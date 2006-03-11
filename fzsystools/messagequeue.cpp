@@ -107,9 +107,9 @@ std::string Message::getStringMsg() throw(Exception<Message>){
 }
   
 
-string Message::contents(){
+std::string Message::contents(){
 
-  ostringstream collect;
+  std::ostringstream collect;
 
   for (unsigned int i = 0; i < size()+sizeof(long); i++)
     collect << getMsg()[i] << "|";

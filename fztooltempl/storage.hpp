@@ -273,7 +273,7 @@ namespace stor{
 
   public:
 
-    map<MultipleTreeBranch<TKey,TComp,TDel>,TKey,TComp> children;
+    std::map<MultipleTreeBranch<TKey,TComp,TDel>,TKey,TComp> children;
 
     MultipleTreeBranch(KeyNode<TKey,TComp,TDel> *next,KeyNode<TKey,TComp,TDel> *prev, TKey &key)
       : KeyNode<TKey,TComp,TDel>(next,prev,key){}
@@ -391,7 +391,7 @@ stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::
 }
   
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
+typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
 stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 begin(){
     
@@ -400,7 +400,7 @@ begin(){
 }
   
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
+typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
 stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 end(){
   

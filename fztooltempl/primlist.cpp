@@ -102,7 +102,7 @@ void PrimList::setPosToPrevPrim(void) throw(Exception<PrimList>){
 long PrimList::get(long index) throw(Exception<PrimList>){
 
   void (PrimList::*spool)(void);
-  char diff=0;
+  signed char diff=0;
 
   if (index<1)
     throw Exception<PrimList>("out of bounds!");

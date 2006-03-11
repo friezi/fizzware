@@ -165,7 +165,7 @@ namespace sys{
        @brief return the mesage as ascii-string-line
        @return the contents of the message (including newline)
     */
-    string contents();
+    std::string contents();
   };
 
   /**
