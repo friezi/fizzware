@@ -1,7 +1,7 @@
 #ifndef MSGQUEUEREGDAEMON_HPP
 #define MSGQUEUEREGDAEMON_HPP
 
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include <syslog.h>
 #include <netdb.h>
@@ -182,12 +182,16 @@ class CommandMsgScanner{
   
 private:
   
-  sys::Message * const message; 
+  const sys::Message * message; 
   size_t count;
   
 protected:
   
-  CommandMsgScanner(CommandMsgScanner &){}
+  CommandMsgScanner(const CommandMsgScanner & cms){
+    
+    this->message = cms.message;
+    this->count = cms.count;
+}
 
   // zurückliefern der Länge des nächsten Blocks in der Message
   size_t shiftTokenSize();

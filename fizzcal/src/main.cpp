@@ -23,6 +23,7 @@
 
 #include "main.hpp"
 
+using namespace std;
 using namespace mexp;
 
 const char *version="2.42";

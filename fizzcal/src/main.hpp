@@ -1,7 +1,7 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include <iostream.h>
+#include <iostream>
 #include <stdio.h>
 #include <readline.h>
 #include <history.h>

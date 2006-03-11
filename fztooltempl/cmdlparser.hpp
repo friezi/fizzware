@@ -183,10 +183,12 @@ namespace cmdl{
       APInfo() : Info(),obligatory(false), found(false){}
       APInfo(std::string v, std::string d, bool o, bool f) : Info(v,d),obligatory(o), found(f){}
     };
+
+  public:  
+    // it's public because user needs access to iterator!
+    typedef std::list<std::string> Arguments;   // for scanned arguments
   
   protected:
-  
-    typedef std::list<std::string> Arguments;   // for scanned arguments
     typedef std::map< std::string,std::string,std::less<std::string> > ObligatoryArguments; // for obligatory arguments
     typedef std::list<Info> ExpOblArguments; // for expected obligatory arguments
     typedef std::map< std::string,std::string,std::less<std::string> > Parameters;  // for scanned parameters

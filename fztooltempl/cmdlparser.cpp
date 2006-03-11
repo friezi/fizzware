@@ -482,9 +482,9 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 
 pair<bool,string> CmdlParser::checkParameter(string parameter){
   
-  Parameters::iterator it;
+  Parameters::iterator it = parameters.find(parameter);
 
-  if ( (it = parameters.find(parameter)) != parameters.end() )
+  if ( it != parameters.end() )
     return pair<bool,string>(true,(*it).second);
   else
     return pair<bool,string>(false,"");
@@ -492,9 +492,9 @@ pair<bool,string> CmdlParser::checkParameter(string parameter){
 
 pair< bool,set<string> * > CmdlParser::checkMultiParameter(string multiparameter){
   
-  MultiParameters::iterator it;
+  MultiParameters::iterator it = multiparameters.find(multiparameter);
 
-  if ( (it = multiparameters.find(multiparameter)) != parameters.end() )
+  if ( it != multiparameters.end() )
     return pair< bool,set<string> * >(true,(*it).second);
   else
     return pair< bool,set<string> * >(false,(set<string> *)0);
@@ -514,9 +514,9 @@ string CmdlParser::synonymUsage(string representative){
   
   ostringstream usg;
 
-  SynonymDict::iterator rit;
+  SynonymDict::iterator rit = synonymdict.find(representative);
 
-  if ( (rit = synonymdict.find(representative)) != synonymdict.end() ){
+  if ( rit != synonymdict.end() ){
     if ( (*rit).second->empty() == false ){
       usg << "{" << representative;
       for ( set<string>::iterator s_it = (*rit).second->begin(); s_it != (*rit).second->end(); s_it++ )

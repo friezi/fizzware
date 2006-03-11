@@ -71,7 +71,7 @@ void Message::setType(long type){
   memcpy(msg,(char *)&type,sizeof(long));
 }
 
-long Message::getType(){
+long Message::getType() const {
 
   long type;
 
@@ -79,12 +79,12 @@ long Message::getType(){
   return type;
 }
 
-size_t Message::sizeOfType(){
+size_t Message::sizeOfType() const {
 
   return sizeof(long);
 }
 
-void Message::send(int id, int flag) throw(Exception<Message>){
+void Message::send(int id, int flag) const throw(Exception<Message>){
 
   if (msgsnd(id,msg,msize,flag) == -1){
     perror("error:");
@@ -92,7 +92,7 @@ void Message::send(int id, int flag) throw(Exception<Message>){
   }
 }
 
-std::string Message::getStringMsg() throw(Exception<Message>){
+std::string Message::getStringMsg() const throw(Exception<Message>){
 
   char *buf;
   std::string s;
@@ -107,7 +107,7 @@ std::string Message::getStringMsg() throw(Exception<Message>){
 }
   
 
-std::string Message::contents(){
+std::string Message::contents() const {
 
   std::ostringstream collect;
 

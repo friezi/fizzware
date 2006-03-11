@@ -109,7 +109,7 @@ namespace sys{
        @param flag kommt noch
        @exception Exception<Message>
     */
-    void send(int id, int flag = 0) throw(Exception<Message>);
+    void send(int id, int flag = 0) const throw(Exception<Message>);
 
     // Setze Typ nachträglich
     /**
@@ -123,35 +123,35 @@ namespace sys{
        @brief return the type
        @return the type
     */
-    long getType();
+    long getType() const ;
 
     //liefere Typlaenge
     /**
        @brief return the length, i.e. size of the type
        @return the size
     */
-    size_t sizeOfType();
+    size_t sizeOfType() const ;
 
     // liefere Laenge der Message
     /**
        @brief return the size of the message
        @return the size
     */
-    size_t size() { return msize; }
+    size_t size() const { return msize; }
 
     // liefere msg
     /**
        @brief return the whole message
        @return pointer to the message
     */
-    char *getMsg(){ return msg; }
+    char *getMsg() const { return msg; }
 
     // liefere nur Daten ohne Typ
     /**
        @brief return only data whithout typeinfo of the message
        @return pointer to data
     */
-    char *getData(){ return &msg[sizeof(long)]; }
+    char *getData() const { return &msg[sizeof(long)]; }
 
     // string zurueckliefern
     /**
@@ -159,13 +159,13 @@ namespace sys{
        @return well, the string
        @exception Exception<Message>
     */
-    std::string getStringMsg() throw(Exception<Message>);
+    std::string getStringMsg() const throw(Exception<Message>);
 
     /**
        @brief return the mesage as ascii-string-line
        @return the contents of the message (including newline)
     */
-    std::string contents();
+    std::string contents() const ;
   };
 
   /**
