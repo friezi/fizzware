@@ -1,0 +1,181 @@
+using namespace graph;
+
+class Tstgraph : public Graphable<int>{
+
+public:
+
+  typedef map< int, list<int> *, less<int> > Nodemap;
+
+private:
+  
+  Nodemap * nodes;
+
+public:
+
+  class tg_node_iterator : public node_iterator{
+
+    friend Tstgraph;
+
+  private:
+
+    int count;
+
+    void setCount(int rval_count){ count = rval_count; }
+
+  public:
+
+    ~tg_node_iterator(){}
+
+    void operator++(){ ++count; }
+    void operator++(int){ count++; }
+    int & operator*(){ return count; }
+    bool operator!=(const iterator & it_rval){ return ( this->count != ((tg_node_iterator &)it_rval).count ); }
+    bool operator==(const iterator & it_rval){ return ( this->count == ((tg_node_iterator &)it_rval).count ); }
+    
+
+  };
+
+  class tg_neighbour_iterator : public neighbour_iterator{
+
+    friend Tstgraph;
+
+  private:
+
+    list<int>::iterator it;
+
+    void setIt(list<int>::iterator it_rval){ it = it_rval; }
+
+  public:
+
+    ~tg_neighbour_iterator(){}
+
+    void operator++(){ ++it; }
+    void operator++(int){ it++; }
+    int & operator*(){ return *it; }
+    bool operator!=(const iterator & it_rval){ return ( this->it != ((tg_neighbour_iterator &)it_rval).it ); }
+    bool operator==(const iterator & it_rval){ return ( this->it == ((tg_neighbour_iterator &)it_rval).it ); }
+    
+
+  };
+
+  Tstgraph(){ nodes = new Nodemap(); }
+
+  ~Tstgraph(){
+
+    for ( Nodemap::iterator it = nodes->begin(); it != nodes->end(); it++ )
+      delete (*it).second;
+    
+    delete nodes;
+    
+  }
+
+  Nodemap * getNodes(){ return nodes; }
+
+  void insertNode(int node){ 
+    
+    (*nodes)[node] = new list<int>();
+  
+  }
+
+  void insertNeighbour(int node, int neighbour){
+
+    (*nodes)[node]->push_back(neighbour);
+
+  }
+
+  node_iterator * nodesBegin(){
+
+    tg_node_iterator * it = new tg_node_iterator();
+    
+    it->setCount(0);
+
+    return it;
+
+  }
+  node_iterator * nodesEnd(){
+
+    tg_node_iterator * it = new tg_node_iterator();
+   
+    it->setCount(maxNodes());
+
+    return it;
+
+  }
+
+  neighbour_iterator * neighboursBegin(const int & node){
+
+    tg_neighbour_iterator * it = new tg_neighbour_iterator();
+    
+    it->setIt((*nodes->find(node)).second->begin());
+
+    return it;
+
+  }
+  neighbour_iterator * neighboursEnd(const int & node){
+
+    tg_neighbour_iterator * it = new tg_neighbour_iterator();
+   
+    it->setIt((*nodes->find(node)).second->end());
+
+    return it;
+
+  }
+
+  unsigned int maxNodes(){ return nodes->size(); }
+
+  int startNode(){ return (*nodes->begin()).first; }
+
+};
+  
+
+int main(int argc, char **argv){
+
+  Tstgraph tg;
+
+  tg.insertNode(1);
+  tg.insertNode(0);
+  tg.insertNode(2);
+  
+  tg.insertNeighbour(0,1);
+  tg.insertNeighbour(0,2);
+  tg.insertNeighbour(2,0);
+  	
+  for ( Tstgraph::Nodemap::iterator nm_it = tg.getNodes()->begin(); nm_it != tg.getNodes()->end(); nm_it++ ){
+
+    cout << "neighbours from node " << (*nm_it).first << ": ";
+
+    {
+
+      Graphable<int>::temp_iterator ni_begin(tg.neighboursBegin((*nm_it).first));
+      Graphable<int>::temp_iterator ni_end(tg.neighboursEnd((*nm_it).first));
+
+      for ( Tstgraph::tg_neighbour_iterator *ni = (Tstgraph::tg_neighbour_iterator *)ni_begin.get(); *ni != *ni_end.get(); (*ni)++ )
+	cout << **ni << " ";
+
+    }
+
+    cout << endl;
+
+  }
+
+  list< list<int> > *scc;
+
+  // find all strongly connected components
+  scc = tg.find_scc();
+
+  int count = 1;
+
+  for ( list< list<int> >::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++, count++ ){
+
+    cout << "Komponente " << count << ": ";
+
+    for ( list<int>::iterator c_it = (*scc_it).begin(); c_it != (*scc_it).end(); c_it++ )
+      cout << *c_it << " ";
+
+    cout << endl;
+  }
+
+  delete scc;
+  
+  return 0;
+}

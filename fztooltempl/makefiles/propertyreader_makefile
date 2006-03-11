@@ -1,0 +1,34 @@
+#################################################################
+############ Erzeugt einzelnes Objektfile #######################
+#################################################################
+
+#################################################################
+################### zum Editieren ###############################
+
+OBJECT = propertyreader
+
+DEPENDS_ON = exception storage
+
+############### check the CC Variable ###########################
+#################################################################
+
+INCLUDE_PATH = ./
+
+EDITOR = emacs
+
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
+
+DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
+
+.PHONY: all ed clean
+
+all: $(OBJECT).o
+
+$(OBJECT).o: $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
+	$(CC) $(OBJECT).cpp
+
+ed:
+	$(EDITOR) $(OBJECT).cpp $(OBJECT).hpp $(OBJECT)_makefile &
+
+clean:
+	rm $(OBJECT).o
