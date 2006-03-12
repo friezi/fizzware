@@ -37,7 +37,7 @@ int main(int argc, char **argv, char **envp){
   bool bflag=false;
 
   try{
-    if (argc>2)
+    if ( argc>2 )
       goto exit_calc;
     
     varlist = new VarList();
@@ -46,26 +46,28 @@ int main(int argc, char **argv, char **envp){
 
     functionlist = new FunctionList();
     
-    if (argc==2){
+    if ( argc==2 ){
       mathexpression = new MathExpression(argv[1],varlist,functionlist);
-      cout << "result: " << mathexpression->eval() << "\n";
+      cout << mathexpression->eval() << "\n";
       delete mathexpression;
       delete varlist;
       return(0);
     }
+
     header(argv[0]);
 
     for (;;){
+
       try{
+
 	input=(char *)readline(NULL);
-	if (input){
-	  if (*input){
+
+	if ( input ){
+	  if ( *input ){
 	    add_history(input);
-	  }
-	  else
+	  } else
 	    continue;
-	}
-	else{
+	} else {
 	  perror("some error occured in readline:");
 	  continue;
 	}
@@ -113,14 +115,15 @@ int main(int argc, char **argv, char **envp){
 	  cout << "\n";
 
 	}
+
 	cout << "result: " << mathexpression->eval() << "\n";
 	delete mathexpression;
 
-      }catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+      } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
 	cout << "syntaxerror: " << mese.getMsg() << "\n";
 
-      }catch (EvalException &meee){
+      } catch (EvalException &meee){
 
 	cout << meee.getMsg();
 
@@ -129,7 +132,9 @@ int main(int argc, char **argv, char **envp){
 	cout << "\n";
 
       }
+
       free(input);
+
     }
     
     free(input);
@@ -141,14 +146,18 @@ int main(int argc, char **argv, char **envp){
     cout << "usage: " << argv[0] << " ['{expr}']\n";
     return(1);
 
-  }catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+  } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+
     // komischerweise werden ohne diesen catch-block die excpetions im inneren
     // nicht abgefangen !?!? (Ist eigentlich unnoetig)
     cout << "syntaxerror: " << mese.getMsg() << "\n";
     exit(1);
-  }catch (Exception_T &e){
+
+  } catch (Exception_T &e){
+
     e.show();
     exit(1);
+
   }
   
 }
@@ -159,21 +168,24 @@ void undefineFunction(FunctionList *fl){
 
   undef=readline(NULL);
 
-  if (undef){
-    if (*undef){
+  if ( undef ){
+    if ( *undef ){
+
       try{
+
 	fl->remove(undef);
 	cout << undef << " undefined\n";
+
       } catch (Exception<FunctionList> &fle){
 	fle.show();
       }
-    }
-    else
+    } else
       cout << "nothing undefined\n";
-  }
-  else
+  } else
     perror("some error occured in readline:");
+
   free(undef);
+
 }
 
 void removeVariable(VarList *vl){
@@ -182,21 +194,24 @@ void removeVariable(VarList *vl){
 
   remove=readline(NULL);
 
-  if (remove){
-    if (*remove){
+  if ( remove ){
+    if ( *remove ){
+
       try{
+
 	vl->remove(remove);
 	cout << remove << " removed\n";
+
       } catch (Exception<VarList> &vle){
 	vle.show();
       }
-    }
-    else
+    } else
       cout << "nothing removed\n";
-  }
-  else
+  } else
     perror("some error occured in readline:");
+
   free(remove);
+
 }
 
 void header(char *appname){
@@ -224,18 +239,23 @@ void show(char *pname, void (*what)(char *)){
   int filedes[2];
   int status;
 
-  if (!fork()){
+  if ( !fork() ){
+
     pipe(filedes);
     close(0);
     dup(filedes[0]);
     close(filedes[0]);
-    if (!fork()){
+
+    if ( !fork() ){
+
       close(1);
       dup(filedes[1]);
       close(filedes[1]);
       (*what)(pname);
       exit(0);
+
     }
+
     close(filedes[1]);
     execvp(proc[0],proc);
     (*what)(pname);
@@ -243,9 +263,10 @@ void show(char *pname, void (*what)(char *)){
     cout << "neither \"" << SHOWHELP << "\" nor \"" << SHOWHELP2
 	 << "\" installed!\n";
     exit(1);
-  }
-  else
+
+  } else
     wait(&status);
+
 }
 
 void printHelp(char *pname){
