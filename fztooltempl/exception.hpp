@@ -4,6 +4,8 @@
    @author Friedemann Zintel
    
    Copyright (C) 1999-2004 Friedemann Zintel
+
+   Compilation is only successfully tested with gcc v.2.95 and v.3.3 .
    
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
