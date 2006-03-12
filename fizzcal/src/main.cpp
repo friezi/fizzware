@@ -1,7 +1,7 @@
 /*
     this sourcefile belongs to the programm focal,
     a mathematical formular-calculator
-    Copyright (C) 1999-2000 Friedemann Zintel
+    Copyright (C) 1999-2006 Friedemann Zintel
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,12 +24,18 @@
 #include "main.hpp"
 
 using namespace std;
+using namespace cmdl;
 using namespace mexp;
 
-const char *version="2.42";
+const char *version="2.43";
+
+const static string formula = "formula";
 
 int main(int argc, char **argv, char **envp){
 
+  CmdlParser cmdlparser(argc,argv);
+  string usage;
+  const char *programname = 0;
   MathExpression *mathexpression;
   VarList *varlist=0;
   FunctionList *functionlist=0;
@@ -37,8 +43,29 @@ int main(int argc, char **argv, char **envp){
   bool bflag=false;
 
   try{
-    if ( argc>2 )
-      goto exit_calc;
+
+    usage = setupParser(cmdlparser);
+
+    cmdlparser.parse();
+
+    programname = cmdlparser.getProgramname().c_str();
+
+    if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
+
+      cout << endl << programname << " is a calculator/evaluator of mathematical formulars." << endl << endl;
+      cout << "version " << version << ", Copyright (C) 1999-2006  Friedemann Zintel" << endl << endl;
+      cout << cmdlparser.infoUsage();
+      cout << "With no options given, focal will work in interactive mode" << endl << endl;
+      exit(0);
+
+    }
+
+    if ( cmdlparser.checkShortoption('v') == true || cmdlparser.checkOption("version") == true ){
+
+      cout << version << endl;
+      exit(0);
+
+    }
     
     varlist = new VarList();
     varlist->insert("pi",M_PI,true);
@@ -46,15 +73,17 @@ int main(int argc, char **argv, char **envp){
 
     functionlist = new FunctionList();
     
-    if ( argc==2 ){
-      mathexpression = new MathExpression(argv[1],varlist,functionlist);
+    if ( cmdlparser.checkParameter(formula).first == true ){
+
+      mathexpression = new MathExpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
       cout << mathexpression->eval() << "\n";
       delete mathexpression;
       delete varlist;
       return(0);
+
     }
 
-    header(argv[0]);
+    header(programname);
 
     for (;;){
 
@@ -75,11 +104,11 @@ int main(int argc, char **argv, char **envp){
 	if (!strcmp(input,QUIT))
 	  break;
 	else if (!strcmp(input,HELP)){
-	  show(argv[0],printHelp);
+	  show(programname,printHelp);
 	  continue;
 	}
 	else if (!strcmp(input,GPL)){
-	  show(argv[0],gpl);
+	  show(programname,gpl);
 	  continue;
 	}
 	else if (!strcmp(input,FON)){
@@ -141,10 +170,6 @@ int main(int argc, char **argv, char **envp){
     delete functionlist;
     delete varlist;
     return 0;
-    
-  exit_calc:
-    cout << "usage: " << argv[0] << " ['{expr}']\n";
-    return(1);
 
   } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
@@ -156,10 +181,32 @@ int main(int argc, char **argv, char **envp){
   } catch (Exception_T &e){
 
     e.show();
+    cerr << usage << endl;
     exit(1);
 
   }
   
+}
+
+string setupParser(CmdlParser& parser){
+
+  parser.addShortoption('h',"print help");
+  parser.shortsynonym('h') << 'H' << '?';
+
+  parser.addShortoption('v',"print version");
+  parser.shortsynonym('v') << 'V';
+
+  parser.addOption("help","print help");
+  parser.synonym("help") << "h" << "Help" << "H";
+
+  parser.addOption("version","print version");
+  parser.synonym("version") << "v" << "Version" << "V";
+
+  parser.addParameter(formula,formula,"a formula to be evaluated");
+  parser.synonym(formula) << "f" << "Formula" << "F";
+
+  return parser.usage();
+
 }
 
 void undefineFunction(FunctionList *fl){
@@ -214,10 +261,10 @@ void removeVariable(VarList *vl){
 
 }
 
-void header(char *appname){
+void header(const char *appname){
 
   cout << "\n" << appname << " version " << version
-       << ", Copyright (C) 1999-2000  Friedemann Zintel\n";
+       << ", Copyright (C) 1999-2006  Friedemann Zintel\n";
   cout << "email: friezi@cs.tu-berlin.de\n";
   cout << "If you have any questions, comments or suggestions about ";
   cout << "this programm,\n";
@@ -228,11 +275,11 @@ void header(char *appname){
   cout << "This is free software, and you are welcome to redistribute it\n";
   cout << "under certain conditions; type \"" << GPL;
   cout << "\" for to read the GPL.\n\n";
-  cout << appname << " is a calculator of mathematical formulars.\n"
+  cout << appname << " is a calculator/evaluator of mathematical formulars.\n"
        << "Type \"" << HELP << "\" for help, \"" << QUIT << "\" to quit\n\n";
 }
 
-void show(char *pname, void (*what)(char *)){
+void show(const char *pname, void (*what)(const char *)){
 
   char *proc[]={SHOWHELP,0};
   char *proc2[]={SHOWHELP2,0};
@@ -269,9 +316,8 @@ void show(char *pname, void (*what)(char *)){
 
 }
 
-void printHelp(char *pname){
+void printHelp(const char *pname){
   cout << "help:\n\n"
-       << "usage: " << pname << " ['<expr>']\n\n"
        << "the following commands are accessible:\n\n"
        << HELP << "\t\tdisplay this helpfile\n"
        << GPL << "\t\tshows the GPL\n"
@@ -311,12 +357,12 @@ void printHelp(char *pname){
        << "Example: pow(x,y)=x^y\n"
        << "Within the function you can also use "
        << "global variables.\n\n"
-       << "The following operators are known:\n\n"
+       << "The following operators are predefined:\n\n"
        << "+\taddition\n-\tsubtraction\n*\tmultiplication\n/\t"
        << "division\n\\\tnon-broken division\n%\tmodulo\n!\tfaculty\n"
        << "@\tthe operator for binomial-coefficient (e.g. a@b means a over "
        << "b, i.e.\n\ta!/(b!(a-b)!) )\n=\tassignment to variables\n\n"
-       << "The following functions are known (\"var\" means local variable, "
+       << "The following functions are predefined (\"var\" means local variable, "
        << "\"exp\" means\nmath.-expression):\n\n"
        << "Sum[<var>=<exp1>;<exp2>](<exp3>)\tsum from <var>=<exp1> to "
        << "<exp2>\n\t\t\t\t\tover <exp3>\n"
@@ -358,7 +404,7 @@ void printHelp(char *pname){
   cout << "\n\n";
 }
 
-void gpl(char *nix){
+void gpl(const char *nix){
 
   cout << "		    GNU GENERAL PUBLIC LICENSE\n"
        << "		       Version 2, June 1991\n"

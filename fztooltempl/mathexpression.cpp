@@ -290,7 +290,7 @@ MathExpression::MathExpression(VarList *vl, FunctionList *fl) :
     variable[i]=0;
 }
 
-MathExpression::MathExpression(char *expression, VarList *vl,
+MathExpression::MathExpression(const char *expression, VarList *vl,
 			       FunctionList *fl)
   throw (SubException<SyntaxErr,MathExpression>,Exception_T)
   : varlist(vl), functionlist(fl), left(0), right(0), pred(0), value(0),
@@ -387,7 +387,7 @@ MathExpression::~MathExpression(){
     delete this->right;
 }
 
-MathExpression *MathExpression::parse(char *expr, VarList& locals)
+MathExpression *MathExpression::parse(const char *expr, VarList& locals)
   throw (SubException<SyntaxErr,MathExpression>,Exception_T){
 
   int e_indx, priority, offs;
@@ -925,7 +925,7 @@ bool MathExpression::isBuiltinOp(char op){
   return false;
 }
 
-int MathExpression::brackcpy(char *exprstring, char *arg, char open,
+int MathExpression::brackcpy(char *exprstring, const char *arg, char open,
 			     char close){
 
   int br_cnt=0, indx=0, eindx=0;
@@ -958,7 +958,7 @@ int MathExpression::brackcpy(char *exprstring, char *arg, char open,
   return(indx);
 }
   
-int MathExpression::flcpy(char *exprstring, char *arg){
+int MathExpression::flcpy(char *exprstring, const char *arg){
 
   int indx=0;
   while (checkDigit(arg[indx])){ 
@@ -968,7 +968,7 @@ int MathExpression::flcpy(char *exprstring, char *arg){
   return(indx);
 }
 
-int MathExpression::oprcpy(char *exprstring, char *arg){
+int MathExpression::oprcpy(char *exprstring, const char *arg){
 
   int indx=0;
 
@@ -999,10 +999,10 @@ void MathExpression::clearString(char *exprstring){
     *exprstring++=0;
 }
 
-int MathExpression::pri(char *c0, char *c1){
+int MathExpression::pri(const char *c0, const char *c1){
 
   int p[2],i;
-  char *c[2]={&c0[0],&c1[0]};
+  const char *c[2]={&c0[0],&c1[0]};
 
   for (i=0;i<2;i++){
     switch(*c[i]){

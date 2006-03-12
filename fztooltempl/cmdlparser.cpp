@@ -516,16 +516,20 @@ string CmdlParser::synonymUsage(string representative){
 
   SynonymDict::iterator rit = synonymdict.find(representative);
 
-  if ( rit != synonymdict.end() ){
-    if ( (*rit).second->empty() == false ){
-      usg << "{" << representative;
-      for ( set<string>::iterator s_it = (*rit).second->begin(); s_it != (*rit).second->end(); s_it++ )
-	usg << "," << *s_it;
-      usg << "}";
-    } else
-      usg << representative;
-  } else
-    usg << representative;
+  // it's simply to much and actually unnecessary to print all the synonyms
+//   if ( rit != synonymdict.end() ){
+//     if ( (*rit).second->empty() == false ){
+//       usg << "{" << representative;
+//       for ( set<string>::iterator s_it = (*rit).second->begin(); s_it != (*rit).second->end(); s_it++ )
+// 	usg << "," << *s_it;
+//       usg << "}";
+//     } else
+//       usg << representative;
+//   } else
+//     usg << representative;
+
+// only show representative
+  usg << representative;
 
   return usg.str();
 }
@@ -540,9 +544,10 @@ string CmdlParser::usage(){
     usg << "[-";
     for ( AShortoptions::iterator it = allowedshortoptions.begin(); it != allowedshortoptions.end(); it++ )
       usg << (*it).first;
-    for ( ShortSynonymDict::iterator syn_it = shortsynonymdict.begin(); syn_it != shortsynonymdict.end(); syn_it++ )
-      for ( set<char>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); s_it++ )
-	usg << *s_it;
+    // it's simply to much and actually unnecessary to print all the synonyms
+//     for ( ShortSynonymDict::iterator syn_it = shortsynonymdict.begin(); syn_it != shortsynonymdict.end(); syn_it++ )
+//       for ( set<char>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); s_it++ )
+// 	usg << *s_it;
     for ( ShortAliasDict::iterator a_it = shortaliasdict.begin(); a_it != shortaliasdict.end(); a_it++ )
       usg << (*a_it).first;
     usg << "] ";

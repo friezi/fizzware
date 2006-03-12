@@ -11,7 +11,7 @@ EM_PATH = ../classes
 
 CLASSLIBRARY_PATH = $(EM_PATH)
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES =  mathexpression exception
+CLASS_MODULES =  mathexpression exception cmdlparser
 
 IMPORTANT_HEADERS =
 

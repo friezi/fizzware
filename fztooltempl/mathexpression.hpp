@@ -90,12 +90,12 @@ namespace mexp{
     double value;
     char type;
     
-    MathExpression *parse(char *expr, VarList& locals)
+    MathExpression *parse(const char *expr, VarList& locals)
     throw (SubException<SyntaxErr,MathExpression>,Exception_T);
     
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
-    static int pri(char *c0, char *c1);
+    static int pri(const char *c0, const char *c1);
     bool checkSyntax(void) throw (SubException<SyntaxErr,MathExpression>);
     double faculty(double fac) throw (Exception_T);
     double sumProd(void) throw (Exception_T);
@@ -147,7 +147,7 @@ namespace mexp{
        @exception SubException<SyntaxErr,MathExpression>
        @exception OutOfMemException
     */
-    MathExpression(char *expression, VarList *vl = 0, FunctionList *fl = 0)
+    MathExpression(const char *expression, VarList *vl = 0, FunctionList *fl = 0)
       throw (SubException<SyntaxErr,MathExpression>,Exception_T);
  
   protected:
@@ -187,7 +187,7 @@ namespace mexp{
        @param close the sign for the close-bracket
        @return number of copied signs
     */
-    static int brackcpy(char *exprstring, char *arg, char open, char close);
+    static int brackcpy(char *exprstring, const char *arg, char open, char close);
     
     /**
        flcpy copies the numeric part from "arg" into "exprstring"
@@ -196,7 +196,7 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int flcpy(char *exprstring, char *arg);
+    static int flcpy(char *exprstring, const char *arg);
     
     /**
        oprcpy copies the operatorpart (also functionnames) from "arg" into "exprstring"
@@ -205,7 +205,7 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int oprcpy(char *exprstring, char *arg);
+    static int oprcpy(char *exprstring, const char *arg);
     
     /**
        @brief clears a Null-terminated char-Array

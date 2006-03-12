@@ -11,6 +11,7 @@
 #include <sys/wait.h>
 #include <exception.hpp>
 #include <mathexpression.hpp>
+#include <cmdlparser.hpp>
 
 #define I_SIZE 1000
 #define QUIT "quit"
@@ -25,10 +26,11 @@
 #define SHOWHELP "less" // program to show help
 #define SHOWHELP2 "more" // program to show help
 
-void header(char *appname);
-void show(char *pname, void (*what)(char *));
-void printHelp(char *pname);
-void gpl(char *nix);
+std::string setupParser(cmdl::CmdlParser& parser);
+void header(const char *appname);
+void show(const char *pname, void (*what)(const char *));
+void printHelp(const char *pname);
+void gpl(const char *nix);
 void undefineFunction(mexp::FunctionList *fl);
 void removeVariable(mexp::VarList *vl);
 
