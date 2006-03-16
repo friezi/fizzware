@@ -14,7 +14,7 @@ LIBRARY_INCLUDE_PATHS = $(EM_PATH)
 LIBRARIES = fztooltempl
 LIBRARY_PATHS = $(EM_PATH)
 
-EDITOR = emacs
+EDITOR ?= vi
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)

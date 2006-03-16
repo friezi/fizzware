@@ -13,7 +13,7 @@ OBJECTS = exception bashautomat messagequeue socket tcpserver tcpclient msgqueue
 
 HEADERS_ONLY = functions storage graph
 
-EDITOR = emacs
+EDITOR ?= vi
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/classes

@@ -10,6 +10,8 @@ DATE := $(shell date -I)
 
 DIST_FILE = $(DIST_PREFIX)_$(DIST_IDENTIFIER)_$(DATE)_.tar
 
+EDITOR ?= vi
+
 all:
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; cd $(dir); $(MAKE) -k; cd ../; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
 
@@ -19,7 +21,7 @@ clean:
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; cd $(dir); $(MAKE) -k clean; cd ../; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
 
 ed:
-	emacs Makefile&
+	$(EDITOR) Makefile&
 
 dist:
 	cd classes; $(MAKE) -k dist; cd -;

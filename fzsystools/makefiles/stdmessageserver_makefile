@@ -14,7 +14,7 @@ DEPENDS_ON = exception tcpserver signalhandler messagequeue
 
 INCLUDE_PATH = ./
 
-EDITOR = emacs
+EDITOR ?= vi
 
 CC = g++ -Wall -Wconversion -pedantic -O3 -c -I $(INCLUDE_PATH)
 

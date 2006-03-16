@@ -14,7 +14,7 @@ DEPENDS_ON = exception
 
 INCLUDE_PATH = ./
 
-EDITOR = emacs
+EDITOR ?= 
 
 CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
 

@@ -19,7 +19,7 @@ LIBRARY_INCLUDE_PATHS = /usr/include/readline
 LIBRARIES = readline
 LIBRARY_PATHS = /usr/lib
 
-EDITOR = emacs
+EDITOR ?= vi
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)

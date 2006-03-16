@@ -16,7 +16,7 @@ EM_SOURCES = $(EXTERN_MODULES:%=$(EM_PATH)/%.cpp)
 EM_HEADERS = $(EXTERN_MODULES:%=$(EM_PATH)/%.hpp)
 EM_OBJECTS = $(EXTERN_MODULES:%=$(EM_PATH)/%.o)
 
-EDITOR = emacs
+EDITOR ?= vi
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)

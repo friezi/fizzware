@@ -19,7 +19,7 @@ LIBRARY_INCLUDE_PATHS = <alle Pfade fuer Library-Includes angeben>
 LIBRARIES = <zu linkende Bibliotheksnamen angeben (einfacher Name!)>
 LIBRARY_PATHS = <Pfade fuer Bibliotheken>
 
-EDITOR = emacs
+EDITOR ?= vi
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
