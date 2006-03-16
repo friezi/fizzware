@@ -35,6 +35,40 @@
 #include <string>
 #include <signal.h>
 
+// in BSD-Un*x the following operations are implemented as Macros, so
+// an access-operator would confuse the compiler
+#ifdef sigaddset
+#define SIGADDSET sigaddset
+#else
+#define SIGADDSET ::sigaddset
+#endif
+
+#ifdef sigdelset
+#define SIGDELSET sigdelset
+#else
+#define SIGDELSET ::sigdelset
+#endif
+
+#ifdef sigemptyset
+#define SIGEMPTYSET sigemptyset
+#else
+#define SIGEMPTYSET ::sigemptyset
+#endif
+
+#ifdef sigfillset
+#define SIGFILLSET sigfillset
+#else
+#define SIGFILLSET ::sigfillset
+#endif
+
+#ifdef sigismember
+#define SIGISMEMBER sigismember
+#else
+#define SIGISMEMBER ::sigismember
+#endif
+
+
+
 /**
    @class SignalHandler
    @brief For installing Unix/Linux-signalhandlers

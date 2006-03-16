@@ -29,7 +29,7 @@ SignalHandler::SignalHandler(int signr, void (*handler)(int), bool init, int fla
   throw(Exception<SignalHandler>) : signr(signr){
 
   this->handler.sa_handler = handler;
-  ::sigemptyset(&(this->handler.sa_mask));
+  SIGEMPTYSET(&(this->handler.sa_mask));
   this->handler.sa_flags = flags;
 
   if (init == true)
@@ -43,27 +43,27 @@ void SignalHandler::init() throw(Exception<SignalHandler>){
 }
 
 void SignalHandler::emptyset() throw(Exception<SignalHandler>){
-  if ( ::sigemptyset(&handler.sa_mask) == -1 )
+  if ( SIGEMPTYSET(&handler.sa_mask) == -1 )
     throw Exception<SignalHandler>("sigemptyset failed!");
 }
 
 void SignalHandler::fillset() throw(Exception<SignalHandler>){
-  if ( ::sigfillset(&handler.sa_mask) == -1 )
+  if ( SIGFILLSET(&handler.sa_mask) == -1 )
     throw Exception<SignalHandler>("sigfillset failed!");
 }
 
 void SignalHandler::addset(int signr) throw(Exception<SignalHandler>){
-  if ( ::sigaddset(&handler.sa_mask, signr) == -1 )
+  if ( SIGADDSET(&handler.sa_mask, signr) == -1 )
     throw Exception<SignalHandler>("sigaddset failed!");
 }
 
 void SignalHandler::delset(int signr) throw(Exception<SignalHandler>){
-  if ( ::sigdelset(&handler.sa_mask, signr) == -1 )
+  if ( SIGDELSET(&handler.sa_mask, signr) == -1 )
     throw Exception<SignalHandler>("sigdelset failed!");
 }
 
 int SignalHandler::ismember(int signr){
-  return ::sigismember(&handler.sa_mask, signr);
+  return SIGISMEMBER(&handler.sa_mask, signr);
 }
 
 void SignalHandler::siginterrupt(int flag) throw(Exception<SignalHandler>){
