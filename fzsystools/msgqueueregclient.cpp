@@ -226,7 +226,7 @@ MsgQueueRegClient::ULongToken::ULongToken(unsigned long value){
 
 const unsigned long MsgQueueRegClient::Scanner::BLKSIZE = 10;
 
-int MsgQueueRegClient::Scanner::isblank(char c){
+int MsgQueueRegClient::Scanner::isBlank(char c){
 
   return ((c == ' ') || (c == '\t'));
 }
@@ -260,7 +260,7 @@ MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Excepti
 
     if ((tmp=='\0'))
       break;
-    else if(isspace(tmp) && !(isblank(tmp)))
+    else if(isspace(tmp) && !(isBlank(tmp)))
       continue;
     
     buffer.put(tmp);

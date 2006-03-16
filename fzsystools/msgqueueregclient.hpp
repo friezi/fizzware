@@ -167,7 +167,7 @@ protected:
     
     ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
     
-    int isblank(char c);
+    int isBlank(char c);
   };
   
   sys::TCPClient *msgqueueregclient;
