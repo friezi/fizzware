@@ -395,7 +395,7 @@ typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
 stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 begin(){
     
-  KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it(first);
+  typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it(first);
   return it;
 }
   
@@ -404,7 +404,7 @@ typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
 stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 end(){
   
-  stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it;
+  typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it;
   return it;
 }
 
@@ -744,15 +744,15 @@ concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
       left = node;
       node->parent = this;
 
-      if ( prev ){
+      if ( this->prev ){
 
-	prev->next = node->getFirst();
-	prev->next->prev = prev;
+	this->prev->next = node->getFirst();
+	this->prev->next->prev = this->prev;
 
       }
 
-      prev = node->getLast();
-      prev->next = this;
+      this->prev = node->getLast();
+      this->prev->next = this;
       
     }
   }
@@ -765,15 +765,15 @@ concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
       right = node;
       node->parent = this;
 
-      if ( next ){
+      if ( this->next ){
 
-	next->prev = node->getLast();
-	next->prev->next = next;
+	this->next->prev = node->getLast();
+	this->next->prev->next = this->next;
 
       }
 
-      next = node->getFirst();
-      next->prev = this;
+      this->next = node->getFirst();
+      this->next->prev = this;
       
     }
   }
@@ -815,7 +815,7 @@ show(){
   if ( left != NULL )
     left->show();
   
-  std::cout << key << std::endl;
+  std::cout << this->key << std::endl;
   
   if ( right != NULL )
     right->show();
@@ -828,16 +828,16 @@ insert(TKey key){
   
   if ( count == 0 ){
 
-    root = new BinaryTreeBranch<TKey,TComp,TDel>(key);
-    first = root;
+    this->root = new BinaryTreeBranch<TKey,TComp,TDel>(key);
+    this->first = this->root;
 
   }
   else{
 
-    root->insert(key);
+    this->root->insert(key);
 
-    if ( first->left != 0 )
-      first = first->left;
+    if ( this->first->left != 0 )
+      this->first = this->first->left;
 
   }
   
@@ -854,16 +854,16 @@ erase(TKey key){
   BinaryTreeBranch<TKey,TComp,TDel> *left = 0;
   BinaryTreeBranch<TKey,TComp,TDel> *parent = 0;
   
-  if ( root == NULL )
+  if ( this->root == NULL )
     return;
   
-  node = root->getBranch(key);
+  node = this->root->getBranch(key);
 
   if ( node == NULL )
     return;
     
-  if ( node == first )
-    first = (BinaryTreeBranch<TKey,TComp,TDel> *)node->next;
+  if ( node == this->first )
+    this->first = (BinaryTreeBranch<TKey,TComp,TDel> *)node->next;
 
   left = node->cutLeft();
   right = node->cutRight();
@@ -883,7 +883,7 @@ erase(TKey key){
       parent->concat(left);
     
     else
-      root = left;
+      this->root = left;
     
     left->concat(right);
 
@@ -894,7 +894,7 @@ erase(TKey key){
      parent->concat(right);
 
     else
-      root = right;
+      this->root = right;
 
   }
   else{
@@ -907,8 +907,8 @@ erase(TKey key){
     
   }
 
-  if ( first == NULL )
-    root = NULL;
+  if ( this->first == NULL )
+    this->root = NULL;
 
   delete node;
   count--;
@@ -920,8 +920,8 @@ void
 stor::BTree<TKey,TComp,TDel>::
 show(){
 
-  if ( root != NULL )
-    root->show();
+  if ( this->root != NULL )
+    this->root->show();
 }
 
 #endif
