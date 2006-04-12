@@ -24,22 +24,22 @@
 */
 
 /**
-   @file storage.hpp
+   @file datastructures.hpp
    @author Friedemann Zintel
 */
 
-#ifndef STORAGE_HPP
-#define STORAGE_HPP
+#ifndef DATASTRUCTURES_HPP
+#define DATASTRUCTURES_HPP
 #include <utility>
 #include <map>
 #include <exception.hpp>
 
 /**
-   @brief Contains templates for storage-structures
-   @ingroup storage
+   @brief Contains templates for datastructures
+   @ingroup datastructures
 */
 
-namespace stor{
+namespace ds{
   
   /**
      @brief to administer memory-blocks
@@ -367,7 +367,7 @@ namespace stor{
 }
 
 template< typename TKey, typename TComp, typename TDel >
-stor::KeyNode<TKey,TComp,TDel>::
+ds::KeyNode<TKey,TComp,TDel>::
 ~KeyNode(){
 
   TDel del;
@@ -376,7 +376,7 @@ stor::KeyNode<TKey,TComp,TDel>::
 }
   
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::
+ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::
 ~KeyNodeContainer<TKNode,TKey,TComp,TDel>(){
 
   TKNode<TKey,TComp,TDel> *curr = this->first;
@@ -391,8 +391,8 @@ stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::
 }
   
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
+typename ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
+ds::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 begin(){
     
   typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it(first);
@@ -400,8 +400,8 @@ begin(){
 }
   
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-typename stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
+typename ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
+ds::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
 end(){
   
   typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it;
@@ -410,7 +410,7 @@ end(){
 
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
 void
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
+ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
 operator++(){
 
   if ( current != 0 )
@@ -419,7 +419,7 @@ operator++(){
 
 template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
 void
-stor::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
+ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
 operator--(){
 
   if ( current != 0 )
@@ -427,29 +427,29 @@ operator--(){
 }
 
 template<typename T>
-stor::MemBlock<T>::
+ds::MemBlock<T>::
 MemBlock(unsigned long blksize) throw (Exception_T) : next(0){
   
   if (!(buf = (T *)calloc(blksize,sizeof(T))))
-    throw Exception< stor::MemBlock<T> >("MemBlock(): calloc() failed!");
+    throw Exception< ds::MemBlock<T> >("MemBlock(): calloc() failed!");
 }
 
 template<typename T>
-stor::MemBlock<T>::
+ds::MemBlock<T>::
 ~MemBlock() throw (Exception_T){
   
   if (buf)
     free(buf);
   else
-    throw Exception< stor::MemBlock<T> >("~MemBlock(): buf==NULL!");
+    throw Exception< ds::MemBlock<T> >("~MemBlock(): buf==NULL!");
   
 }
 
 template<typename T>
-stor::Buffer<T>::
+ds::Buffer<T>::
 ~Buffer() throw (Exception_T){
   
-  stor::MemBlock<T> *curr,*next;
+  ds::MemBlock<T> *curr,*next;
   
   if( !memblock )
     return;
@@ -466,10 +466,10 @@ stor::Buffer<T>::
 
 template<typename T>
 void
-stor::Buffer<T>::
+ds::Buffer<T>::
 put(T &c) throw (Exception_T){
   
-  stor::MemBlock<T> *curr;
+  ds::MemBlock<T> *curr;
   
   /* bis zum letzten Block vorarbeiten */
   if ( memblock ){
@@ -478,14 +478,14 @@ put(T &c) throw (Exception_T){
       curr = curr->next;
   }
   else{
-    memblock = new stor::MemBlock<T>(blksize);
+    memblock = new ds::MemBlock<T>(blksize);
     curr = memblock;
     nmb++;
   }
   
   /* eventuell neuen Block allokieren */
   if ( offs == blksize ){
-    curr->next = new stor::MemBlock<T>(blksize);
+    curr->next = new ds::MemBlock<T>(blksize);
     nmb++;
     
     curr = curr->next;
@@ -500,13 +500,13 @@ put(T &c) throw (Exception_T){
 }
 
 template<typename T>
-stor::MemPointer<T>
-stor::Buffer<T>::
+ds::MemPointer<T>
+ds::Buffer<T>::
 merge() throw (Exception_T){
   
   unsigned long units=0, pos=0;
-  stor::MemBlock<T> *curr;
-  stor::MemPointer<T> mempointer(false);
+  ds::MemBlock<T> *curr;
+  ds::MemPointer<T> mempointer(false);
   T *block;
   
   if ( !memblock )
@@ -517,14 +517,14 @@ merge() throw (Exception_T){
   units = nmb*blksize;
   
   if ( !(block = (T *)calloc(1,units*sizeof(T)+1)) )
-    throw Exception< stor::Buffer<T> >("merge(): calloc failed!");
+    throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
   
   curr = memblock;
   
   /* alle Bloecke kopieren */
   while ( curr ){
     if ( !curr->buf )
-      throw Exception< stor::Buffer<T> >("merge(): curr->buf==NULL!");
+      throw Exception< ds::Buffer<T> >("merge(): curr->buf==NULL!");
     memcpy(&block[pos],curr->buf,blksize*sizeof(T));
     pos += blksize*sizeof(T);
     curr = curr->next;
@@ -537,10 +537,10 @@ merge() throw (Exception_T){
 
 template< typename T >
 void
-stor::Buffer<T>::
+ds::Buffer<T>::
 clear(){
   
-  stor::MemBlock<T> *curr,*next;
+  ds::MemBlock<T> *curr,*next;
   
   if ( memblock ){
     
@@ -559,7 +559,7 @@ clear(){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 insert(TKey key){
   
   TComp comp;
@@ -569,7 +569,7 @@ insert(TKey key){
       left->insert(key);
     else{
 
-      left = new stor::BinaryTreeBranch<TKey,TComp,TDel>(key);
+      left = new ds::BinaryTreeBranch<TKey,TComp,TDel>(key);
 
       left->parent = this;
       
@@ -589,7 +589,7 @@ insert(TKey key){
       right->insert(key);
     else{
 
-      right = new stor::BinaryTreeBranch<TKey,TComp,TDel>(key);
+      right = new ds::BinaryTreeBranch<TKey,TComp,TDel>(key);
 
       right->parent = this;
 
@@ -605,8 +605,8 @@ insert(TKey key){
 }
 
 template< typename TKey, typename TComp, typename TDel >
-stor::BinaryTreeBranch<TKey,TComp,TDel> * 
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel> * 
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 getFirst(){
   
   BinaryTreeBranch<TKey,TComp,TDel> * current = this;
@@ -618,8 +618,8 @@ getFirst(){
 }
 
 template< typename TKey, typename TComp, typename TDel >
-stor::BinaryTreeBranch<TKey,TComp,TDel> *
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel> *
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 getLast(){
   
   BinaryTreeBranch<TKey,TComp,TDel> * current = this;
@@ -632,13 +632,13 @@ getLast(){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 breakLeft(){
 
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
 
   if ( parent == 0 )
     return;
@@ -659,13 +659,13 @@ breakLeft(){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 breakRight(){
 
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
-  stor::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
+  ds::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
 
   if ( parent == 0 )
     return;
@@ -685,8 +685,8 @@ breakRight(){
 }
   
 template< typename TKey, typename TComp, typename TDel >
-stor::BinaryTreeBranch<TKey,TComp,TDel> *
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel> *
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 cutRight(){
 
   BinaryTreeBranch<TKey,TComp,TDel> * right = 0;
@@ -705,8 +705,8 @@ cutRight(){
 }
 
 template< typename TKey, typename TComp, typename TDel >
-stor::BinaryTreeBranch<TKey,TComp,TDel> *
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel> *
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 cutLeft(){
 
   BinaryTreeBranch<TKey,TComp,TDel> * left = 0;
@@ -727,7 +727,7 @@ cutLeft(){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
   
   TComp comp;
@@ -780,8 +780,8 @@ concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
 }
 
 template< typename TKey, typename TComp, typename TDel >
-stor::BinaryTreeBranch<TKey,TComp,TDel> *
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel> *
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 getBranch(TKey key){
   
   TComp comp;
@@ -809,7 +809,7 @@ getBranch(TKey key){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TComp,TDel>::
 show(){
   
   if ( left != NULL )
@@ -823,7 +823,7 @@ show(){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TComp,TDel>::
 insert(TKey key){
   
   if ( count == 0 ){
@@ -846,7 +846,7 @@ insert(TKey key){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TComp,TDel>::
 erase(TKey key){
   
   BinaryTreeBranch<TKey,TComp,TDel> *node = 0;
@@ -917,7 +917,7 @@ erase(TKey key){
 
 template< typename TKey, typename TComp, typename TDel >
 void
-stor::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TComp,TDel>::
 show(){
 
   if ( this->root != NULL )

@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <exception.hpp>
 #include <tcpclient.hpp>
-#include <storage.hpp>
+#include <datastructures.hpp>
 
 #define EOS_TOKEN 0
 #define BAD_TOKEN 1

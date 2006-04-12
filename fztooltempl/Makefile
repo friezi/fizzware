@@ -4,14 +4,14 @@
 
 LIBRARY = fztooltempl
 
-VERSION_NUMBER = 1.81
+VERSION_NUMBER = 1.90
 
 OBJECTS = exception bashautomat messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
 	semaphor process mathexpression signalhandler stdmessageserver cmdlparser propertyreader
 
 #old: 
 
-HEADERS_ONLY = functions storage graph
+HEADERS_ONLY = functions datastructures graph
 
 EDITOR ?= vi
 

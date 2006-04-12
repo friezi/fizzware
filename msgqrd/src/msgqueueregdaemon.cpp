@@ -2,6 +2,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace ds;
 
 // Kommandostrings vom Clienten
 const string CMD_ADD_MSGQUEUE = "CMD_ADD_MSGQUEUE";
@@ -351,8 +352,8 @@ size_t CommandMsgScanner::shiftTokenSize(){
 
 Token *CommandMsgScanner::nextToken(){
   
-  stor::Buffer<char> buffer(TOKENSIZE);
-  stor::MemPointer<char> input(false);
+  Buffer<char> buffer(TOKENSIZE);
+  MemPointer<char> input(false);
   unsigned int sz;
   // Grössenangabe shiften und Grösse zurückliefern
   size_t tsize = shiftTokenSize();

@@ -9,7 +9,7 @@ EXTERN_MODULES =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception propertyreader storage cmdlparser
+CLASS_MODULES = exception propertyreader datastructures cmdlparser
 
 EM_PATH = $(CLASSLIBRARY_PATH)
 

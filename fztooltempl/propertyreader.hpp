@@ -37,7 +37,7 @@
 #include <sstream>
 #include <fstream>
 #include <functional>
-#include <storage.hpp>
+#include <datastructures.hpp>
 #include <exception.hpp>
 
 #define BLKSIZE 20

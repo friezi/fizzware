@@ -11,7 +11,7 @@
 #include <exception.hpp>
 #include <signalhandler.hpp>
 #include <stdmessageserver.hpp>
-#include <storage.hpp>
+#include <datastructures.hpp>
 #include <messagequeue.hpp>
 #include "msgqueuelist.hpp"
 #include "scanner.hpp"

@@ -31,6 +31,7 @@
 #include <propertyreader.hpp>
 
 using namespace std;
+using namespace ds;
 
 PropertyReader::PropertyReader(const PropertyReader &propertyreader){
 
@@ -212,8 +213,8 @@ PropertyReader::Property PropertyReader::Scanner::nextTokenpairSaveComments(ostr
 													    SubException<NoIDErr,Scanner>,
 													    SubException<NoValErr,Scanner>){
 
-  stor::Buffer<char> buffer(BLKSIZE);
-  stor::MemPointer<char> propptr,valueptr;
+  Buffer<char> buffer(BLKSIZE);
+  MemPointer<char> propptr,valueptr;
   bool eol = false; //End-Of-Line
   bool comment = false;
   bool id,val;

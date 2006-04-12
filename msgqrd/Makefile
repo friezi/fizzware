@@ -13,7 +13,7 @@ CLASS_MODULES = exception socket tcpserver signalhandler messagequeue stdmessage
 
 EM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/storage $(CLASSLIBRARY_PATH)/functions
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/datastructures $(CLASSLIBRARY_PATH)/functions
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

@@ -855,7 +855,7 @@ inline bool MathExpression::checkOprtr(char x){
   return (((unsigned char)(x)>=1 && (unsigned char)(x)<='/')
 	  || ((unsigned char)(x)>=':' && (unsigned char)(x)<='@')
 	  || ((unsigned char)(x)>='[' && (unsigned char)(x)<='`')
-	  || ((unsigned char)(x)>='{' && (unsigned char)(x)<=255));
+	  || ((unsigned char)(x)>='{') );
 }
 
 inline bool MathExpression::checkDigit(char x){

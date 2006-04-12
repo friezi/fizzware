@@ -7,7 +7,7 @@
 
 OBJECT = msgqueueregclient
 
-DEPENDS_ON = exception tcpclient storage
+DEPENDS_ON = exception tcpclient datastructures
 
 ############### check the CC Variable ###########################
 #################################################################

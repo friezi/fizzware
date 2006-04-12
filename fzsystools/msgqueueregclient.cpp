@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace ds;
 
 const string MsgQueueRegClient::default_socket_path = "/var/run/msgqrd_socket";
 
@@ -52,7 +53,7 @@ MsgQueueRegClient::~MsgQueueRegClient(){
 }
 
 
-bool MsgQueueRegClient::newPort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::newPort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
 
 //   int sockfd;
 
@@ -60,7 +61,7 @@ bool MsgQueueRegClient::newPort(std::string name) throw (Exception<MsgQueueRegCl
 
 //   sockfd = msgqueueregclient->buildUpConnection();
 
-//   std::string commandadd = "CMD_NEW_MSGQUEUE";
+//   string commandadd = "CMD_NEW_MSGQUEUE";
 
 //   if ((write(sockfd,commandadd.c_str(),commandadd.size()+1)) == -1)
 //     throw Exception<MsgQueueRegClient>(strerror(errno));
@@ -80,9 +81,9 @@ bool MsgQueueRegClient::newPort(std::string name) throw (Exception<MsgQueueRegCl
 
 }
 
-bool MsgQueueRegClient::addPort(std::string name, int id) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::addPort(string name, int id) throw (Exception<MsgQueueRegClient>,Exception_T){
 
-  std::string commandadd = "CMD_ADD_MSGQUEUE";
+  string commandadd = "CMD_ADD_MSGQUEUE";
   int sockfd;
   unsigned long nid = htonl((unsigned long)id);
   bool result;
@@ -118,9 +119,9 @@ bool MsgQueueRegClient::addPort(std::string name, int id) throw (Exception<MsgQu
   return result;
 }
 
-int MsgQueueRegClient::findPort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+int MsgQueueRegClient::findPort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
 
-  std::string commandfind = "CMD_FIND_MSGQUEUE";
+  string commandfind = "CMD_FIND_MSGQUEUE";
   int sockfd;
   int id = -1;
 
@@ -155,9 +156,9 @@ int MsgQueueRegClient::findPort(std::string name) throw (Exception<MsgQueueRegCl
   return id;
 }
 
-bool MsgQueueRegClient::removePort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::removePort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
 
-  std::string commandfind = "CMD_REMOVE_MSGQUEUE";
+  string commandfind = "CMD_REMOVE_MSGQUEUE";
   int sockfd;
   bool result;
 
@@ -211,7 +212,7 @@ int MsgQueueRegClient::Token::operator==(char *s){
   return (strncmp(this->buffer,s,tsize) == 0);
 }
 
-int MsgQueueRegClient::Token::operator==(const std::string &s){
+int MsgQueueRegClient::Token::operator==(const string &s){
 
   return (strncmp(this->buffer,s.data(),tsize) == 0);
 }
@@ -233,8 +234,8 @@ int MsgQueueRegClient::Scanner::isBlank(char c){
 
 MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
 
-  stor::Buffer<char> buffer(BLKSIZE);
-  stor::MemPointer<char> input(false);
+  Buffer<char> buffer(BLKSIZE);
+  MemPointer<char> input(false);
   unsigned int count;
   char tmp;
 

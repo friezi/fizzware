@@ -9,7 +9,7 @@
 #include <ctype.h>
 #include <netinet/in.h>
 #include <exception.hpp>
-#include <storage.hpp>
+#include <datastructures.hpp>
 
 #define EOS_TOKEN 0
 #define BAD_TOKEN 1

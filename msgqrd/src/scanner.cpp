@@ -1,6 +1,7 @@
 #include "scanner.hpp"
 
 using namespace std;
+using namespace ds;
 
 Token::~Token(){
   
@@ -48,8 +49,8 @@ int Scanner::isblank(char c){
 
 Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
 
-  stor::Buffer<char> buffer(BLKSIZE);
-  stor::MemPointer<char> input(false);
+  Buffer<char> buffer(BLKSIZE);
+  MemPointer<char> input(false);
   unsigned int count;
   char tmp;
 

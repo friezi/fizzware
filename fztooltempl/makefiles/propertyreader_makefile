@@ -7,7 +7,7 @@
 
 OBJECT = propertyreader
 
-DEPENDS_ON = exception storage
+DEPENDS_ON = exception datastructures
 
 ############### check the CC Variable ###########################
 #################################################################
