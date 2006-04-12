@@ -154,7 +154,6 @@ namespace cmdl{
 
       The end of options and regular arguments on the commandline has to be marked by a "-- " (realise the single space-sign).
       Each string after the "--" is taken as an argument.
-      @see Example @ref cmdlparser_example
       @brief For parsing the commandline and extracting the options and arguments
   */
   class CmdlParser{

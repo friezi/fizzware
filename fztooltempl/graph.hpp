@@ -51,7 +51,6 @@ namespace graph{
     You can define any graph-structure you want, just define the purely virtual methods, which are mainly iterators for
     neighbours and nodes. Furthermore you have to extend the nested classes neighbour_iterator and node_iterator and override
     methods from their super-class iterator. With these methods any structure can behave as a graph-structure.
-    @see Example @ref graph_example
     @brief if a class extends Graphable it has access to graph-algorithms
   */
   template <typename TNode>

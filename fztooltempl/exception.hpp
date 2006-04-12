@@ -5,7 +5,7 @@
    
    Copyright (C) 1999-2004 Friedemann Zintel
 
-   Compilation is only successfully tested with gcc v.2.95 and v.3.3 .
+   Compilation is successfully tested with gcc v.2.95, v.3.3 and v.4.0 .
    
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -196,7 +196,7 @@ protected:
   std::string extract_sub(const std::string &s){
     return Exception_T::skipDigits(Exception_T::skipLetters(Exception_T::skipDigits(Exception_T::skipLetters(s)))); }
 
-  virtual std::string classname(){ return ( extract(typeid(TBase).name()) + extract_sub(typeid(TSub).name()) + "Exception" ); }
+  virtual std::string classname(){ return ( this->extract(typeid(TBase).name()) + this->extract_sub(typeid(TSub).name()) + "Exception" ); }
 };
 
 /**
