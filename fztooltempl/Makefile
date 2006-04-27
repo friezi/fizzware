@@ -48,17 +48,17 @@ $(DOC):
 	@echo '****************' generating documentation '****************'
 	[[ -d $(DOC) ]] || mkdir $(DOC)
 	doxygen -g $(DOC)/doxyfile %1>/dev/zero
-	sed 's/PROJECT_NAME[ ]\+=/PROJECT_NAME = $(LIBRARY)/g' $(DOC)/doxyfile\
-	| sed 's/PROJECT_NUMBER[ ]\+=/PROJECT_NUMBER = $(VERSION_NUMBER)/g'\
-	| sed 's/QUIET[ ]\+=[ ]\+NO/QUIET = YES/g'\
-	| sed 's/EXTRACT_PRIVATE[ ]\+=[ ]\+NO/EXTRACT_PRIVATE = YES/g'\
-	| sed 's/ALPHABETICAL_INDEX[ ]\+=[ ]\+NO/ALPHABETICAL_INDEX = YES/g'\
-	| sed 's/WARN_IF_UNDOCUMENTED[ ]\+=[ ]\+YES/WARN_IF_UNDOCUMENTED = NO/g'\
-	| sed 's/INTERNAL_DOCS[ ]\+=[ ]\+NO/INTERNAL_DOCS = YES/g'\
-	| sed 's/SORT_MEMBER_DOCS[ ]\+=[ ]\+YES/SORT_MEMBER_DOCS = NO/g'\
-	| sed 's/OUTPUT_DIRECTORY[ ]\+=/OUTPUT_DIRECTORY = $(DOC)/g'\
-	| sed 's/EXAMPLE_PATH[ ]\+=/EXAMPLE_PATH = $(EXAMPLES)/g'\
-	| sed 's/PREDEFINED[ ]\+=/PREDEFINED = DOXYGEN_SHOULD_SKIP_THIS/g' >$(DOXY)
+	sed	-e 's/^[ ]*\(PROJECT_NAME\)[ ]*=.*$$/\1 = $(LIBRARY)/g'\
+		-e 's/^[ ]*\(PROJECT_NUMBER\)[ ]*=.*$$/\1 = $(VERSION_NUMBER)/g'\
+		-e 's/^[ ]*\(QUIET\)[ ]*=.*$$/\1 = YES/g'\
+		-e 's/^[ ]*\(EXTRACT_PRIVATE\)[ ]*=.*$$/\1 = YES/g'\
+		-e 's/^[ ]*\(ALPHABETICAL_INDEX\)[ ]*=.*$$/\1 = YES/g'\
+		-e 's/^[ ]*\(WARN_IF_UNDOCUMENTED\)[ ]*=.*$$/\1 = NO/g'\
+		-e 's/^[ ]*\(INTERNAL_DOCS\)[ ]*=.*$$/\1 = YES/g'\
+		-e 's/^[ ]*\(SORT_MEMBER_DOCS\)[ ]*=.*$$/\1 = NO/g'\
+		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = $(DOC)/g'\
+		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = $(EXAMPLES)/g'\
+		-e 's/^[ ]*\(PREDEFINED\)[ ]*=.*$$/\1 = DOXYGEN_SHOULD_SKIP_THIS/g' $(DOC)/doxyfile >$(DOXY)
 	doxygen $(DOXY)
 	rm $(DOC)/doxyfile
 	rm $(DOXY)
