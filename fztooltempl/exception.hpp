@@ -5,7 +5,7 @@
    
    Copyright (C) 1999-2004 Friedemann Zintel
 
-   Compilation is successfully tested with gcc v.2.95, v.3.3 and v.4.0 .
+   Compilation is successfully tested with g++ v.2.95, v.3.3 and v.4.0 .
    
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
