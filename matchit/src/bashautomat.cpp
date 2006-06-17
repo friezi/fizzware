@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <bashautomat.hpp>
+#include "bashautomat.hpp"
 
 Automat::Automat(char *pattern, SpecSymbols *spec_symbols)
   : statelist(0), nos(0){

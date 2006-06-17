@@ -1,0 +1,24 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = funtest
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES =
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS = $(CM_PATH)/functions
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

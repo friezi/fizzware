@@ -48,7 +48,7 @@ int main(int argc, char **argv){
     for ( CmdlParser::Arguments::const_iterator it = parser.beginArguments(); it != parser.endArguments(); it++ )
       cout << *it << endl;
     
-    cout << "source=" << parser.getObligatoryArgument("source") << endl;
+    cout << "source=" << parser.getMandatoryArgument("source") << endl;
 
     cout << "Final-Argument ist: " << parser.getFinalArgumentId() << " = " << parser.getFinalArgumentValue() << endl;
 
@@ -95,8 +95,8 @@ string setupParser(CmdlParser& parser){
 
   parser.shortalias('x') << 'b' << 'a' << 'g';
 
-  parser.addObligatoryArgument("source","The Source");
-  parser.addObligatoryArgument("target","The Target");
+  parser.addMandatoryArgument("source","The Source");
+  parser.addMandatoryArgument("target","The Target");
 
   parser.setInfiniteArguments("filename");
 

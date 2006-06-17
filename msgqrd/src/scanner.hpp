@@ -107,6 +107,11 @@ public:
 
   ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
 
+  // in BSD-Un*x isblank is a macro and must be deactivated
+#ifdef isblank
+  #undef isblank
+#endif
+
   int isblank(char c);
 };
 

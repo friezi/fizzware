@@ -1,0 +1,27 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = msgqrclient
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES = exception tcpclient msgqueueregclient socket
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS =
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+# in case that ansi is not allowed
+NOANSI = true
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

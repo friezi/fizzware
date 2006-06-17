@@ -3,6 +3,6 @@
 
 #include <iostream>
 #include <exception.hpp>
-#include <bashautomat.hpp>
+#include "bashautomat.hpp"
 
 #endif

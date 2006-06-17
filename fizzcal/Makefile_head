@@ -1,0 +1,24 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = focal
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES = mathexpression exception cmdlparser
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS =
+
+LIBRARY_INCLUDE_PATHS =/usr/include/readline
+LIBRARIES = readline
+LIBRARY_PATHS = /usr/lib
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

@@ -1,0 +1,27 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = msgqrd
+
+MAIN_MODULE = main
+LOCAL_MODULES = msgqueueregdaemon scanner msgqueuelist
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES = exception socket tcpserver signalhandler messagequeue stdmessageserver cmdlparser
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/datastructures $(CLASSLIBRARY_PATH)/functions
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+# in case that ansi is not allowed
+NOANSI = true
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

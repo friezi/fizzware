@@ -1,0 +1,24 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = cliparser
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES = cmdlparser exception
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS =
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

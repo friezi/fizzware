@@ -19,7 +19,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <process.hpp>
+#include "process.hpp"
 
 unsigned int Process::pcount=0;
 
