@@ -267,6 +267,8 @@ namespace ds{
 
   /**
     @brief A class for a branch of a multiple-tree
+    @attention not yet supported!
+    @todo supporting MultipleTreeBranch
   **/
   template< typename TKey, typename TComp, typename TDel >
   class MultipleTreeBranch : virtual KeyNode<TKey,TComp,TDel>{
