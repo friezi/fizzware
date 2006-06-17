@@ -6,7 +6,7 @@ LIBRARY = fztooltempl
 
 VERSION_NUMBER = 1.90
 
-OBJECTS = exception bashautomat messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
+OBJECTS = exception messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
 	semaphor process mathexpression signalhandler stdmessageserver cmdlparser propertyreader
 
 #old: 

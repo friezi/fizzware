@@ -102,9 +102,9 @@ void CmdlParser::addOption(string option, string description){
     synonymdict[option] = new Synonyms(); 
 }
 
-void CmdlParser::addParameter(string parameter, string valueid, string description, bool obligatory){
+void CmdlParser::addParameter(string parameter, string valueid, string description, bool mandatory){
 
-  allowedparameters[parameter] = APInfo(valueid,description,obligatory,false);
+  allowedparameters[parameter] = APInfo(valueid,description,mandatory,false);
 
   if ( synonymdict.find(parameter) == synonymdict.end() )
     synonymdict[parameter] = new Synonyms(); 
@@ -118,9 +118,9 @@ void CmdlParser::addMultiParameter(string multiparameter, string valueid, string
     synonymdict[multiparameter] = new Synonyms(); 
 }
 
-void CmdlParser::addObligatoryArgument(string argument, string description){
+void CmdlParser::addMandatoryArgument(string argument, string description){
 
-  exp_obl_arguments.insert(exp_obl_arguments.end(),Info(argument,description));
+  exp_mand_arguments.insert(exp_mand_arguments.end(),Info(argument,description));
 } 
 
 Synonyms & CmdlParser::synonym(string representative) throw(Exception<CmdlParser>){
@@ -231,15 +231,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
       
 	length = strlen(argv[word]);
 	if ( length < 2 ){ // only "-" -> normal argument
-	  if ( argumentcounter < exp_obl_arguments.size() ){
-	    // it's an obligatory argument
+	  if ( argumentcounter < exp_mand_arguments.size() ){
+	    // it's an mandatory argument
 
-	    string oblarg = exp_obl_arguments.front().valueid;
-	    obligatoryarguments[oblarg] = argv[word];  // insertion
+	    string oblarg = exp_mand_arguments.front().valueid;
+	    mandatoryarguments[oblarg] = argv[word];  // insertion
 
 	    // membercycling
-	    exp_obl_arguments.insert(exp_obl_arguments.end(),exp_obl_arguments.front());
-	    exp_obl_arguments.pop_front();
+	    exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());
+	    exp_mand_arguments.pop_front();
 
 	  } else  // random argument
 	    arguments.insert(arguments.end(),argv[word]);
@@ -414,15 +414,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 
       string argument(argv[word]);
 
-      if ( argumentcounter < exp_obl_arguments.size() ){
-	// it's an obligatory argument;
+      if ( argumentcounter < exp_mand_arguments.size() ){
+	// it's an mandatory argument;
 
-	string oblarg = exp_obl_arguments.front().valueid;
-	obligatoryarguments[oblarg] = argument;  // insertion
+	string oblarg = exp_mand_arguments.front().valueid;
+	mandatoryarguments[oblarg] = argument;  // insertion
 
 	// membercycling
-	exp_obl_arguments.insert(exp_obl_arguments.end(),exp_obl_arguments.front());
-	exp_obl_arguments.pop_front();
+	exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());
+	exp_mand_arguments.pop_front();
 	
       } else  // random argument
 	arguments.insert(arguments.end(),argument);
@@ -447,25 +447,25 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
     }
   }
   
-  // to few of the obligatory parameters
+  // to few of the mandatory parameters
   for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ )
-    if ( (*it).second.obligatory == true && (*it).second.found == false ){
+    if ( (*it).second.mandatory == true && (*it).second.found == false ){
 
-      errors << "Too few parameters: obligatory parameter missing: " << "--" << (*it).first << endl;
+      errors << "Too few parameters: mandatory parameter missing: " << "--" << (*it).first << endl;
       parseerror = true;
 
     }
   
-  // to few of the obligatory arguments are given
-  if ( argumentcounter < exp_obl_arguments.size() ){
+  // to few of the mandatory arguments are given
+  if ( argumentcounter < exp_mand_arguments.size() ){
 
-    errors << "Too few obligatory arguments!\n";
+    errors << "Too few mandatory arguments!\n";
     parseerror = true;
 
   }
 
   // got arguments, but none is allowed
-  if ( (arguments.empty() == false) && (exp_obl_arguments.empty() == true)
+  if ( (arguments.empty() == false) && (exp_mand_arguments.empty() == true)
        && (infinite_args == false) && (finalargument.first == "") ){
 
     errors << "No arguments allowed!\n";
@@ -500,11 +500,11 @@ pair< bool,set<string> * > CmdlParser::checkMultiParameter(string multiparameter
     return pair< bool,set<string> * >(false,(set<string> *)0);
 }
 
-string CmdlParser::getObligatoryArgument(string argument){
+string CmdlParser::getMandatoryArgument(string argument){
 
-  ObligatoryArguments::iterator it = obligatoryarguments.find(argument);
+  MandatoryArguments::iterator it = mandatoryarguments.find(argument);
 
-  if ( it != obligatoryarguments.end() )
+  if ( it != mandatoryarguments.end() )
     return (*it).second;
   else
     return "";
@@ -565,10 +565,10 @@ string CmdlParser::usage(){
   
   if ( !allowedparameters.empty() ){
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ ){
-      if ( (*it).second.obligatory == false )
+      if ( (*it).second.mandatory == false )
 	usg << "[";
       usg << "--" << synonymUsage((*it).first) << "=<" << (*it).second.valueid << ">";
-      if ( (*it).second.obligatory == false )     
+      if ( (*it).second.mandatory == false )     
 	usg << "]";
       usg << " ";
     }
@@ -580,11 +580,11 @@ string CmdlParser::usage(){
   }
   
   // falls Argumente erwartet werden, Argumentseparator ausgeben
-  if ( (exp_obl_arguments.empty() == false) || (infinite_args == true) || (finalargument.first != "") )
+  if ( (exp_mand_arguments.empty() == false) || (infinite_args == true) || (finalargument.first != "") )
     usg << "[--] ";
   
-  if ( !exp_obl_arguments.empty() ){
-    for ( ExpOblArguments::iterator it = exp_obl_arguments.begin(); it != exp_obl_arguments.end(); it++ )
+  if ( !exp_mand_arguments.empty() ){
+    for ( ExpMandArguments::iterator it = exp_mand_arguments.begin(); it != exp_mand_arguments.end(); it++ )
       usg << "<" << (*it).valueid << "> ";
   }
 
@@ -607,7 +607,7 @@ std::string CmdlParser::infoUsage(){
        || !allowedparameters.empty() || !allowedmultiparameters.empty() )
     usg << "[Options1] ";
 
-  if ( !exp_obl_arguments.empty() )
+  if ( !exp_mand_arguments.empty() )
     usg << "Options2 ";
   
   usg << endl;
@@ -652,7 +652,7 @@ std::string CmdlParser::infoUsage(){
     }
     
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); ++it ){
-      if ( (*it).second.obligatory == false ){
+      if ( (*it).second.mandatory == false ){
 	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
@@ -673,12 +673,12 @@ std::string CmdlParser::infoUsage(){
 
   }
 
-  if ( !exp_obl_arguments.empty() ){
+  if ( !exp_mand_arguments.empty() ){
 
     usg << "Options2:" << endl;
  
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); ++it ){
-      if ( (*it).second.obligatory == true ){
+      if ( (*it).second.mandatory == true ){
 	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
@@ -688,7 +688,7 @@ std::string CmdlParser::infoUsage(){
       }
     }
 
-    for ( ExpOblArguments::iterator it = exp_obl_arguments.begin(); it != exp_obl_arguments.end(); it++ )
+    for ( ExpMandArguments::iterator it = exp_mand_arguments.begin(); it != exp_mand_arguments.end(); it++ )
       usg << "<" << (*it).valueid << "> " << "\t" << (*it).description << endl;
     usg << endl;
   } 
@@ -805,15 +805,15 @@ string CmdlParser::contents(){
   }
   collect << endl;
 
-  // allowed obligatory arguments:
-  collect << "Allowed obligatory arguments:\n";
-  for ( ExpOblArguments::iterator it = exp_obl_arguments.begin(); it != exp_obl_arguments.end(); it++ )
+  // allowed mandatory arguments:
+  collect << "Allowed mandatory arguments:\n";
+  for ( ExpMandArguments::iterator it = exp_mand_arguments.begin(); it != exp_mand_arguments.end(); it++ )
     collect << (*it).valueid << "\t" << (*it).description << endl;
   collect << endl;
 
-  // obligatory arguments:
-  collect << "Obligatory arguments:\n";
-  for ( ObligatoryArguments::iterator it = obligatoryarguments.begin(); it != obligatoryarguments.end(); it++ )
+  // mandatory arguments:
+  collect << "Mandatory arguments:\n";
+  for ( MandatoryArguments::iterator it = mandatoryarguments.begin(); it != mandatoryarguments.end(); it++ )
     collect << (*it).first << " = " << (*it).second << endl;
   collect << endl;
   

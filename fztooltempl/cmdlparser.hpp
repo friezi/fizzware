@@ -176,11 +176,11 @@ namespace cmdl{
     
     public:
     
-      bool obligatory;
+      bool mandatory;
       bool found;
     
-      APInfo() : Info(),obligatory(false), found(false){}
-      APInfo(std::string v, std::string d, bool o, bool f) : Info(v,d),obligatory(o), found(f){}
+      APInfo() : Info(),mandatory(false), found(false){}
+      APInfo(std::string v, std::string d, bool o, bool f) : Info(v,d),mandatory(o), found(f){}
     };
 
   public:  
@@ -188,8 +188,8 @@ namespace cmdl{
     typedef std::list<std::string> Arguments;   // for scanned arguments
   
   protected:
-    typedef std::map< std::string,std::string,std::less<std::string> > ObligatoryArguments; // for obligatory arguments
-    typedef std::list<Info> ExpOblArguments; // for expected obligatory arguments
+    typedef std::map< std::string,std::string,std::less<std::string> > MandatoryArguments; // for mandatory arguments
+    typedef std::list<Info>ExpMandArguments; // for expected mandatory arguments
     typedef std::map< std::string,std::string,std::less<std::string> > Parameters;  // for scanned parameters
     typedef std::map< std::string,APInfo,std::less<std::string> > AParameters;  // allowed parameters
     typedef std::map< std::string,Info,std::less<std::string> > AMParameters; // allowed multi-parameters
@@ -255,10 +255,10 @@ namespace cmdl{
 
     /// stores the normal arguments
     Arguments arguments;
-    /// stores obligatory arguments
-    ObligatoryArguments obligatoryarguments;
-    /// for allowed obligatory arguments
-    ExpOblArguments exp_obl_arguments;
+    /// stores mandatory arguments
+    MandatoryArguments mandatoryarguments;
+    /// for allowed mandatory arguments
+    ExpMandArguments exp_mand_arguments;
 
     /// stores parameters, like: --color=blue
     Parameters parameters;
@@ -340,9 +340,9 @@ namespace cmdl{
        @param parameter the parameter, which can be assigned a value
        @param valueid id-string for the value how it should be printed by usage()
        @param description a descriptive string for the parameter, printed by infoUsage()
-       @param obligatory if occurence of parameter is must
+       @param mandatory if occurence of parameter is must
     */
-    void addParameter(std::string parameter, std::string valueid, std::string description, bool obligatory = false);
+    void addParameter(std::string parameter, std::string valueid, std::string description, bool mandatory = false);
 
     /**
        A multi-parameter is an optional parameter which can occur more than once, e.g. useful for a
@@ -356,13 +356,13 @@ namespace cmdl{
     void addMultiParameter(std::string multiparameter, std::string valueid, std::string description);
 
     /**
-       An obligatory Argument is an argument which must be present (e.g. \<filename\>)\n
+       An mandatory Argument is an argument which must be present (e.g. \<filename\>)\n
        The order of definition is relevant for the order of connecting the value.
-       @brief to add an allowed obligatory argument
+       @brief to add an allowed mandatory argument
        @param argument a name to which \<argumentname\> from the commandline will be connected to
        @param description a descriptive string for the argument, printed by infoUsage()
     */
-    void addObligatoryArgument(std::string argument, std::string description);
+    void addMandatoryArgument(std::string argument, std::string description);
 
     /**
        Just to inform the user with the usage()-function that an infinite number of
@@ -374,7 +374,7 @@ namespace cmdl{
     void setInfiniteArguments(std::string id);
 
     /**
-       @brief For an obligatory final argument
+       @brief For an mandatory final argument
        @param id the identifier
        @note Useful if you have an infinite number of arguments and need one last, e.g. directoryname for copying
        @remark This last argument won't be a member of the normal Arguments
@@ -495,11 +495,11 @@ namespace cmdl{
 
 
     /**
-       @brief get value the obligatory argument \<argument\>
-       @return the value for an obligatory-argument (only after parsing usefull). If there's no entry for argument
+       @brief get value the mandatory argument \<argument\>
+       @return the value for an mandatory-argument (only after parsing usefull). If there's no entry for argument
        (should not happen if you use everything correctly) the empty-string is returned.
     */
-    std::string getObligatoryArgument(std::string argument);
+    std::string getMandatoryArgument(std::string argument);
 
  
     /**
@@ -534,14 +534,14 @@ namespace cmdl{
     std::string getFinalArgumentValue() throw (Exception<CmdlParser>);
   
     /**
-       Returns an iterator pointing to the beginning of the non-obligatory-argument-list.
+       Returns an iterator pointing to the beginning of the non-mandatory-argument-list.
        @brief beginning of arguments
        @return the const_iterator
     */
     Arguments::const_iterator beginArguments(){ return arguments.begin(); }
   
     /**
-       Returns an iterator pointing to the end of the non-obligatory-argument-list.
+       Returns an iterator pointing to the end of the non-mandatory-argument-list.
        @brief end of arguments
        @return the const_iterator
     */
