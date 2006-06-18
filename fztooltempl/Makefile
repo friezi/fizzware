@@ -13,7 +13,11 @@ OBJECTS = exception messagequeue socket tcpserver tcpclient msgqueueregclient pr
 
 HEADERS_ONLY = functions datastructures graph
 
-EDITOR ?= vi
+# EDITOR ?= vi
+
+ifeq ($(origin EDITOR),undefined)
+	EDITOR = vi
+endif
 
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/classes
