@@ -1,5 +1,5 @@
 DIRS = focal msgqrd msgqrclient prim primfak
-#old: 
+
 DIST_DIR = dist
 
 DIST_PREFIX = dist
