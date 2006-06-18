@@ -1,0 +1,35 @@
+This briefly documents the generation of the static library fztooltempl and some additional tools.
+For generating documentation doxygen must be installed.
+make is the GNU make-utility, should be at least version 3.81. With prior versions it might not work.
+
+compile all sources together:
+make
+
+Build a distribution-file (bzipped) (If date doesnt work properly, change the call in Makefile_dist to "gdate"):
+make dist
+
+Compile only the library:
+cd classes
+make
+
+Call the editor defined in the environment-variable EDITOR with all the relevant sources:
+cd <subdirectory>
+make ed
+
+Clean all addtitional binaries:
+make clean
+
+Clean the library fztooltempl:
+cd classes
+make clean
+
+Clean only documentation for fztooltempl:
+cd classes
+make cleandoc
+
+Make only documentation for fztooltempl:
+cd classes
+make cleandoc
+
+
+

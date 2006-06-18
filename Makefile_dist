@@ -30,7 +30,7 @@ ed:
 dist:
 	cd classes; $(MAKE) -k dist; cd -;
 	cp Makefile_dist $(DIST_DIR)/Makefile
-	cp --target-directory=$(DIST_DIR) Makefile_dist  Makefile_body Makefile_head_template GPL
+	cp --target-directory=$(DIST_DIR) Makefile_dist  Makefile_body Makefile_head_template GPL README
 	$(foreach dir,$(DIRS),cd $(dir); $(MAKE) -k dist; cd ../;)
 	tar cf $(DIST_FILE) dist/
 	bzip2 -9 $(DIST_FILE)
