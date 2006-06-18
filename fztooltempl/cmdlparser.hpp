@@ -477,22 +477,37 @@ namespace cmdl{
 
 
     /**
-       @brief check if a parameter is set in options
+       @brief check if a parameter is set in parameters
        @param parameter to be checked
        @return a pair, first element is a bool value if or if not
        the parameter is contained, second element is the value of the parameter
     */
     std::pair<bool,std::string> checkParameter(std::string parameter);
-
+    
+    
+    /**
+       @brief get the value for a parameter
+       @param parameter to be checked
+       @return value of parameter or "" if not contained
+    */
+    std::string getParameter(std::string parameter);
+    
 
     /**
-       @brief check if a multiparameter is set in options
+       @brief check if a multiparameter is set in multiparameters
        @param multiparameter to be checked
        @return a pair, first element is a bool value if or if not
        the parameter is contained, second element is a set of all value belonging to the multiparameter
     */
     std::pair< bool,std::set<std::string> * > checkMultiParameter(std::string multiparameter);
 
+
+    /**
+       @brief get the values of multiparameter
+       @param multiparameter to be checked
+       @return values of multiparameter or null-pointer if not contained
+    */
+    std::set<std::string> * getMultiParameter(std::string multiparameter);
 
     /**
        @brief get value the mandatory argument \<argument\>

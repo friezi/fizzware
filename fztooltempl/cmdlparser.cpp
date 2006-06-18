@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2005 Friedemann Zintel
+  Copyright (C) 1999-2005 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 #include <cmdlparser.hpp>
@@ -229,187 +229,187 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 
     if ( end_of_options == false && argv[word][0] == '-'){  // did "--" occur?
       
-	length = strlen(argv[word]);
-	if ( length < 2 ){ // only "-" -> normal argument
-	  if ( argumentcounter < exp_mand_arguments.size() ){
-	    // it's an mandatory argument
+      length = strlen(argv[word]);
+      if ( length < 2 ){ // only "-" -> normal argument
+	if ( argumentcounter < exp_mand_arguments.size() ){
+	  // it's an mandatory argument
 
-	    string mandarg = exp_mand_arguments.front().valueid;
-	    mandatoryarguments[mandarg] = argv[word];  // insertion
+	  string mandarg = exp_mand_arguments.front().valueid;
+	  mandatoryarguments[mandarg] = argv[word];  // insertion
 
-	    // membercycling
-	    exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());
-	    exp_mand_arguments.pop_front();
+	  // membercycling
+	  exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());
+	  exp_mand_arguments.pop_front();
 
-	  } else  // random argument
-	    arguments.insert(arguments.end(),argv[word]);
+	} else  // random argument
+	  arguments.insert(arguments.end(),argv[word]);
 
-	  argumentcounter++;
-	  continue;
-	}
+	argumentcounter++;
+	continue;
+      }
 	
-	if ( argv[word][1] != '-' ){ // shortoption
+      if ( argv[word][1] != '-' ){ // shortoption
 
-	  char shortoption;
+	char shortoption;
 	  
-	  // insert chars in shortoptions
-	  for ( int i = 1; i<length; i++){
+	// insert chars in shortoptions
+	for ( int i = 1; i<length; i++){
 
-	    shortoption = argv[word][i];
+	  shortoption = argv[word][i];
 
-	    // check for synonyms
-	    shortoption = getShortRepresentative(shortoption);
+	  // check for synonyms
+	  shortoption = getShortRepresentative(shortoption);
 	    
-	    // check if alias
-	    ShortAliasDict::iterator sad_it;
+	  // check if alias
+	  ShortAliasDict::iterator sad_it;
 
-	    if ( (sad_it = shortaliasdict.find(shortoption)) != shortaliasdict.end() ){
+	  if ( (sad_it = shortaliasdict.find(shortoption)) != shortaliasdict.end() ){
+
+	    // insert all contained options
+	    for ( ShortAliases::iterator sa_it = (*sad_it).second->begin(); sa_it != (*sad_it).second->end(); sa_it++ )
+	      shortoptions.insert(*sa_it);
+		
+	  } else{  // no alias
+	    
+	    // invalid option:
+	    if ( allowedshortoptions.find(shortoption) == allowedshortoptions.end() ){
+
+	      errors << "invalid option: " << string(1,shortoption) << endl;
+	      parseerror = true;
+
+	    } else
+	      shortoptions.insert(shortoption); // insert
+	  }
+	}
+      } else{  // maybe normal option
+	  
+	if ( length == 2 ) // the end of all options: "--"
+	  end_of_options = true;
+	else{  // definitely normal option or parameter
+	    
+	  int eqs;
+	  bool param = false;
+	  bool multiparam = false;
+	    
+	  // check if it is a parameter
+	  for ( eqs = 2; eqs<length; eqs++ ){
+
+	    if ( argv[word][eqs] == '=' ){
+
+	      param = true;
+	      break;
+
+	    } else if ( argv[word][eqs] == ':' ){ // multi-parameter
+
+	      multiparam = true;
+	      break;
+
+	    }
+	  }
+	    
+	  if ( param == false && multiparam == false ){  // now it is really a normal option
+
+	    string option(&argv[word][2]);
+
+	    // check synonyms
+	    option = getRepresentative(option);
+
+	    // check if alias
+	    AliasDict::iterator adit;
+
+	    if ( (adit = aliasdict.find(option)) != aliasdict.end() ){
 
 	      // insert all contained options
-	      for ( ShortAliases::iterator sa_it = (*sad_it).second->begin(); sa_it != (*sad_it).second->end(); sa_it++ )
-		shortoptions.insert(*sa_it);
+	      for ( Aliases::iterator a_it = (*adit).second->begin(); a_it != (*adit).second->end(); a_it++ )
+		options.insert(*a_it);
 		
 	    } else{  // no alias
-	    
-	      // invalid option:
-	      if ( allowedshortoptions.find(shortoption) == allowedshortoptions.end() ){
 
-		errors << "invalid option: " << string(1,shortoption) << endl;
+	      // invalid option
+	      if ( allowedoptions.find(option) == allowedoptions.end() ){
+
+		errors << "invalid option: " << option << endl;
 		parseerror = true;
 
 	      } else
-		shortoptions.insert(shortoption); // insert
-	    }
-	  }
-	} else{  // maybe normal option
-	  
-	  if ( length == 2 ) // the end of all options: "--"
-	    end_of_options = true;
-	  else{  // definitely normal option or parameter
-	    
-	    int eqs;
-	    bool param = false;
-	    bool multiparam = false;
-	    
-	    // check if it is a parameter
-	    for ( eqs = 2; eqs<length; eqs++ ){
-
-	      if ( argv[word][eqs] == '=' ){
-
-		param = true;
-		break;
-
-	      } else if ( argv[word][eqs] == ':' ){ // multi-parameter
-
-		multiparam = true;
-		break;
-
-	      }
-	    }
-	    
-	    if ( param == false && multiparam == false ){  // now it is really a normal option
-
-	      string option(&argv[word][2]);
-
-	      // check synonyms
-	      option = getRepresentative(option);
-
-	      // check if alias
-	      AliasDict::iterator adit;
-
-	      if ( (adit = aliasdict.find(option)) != aliasdict.end() ){
-
-		// insert all contained options
-		for ( Aliases::iterator a_it = (*adit).second->begin(); a_it != (*adit).second->end(); a_it++ )
-		  options.insert(*a_it);
-		
-	      } else{  // no alias
-
-		// invalid option
-		if ( allowedoptions.find(option) == allowedoptions.end() ){
-
-		  errors << "invalid option: " << option << endl;
-		  parseerror = true;
-
-		} else
-		  options.insert(option);
+		options.insert(option);
 	      
-	      }
-	    } else if ( multiparam == true ){  // a multi-parameter with value
+	    }
+	  } else if ( multiparam == true ){  // a multi-parameter with value
 
-	      string parameter(&argv[word][2],eqs-2);
+	    string parameter(&argv[word][2],eqs-2);
 
-	      // check synonyms
-	      parameter = getRepresentative(parameter);
+	    // check synonyms
+	    parameter = getRepresentative(parameter);
 	      
-	      // invalid parameter
-	      if ( allowedmultiparameters.find(parameter) == allowedmultiparameters.end() ){
+	    // invalid parameter
+	    if ( allowedmultiparameters.find(parameter) == allowedmultiparameters.end() ){
 
-		errors << "invalid multi-parameter: " << parameter << endl;
+	      errors << "invalid multi-parameter: " << parameter << endl;
+	      parseerror = true;
+
+	    } else{
+
+	      // check if a value is given
+	      if ( argv[word][eqs+1] == '\0' ){
+
+		errors << "no value given for multi-parameter: " << parameter << endl;
 		parseerror = true;
 
 	      } else{
 
-		// check if a value is given
-		if ( argv[word][eqs+1] == '\0' ){
-
-		  errors << "no value given for multi-parameter: " << parameter << endl;
-		  parseerror = true;
-
-		} else{
-
-		  string value(&argv[word][eqs+1]);
+		string value(&argv[word][eqs+1]);
 		  
-		  // first occurence
-		  if ( multiparameters.find(parameter) == multiparameters.end()){
+		// first occurence
+		if ( multiparameters.find(parameter) == multiparameters.end()){
 
-		    set<string> *valueset = new set<string>();
-		    valueset->insert(value);
-		    multiparameters[parameter] = valueset;
+		  set<string> *valueset = new set<string>();
+		  valueset->insert(value);
+		  multiparameters[parameter] = valueset;
 
-		  } else{  // there's an entry already
+		} else{  // there's an entry already
 		    
-		    set<string> *valueset = multiparameters[parameter];
-		    valueset->insert(value);
+		  set<string> *valueset = multiparameters[parameter];
+		  valueset->insert(value);
 
-		  }
 		}
 	      }
-	    } else{   // a parameter with value
+	    }
+	  } else{   // a parameter with value
 	      
-	      string parameter(&argv[word][2],eqs-2);
+	    string parameter(&argv[word][2],eqs-2);
 
-	      // check synonyms
-	      parameter = getRepresentative(parameter);
+	    // check synonyms
+	    parameter = getRepresentative(parameter);
 	      
-	      // invalid parameter
-	      if ( allowedparameters.find(parameter) == allowedparameters.end() ){
+	    // invalid parameter
+	    if ( allowedparameters.find(parameter) == allowedparameters.end() ){
 
-		errors << "invalid parameter: " << parameter << endl;
+	      errors << "invalid parameter: " << parameter << endl;
+	      parseerror = true;
+
+	    } else{
+
+	      // check if a value is given
+	      if ( argv[word][eqs+1] == '\0' ){
+
+		errors << "no value given for parameter: " << parameter << endl;
 		parseerror = true;
 
-	      } else{
+	      } else{  // ok, there's a value
 
-		// check if a value is given
-		if ( argv[word][eqs+1] == '\0' ){
+		string value(&argv[word][eqs+1]);
 
-		  errors << "no value given for parameter: " << parameter << endl;
-		  parseerror = true;
-
-		} else{  // ok, there's a value
-
-		  string value(&argv[word][eqs+1]);
-
-		  parameters[parameter] = value;
+		parameters[parameter] = value;
 		  
-		  // set the "found"-state
-		  allowedparameters[parameter].found = true;
+		// set the "found"-state
+		allowedparameters[parameter].found = true;
 
-		}
 	      }
 	    }
 	  }
 	}
+      }
     } else{  // end_of_options == true -> only arguments follow
 
       string argument(argv[word]);
@@ -490,6 +490,16 @@ pair<bool,string> CmdlParser::checkParameter(string parameter){
     return pair<bool,string>(false,"");
 }
 
+string CmdlParser::getParameter(string parameter){
+  
+  Parameters::iterator it = parameters.find(parameter);
+
+  if ( it != parameters.end() )
+    return (*it).second;
+  else
+    return "";
+}  
+
 pair< bool,set<string> * > CmdlParser::checkMultiParameter(string multiparameter){
   
   MultiParameters::iterator it = multiparameters.find(multiparameter);
@@ -499,6 +509,17 @@ pair< bool,set<string> * > CmdlParser::checkMultiParameter(string multiparameter
   else
     return pair< bool,set<string> * >(false,(set<string> *)0);
 }
+
+set<string> * CmdlParser::getMultiParameter(string multiparameter){
+  
+  MultiParameters::iterator it = multiparameters.find(multiparameter);
+
+  if ( it != multiparameters.end() )
+    return (*it).second;
+  else
+    return (set<string> *)0;
+}
+
 
 string CmdlParser::getMandatoryArgument(string argument){
 
@@ -517,18 +538,18 @@ string CmdlParser::synonymUsage(string representative){
   SynonymDict::iterator rit = synonymdict.find(representative);
 
   // it's simply to much and actually unnecessary to print all the synonyms
-//   if ( rit != synonymdict.end() ){
-//     if ( (*rit).second->empty() == false ){
-//       usg << "{" << representative;
-//       for ( set<string>::iterator s_it = (*rit).second->begin(); s_it != (*rit).second->end(); s_it++ )
-// 	usg << "," << *s_it;
-//       usg << "}";
-//     } else
-//       usg << representative;
-//   } else
-//     usg << representative;
+  //   if ( rit != synonymdict.end() ){
+  //     if ( (*rit).second->empty() == false ){
+  //       usg << "{" << representative;
+  //       for ( set<string>::iterator s_it = (*rit).second->begin(); s_it != (*rit).second->end(); s_it++ )
+  // 	usg << "," << *s_it;
+  //       usg << "}";
+  //     } else
+  //       usg << representative;
+  //   } else
+  //     usg << representative;
 
-// only show representative
+  // only show representative
   usg << representative;
 
   return usg.str();
@@ -545,9 +566,9 @@ string CmdlParser::usage(){
     for ( AShortoptions::iterator it = allowedshortoptions.begin(); it != allowedshortoptions.end(); it++ )
       usg << (*it).first;
     // it's simply to much and actually unnecessary to print all the synonyms
-//     for ( ShortSynonymDict::iterator syn_it = shortsynonymdict.begin(); syn_it != shortsynonymdict.end(); syn_it++ )
-//       for ( set<char>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); s_it++ )
-// 	usg << *s_it;
+    //     for ( ShortSynonymDict::iterator syn_it = shortsynonymdict.begin(); syn_it != shortsynonymdict.end(); syn_it++ )
+    //       for ( set<char>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); s_it++ )
+    // 	usg << *s_it;
     for ( ShortAliasDict::iterator a_it = shortaliasdict.begin(); a_it != shortaliasdict.end(); a_it++ )
       usg << (*a_it).first;
     usg << "] ";
@@ -630,7 +651,7 @@ std::string CmdlParser::infoUsage(){
       usg << "-" << (*it).first << "\t";
       usg << "an alias for the combination of the following shortoptions:" << endl << "  ";
       for ( set<char>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); ++a_it )
-	  usg << " -" << *a_it;
+	usg << " -" << *a_it;
       usg << endl << endl;
     }
     
@@ -647,7 +668,7 @@ std::string CmdlParser::infoUsage(){
       usg << "--" << (*it).first << endl;
       usg << "  an alias for the combination of the following options:" << endl << "  ";
       for ( set<std::string>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); ++a_it )
-	  usg << " --" << *a_it;
+	usg << " --" << *a_it;
       usg << endl << endl;
     }
     
