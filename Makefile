@@ -1,14 +1,5 @@
 DIRS = cliparser focal funtest matchit msgqrd msgqrclient prim primfak process properties semaphoren graph tree
 #old: 
-DIST_DIR = dist
-
-DIST_PREFIX = dist
-
-DIST_IDENTIFIER = c++
-
-DATE := $(shell date -I)
-
-DIST_FILE = $(DIST_PREFIX)_$(DIST_IDENTIFIER)_$(DATE)_.tar
 
 EDITOR ?= vi
 

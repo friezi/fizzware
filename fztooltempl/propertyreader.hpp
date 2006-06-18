@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2005 Friedemann Zintel
+  Copyright (C) 1999-2005 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 /**
@@ -39,6 +39,7 @@
 #include <functional>
 #include <datastructures.hpp>
 #include <exception.hpp>
+#include <cmdlparser.hpp>
 
 #define BLKSIZE 20
 
@@ -142,11 +143,11 @@ private:
        @exception SubException<NoValErr,Scanner>
     */
     Property nextTokenpairSaveComments(std::ostringstream *comments) throw (SubException<InputInvalidErr,Scanner>,
-								       SubException<IncompleteErr,Scanner>,
-								       SubException<EOFErr,Scanner>,
-								       SubException<SyntaxErr,Scanner>,
-								       SubException<NoIDErr,Scanner>,
-								       SubException<NoValErr,Scanner>);
+									    SubException<IncompleteErr,Scanner>,
+									    SubException<EOFErr,Scanner>,
+									    SubException<SyntaxErr,Scanner>,
+									    SubException<NoIDErr,Scanner>,
+									    SubException<NoValErr,Scanner>);
     
   };
 
@@ -175,6 +176,7 @@ private:
   };
 
   Properties properties;
+  const cmdl::CmdlParser *cmdlparser;
   std::string filename;
   unsigned int line;
   
@@ -188,8 +190,17 @@ public:
   /**
      @param filename the file conatining the properties
   */
-  PropertyReader(const std::string &filename) : filename(filename), line(0){};
+  PropertyReader(const std::string &filename) : cmdlparser(0), filename(filename), line(0){};
 
+  /**
+     @param filename the file containing the properties
+     @param cmdlparser from this cmdlparser all parameters (key/value-pairs) will inserted in the property-list
+  */
+  PropertyReader(const std::string &filename, const cmdl::CmdlParser &cmdlparser) : cmdlparser(&cmdlparser), filename(filename), line(0){};
+
+  /**
+     @param propertyreader another PropertyReader, its entries wil be copied to this new one.
+  */
   PropertyReader(const PropertyReader &propertyreader);
 
   ~PropertyReader(){}
@@ -274,6 +285,13 @@ public:
      @param filename new filename
   */
   void setFilename(std::string filename){ this->filename = filename; }
+
+
+  /**
+     @brief Sets a new CmdlParser
+     @param cmdlparser new CmdlParser
+  */
+  void setCmdlParser(const cmdl::CmdlParser &cmdlparser){ this->cmdlparser = &cmdlparser; }
 
   /**
      @brief Erases all entries, except filename

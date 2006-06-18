@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2005 Friedemann Zintel
+  Copyright (C) 1999-2005 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 /**
@@ -117,7 +117,7 @@ namespace cmdl{
        @return reference to aliases
        @see CmdlParser::alias()
     */
-     Aliases& operator<<(std::string entry);
+    Aliases& operator<<(std::string entry);
 
   };
 
@@ -140,7 +140,7 @@ namespace cmdl{
        @return reference to shortaliases
        @see CmdlParser::shortalias()
     */
-     ShortAliases& operator<<(char entry);
+    ShortAliases& operator<<(char entry);
 
   };
 
@@ -186,11 +186,11 @@ namespace cmdl{
   public:  
     // it's public because user needs access to iterator!
     typedef std::list<std::string> Arguments;   // for scanned arguments
-  
+    typedef std::map< std::string,std::string,std::less<std::string> > Parameters;  // for scanned parameters
+ 
   protected:
     typedef std::map< std::string,std::string,std::less<std::string> > MandatoryArguments; // for mandatory arguments
     typedef std::list<Info>ExpMandArguments; // for expected mandatory arguments
-    typedef std::map< std::string,std::string,std::less<std::string> > Parameters;  // for scanned parameters
     typedef std::map< std::string,APInfo,std::less<std::string> > AParameters;  // allowed parameters
     typedef std::map< std::string,Info,std::less<std::string> > AMParameters; // allowed multi-parameters
     typedef std::set< std::string,std::less<std::string> > Options;
@@ -546,6 +546,20 @@ namespace cmdl{
        @return the const_iterator
     */
     Arguments::const_iterator endArguments(){ return arguments.end(); }
+
+    /**
+       Returns an iterator pointing to the beginning of the parameter-list.
+       @brief beginning of parameters
+       @return the const_iterator
+    */
+    Parameters::const_iterator beginParameters() const { return parameters.begin(); }
+
+    /**
+       Returns an iterator pointing to the end of the parameter-list.
+       @brief end of parameters
+       @return the const_iterator
+    */
+    Parameters::const_iterator endParameters() const { return parameters.end(); }
   
     /**
        @brief returns a string containing the syntax of how the programm should be called

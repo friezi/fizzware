@@ -20,7 +20,7 @@ LIBRARIES =
 LIBRARY_PATHS =
 
 # in case that ansi is not allowed
-NOANSI = true
+# NOANSI = true
 
 ### check the field CC ########################################################
 ################################################################################

@@ -17,7 +17,7 @@ int main(int argc, char **argv){
 
     parser.parse();
 
-    PropertyReader prop((parser.checkParameter("filename")).second);
+    PropertyReader prop((parser.checkParameter("filename")).second, parser);
     cout << "filename_0:::::::::::::::::::::: " << (parser.checkParameter("filename")).second << endl;
     
     prop.read();
@@ -68,4 +68,6 @@ int main(int argc, char **argv){
 void setupParser(CmdlParser &parser){
 
   parser.addParameter("filename","filename","property-file",true);
+  parser.addParameter("Host","host","the hostname");
+
 }

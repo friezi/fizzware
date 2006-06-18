@@ -32,11 +32,14 @@
 
 using namespace std;
 using namespace ds;
+using namespace cmdl;
 
-PropertyReader::PropertyReader(const PropertyReader &propertyreader){
+PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparser(0){
 
   filename = propertyreader.filename;
   properties = propertyreader.properties;
+  line = 0;
+
 }
 
 void PropertyReader::read() throw (Exception<PropertyReader>,
@@ -84,6 +87,14 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
     lines << line;
     throw SubException<Scanner::SyntaxErr,Scanner>("In file " + filename + ": Syntax-Error in line " + lines.str());
   } catch ( SubException<Scanner::EOFErr,Scanner> &se ){
+
+    if ( cmdlparser != 0 ){
+
+      for (CmdlParser::Parameters::const_iterator it = cmdlparser->beginParameters(); it != cmdlparser->endParameters(); it++ )
+	properties[(*it).first] = (*it).second;
+
+    }
+
     return;
   }
 }
