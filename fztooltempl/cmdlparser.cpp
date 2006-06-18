@@ -234,8 +234,8 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	  if ( argumentcounter < exp_mand_arguments.size() ){
 	    // it's an mandatory argument
 
-	    string oblarg = exp_mand_arguments.front().valueid;
-	    mandatoryarguments[oblarg] = argv[word];  // insertion
+	    string mandarg = exp_mand_arguments.front().valueid;
+	    mandatoryarguments[mandarg] = argv[word];  // insertion
 
 	    // membercycling
 	    exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());
@@ -417,8 +417,8 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
       if ( argumentcounter < exp_mand_arguments.size() ){
 	// it's an mandatory argument;
 
-	string oblarg = exp_mand_arguments.front().valueid;
-	mandatoryarguments[oblarg] = argument;  // insertion
+	string mandarg = exp_mand_arguments.front().valueid;
+	mandatoryarguments[mandarg] = argument;  // insertion
 
 	// membercycling
 	exp_mand_arguments.insert(exp_mand_arguments.end(),exp_mand_arguments.front());

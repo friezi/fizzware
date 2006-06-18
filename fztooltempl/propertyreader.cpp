@@ -160,7 +160,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 }
 
 char PropertyReader::Scanner::delimitors[] = {'\n','\0'};
-char PropertyReader::Scanner::separators[] = {'='};
+char PropertyReader::Scanner::separators[] = {'=',':'};
 char PropertyReader::Scanner::zero = '\0';
 char PropertyReader::Scanner::space = ' ';
 

@@ -211,6 +211,7 @@ namespace ds{
 
   
   /**
+     It stores a key of the template-classtype TKey.
     @brief The base-class for a branch of a tree
   **/
   template< typename TKey, typename TComp, typename TDel >
@@ -227,7 +228,20 @@ namespace ds{
   };
 
   /**
-    @brief A class for a branch of a binary-tree
+     The template-parameters are
+      - TKey:\n
+        the class-type of the key
+      - TComp:\n
+        Comparator: the class-type for a function-object, containing the comparison-function. It must be
+	a binary function, both parameters of type TKey, returning a bool.
+	Besides, the operator bool TKey::operator=(TKey) must be defined.
+      - TDel:\n
+        Deleter : the class-type for a function-object, containing the delete-function. It will be called on destructor-call
+	and can delete the key (if it's a pointer or something more complicated). Usefull if the key should be deleted automatically on
+	destruction of the BinaryTreeBranch. If the key should not be destructed just leave the function-body empty of the Deleter-class.
+
+     @brief A class for a branch of a binary-tree
+     @see STL-documentation on the use of function-objects.
   **/
   template< typename TKey, typename TComp, typename TDel >
   class BinaryTreeBranch : public KeyNode<TKey,TComp,TDel>{
@@ -324,17 +338,9 @@ namespace ds{
   };
   
   /** 
-      A template-class for binary trees. The template-parameters are
-      - TKey:
-        the class-type of the key
-      - TComp:
-        the class-type for a function-object, containing the comparison-function. It must be
-	a binary function, both parameters of type TKey, returning a bool.
-	Besides, the operator bool TKey::operator=(TKey) must be defined.
-      - TDel:
-        the class-type for a function-object, containing the delete-function. It will be called on destructor call
-	and can delete the key (if it's a pointer or something more complicated)
+      A template-class for binary trees
       @brief A binary Tree, which stores keys
+      @see BinaryTreeBranch for information about the templateclass-parameters
   */
   template< typename TKey,typename TComp, typename TDel >
   class BTree : public KeyNodeContainer< BinaryTreeBranch,TKey,TComp,TDel >{
