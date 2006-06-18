@@ -1,7 +1,7 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = prim
+TARGET = graph
 
 MAIN_MODULE = main
 LOCAL_MODULES =
@@ -10,10 +10,10 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = primlist exception
+CLASS_MODULES = exception
 CM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/graph
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

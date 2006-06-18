@@ -94,11 +94,11 @@ clean:
 
 # Editor aufrufen
 ed:
-	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IMPORTANT_HEADERS) &
+	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IMPORTANT_HEADERS:%=%.hpp) &
 
 # erstelle Packet fuer Distribution
 dist:
 	cd ../classes; make -k dist; cd -;
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
 	[[ -d $(DT_DIR) ]] || mkdir $(DT_DIR)
-	cp --target-directory=$(DT_DIR) $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) Makefile
+	cp --target-directory=$(DT_DIR) $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) Makefile Makefile_head

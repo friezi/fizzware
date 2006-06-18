@@ -214,13 +214,13 @@ namespace ds{
      It stores a key of the template-classtype TKey.
     @brief The base-class for a branch of a tree
   **/
-  template< typename TKey, typename TComp, typename TDel >
+  template< typename TKey, typename TLess, typename TDel >
   class KeyNode : public Node{
 
   public:
     TKey key;
 
-    KeyNode(KeyNode<TKey,TComp,TDel> *next,KeyNode<TKey,TComp,TDel> *prev, TKey &key)
+    KeyNode(KeyNode<TKey,TLess,TDel> *next,KeyNode<TKey,TLess,TDel> *prev, TKey &key)
       : Node(next,prev) ,key(key){}
 
     ~KeyNode();
@@ -231,49 +231,49 @@ namespace ds{
      The template-parameters are
       - TKey:\n
         the class-type of the key
-      - TComp:\n
-        Comparator: the class-type for a function-object, containing the comparison-function. It must be
-	a binary function, both parameters of type TKey, returning a bool.
-	Besides, the operator bool TKey::operator=(TKey) must be defined.
+      - TLess:\n
+        Less-Comparator: the class-type for a function-object (let's say less), containing the comparison-function. It must be
+	a binary function, both parameters of type TKey, returning a bool. It has to return true on less(x,y) iff (!) x < y.
       - TDel:\n
         Deleter : the class-type for a function-object, containing the delete-function. It will be called on destructor-call
 	and can delete the key (if it's a pointer or something more complicated). Usefull if the key should be deleted automatically on
 	destruction of the BinaryTreeBranch. If the key should not be destructed just leave the function-body empty of the Deleter-class.
+	@see nofree
 
      @brief A class for a branch of a binary-tree
      @see STL-documentation on the use of function-objects.
   **/
-  template< typename TKey, typename TComp, typename TDel >
-  class BinaryTreeBranch : public KeyNode<TKey,TComp,TDel>{
+  template< typename TKey, typename TLess, typename TDel >
+  class BinaryTreeBranch : public KeyNode<TKey,TLess,TDel>{
 
   public:
 
-    typedef std::pair< BinaryTreeBranch<TKey,TComp,TDel> *, BinaryTreeBranch<TKey,TComp,TDel> *> Tail;
+    typedef std::pair< BinaryTreeBranch<TKey,TLess,TDel> *, BinaryTreeBranch<TKey,TLess,TDel> *> Tail;
 
-    BinaryTreeBranch<TKey,TComp,TDel> *left;
-    BinaryTreeBranch<TKey,TComp,TDel> *right;
-    BinaryTreeBranch<TKey,TComp,TDel> *parent;
+    BinaryTreeBranch<TKey,TLess,TDel> *left;
+    BinaryTreeBranch<TKey,TLess,TDel> *right;
+    BinaryTreeBranch<TKey,TLess,TDel> *parent;
 
     BinaryTreeBranch(TKey &key)
-      : KeyNode<TKey,TComp,TDel>(0,0,key), left(0),right(0),parent(0){}
+      : KeyNode<TKey,TLess,TDel>(0,0,key), left(0),right(0),parent(0){}
 
-    BinaryTreeBranch(KeyNode<TKey,TComp,TDel> *next,KeyNode<TKey,TComp,TDel> *prev,
-		     BinaryTreeBranch<TKey,TComp,TDel> *left,BinaryTreeBranch<TKey,TComp,TDel> *right,
-		     BinaryTreeBranch<TKey,TComp,TDel> *parent,TKey &key)
-      : KeyNode<TKey,TComp,TDel>(next,prev,key), left(left),right(right),parent(parent){}
+    BinaryTreeBranch(KeyNode<TKey,TLess,TDel> *next,KeyNode<TKey,TLess,TDel> *prev,
+		     BinaryTreeBranch<TKey,TLess,TDel> *left,BinaryTreeBranch<TKey,TLess,TDel> *right,
+		     BinaryTreeBranch<TKey,TLess,TDel> *parent,TKey &key)
+      : KeyNode<TKey,TLess,TDel>(next,prev,key), left(left),right(right),parent(parent){}
 
     void insert(TKey key);
     
-    BinaryTreeBranch<TKey,TComp,TDel> * getFirst();
-    BinaryTreeBranch<TKey,TComp,TDel> * getLast();
+    BinaryTreeBranch<TKey,TLess,TDel> * getFirst();
+    BinaryTreeBranch<TKey,TLess,TDel> * getLast();
 
-    void concat(BinaryTreeBranch<TKey,TComp,TDel> *node);
-    BinaryTreeBranch<TKey,TComp,TDel> * cutRight();
-    BinaryTreeBranch<TKey,TComp,TDel> * cutLeft();
+    void concat(BinaryTreeBranch<TKey,TLess,TDel> *node);
+    BinaryTreeBranch<TKey,TLess,TDel> * cutRight();
+    BinaryTreeBranch<TKey,TLess,TDel> * cutLeft();
     void breakRight();
     void breakLeft();
 
-    BinaryTreeBranch<TKey,TComp,TDel> * getBranch(TKey key);
+    BinaryTreeBranch<TKey,TLess,TDel> * getBranch(TKey key);
         
     void show();
     
@@ -284,21 +284,21 @@ namespace ds{
     @attention not yet supported!
     @todo supporting MultipleTreeBranch
   **/
-  template< typename TKey, typename TComp, typename TDel >
-  class MultipleTreeBranch : virtual KeyNode<TKey,TComp,TDel>{
+  template< typename TKey, typename TLess, typename TDel >
+  class MultipleTreeBranch : virtual KeyNode<TKey,TLess,TDel>{
 
   public:
 
-    std::map<MultipleTreeBranch<TKey,TComp,TDel>,TKey,TComp> children;
+    std::map<MultipleTreeBranch<TKey,TLess,TDel>,TKey,TLess> children;
 
-    MultipleTreeBranch(KeyNode<TKey,TComp,TDel> *next,KeyNode<TKey,TComp,TDel> *prev, TKey &key)
-      : KeyNode<TKey,TComp,TDel>(next,prev,key){}
+    MultipleTreeBranch(KeyNode<TKey,TLess,TDel> *next,KeyNode<TKey,TLess,TDel> *prev, TKey &key)
+      : KeyNode<TKey,TLess,TDel>(next,prev,key){}
   };
 
   /**
      @brief A class for holding keynodes. Useful for defining your own tree-structures
   */
-  template< template<typename,typename,typename> class TKNode, typename TKey, typename TComp, typename TDel >
+  template< template<typename,typename,typename> class TKNode, typename TKey, typename TLess, typename TDel >
   class KeyNodeContainer{
 
   public:
@@ -309,13 +309,13 @@ namespace ds{
 
     private :
       
-      TKNode<TKey,TComp,TDel> *current;
+      TKNode<TKey,TLess,TDel> *current;
 
-      iterator(TKNode<TKey,TComp,TDel> * kn) : current(kn){}
+      iterator(TKNode<TKey,TLess,TDel> * kn) : current(kn){}
       
     public:
       
-      iterator() : current((TKNode<TKey,TComp,TDel> *)0){}
+      iterator() : current((TKNode<TKey,TLess,TDel> *)0){}
       
       void operator++();
       void operator--();
@@ -326,8 +326,8 @@ namespace ds{
       
     };
     
-    TKNode<TKey,TComp,TDel> *root;
-    TKNode<TKey,TComp,TDel> *first;
+    TKNode<TKey,TLess,TDel> *root;
+    TKNode<TKey,TLess,TDel> *first;
 
     KeyNodeContainer() : root(0),first(0){}
     
@@ -338,18 +338,21 @@ namespace ds{
   };
   
   /** 
+      @example btree_example
+  */
+  /** 
       A template-class for binary trees
       @brief A binary Tree, which stores keys
       @see BinaryTreeBranch for information about the templateclass-parameters
   */
-  template< typename TKey,typename TComp, typename TDel >
-  class BTree : public KeyNodeContainer< BinaryTreeBranch,TKey,TComp,TDel >{
+  template< typename TKey,typename TLess, typename TDel >
+  class BTree : public KeyNodeContainer< BinaryTreeBranch,TKey,TLess,TDel >{
 
     public:
 
     unsigned long count;
     
-    BTree() : KeyNodeContainer< BinaryTreeBranch,TKey,TComp,TDel >(),count(0){}
+    BTree() : KeyNodeContainer< BinaryTreeBranch,TKey,TLess,TDel >(),count(0){}
 
     void insert(TKey key);
     void erase(TKey key);
@@ -359,10 +362,13 @@ namespace ds{
     
   };
 
-  template< typename TKey, typename TComp, typename TDel >
-  class MTree : KeyNodeContainer< MultipleTreeBranch,TKey,TComp,TDel >{
+  template< typename TKey, typename TLess, typename TDel >
+  class MTree : KeyNodeContainer< MultipleTreeBranch,TKey,TLess,TDel >{
   };
 
+  /**
+     @brief A Deletor-classtemplate which omits deletion of the key.
+  */   
   template< typename T >
   class nofree{
 
@@ -374,8 +380,8 @@ namespace ds{
   
 }
 
-template< typename TKey, typename TComp, typename TDel >
-ds::KeyNode<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::KeyNode<TKey,TLess,TDel>::
 ~KeyNode(){
 
   TDel del;
@@ -383,55 +389,55 @@ ds::KeyNode<TKey,TComp,TDel>::
   del(key);
 }
   
-template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::
-~KeyNodeContainer<TKNode,TKey,TComp,TDel>(){
+template< template<typename,typename,typename> class TKNode,typename TKey, typename TLess, typename TDel >
+ds::KeyNodeContainer<TKNode,TKey,TLess,TDel>::
+~KeyNodeContainer<TKNode,TKey,TLess,TDel>(){
 
-  TKNode<TKey,TComp,TDel> *curr = this->first;
-  TKNode<TKey,TComp,TDel> *next = 0;
+  TKNode<TKey,TLess,TDel> *curr = this->first;
+  TKNode<TKey,TLess,TDel> *next = 0;
 
   while ( curr ){
     
-    next = (TKNode<TKey,TComp,TDel> *)curr->next;
+    next = (TKNode<TKey,TLess,TDel> *)curr->next;
     delete curr;
     curr = next;
   }
 }
   
-template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-typename ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
-ds::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
+template< template<typename,typename,typename> class TKNode,typename TKey, typename TLess, typename TDel >
+typename ds::KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator
+ds::KeyNodeContainer<TKNode,TKey,TLess,TDel >::
 begin(){
     
-  typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it(first);
+  typename KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator it(first);
   return it;
 }
   
-template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
-typename ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator
-ds::KeyNodeContainer<TKNode,TKey,TComp,TDel >::
+template< template<typename,typename,typename> class TKNode,typename TKey, typename TLess, typename TDel >
+typename ds::KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator
+ds::KeyNodeContainer<TKNode,TKey,TLess,TDel >::
 end(){
   
-  typename KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator it;
+  typename KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator it;
   return it;
 }
 
-template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
+template< template<typename,typename,typename> class TKNode,typename TKey, typename TLess, typename TDel >
 void
-ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
+ds::KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator::
 operator++(){
 
   if ( current != 0 )
-    current = (TKNode<TKey,TComp,TDel> *)current->next;
+    current = (TKNode<TKey,TLess,TDel> *)current->next;
 }
 
-template< template<typename,typename,typename> class TKNode,typename TKey, typename TComp, typename TDel >
+template< template<typename,typename,typename> class TKNode,typename TKey, typename TLess, typename TDel >
 void
-ds::KeyNodeContainer<TKNode,TKey,TComp,TDel>::iterator::
+ds::KeyNodeContainer<TKNode,TKey,TLess,TDel>::iterator::
 operator--(){
 
   if ( current != 0 )
-    current = (TKNode<TKey,TComp,TDel> *)current->prev;
+    current = (TKNode<TKey,TLess,TDel> *)current->prev;
 }
 
 template<typename T>
@@ -565,19 +571,19 @@ clear(){
   offs = count = 0;
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 insert(TKey key){
   
-  TComp comp;
+  TLess less;
   
-  if ( comp(key,this->key) == true ){
+  if ( less(key,this->key) == true ){
     if ( left != NULL )
       left->insert(key);
     else{
 
-      left = new ds::BinaryTreeBranch<TKey,TComp,TDel>(key);
+      left = new ds::BinaryTreeBranch<TKey,TLess,TDel>(key);
 
       left->parent = this;
       
@@ -597,7 +603,7 @@ insert(TKey key){
       right->insert(key);
     else{
 
-      right = new ds::BinaryTreeBranch<TKey,TComp,TDel>(key);
+      right = new ds::BinaryTreeBranch<TKey,TLess,TDel>(key);
 
       right->parent = this;
 
@@ -612,41 +618,41 @@ insert(TKey key){
   }
 }
 
-template< typename TKey, typename TComp, typename TDel >
-ds::BinaryTreeBranch<TKey,TComp,TDel> * 
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::BinaryTreeBranch<TKey,TLess,TDel> * 
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 getFirst(){
   
-  BinaryTreeBranch<TKey,TComp,TDel> * current = this;
+  BinaryTreeBranch<TKey,TLess,TDel> * current = this;
   
   while ( current->prev )
-    current = (BinaryTreeBranch<TKey,TComp,TDel> *)current->prev;
+    current = (BinaryTreeBranch<TKey,TLess,TDel> *)current->prev;
 
   return current;
 }
 
-template< typename TKey, typename TComp, typename TDel >
-ds::BinaryTreeBranch<TKey,TComp,TDel> *
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::BinaryTreeBranch<TKey,TLess,TDel> *
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 getLast(){
   
-  BinaryTreeBranch<TKey,TComp,TDel> * current = this;
+  BinaryTreeBranch<TKey,TLess,TDel> * current = this;
   
   while ( current->next )
-    current = (BinaryTreeBranch<TKey,TComp,TDel> *)current->next;
+    current = (BinaryTreeBranch<TKey,TLess,TDel> *)current->next;
 
   return current;
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 breakLeft(){
 
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * current = this;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * leftmost = current;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * rightmost = current;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * parent = this->parent;
 
   if ( parent == 0 )
     return;
@@ -665,15 +671,15 @@ breakLeft(){
   leftmost->prev = 0;
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 breakRight(){
 
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * current = this;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * leftmost = current;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * rightmost = current;
-  ds::BinaryTreeBranch<TKey,TComp,TDel> * parent = this->parent;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * current = this;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * leftmost = current;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * rightmost = current;
+  ds::BinaryTreeBranch<TKey,TLess,TDel> * parent = this->parent;
 
   if ( parent == 0 )
     return;
@@ -692,12 +698,12 @@ breakRight(){
   leftmost->prev = 0;
 }
   
-template< typename TKey, typename TComp, typename TDel >
-ds::BinaryTreeBranch<TKey,TComp,TDel> *
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::BinaryTreeBranch<TKey,TLess,TDel> *
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 cutRight(){
 
-  BinaryTreeBranch<TKey,TComp,TDel> * right = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> * right = 0;
 
   if ( this->right == 0 )
     return 0;
@@ -712,12 +718,12 @@ cutRight(){
   return right;
 }
 
-template< typename TKey, typename TComp, typename TDel >
-ds::BinaryTreeBranch<TKey,TComp,TDel> *
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::BinaryTreeBranch<TKey,TLess,TDel> *
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 cutLeft(){
 
-  BinaryTreeBranch<TKey,TComp,TDel> * left = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> * left = 0;
 
   if ( this->left == 0 )
     return 0;
@@ -733,17 +739,17 @@ cutLeft(){
   return left;
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
-concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
+concat(BinaryTreeBranch<TKey,TLess,TDel> *node){
   
-  TComp comp;
+  TLess less;
   
   if ( node == NULL )
     return;
   
-  if ( comp(node->key,this->key) == true ){
+  if ( less(node->key,this->key) == true ){
 
     if ( left != NULL )
       left->concat(node);
@@ -787,17 +793,18 @@ concat(BinaryTreeBranch<TKey,TComp,TDel> *node){
   }
 }
 
-template< typename TKey, typename TComp, typename TDel >
-ds::BinaryTreeBranch<TKey,TComp,TDel> *
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+template< typename TKey, typename TLess, typename TDel >
+ds::BinaryTreeBranch<TKey,TLess,TDel> *
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 getBranch(TKey key){
   
-  TComp comp;
- 
-  if ( key == this->key )
+  TLess less;
+
+  // check for equality 
+  if ( less(key,this->key) == false && less(this->key,key) == false )
     return this;
   
-  else if ( comp(key,this->key) == true ){
+  else if ( less(key,this->key) == true ){
     
     if ( this->left )
       return this->left->getBranch(key);
@@ -815,9 +822,9 @@ getBranch(TKey key){
   }
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BinaryTreeBranch<TKey,TComp,TDel>::
+ds::BinaryTreeBranch<TKey,TLess,TDel>::
 show(){
   
   if ( left != NULL )
@@ -829,14 +836,14 @@ show(){
     right->show();
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TLess,TDel>::
 insert(TKey key){
   
   if ( count == 0 ){
 
-    this->root = new BinaryTreeBranch<TKey,TComp,TDel>(key);
+    this->root = new BinaryTreeBranch<TKey,TLess,TDel>(key);
     this->first = this->root;
 
   }
@@ -852,15 +859,15 @@ insert(TKey key){
   count++;
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TLess,TDel>::
 erase(TKey key){
   
-  BinaryTreeBranch<TKey,TComp,TDel> *node = 0;
-  BinaryTreeBranch<TKey,TComp,TDel> *right = 0;
-  BinaryTreeBranch<TKey,TComp,TDel> *left = 0;
-  BinaryTreeBranch<TKey,TComp,TDel> *parent = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> *node = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> *right = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> *left = 0;
+  BinaryTreeBranch<TKey,TLess,TDel> *parent = 0;
   
   if ( this->root == NULL )
     return;
@@ -871,7 +878,7 @@ erase(TKey key){
     return;
     
   if ( node == this->first )
-    this->first = (BinaryTreeBranch<TKey,TComp,TDel> *)node->next;
+    this->first = (BinaryTreeBranch<TKey,TLess,TDel> *)node->next;
 
   left = node->cutLeft();
   right = node->cutRight();
@@ -923,9 +930,9 @@ erase(TKey key){
 
 }
 
-template< typename TKey, typename TComp, typename TDel >
+template< typename TKey, typename TLess, typename TDel >
 void
-ds::BTree<TKey,TComp,TDel>::
+ds::BTree<TKey,TLess,TDel>::
 show(){
 
   if ( this->root != NULL )

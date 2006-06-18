@@ -1,7 +1,4 @@
-#include <exception.hpp>
-#include <list>
-#include <map>
-#include <graph.hpp>
+#include "main.hpp"
 
 using namespace std;
 using namespace graph;

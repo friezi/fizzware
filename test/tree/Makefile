@@ -1,7 +1,7 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = prim
+TARGET = tree
 
 MAIN_MODULE = main
 LOCAL_MODULES =
@@ -10,10 +10,10 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = primlist exception
+CLASS_MODULES =
 CM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

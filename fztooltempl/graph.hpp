@@ -58,7 +58,7 @@ namespace graph{
 
   private:
 
-    typedef map< TNode, unsigned int, less<TNode> > Valuemap;
+    typedef std::map< TNode, unsigned int, std::less<TNode> > Valuemap;
 
   protected:
 
@@ -68,7 +68,7 @@ namespace graph{
     */
     class iterator{
 
-      friend Graphable<TNode>;
+      friend class Graphable<TNode>;
 
     public:
 
@@ -93,7 +93,7 @@ namespace graph{
     */
     class node_iterator : public iterator{
 
-      friend Graphable<TNode>;
+      friend class Graphable<TNode>;
 
     public:
 
@@ -107,7 +107,7 @@ namespace graph{
     */
     class neighbour_iterator : public iterator{
 
-      friend Graphable<TNode>;
+      friend class Graphable<TNode>;
 
     public:
 
@@ -193,12 +193,12 @@ namespace graph{
       @brief for finding strongly connected components (Tarjan)
       @return a list of components containing the connected nodes
     */
-    list< list<TNode> > * find_scc();
+    std::list< std::list<TNode> > * find_scc();
     //@}
 
   private:
 
-    unsigned int scc_visit(TNode node, list< list<TNode> > & scc, stack<TNode> & nodestack, Valuemap & values, unsigned int id);
+    unsigned int scc_visit(TNode node, std::list< std::list<TNode> > & scc, std::stack<TNode> & nodestack, Valuemap & values, unsigned int id);
     
   };
   
@@ -208,7 +208,7 @@ namespace graph{
 template< typename TNode >
 unsigned int
 graph::Graphable<TNode>::
-scc_visit(TNode node, list< list<TNode> > & scc, stack<TNode> & nodestack, Valuemap & values, unsigned int id){
+scc_visit(TNode node, std::list< std::list<TNode> > & scc, std::stack<TNode> & nodestack, Valuemap & values, unsigned int id){
   
   unsigned int m = 0, min;
 
@@ -233,7 +233,7 @@ scc_visit(TNode node, list< list<TNode> > & scc, stack<TNode> & nodestack, Value
 
   if ( min == values[node] ){
 
-    list<TNode> new_scc;
+    std::list<TNode> new_scc;
 
     scc.push_back(new_scc);
 
@@ -257,12 +257,12 @@ scc_visit(TNode node, list< list<TNode> > & scc, stack<TNode> & nodestack, Value
 }
 
 template< typename TNode >
-list< list<TNode> > *
+std::list< std::list<TNode> > *
 graph::Graphable<TNode>::
 find_scc(){
 
-  list< list<TNode> > *scc = new list< list<TNode> >();
-  stack<TNode> nodestack;
+  std::list< std::list<TNode> > *scc = new std::list< std::list<TNode> >();
+  std::stack<TNode> nodestack;
   Valuemap values;
   unsigned int id = 0;
   unsigned int min;

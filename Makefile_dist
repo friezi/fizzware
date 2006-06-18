@@ -1,4 +1,4 @@
-DIRS = cliparser focal funtest matchit msgqrd msgqrclient prim primfak process properties semaphoren graph tree
+DIRS = focal funtest msgqrd msgqrclient prim primfak properties
 #old: 
 DIST_DIR = dist
 
@@ -28,4 +28,9 @@ ed:
 	$(EDITOR) Makefile&
 
 dist:
-	$(MAKE) -k -f Makefile_dist dist
+	cd classes; $(MAKE) -k dist; cd -;
+	cp Makefile_dist $(DIST_DIR)/Makefile
+	cp --target-directory=$(DIST_DIR) Makefile_dist  Makefile_body Makefile_head_template GPL
+	$(foreach dir,$(DIRS),cd $(dir); $(MAKE) -k dist; cd ../;)
+	tar cf $(DIST_FILE) dist/
+	bzip2 -9 $(DIST_FILE)
