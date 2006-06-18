@@ -14,7 +14,11 @@ DEPENDS_ON = exception datastructures
 
 INCLUDE_PATH = ./
 
-EDITOR ?= vi
+# EDITOR ?= vi
+
+ifeq ($(origin EDITOR), undefined)
+	EDITOR = vi
+endif
 
 CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
 

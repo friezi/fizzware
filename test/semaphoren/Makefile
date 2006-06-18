@@ -29,7 +29,11 @@ NOANSI = true
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
 
-EDITOR ?= vi
+# EDITOR ?= vi
+
+ifeq ($(origin EDITOR), undefined)
+	EDITOR = vi
+endif
 
 ifeq ($(NOANSI),true)
      ANSI =

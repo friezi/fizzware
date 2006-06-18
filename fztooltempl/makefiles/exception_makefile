@@ -16,7 +16,7 @@ INCLUDE_PATH = ./
 
 # EDITOR ?= vi
 
-ifeq ($(origin EDITOR, undefined)
+ifeq ($(origin EDITOR), undefined)
 	EDITOR = vi
 endif
 
