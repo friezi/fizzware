@@ -15,21 +15,26 @@ CM_PATH = $(CLASSLIBRARY_PATH)
 
 IMPORTANT_HEADERS =
 
-LIBRARY_INCLUDE_PATHS =/usr/include/readline
-LIBRARIES = readline
+ifeq ($(UNIX),true)
+	READLINEDIR = /usr/gnu/include/readline
+	READLINELIBS = readline curses
+else
+	READLINEDIR = /usr/include/readline
+	READLINELIBS = readline
+endif
+
+LIBRARY_INCLUDE_PATHS = $(READLINEDIR)
+LIBRARIES = $(READLINELIBS)
 LIBRARY_PATHS = /usr/lib
 
 ### check the field CC ########################################################
 ################################################################################
 ################################################################################
+
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
 
-# EDITOR ?= vi
-
-ifeq ($(origin EDITOR), undefined)
-	EDITOR = vi
-endif
+EDITOR ?= vi
 
 ifeq ($(NOANSI),true)
      ANSI =

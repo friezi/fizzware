@@ -2,6 +2,9 @@ This briefly documents the generation of the static library fztooltempl and some
 For generating documentation doxygen must be installed.
 make is the GNU make-utility, should be at least version 3.81. With prior versions it might not work.
 
+On UN*X first call:
+export UNIX=true
+
 compile all sources together:
 make
 

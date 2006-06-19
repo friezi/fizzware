@@ -28,11 +28,7 @@ LIBRARY_PATHS =
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
 
-# EDITOR ?= vi
-
-ifeq ($(origin EDITOR), undefined)
-	EDITOR = vi
-endif
+EDITOR ?= vi
 
 ifeq ($(NOANSI),true)
      ANSI =

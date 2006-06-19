@@ -15,9 +15,15 @@ CM_PATH = $(CLASSLIBRARY_PATH)
 
 IMPORTANT_HEADERS =
 
+ifeq ($(UNIX),true)
+	NETWORKLIBS = socket nsl resolv
+else
+	NETWORKLIBS =
+endif
+
 LIBRARY_INCLUDE_PATHS =
-LIBRARIES =
-LIBRARY_PATHS =
+LIBRARIES = $(NETWORKLIBS)
+LIBRARY_PATHS = /usr/lib
 
 # in case that ansi is not allowed
 # NOANSI = true
@@ -28,11 +34,7 @@ LIBRARY_PATHS =
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
 
-# EDITOR ?= vi
-
-ifeq ($(origin EDITOR), undefined)
-	EDITOR = vi
-endif
+EDITOR ?= vi
 
 ifeq ($(NOANSI),true)
      ANSI =

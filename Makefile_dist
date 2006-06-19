@@ -6,7 +6,13 @@ DIST_PREFIX = dist
 
 DIST_IDENTIFIER = c++
 
-NOW := $(shell date -I)
+ifeq ($(MAKE),gmake)
+	DATE = gdate
+else
+	DATE = date
+endif
+
+NOW := $(shell $(DATE) -I)
 
 DIST_FILE = $(DIST_PREFIX)_$(DIST_IDENTIFIER)_$(NOW)_.tar
 
