@@ -82,7 +82,7 @@ $(LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 
 %.o:%.cpp %.hpp
 	@echo '***' compiling module $(@) for static-library  $(LIB_NAME) '***'
-	make -f $(@:%.o=%_makefile)
+	$(MAKE) -f $(@:%.o=%_makefile)
 	@echo '*********************' finished '******************************'
 
 clean:	
