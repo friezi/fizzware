@@ -31,6 +31,11 @@ const char *version="2.43";
 
 const static string formula = "formula";
 
+// for future use: to implement a linescanner for REMVAR and UNDEF
+const static char[] delimitors = {'\0','\n','\r'}
+
+const static char[] separators = {' ','\t'};
+
 int main(int argc, char **argv, char **envp){
 
   CmdlParser cmdlparser(argc,argv);
