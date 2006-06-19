@@ -2,10 +2,6 @@ DIRS = cliparser focal funtest matchit msgqrd msgqrclient prim primfak process p
 
 EDITOR ?= vi
 
-# ifeq ($(origin EDITOR), undefined)
-#	EDITOR = vi
-# endif
-
 all:
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; cd $(dir); \
 		echo \*\*\* generating Makefile \*\*\*; \

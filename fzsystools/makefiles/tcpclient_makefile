@@ -15,11 +15,7 @@ DEPENDS_ON = exception socket
 
 INCLUDE_PATH = ./
 
-# EDITOR ?= vi
-
-ifeq ($(origin EDITOR), undefined)
-	EDITOR = vi
-endif
+EDITOR ?= vi
 
 CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
 

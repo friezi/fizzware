@@ -10,11 +10,7 @@ NOW := $(shell date -I)
 
 DIST_FILE = $(DIST_PREFIX)_$(DIST_IDENTIFIER)_$(NOW)_.tar
 
-# EDITOR ?= vi
-
-ifeq ($(origin EDITOR), undefined)
-	EDITOR = vi
-endif
+EDITOR ?= vi
 
 all:
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; cd $(dir); \

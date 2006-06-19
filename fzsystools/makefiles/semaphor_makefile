@@ -17,10 +17,6 @@ INCLUDE_PATH = ./
 
 EDITOR ?= vi
 
-# ifeq ($(origin EDITOR), undefined)
-#	EDITOR = vi
-# endif
-
 CC = g++ -Wall -Wconversion -pedantic -O3 -c -I $(INCLUDE_PATH)
 
 DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
