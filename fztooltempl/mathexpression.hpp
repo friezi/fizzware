@@ -32,6 +32,7 @@
 #define MATHEXPRESSION_HPP
 
 #include <iostream>
+#include <sstream>
 #include <stdlib.h>
 #include <memory.h>
 #include <math.h>
@@ -103,16 +104,16 @@ namespace mexp{
     double evalFunction(void) throw (Exception_T);
     void defineFunction(void);
     bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
-    bool empty(void) { return (getType()==EMPTY); }
-    void setOprtr(char *name);
-    void setVariable(char *name);
+    bool empty(void) const { return (getType()==EMPTY); }
+    void setOprtr(const char *name);
+    void setVariable(const char *name);
     void setValue(double value);
     void setType(char type) { this->type=type; }
     bool isVariable(void) const { return (getType()==VAR); }
     bool isOprtr(void) const { return (getType()==OP); }
-    char *getOprtr(void) { return oprtr; }
-    char *getVariable(void) { return variable; }
-    double getValue(void) { return value; }
+    const char *getOprtr(void) const { return oprtr; }
+    const char *getVariable(void) const { return variable; }
+    double getValue(void) const { return value; }
     char getType() const { return type; }
     MathExpression *getLeft(void) { return left; }
     MathExpression *getRight(void) { return right; }
@@ -127,7 +128,7 @@ namespace mexp{
     bool checkForVartree();
     
     // varInTree checks, if a given variable-name is defined as variable in tree
-    bool varInTree(char *name);
+    bool varInTree(const char *name);
     
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
@@ -162,8 +163,16 @@ namespace mexp{
     
     // main functions:
     
-    /// print prints the mathematic expression totally bracketed to stdout
-    void print();
+    /**
+       @brief print prints the mathematic expression totally bracketed to stdout
+    */
+    void print() const;
+
+    /**
+       @brief returns a string-representation of the expression
+       @return the string-representation
+    */
+    std::string toString() const;
     
     // eval evaluates the expression
     // return: the result
@@ -239,7 +248,7 @@ namespace mexp{
        @param strname pointer to chararray to be checked
        @return true, if strname is a built-in-function, else false
     */
-    static bool isBuiltinFunc(char *strname);
+    static bool isBuiltinFunc(const char *strname);
     
     /**
        @brief checks, whether "op" is member of built-in operators
@@ -284,12 +293,16 @@ namespace mexp{
     }
   };
   
+  /**
+     @brief A variable-element
+     @see VarList
+  */
   class VarElement {
     
     friend class VarList;
     friend class MathExpression;
     
-  private:
+  protected:
     char *name;
     double value;
     char protect;
@@ -309,19 +322,46 @@ namespace mexp{
     ~VarElement();
     char *getName() const{ return name; }
     double getValue() const{ return this->value; }
+    VarElement *getNext(){ return next; }
     
   };
   
+  /**
+     @brief A list of variables
+     @see MathExpression
+  */
   class VarList {
     
     friend class MathExpression;
     
-  private:
+  protected:
     VarElement *first;
     VarElement *last;
     
     
   public:
+
+    class iterator{
+
+      friend class VarList;
+
+    private:
+
+      VarElement *current;
+
+    public:
+
+      iterator(VarElement *velem) : current(velem){};
+
+      iterator(const iterator & it) { this->current = it.current; }
+
+      void operator++(){ current = current->getNext(); }
+      void operator++(int){ this->operator++(); }
+      VarElement & operator*(){ return *current; }
+      bool operator==(const iterator & it_rval) { return it_rval.current == this->current; }
+      bool operator!=(const iterator & it_rval) { return it_rval.current != this->current; }
+      
+    };
     
     // constructor:
     VarList() : first(0), last(0){}
@@ -339,19 +379,26 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    void insert(char *name, double value, char protect=0)
+    void insert(const char *name, double value, char protect=0)
       throw (Exception_T);
-    void remove(char *name) throw (Exception<VarList>);
+    void remove(const char *name) throw (Exception<VarList>);
     /**
        @exception EvalException
     */
-    double getValue(char *name) const throw (Exception_T);
-    VarElement *isMember(char *name) const;
-    void unprotect(char *name=0);
-    void print() const;
+    double getValue(const char *name) const throw (Exception_T);
+    VarElement *isMember(const char *name) const;
+    void unprotect(const char *name=0);
+    void print() const;    
+    std::string toString(const bool include_protected) const;
+    VarList::iterator begin(){ return iterator(first); }
+    VarList::iterator end(){ return iterator(last); }
     
   };
   
+  /**
+     @brief A function-element
+     @see FunctionList
+  */
   class FunctionElement{
     
     friend class FunctionList;
@@ -376,6 +423,10 @@ namespace mexp{
     MathExpression *getBody(void){ return body; }
   };
   
+  /**
+     @brief A list of functions
+     @see MathExpression
+  */
   class FunctionList{
     
   private:
@@ -392,12 +443,42 @@ namespace mexp{
     
     // destructor:
     ~FunctionList();
-    
+
+    /**
+       @brief inserts a functionelement to the list
+       @param fe the functionelement
+    */
     void insert(FunctionElement *fe) throw(Exception<FunctionList>);
-    void remove(char *name) throw(Exception<FunctionList>);
-    void print(char *name=0);
-    bool isMember(char *name) const;
-    FunctionElement *get(char *name) const;
+
+    /**
+       @brief removes a function from the list
+    */
+    void remove(const char *name) throw(Exception<FunctionList>);
+
+    /**
+       @brief prints the complete list (if name==0) or the function with name <name> to standard-output
+       @param name a functionname
+    */
+    void print(const char *name=0);
+
+    /**
+       @brief returns the complete list represented as a string
+       @return the string representing the list
+    */
+    std::string toString() const;
+
+    /**
+       @brief tests if function <name> is a member of list
+       @return true, if member, false otherwise
+    */
+    bool isMember(const char *name) const;
+
+    /**
+       @brief returns the functionelement with name <name>
+       @param name the functionname
+       @return the functionelement
+    */
+    FunctionElement *get(const char *name) const;
     
   };
   

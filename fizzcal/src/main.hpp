@@ -25,16 +25,20 @@
 #define MAIN_HPP
 
 #include <iostream>
+#include <fstream>
 #include <stdio.h>
+#include <libgen.h>
 #include <readline.h>
 #include <history.h>
 #include <math.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <string>
 #include <exception.hpp>
 #include <mathexpression.hpp>
 #include <cmdlparser.hpp>
+#include "linescanner.hpp"
 
 #define I_SIZE 1000
 #define QUIT "quit"
@@ -43,9 +47,11 @@
 #define HELP "help"
 #define GPL "gpl"
 #define VARS "vars"    // show variables
-#define REMVAR "remvar" // remove variable
-#define UNDEF "undef"  // undefine functions
-#define FUNCS "funcs"  // show functiondefinitions
+#define REMVAR "undefvar" // remove variable
+#define UNDEF "undeffun"  // undefine functions
+#define FUNCS "funs"  // show functiondefinitions
+#define SAVE "save" // save the variables and commands to file
+#define LOAD "load" // load variables and commands from file
 #define SHOWHELP "less" // program to show help
 #define SHOWHELP2 "more" // program to show help
 
@@ -54,7 +60,9 @@ void header(const char *appname);
 void show(const char *pname, void (*what)(const char *));
 void printHelp(const char *pname);
 void gpl(const char *nix);
-void undefineFunction(mexp::FunctionList *fl);
-void removeVariable(mexp::VarList *vl);
+void undefineFunctions(mexp::FunctionList *fl, LineScanner & lscanner);
+void removeVariables(mexp::VarList *vl, LineScanner & lscanner);
+void save(mexp::VarList *vl, mexp::FunctionList *fl, LineScanner & lscanner);
+void load(mexp::VarList *vl, mexp::FunctionList *fl, LineScanner & lscanner);
 
 #endif

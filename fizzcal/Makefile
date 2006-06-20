@@ -4,7 +4,7 @@
 TARGET = focal
 
 MAIN_MODULE = main
-LOCAL_MODULES =
+LOCAL_MODULES = linescanner
 EXTERN_MODULES =
 EM_PATH =
 

@@ -1,24 +1,24 @@
 /*
-    this sourcefile belongs to the programm focal,
-    a mathematical formular-calculator
-    Copyright (C) 1999-2006 Friedemann Zintel
+  this sourcefile belongs to the programm focal,
+  a mathematical formular-calculator
+  Copyright (C) 1999-2006 Friedemann Zintel
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 #include "main.hpp"
@@ -27,14 +27,9 @@ using namespace std;
 using namespace cmdl;
 using namespace mexp;
 
-const char *version="2.43";
+const char *version="2.50";
 
 const static string formula = "formula";
-
-// for future use: to implement a linescanner for REMVAR and UNDEF
-const static char[] delimitors = {'\0','\n','\r'}
-
-const static char[] separators = {' ','\t'};
 
 int main(int argc, char **argv, char **envp){
 
@@ -53,7 +48,7 @@ int main(int argc, char **argv, char **envp){
 
     cmdlparser.parse();
 
-    programname = cmdlparser.getProgramname().c_str();
+    programname = ::basename(cmdlparser.getProgramname().c_str());
 
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
@@ -105,6 +100,9 @@ int main(int argc, char **argv, char **envp){
 	  perror("some error occured in readline:");
 	  continue;
 	}
+
+	LineScanner lscanner = LineScanner(input); 
+	string firstword = lscanner.nextToken();
 	
 	if (!strcmp(input,QUIT))
 	  break;
@@ -128,12 +126,20 @@ int main(int argc, char **argv, char **envp){
 	  varlist->print();
 	  continue;
 	}
-	else if (!strcmp(input,REMVAR)){
-	  removeVariable(varlist);
+	else if ( firstword == REMVAR ){
+	  removeVariables(varlist,lscanner);
 	  continue;
 	}
-	else if (!strcmp(input,UNDEF)){
-	  undefineFunction(functionlist);
+	else if ( firstword == UNDEF ){
+	  undefineFunctions(functionlist,lscanner);
+	  continue;
+	}
+	else if ( firstword == SAVE ){
+	  save(varlist,functionlist,lscanner);
+	  continue;
+	}
+	else if ( firstword == LOAD ){
+	  load(varlist,functionlist,lscanner);
 	  continue;
 	}
 	else if (!strcmp(input,FUNCS)){
@@ -214,56 +220,74 @@ string setupParser(CmdlParser& parser){
 
 }
 
-void undefineFunction(FunctionList *fl){
+void undefineFunctions(FunctionList *fl, LineScanner & lscanner){
   
-  char *undef=NULL;
+  string fun;
+  bool removed = false;
 
-  undef=readline(NULL);
+  while ( (fun = lscanner.nextToken()) != "" ){
 
-  if ( undef ){
-    if ( *undef ){
+    try{
 
-      try{
+      fl->remove(fun.c_str());
+      cout << fun << " undefined\n";
+      removed = true;
 
-	fl->remove(undef);
-	cout << undef << " undefined\n";
-
-      } catch (Exception<FunctionList> &fle){
-	fle.show();
-      }
-    } else
-      cout << "nothing undefined\n";
-  } else
-    perror("some error occured in readline:");
-
-  free(undef);
+    } catch (Exception<FunctionList> &fle){
+      cout << fle.getMsg() << ": " << fun << endl;
+    }
+  }
+  
+  if ( removed == false )
+    cout << "nothing undefined\n";
 
 }
 
-void removeVariable(VarList *vl){
+void removeVariables(VarList *vl, LineScanner & lscanner){
+
+  string var;
+  bool removed = false;
+
+  while ( (var = lscanner.nextToken()) != "" ){
+
+    try{
+
+      vl->remove(var.c_str());
+      cout << var << " removed\n";
+      removed = true;
+
+    } catch (Exception<VarList> &vle){
+      cout << vle.getMsg() << ": " << var << endl;
+    }
+  }
   
-  char *remove=NULL;
+  if ( removed == false )
+    cout << "nothing removed\n";
 
-  remove=readline(NULL);
+}
+void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
-  if ( remove ){
-    if ( *remove ){
+  string filename = lscanner.nextToken();
 
-      try{
+  if ( filename == "" ){
 
-	vl->remove(remove);
-	cout << remove << " removed\n";
+    cout << "expecting filename!" << endl;
+    return;
 
-      } catch (Exception<VarList> &vle){
-	vle.show();
-      }
-    } else
-      cout << "nothing removed\n";
-  } else
-    perror("some error occured in readline:");
+  }
 
-  free(remove);
+  ofstream file(filename.c_str());
 
+  file << vl->toString(false);
+  file << fl->toString();
+
+  file.close();
+
+  cout << "commands saved to file \"" << filename << "\"" << endl;
+  
+}
+
+void load(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 }
 
 void header(const char *appname){
@@ -328,9 +352,11 @@ void printHelp(const char *pname){
        << GPL << "\t\tshows the GPL\n"
        << QUIT << "\t\tends the program\n"
        << VARS << "\t\tshows all variables with values\n"
-       << REMVAR << "\t\tswitches into mode to remove a variable\n"
-       << UNDEF << "\t\tswitches into mode to remove a userdefined function\n"
+       << REMVAR << " [var1 [...]]" << "\t\tundefines the variables\n"
+       << UNDEF << " [fun1 [...]]" << "\t\tundefines the functions\n"
        << FUNCS << "\t\tshows all user-defined functions\n"
+       << SAVE << " <filename>" << "\t\tsaves all user-defined variables and commands to file <filename>" << endl
+       << LOAD << " <filename>" << "\t\tloads all user-defined variables and commands from file <filename>" << endl
        << FON << "\t\tdisplays the formular\n"
        << FOFF << "\t\thides the formular\n"
        << "\n\n"
@@ -354,8 +380,8 @@ void printHelp(const char *pname){
        << "redefined.\n\n"
        << "It's even possible to define your own fuctions.\n"
        << "You can define a function using the following syntax:\n"
-       << "<func>([<lvar>[,<lvar>[,...]]])=<expr>\n"
-       << "where <func> means the functionname, <lvar> a local parameter and\n"
+       << "<fun>([<lvar>[,<lvar>[,...]]])=<expr>\n"
+       << "where <fun> means the functionname, <lvar> a local parameter and\n"
        << "<expr> "
        << "a math.-expression. Everything within the brackets [] "
        << "is optional.\n"

@@ -31,6 +31,7 @@
   "asinh","acosh","atanh","ln","ld","log","exp","sgn",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
 
+using namespace std;
 using namespace mexp;
 
 VarElement::VarElement(const char *name, double value, char protect)
@@ -70,7 +71,7 @@ VarList::~VarList(){
   }
 }
 
-void VarList::insert(char *name, double value, char protect)
+void VarList::insert(const char *name, double value, char protect)
   throw (Exception_T){
 
   VarElement *ve;
@@ -94,7 +95,7 @@ void VarList::insert(char *name, double value, char protect)
   }
 }
 
-void VarList::remove(char *name) throw (Exception<VarList>){
+void VarList::remove(const char *name) throw (Exception<VarList>){
 
   VarElement *curr, *prev = 0;
 
@@ -116,7 +117,7 @@ void VarList::remove(char *name) throw (Exception<VarList>){
   throw Exception<VarList>("not defined!");
 }
 
-double VarList::getValue(char *name) const throw (Exception_T){
+double VarList::getValue(const char *name) const throw (Exception_T){
 
   const VarElement *ve;
 
@@ -129,7 +130,7 @@ double VarList::getValue(char *name) const throw (Exception_T){
   throw EvalException("unknown variable!",name);
 }
 
-VarElement *VarList::isMember(char *name) const{
+VarElement *VarList::isMember(const char *name) const{
 
   const VarElement *ve;
   
@@ -142,7 +143,7 @@ VarElement *VarList::isMember(char *name) const{
   return 0;
 }
 
-void VarList::unprotect(char *name){
+void VarList::unprotect(const char *name){
 
   VarElement *curr=0;
 
@@ -159,14 +160,27 @@ void VarList::unprotect(char *name){
 }
 
 void VarList::print() const{
+  cout << toString(true);
+}
+
+string VarList::toString(bool include_protected) const{
+
+  ostringstream vars;
 
   const VarElement *ve;
 
   ve=first;
   while(ve){
-    std::cout << ve->getName() << "=" << ve->getValue() << "\n";
-    ve=ve->next;
+
+    if ( ve->protect == false || include_protected == true )
+      vars << ve->getName() << "=" << ve->getValue() << endl;
+
+    ve = ve->next;
+
   }
+
+  return vars.str();
+
 }
 
 FunctionElement::FunctionElement(const char *name, MathExpression *paramlist,
@@ -196,12 +210,12 @@ FunctionList::~FunctionList(){
   }
 }
 
-bool FunctionList::isMember(char *name) const{
+bool FunctionList::isMember(const char *name) const{
 
   return (bool)this->get(name);
 }
 
-FunctionElement *FunctionList::get(char *name) const{
+FunctionElement *FunctionList::get(const char *name) const{
 
   const FunctionElement *fe;
   
@@ -227,7 +241,7 @@ void FunctionList::insert(FunctionElement *fe) throw(Exception<FunctionList>){
   last=fe;
 }
 
-void FunctionList::remove(char *name) throw(Exception<FunctionList>){
+void FunctionList::remove(const char *name) throw(Exception<FunctionList>){
 
   FunctionElement *curr, *prev=0;
 
@@ -249,35 +263,71 @@ void FunctionList::remove(char *name) throw(Exception<FunctionList>){
   throw Exception<FunctionList>("not defined!");
 }
 
-void FunctionList::print(char *name){
+void FunctionList::print(const char *name){
 
   FunctionElement *curr;
   bool match=true, stop=false;
 
-  if (name)
-    match=false;
+  if ( name )
+    match = false;
 
-  curr=this->first;
-  while (curr){
-    if (name)
-      if (!strcmp(curr->getName(),name)){
+  curr = this->first;
+  while ( curr ){
+
+    if ( name )
+
+      if ( !strcmp(curr->getName(),name) ){
+
 	match=true;
 	stop=true;
+
       }
-    if (match){
+
+    if ( match ){
       std::cout << curr->getName();
-      if (curr->paramlist)
+
+      if ( curr->paramlist )
 	curr->paramlist->print();
       else
 	std::cout << "()";
+
       std::cout << "=";
       curr->body->print();
       std::cout << "\n";
     }
-    curr=curr->next;
-    if (stop)
+    curr = curr->next;
+    if ( stop )
       break;
   }
+}
+
+string FunctionList::toString() const{
+
+  ostringstream funs;
+
+  FunctionElement *curr;
+
+  curr = this->first;
+
+  while ( curr ){
+
+      funs << curr->getName();
+
+      if (curr->paramlist)
+	funs << curr->paramlist->toString();
+      else
+	funs << "()";
+
+      funs << "=";
+      funs << curr->body->toString();
+      funs << endl;
+
+      curr = curr->next;
+
+  }
+
+  return funs.str();
+
 }
 
 MathExpression::MathExpression(VarList *vl, FunctionList *fl) :
@@ -868,7 +918,7 @@ inline bool MathExpression::checkLetter(char x){
 	  || ((unsigned char)(x)>='a' && (unsigned char)(x)<='z'));
 }
 
-bool MathExpression::isBuiltinFunc(char *strname){
+bool MathExpression::isBuiltinFunc(const char *strname){
 
   char *flist[]={FLIST};
 
@@ -878,7 +928,7 @@ bool MathExpression::isBuiltinFunc(char *strname){
   return false;
 }
 
-void MathExpression::setOprtr(char *name){
+void MathExpression::setOprtr(const char *name){
 
   clearString(oprtr);
   strcpy(oprtr,name);
@@ -887,7 +937,7 @@ void MathExpression::setOprtr(char *name){
   type=OP;
 }
 
-void MathExpression::setVariable(char *name){
+void MathExpression::setVariable(const char *name){
 
   clearString(variable);
   strcpy(variable,name);
@@ -1130,39 +1180,48 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
   return(true);
 }
 
-void MathExpression::print(){
+void MathExpression::print() const{
+  cout << toString();
+}
 
-  std::cout << "(";
+string MathExpression::toString() const{
+
+  ostringstream exp;
+
+  exp << "(";
   if (!this->empty()){
     if (this->isOprtr()){
       if (this->oprtr[0]=='!'){
 	if (this->right)
-	  this->right->print();
-	std::cout << this->getOprtr();
+	  exp << this->right->toString();
+	exp << this->getOprtr();
       }
       else if (!strcmp(this->getOprtr(),"log")
 	       || !strcmp(this->getOprtr(),SUM)
 	       || !strcmp(this->getOprtr(),PROD)){
-	std::cout << this->getOprtr();
-	std::cout << "[";
-	this->left->print();
-	std::cout << "]";
-	this->right->print();
+	exp << this->getOprtr();
+	exp << "[";
+	exp << this->left->toString();
+	exp << "]";
+	exp << this->right->toString();
       }
       else{
 	if (this->left)
-	  this->left->print();
-	std::cout << this->getOprtr();
+	  exp << this->left->toString();
+	exp << this->getOprtr();
 	if (this->right)
-	  this->right->print();
+	  exp << this->right->toString();
       }
     }
     else if (this->isVariable())
-      std::cout << this->getVariable();
+      exp << this->getVariable();
     else
-      std::cout << this->getValue();
+      exp << this->getValue();
   }
-  std::cout << ")";
+  exp << ")";
+
+  return exp.str();
+
 }
 
 double MathExpression::eval()
@@ -1415,7 +1474,7 @@ double MathExpression::evalFunction(void) throw (Exception_T){
 
 void MathExpression::defineFunction(void){
 
-  char *functionname;
+  const char *functionname;
   MathExpression *paramlist=0, *body=0;
   FunctionElement *fe=0;
   VarList locals;
@@ -1424,20 +1483,20 @@ void MathExpression::defineFunction(void){
   
   // already declared as variable? (impossible to happen)
   if (varlist->isMember(functionname)){
-    std::cout << functionname << " already declared as variable, definition "
+    cout << functionname << " already declared as variable, definition "
 	 << "not possible!\n";
     return;
   }
   
   // built-in function?
   if (isBuiltinFunc(functionname)){
-    std::cout << functionname << " is built-in function and can't be replaced!\n";
+    cout << functionname << " is built-in function and can't be replaced!\n";
     return;
   }
   
   // already declared as function?
   if (functionlist->isMember(functionname)){
-    std::cout << functionname << " already declared as function, to redefine it"
+    cout << functionname << " already declared as function, to redefine it"
 	 << " first undefine it using \"undef\"\n";
     return;
   }
@@ -1447,7 +1506,7 @@ void MathExpression::defineFunction(void){
   
   // must be a variabletree
   if (paramlist->checkForVartree()==false){
-    std::cout << "only letters and non-built-in functionnames allowed,"
+    cout << "only letters and non-built-in functionnames allowed,"
 	 << " variables must be seperated by commas!\n";
     delete paramlist;
     return;
@@ -1458,7 +1517,7 @@ void MathExpression::defineFunction(void){
   
   // body must only contain defined variables/functions/operators
   if (!checkBody(body,paramlist,&locals)){
-    std::cout << "undefined variables/functions/operators used, "
+    cout << "undefined variables/functions/operators used, "
 	 << "no definition possible!\n";
     delete body;
     delete paramlist;
@@ -1470,7 +1529,7 @@ void MathExpression::defineFunction(void){
   
   this->functionlist->insert(fe); // insert in functionlist;
   
-  std::cout << functionname << " defined\n";
+  cout << functionname << " defined\n";
   
 }
 
@@ -1539,7 +1598,7 @@ bool MathExpression::checkForVartree(){
   return true;
 }
 
-bool MathExpression::varInTree(char *name){
+bool MathExpression::varInTree(const char *name){
 
   if (!this)
     return false;
