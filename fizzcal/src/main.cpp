@@ -147,17 +147,17 @@ int main(int argc, char **argv, char **envp){
 	  continue;;
 	}
 
-	mathexpression = new MathExpression(input,varlist,functionlist);
+	MathExpression mathexpression(input,varlist,functionlist);
 
-	if (bflag==true){
+	if ( bflag == true ){
 
-	  mathexpression->print();
+	  mathexpression.print();
 	  cout << "\n";
 
 	}
 
-	cout << "result: " << mathexpression->eval() << "\n";
-	delete mathexpression;
+	double result = mathexpression.eval();
+	cout << "result: " << result << "\n";
 
       } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
@@ -165,11 +165,13 @@ int main(int argc, char **argv, char **envp){
 
       } catch (EvalException &meee){
 
-	cout << meee.getMsg();
+	// why this sometimes doesn't work I really don't know
+	// 	cout << meee.getMsg();
+	meee.show();
 
 	if (meee.getObjName() != "")
 	  cout << " : " << meee.getObjName();
-	cout << "\n";
+// 	cout << "\n";
 
       }
 
@@ -267,6 +269,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
 }
 void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
+  bool write = true;
   string filename = lscanner.nextToken();
 
   if ( filename == "" ){
@@ -276,18 +279,83 @@ void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
   }
 
+  // check if file exists
+  ifstream oldfile(filename.c_str());
+  
+  if ( oldfile != NULL ){
+
+    char *answer;
+    ostringstream prompt;
+    prompt << "file " << filename << " exists! Really overwrite it? (y,n) ";
+    answer = (char *)readline(prompt.str().c_str());
+
+    if (strcmp(answer,"y"))
+      write = false;
+
+    free(answer);
+    oldfile.close();
+
+  }
+  
+  if ( write == false )
+    return;
+
   ofstream file(filename.c_str());
 
   file << vl->toString(false);
   file << fl->toString();
-
-  file.close();
 
   cout << "commands saved to file \"" << filename << "\"" << endl;
   
 }
 
 void load(VarList *vl, FunctionList *fl, LineScanner & lscanner){
+
+  string filename = lscanner.nextToken();
+
+  if ( filename == "" ){
+
+    cout << "expecting filename!" << endl;
+    return;
+
+  }
+
+  ifstream file(filename.c_str());
+
+  if ( file == NULL ){
+
+    cout << "file " << filename << " doesn't exist!" << endl;
+    return;
+
+  }
+
+  FileScanner fscanner(file);
+  string line;
+
+  while ( (line = fscanner.nextLine()) != "" ){
+
+    try{
+
+      MathExpression mathexpression(line.c_str(),vl,fl);
+      mathexpression.eval();
+      cout << line << endl;
+
+    } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+
+      cout << "syntaxerror: " << mese.getMsg() << "\n";
+
+    } catch (EvalException &meee){
+
+      cout << meee.getMsg();
+
+      if (meee.getObjName() != "")
+	cout << " : " << meee.getObjName();
+      cout << "\n";
+
+    }
+
+  }
+
 }
 
 void header(const char *appname){

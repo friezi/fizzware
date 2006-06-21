@@ -39,6 +39,7 @@
 #include <mathexpression.hpp>
 #include <cmdlparser.hpp>
 #include "linescanner.hpp"
+#include "filescanner.hpp"
 
 #define I_SIZE 1000
 #define QUIT "quit"

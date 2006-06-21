@@ -1497,7 +1497,7 @@ void MathExpression::defineFunction(void){
   // already declared as function?
   if (functionlist->isMember(functionname)){
     cout << functionname << " already declared as function, to redefine it"
-	 << " first undefine it using \"undef\"\n";
+	 << " first undefine it!\n";
     return;
   }
 

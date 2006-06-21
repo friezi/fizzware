@@ -99,11 +99,13 @@ private:
 
     static char delimitors[];
     static char separators[];
+    static char blanks[];
     static char zero;
     static char space;
 
     static bool isDelimitor(char c);
     static bool isSeparator(char c);
+    static bool isABlank(char c);
 
     bool skipSpaces(char &c);
     

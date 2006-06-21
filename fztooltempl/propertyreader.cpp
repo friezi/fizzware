@@ -172,6 +172,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 
 char PropertyReader::Scanner::delimitors[] = {'\n','\0'};
 char PropertyReader::Scanner::separators[] = {'=',':'};
+char PropertyReader::Scanner::blanks[] = {' ','\t'};
 char PropertyReader::Scanner::zero = '\0';
 char PropertyReader::Scanner::space = ' ';
 
@@ -193,11 +194,20 @@ bool PropertyReader::Scanner::isSeparator(char c){
   return false;
 }
 
+bool PropertyReader::Scanner::isABlank(char c){
+
+  for ( unsigned int i = 0; i < sizeof(blanks); i++ )
+    if ( c == blanks[i] )
+      return true;
+
+  return false;
+}
+
 bool PropertyReader::Scanner::skipSpaces(char &c){
 
   while ( true ){
     
-    if ( c != space )
+    if ( isABlank(c) == false )
       return true;
     
     if ( input.eof() == true )
@@ -307,7 +317,7 @@ PropertyReader::Property PropertyReader::Scanner::nextTokenpairSaveComments(ostr
       } else if ( isDelimitor(c) ){  // darf noch nicht auftreten
 	throw SubException<NoValErr,Scanner>();
 
-      } else if ( c == space ){  // nach Leerzeichen muss Separator kommen
+      } else if ( isABlank(c) == true ){  // nach Leerzeichen muss Separator kommen
 	
 	// Leerzeichen ueberlesen
 	if ( skipSpaces(c) == false )
@@ -366,7 +376,7 @@ PropertyReader::Property PropertyReader::Scanner::nextTokenpairSaveComments(ostr
 
 	break;
 
-      } else if ( c == space ){  // Leerzeichen
+      } else if ( isABlank(c) == true ){  // Leerzeichen
 	spacecount++;  // abgehende Leerzeichen ueberlesen
 
       } else{  // normales Zeichen

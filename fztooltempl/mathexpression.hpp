@@ -296,6 +296,7 @@ namespace mexp{
   /**
      @brief A variable-element
      @see VarList
+     @internal
   */
   class VarElement {
     
@@ -329,6 +330,7 @@ namespace mexp{
   /**
      @brief A list of variables
      @see MathExpression
+     @internal
   */
   class VarList {
     
@@ -398,6 +400,7 @@ namespace mexp{
   /**
      @brief A function-element
      @see FunctionList
+     @internal
   */
   class FunctionElement{
     
@@ -426,6 +429,7 @@ namespace mexp{
   /**
      @brief A list of functions
      @see MathExpression
+     @internal
   */
   class FunctionList{
     
