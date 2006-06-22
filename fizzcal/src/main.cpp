@@ -1,6 +1,6 @@
 /*
   this sourcefile belongs to the programm focal,
-  a mathematical formular-calculator
+  a mathematical formula-calculator
   Copyright (C) 1999-2006 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ int main(int argc, char **argv, char **envp){
 
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
-      cout << endl << programname << " is a calculator/evaluator of mathematical formulars." << endl << endl;
+      cout << endl << programname << " is a calculator/evaluator of mathematical formulas." << endl << endl;
       cout << "version " << version << ", Copyright (C) 1999-2006  Friedemann Zintel" << endl << endl;
       cout << cmdlparser.infoUsage();
       cout << "With no options given, focal will work in interactive mode" << endl << endl;
@@ -372,7 +372,7 @@ void header(const char *appname){
   cout << "This is free software, and you are welcome to redistribute it\n";
   cout << "under certain conditions; type \"" << GPL;
   cout << "\" for to read the GPL.\n\n";
-  cout << appname << " is a calculator/evaluator of mathematical formulars.\n"
+  cout << appname << " is a calculator/evaluator of mathematical formulas/expressions.\n"
        << "Type \"" << HELP << "\" for help, \"" << QUIT << "\" to quit\n\n";
 }
 
@@ -425,10 +425,10 @@ void printHelp(const char *pname){
        << FUNCS << "\t\tshows all user-defined functions\n"
        << SAVE << " <filename>" << "\t\tsaves all user-defined variables and commands to file <filename>" << endl
        << LOAD << " <filename>" << "\t\tloads all user-defined variables and commands from file <filename>" << endl
-       << FON << "\t\tdisplays the formular\n"
-       << FOFF << "\t\thides the formular\n"
+       << FON << "\t\tdisplays the formula\n"
+       << FOFF << "\t\thides the formula\n"
        << "\n\n"
-       << "In " << pname << " you can type a mathematical formular which will"
+       << "In " << pname << " you can type a mathematical formula which will"
        << " be evaluated. The\nspeciality of " << pname << " is that you can "
        << "omit many round brackets according\nto the mathematical "
        << "conventions. E.g. you can type \"sin2cos2\" instead "
@@ -437,7 +437,7 @@ void printHelp(const char *pname){
        << " bracketing only the first\nexpression without operator is taken "
        << "as argument for a function. If you are not\nshure, how the "
        << "expression will be interpreted just "
-       << "switch on the display of\nthe formular with \"" << FON << "\".\n"
+       << "switch on the display of\nthe formula with \"" << FON << "\".\n"
        << "Note that an unary minus res. plus is only allowed "
        << "at the beginning\n"
        << "of the expression (but everything within braces is a "

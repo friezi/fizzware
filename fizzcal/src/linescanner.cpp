@@ -1,6 +1,6 @@
 /*
   this sourcefile belongs to the programm focal,
-  a mathematical formular-calculator
+  a mathematical formula-calculator
   Copyright (C) 1999-2006 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify

@@ -1,6 +1,6 @@
 /*
     this sourcefile belongs to the programm focal,
-    a mathematical formular-calculator
+    a mathematical formula-calculator
     Copyright (C) 1999-2006 Friedemann Zintel
 
     This program is free software; you can redistribute it and/or modify
@@ -43,8 +43,8 @@
 
 #define I_SIZE 1000
 #define QUIT "quit"
-#define FON "fon"   // show formular
-#define FOFF "foff" // hide formular
+#define FON "fon"   // show formula
+#define FOFF "foff" // hide formula
 #define HELP "help"
 #define GPL "gpl"
 #define VARS "vars"    // show variables
