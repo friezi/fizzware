@@ -41,7 +41,7 @@ int main(int argc, char **argv, char **envp){
   FunctionList *functionlist=0;
   char *input=NULL;
   bool bflag=false;
-  char *temppname; 
+  char *pathname = NULL;
 
 
   try{
@@ -50,12 +50,12 @@ int main(int argc, char **argv, char **envp){
 
     cmdlparser.parse();
 
-    temppname = (char *)calloc(cmdlparser.getProgramname().size()+1,sizeof(char));
-    strcpy(temppname,cmdlparser.getProgramname().c_str());
+    // on some systems basename expects a char *, not a const char *, so we have to provide it with a char * !
+    pathname = (char *)calloc(cmdlparser.getProgramname().size()+1,sizeof(char));
+    strcpy(pathname,cmdlparser.getProgramname().c_str());
 
-    programname = ::basename(temppname);
+    programname = ::basename(pathname);
 
-//    free(temppname);	
 
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
@@ -187,6 +187,7 @@ int main(int argc, char **argv, char **envp){
     }
     
     free(input);
+    free(pathname);
     delete functionlist;
     delete varlist;
     return 0;
