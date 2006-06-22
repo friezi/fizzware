@@ -41,6 +41,8 @@ int main(int argc, char **argv, char **envp){
   FunctionList *functionlist=0;
   char *input=NULL;
   bool bflag=false;
+  char *temppname; 
+
 
   try{
 
@@ -48,7 +50,12 @@ int main(int argc, char **argv, char **envp){
 
     cmdlparser.parse();
 
-    programname = ::basename(cmdlparser.getProgramname().c_str());
+    temppname = (char *)calloc(cmdlparser.getProgramname().size()+1,sizeof(char));
+    strcpy(temppname,cmdlparser.getProgramname().c_str());
+
+    programname = ::basename(temppname);
+
+//    free(temppname);	
 
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
