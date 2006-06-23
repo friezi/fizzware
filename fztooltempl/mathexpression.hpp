@@ -357,7 +357,10 @@ namespace mexp{
 
       iterator(const iterator & it) { this->current = it.current; }
 
-      void operator++(){ current = current->getNext(); }
+      void operator++(){ 
+	if ( current )
+	  current = current->getNext();
+      }
       void operator++(int){ this->operator++(); }
       VarElement & operator*(){ return *current; }
       bool operator==(const iterator & it_rval) { return it_rval.current == this->current; }
@@ -393,7 +396,7 @@ namespace mexp{
     void print() const;    
     std::string toString(const bool include_protected) const;
     VarList::iterator begin(){ return iterator(first); }
-    VarList::iterator end(){ return iterator(last); }
+    VarList::iterator end(){ return iterator(0); }
     
   };
   

@@ -4,7 +4,7 @@
 
 LIBRARY = fztooltempl
 
-VERSION_NUMBER = 1.92
+VERSION_NUMBER = 1.93
 
 OBJECTS = exception messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
 	semaphor mathexpression signalhandler stdmessageserver cmdlparser propertyreader
