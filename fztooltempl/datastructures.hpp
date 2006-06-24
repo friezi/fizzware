@@ -93,7 +93,7 @@ namespace ds{
        @brief get the memory-pointer
        @return memory-pointer
     */
-    T *get() { return ptr; }
+    T *get() const { return ptr; }
     
     /**
        @brief return status of clear_on_exit-flag
@@ -117,15 +117,34 @@ namespace ds{
       ptr = (T *)0;
     }
     
-    MemPointer &operator=(const MemPointer &mempointer) { 
-      this->ptr = mempointer.ptr;
+    MemPointer &operator=(const MemPointer & mempointer){ 
+      this->ptr = mempointer.get();
       return *this;
     }
     
-    MemPointer &operator=(const T * const mempointer) {
+    MemPointer &operator=(const T * const mempointer){
       this->ptr = (T *)mempointer;
       return *this;
     }
+
+    /**
+       checks if contained pointers point to the same memory-address
+       @param mempointer a mempointer to be compared to
+       @return true, if both point to the same memory-address, false otherwise
+    */
+    bool operator==(const MemPointer & mempointer){ return this->get() == mempointer.get(); }
+ 
+    /**
+       checks if contained pointers point to a different memory-address
+       @param mempointer a mempointer to be compared to
+       @return true, if both point to a different memory-address, false otherwise
+    */
+   bool operator!=(const MemPointer & mempointer){ return this->get() != mempointer.get(); }
+    /**
+       returns the content of the contained pointer
+       @return content of pointer
+    */
+    T operator*(){ return *this->get(); }
     
   };
   

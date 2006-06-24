@@ -13,7 +13,7 @@ CLASSLIBRARY = fztooltempl
 CLASS_MODULES = mathexpression exception cmdlparser
 CM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(CM_PATH)/datastructures
 
 ifeq ($(UNIX),true)
 	READLINEDIR = /usr/gnu/include/readline
@@ -53,6 +53,7 @@ EM_HEADERS = $(EXTERN_MODULES:%=$(EM_PATH)/%.hpp)
 EM_OBJECTS = $(EXTERN_MODULES:%=$(EM_PATH)/%.o)
 CM_HEADERS = $(CLASS_MODULES:%=$(CM_PATH)/%.hpp)
 CM_MAKEFILES = $(CLASS_MODULES:%=-f $(CM_PATH)/%/Makefile)
+IM_HEADERS = $(IMPORTANT_HEADERS:%=%.hpp)
 INC_LI_PATHS = $(LIBRARY_INCLUDE_PATHS:%=-I%)
 LIBS = $(LIBRARIES:%=-l%)
 INC_L_PATHS = $(LIBRARY_PATHS:%=-L%)
@@ -80,11 +81,11 @@ $(TARGET): $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAME)
 #	wc -l $(MM_SOURCE) $(MM_HEADER) $(LM_SOURCES) $(LM_HEADERS) $(EM_SOURCES) $(EM_HEADERS)
 
 # compilieren der Module 
-%.o: %.cpp %.hpp
+%.o: %.cpp %.hpp $(IM_HEADERS)
 	$(CC) $< -c -o $@
 
 # <MAIN_MODULE> hängt von allen Header-files ab
-$(MM_OBJECT): $(LM_HEADERS) $(EM_HEADERS) $(CM_HEADERS)
+$(MM_OBJECT): $(LM_HEADERS) $(EM_HEADERS) $(CM_HEADERS) $(IM_HEADERS)
 
 # es können zusäzliche spezielle Abhängigkeiten definiert werden
 
@@ -102,7 +103,7 @@ clean:
 
 # Editor aufrufen
 ed:
-	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IMPORTANT_HEADERS:%=%.hpp) &
+	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IM_HEADERS) &
 
 # erstelle Packet fuer Distribution
 dist:

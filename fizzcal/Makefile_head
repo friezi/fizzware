@@ -13,7 +13,7 @@ CLASSLIBRARY = fztooltempl
 CLASS_MODULES = mathexpression exception cmdlparser
 CM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(CM_PATH)/datastructures
 
 ifeq ($(UNIX),true)
 	READLINEDIR = /usr/gnu/include/readline

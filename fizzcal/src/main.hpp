@@ -38,6 +38,7 @@
 #include <exception.hpp>
 #include <mathexpression.hpp>
 #include <cmdlparser.hpp>
+#include <datastructures.hpp>
 #include "linescanner.hpp"
 #include "filescanner.hpp"
 

@@ -26,6 +26,7 @@
 using namespace std;
 using namespace cmdl;
 using namespace mexp;
+using namespace ds;
 
 const char *version="2.50";
 
@@ -39,9 +40,9 @@ int main(int argc, char **argv, char **envp){
   MathExpression *mathexpression;
   VarList *varlist=0;
   FunctionList *functionlist=0;
-  char *input=NULL;
   bool bflag=false;
-  char *pathname = NULL;
+  MemPointer<char> input;
+  MemPointer<char> pathname;
 
 
   try{
@@ -52,9 +53,9 @@ int main(int argc, char **argv, char **envp){
 
     // on some systems basename expects a char *, not a const char *, so we have to provide it with a char * !
     pathname = (char *)calloc(cmdlparser.getProgramname().size()+1,sizeof(char));
-    strcpy(pathname,cmdlparser.getProgramname().c_str());
+    strcpy(pathname.get(),cmdlparser.getProgramname().c_str());
 
-    programname = ::basename(pathname);
+    programname = ::basename(pathname.get());
 
 
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
@@ -96,11 +97,11 @@ int main(int argc, char **argv, char **envp){
 
       try{
 
-	input=(char *)readline(NULL);
+	input = (char *)readline(NULL);
 
-	if ( input ){
-	  if ( *input ){
-	    add_history(input);
+	if ( input.get() ){
+	  if ( *input.get() ){
+	    add_history(input.get());
 	  } else
 	    continue;
 	} else {
@@ -108,28 +109,28 @@ int main(int argc, char **argv, char **envp){
 	  continue;
 	}
 
-	LineScanner lscanner = LineScanner(input); 
+	LineScanner lscanner = LineScanner(input.get()); 
 	string firstword = lscanner.nextToken();
 	
-	if (!strcmp(input,QUIT))
+	if (!strcmp(input.get(),QUIT))
 	  break;
-	else if (!strcmp(input,HELP)){
+	else if (!strcmp(input.get(),HELP)){
 	  show(programname,printHelp);
 	  continue;
 	}
-	else if (!strcmp(input,GPL)){
+	else if (!strcmp(input.get(),GPL)){
 	  show(programname,gpl);
 	  continue;
 	}
-	else if (!strcmp(input,FON)){
+	else if (!strcmp(input.get(),FON)){
 	  bflag=true;
 	  continue;
 	}
-	else if (!strcmp(input,FOFF)){
+	else if (!strcmp(input.get(),FOFF)){
 	  bflag=false;
 	  continue;
 	}
-	else if (!strcmp(input,VARS)){
+	else if (!strcmp(input.get(),VARS)){
 	  varlist->print();
 	  continue;
 	}
@@ -149,12 +150,12 @@ int main(int argc, char **argv, char **envp){
 	  load(varlist,functionlist,lscanner);
 	  continue;
 	}
-	else if (!strcmp(input,FUNCS)){
+	else if (!strcmp(input.get(),FUNCS)){
 	  functionlist->print();
 	  continue;;
 	}
 
-	MathExpression mathexpression(input,varlist,functionlist);
+	MathExpression mathexpression(input.get(),varlist,functionlist);
 
 	if ( bflag == true ){
 
@@ -182,12 +183,10 @@ int main(int argc, char **argv, char **envp){
 
       }
 
-      free(input);
+      input.clear(true);
 
     }
     
-    free(input);
-    free(pathname);
     delete functionlist;
     delete varlist;
     return 0;
