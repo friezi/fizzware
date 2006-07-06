@@ -19,6 +19,8 @@ LIBRARY_INCLUDE_PATHS = <alle Pfade fuer Library-Includes angeben>
 LIBRARIES = <zu linkende Bibliotheksnamen angeben (einfacher Name!)>
 LIBRARY_PATHS = <Pfade fuer Bibliotheken>
 
+ADDITIONAL_DISTFILES = <zusaetzliche Dateien, die kopiert werden sollen>
+
 # in case that ansi is not allowed
 # NOANSI = true
 

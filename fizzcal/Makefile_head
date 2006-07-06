@@ -27,6 +27,8 @@ LIBRARY_INCLUDE_PATHS = $(READLINEDIR)
 LIBRARIES = $(READLINELIBS)
 LIBRARY_PATHS = /usr/lib
 
+ADDITIONAL_DISTFILES = GPL README BUGFIXES
+
 ### check the field CC ########################################################
 ################################################################################
 ################################################################################

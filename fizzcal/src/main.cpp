@@ -28,7 +28,7 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.50";
+const char *version="2.51";
 
 const static string formula = "formula";
 
@@ -105,8 +105,7 @@ int main(int argc, char **argv, char **envp){
 	  } else
 	    continue;
 	} else {
-	  perror("some error occured in readline:");
-	  continue;
+	  break;
 	}
 
 	LineScanner lscanner = LineScanner(input.get()); 
@@ -380,7 +379,7 @@ void header(const char *appname){
   cout << "under certain conditions; type \"" << GPL;
   cout << "\" for to read the GPL.\n\n";
   cout << appname << " is a calculator/evaluator of mathematical formulas/expressions.\n"
-       << "Type \"" << HELP << "\" for help, \"" << QUIT << "\" to quit\n\n";
+       << "Type \"" << HELP << "\" for help, \"" << QUIT << "\" or CTRL-D to quit\n\n";
 }
 
 void show(const char *pname, void (*what)(const char *)){

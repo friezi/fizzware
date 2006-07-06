@@ -110,4 +110,6 @@ dist:
 	cd ../classes; make -k dist; cd -;
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
 	[[ -d $(DT_DIR) ]] || mkdir $(DT_DIR)
-	cp --target-directory=$(DT_DIR) $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) Makefile Makefile_head
+	cp --target-directory=$(DT_DIR) $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EM_SOURCES) $(EM_HEADERS) Makefile Makefile_head \
+		$(ADDITIONAL_DISTFILES)
+
