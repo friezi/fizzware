@@ -308,6 +308,13 @@ void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
   ofstream file(filename.c_str());
 
+  if ( file == NULL ){
+
+    cout << "can't save to file " << filename << endl;
+    return;
+
+  }
+
   file << vl->toString(false);
   file << fl->toString();
 
