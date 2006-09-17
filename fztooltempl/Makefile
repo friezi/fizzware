@@ -94,7 +94,7 @@ ed:
 dist:
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
 	[[ -d $(DT_DIR) ]] || mkdir $(DT_DIR)
-	cp --target-directory=$(DT_DIR) $(OBJECTS:=.?pp) $(OBJECTS:=_makefile) $(HEADERS_ONLY:=.hpp) Makefile LGPL*
+	cp --target-directory=$(DT_DIR) $(OBJECTS:=.?pp) $(OBJECTS:=_makefile) $(HEADERS_ONLY:=.hpp) Makefile README CHANGES LGPL*
 
 	[[ -d $(DT_DIR)/$(EXAMPLES) ]] || mkdir $(DT_DIR)/$(EXAMPLES)
 	cp --target-directory=$(DT_DIR)/$(EXAMPLES) $(EXAMPLES)/*[!~]
