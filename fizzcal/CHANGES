@@ -1,0 +1,3 @@
+v2.52:
+- added commandline-parameter "commands": commands will be loaded before execution
+

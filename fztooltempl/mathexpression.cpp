@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2004 Friedemann Zintel
+  Copyright (C) 1999-2004 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 #include <mathexpression.hpp>
@@ -81,9 +81,8 @@ void VarList::insert(const char *name, double value, char protect)
       ve->value = value;
     else
       throw EvalException("redefinition not possible!",
-					ve->getName());
-  }
-  else {
+			  ve->getName());
+  } else {
     if (!(ve = new VarElement(name,value,protect)))
       throw OutOfMemException();
       
@@ -311,18 +310,18 @@ string FunctionList::toString() const{
 
   while ( curr ){
 
-      funs << curr->getName();
+    funs << curr->getName();
 
-      if (curr->paramlist)
-	funs << curr->paramlist->toString();
-      else
-	funs << "()";
+    if (curr->paramlist)
+      funs << curr->paramlist->toString();
+    else
+      funs << "()";
 
-      funs << "=";
-      funs << curr->body->toString();
-      funs << endl;
+    funs << "=";
+    funs << curr->body->toString();
+    funs << endl;
 
-      curr = curr->next;
+    curr = curr->next;
 
   }
 
@@ -448,10 +447,14 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
     return 0;
 
   for (e_indx=0;expr[e_indx];){
+
     if (expr[e_indx]==')'){
+
       delete TopNode;
       throw SubException<SyntaxErr,MathExpression>("invalid expression!");
+
     }
+
     if (expr[e_indx]=='('){
       if (PrevNode){
 	if (PrevNode->isOprtr()){
@@ -465,8 +468,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		throw OutOfMemException();
 	      }
 	      ActualNode->setOprtr("*");
-	    }
-	    else{      /* Prev hat kein ->right */
+	    } else{      /* Prev hat kein ->right */
 	      if ((offs=this->brackcpy(bracketstring,
 				       &expr[e_indx],'(',')'))==-1){
 		delete TopNode;
@@ -479,67 +481,89 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		ActualNode = new MathExpression(varlist,functionlist);
 	      this->clearString(bracketstring);
 	    }
-	  }
-	  else{          /* PrevNode has no predecessor */
+	  } else{          /* PrevNode has no predecessor */
+
 	    if (PrevNode->right){
+
 	      if (!(ActualNode = new MathExpression(varlist,functionlist))){
+
 		delete TopNode;
 		throw OutOfMemException();
+
 	      }
+
 	      ActualNode->setOprtr("*");
-	    }
-	    else{      /* Prev hat kein ->right */
+
+	    } else{      /* Prev hat kein ->right */
+
 	      if ((offs=this->brackcpy(bracketstring,
 				       &expr[e_indx],'(',')'))==-1){
+
 		delete TopNode;
 		throw SubException<SyntaxErr,MathExpression>("missing bracket!");
+
 	      }
 
 	      e_indx+=offs;
 	      if (!(ActualNode=this->parse(bracketstring,locals)))
 		ActualNode = new MathExpression(varlist,functionlist);
+
 	      this->clearString(bracketstring);
+
 	    }
 	  }
-	}
-	else{  /* Prev no operator -> digit or variable */
+	} else{  /* Prev no operator -> digit or variable */
 	  if (PrevNode->isVariable()){
 	    if (!varlist->isMember(PrevNode->getVariable())
 		&& !locals.isMember(PrevNode->getVariable())){
+
 	      // a functioncall/-definition is following, thus variable
 	      // must be operator
 	      PrevNode->setOprtr(PrevNode->getVariable());
 	      continue;
+
 	    }
 	  }
+
 	  if (!(ActualNode = new MathExpression(varlist,functionlist))){
+
 	    delete TopNode;
 	    throw OutOfMemException();
+
 	  }
+
 	  ActualNode->setOprtr("*");
+
 	}
-      }
-      else{ /* kein Prev vorhanden */
+      } else{ /* kein Prev vorhanden */
 	if ((offs=this->brackcpy(bracketstring,&expr[e_indx],'(',')'))==-1){
+
 	  delete TopNode;
 	  throw SubException<SyntaxErr,MathExpression>("missing bracket!");
+
 	}
 	
 	e_indx+=offs;
+
 	if (!(ActualNode=this->parse(bracketstring,locals)))
 	  ActualNode = new MathExpression(varlist,functionlist);
+
 	this->clearString(bracketstring);
+
       }
-    }
-    else if(expr[e_indx]=='['){
+    } else if(expr[e_indx]=='['){
 
       if (!PrevNode){
+
 	delete TopNode;
 	throw SubException<SyntaxErr,MathExpression>("invalid operator \"[\"!");
+
       }
       if (!PrevNode->isOprtr()){
+
 	delete TopNode;
 	throw SubException<SyntaxErr,MathExpression>("invalid operator \"[\"!");
+
       }
 
       if (!strcmp(PrevNode->getOprtr(),"log")
@@ -547,13 +571,17 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	  || !strcmp(PrevNode->getOprtr(),PROD)){
 
 	if (PrevNode->left){
+
 	  delete TopNode;
 	  throw SubException<SyntaxErr,MathExpression>("invalid expression!");
+
 	}
 
 	if ((offs=this->brackcpy(bracketstring,&expr[e_indx],'[',']'))==-1){
+
 	  delete TopNode;
 	  throw SubException<SyntaxErr,MathExpression>("missing bracket!");
+
 	}
 
 	e_indx+=offs;
@@ -565,89 +593,109 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	ActualNode->pred=PrevNode;
 	this->clearString(bracketstring);
 	continue;
-      }
-      else{
+
+      } else{
+
 	delete TopNode;
 	throw SubException<SyntaxErr,MathExpression>("invalid operator \"[\"!");
+
       }
-    }
-    else{        /* kein Bracket */
+    } else{        /* kein Bracket */
       if (!(ActualNode = new MathExpression(varlist,functionlist))){
+
 	delete TopNode;
 	throw OutOfMemException();
+
       }
+
       if (checkDigit(expr[e_indx])){
 	if (PrevNode){
 	  if (PrevNode->isOprtr()){
 	    if (PrevNode->right){
+
 	      ActualNode->setOprtr("*");
-	    }
-	    else{ /* Prev hat kein right */
+
+	    } else{ /* Prev hat kein right */
+
 	      e_indx+=this->flcpy(exprstring,&expr[e_indx]);
 	      ActualNode->setValue(atof(exprstring));
 	      this->clearString(exprstring);
+
 	    }
-	  }
-	  else{  /* Prev kein operator
-		    ( Actual=Zahl, Prev=Zahl => Prev->pred=ln o.a") */
+	  } else{  /* Prev kein operator
+		      ( Actual=Zahl, Prev=Zahl => Prev->pred=ln o.a") */
 	    ActualNode->setOprtr("*");
+
 	  }
-	}
-	else{ /* kein Prev */
+
+	} else{ /* kein Prev */
+
 	  e_indx+=this->flcpy(exprstring,&expr[e_indx]);
 	  ActualNode->setValue(atof(exprstring));
 	  this->clearString(exprstring);
+
 	}
-      }
-      else{               /* keine Zahl */
+
+      } else{               /* keine Zahl */
 	if (PrevNode){
 	  if (checkLetter(expr[e_indx])){
 	    if (PrevNode->isOprtr()){
 	      if (PrevNode->pred){
 		if (PrevNode->right){
+
 		  ActualNode->setOprtr("*");
-		}
-		else{      /* Prev hat kein ->right */
-		  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
-		  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-		    ActualNode->setOprtr(exprstring);
-		  else if (functionlist){
-		    if (functionlist->isMember(exprstring))
-		      ActualNode->setOprtr(exprstring);
-		    else
-		      ActualNode->setVariable(exprstring);
-		  }
-		  else
-		    ActualNode->setVariable(exprstring);
-		  this->clearString(exprstring);
-		}
-	      }
-	      else{          /* Prev hat kein ->pred */
-		if (PrevNode->right){
-		  ActualNode->setOprtr("*");
-		}
-		else{      /* Prev hat kein ->right */
+
+		} else{      /* Prev hat kein ->right */
+
 		  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
 
 		  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
 		    ActualNode->setOprtr(exprstring);
 		  else if (functionlist){
+
 		    if (functionlist->isMember(exprstring))
 		      ActualNode->setOprtr(exprstring);
 		    else
 		      ActualNode->setVariable(exprstring);
-		  }
-		  else
+
+		  } else
 		    ActualNode->setVariable(exprstring);
+
+		  this->clearString(exprstring);
+
+		}
+	      } else{          /* Prev hat kein ->pred */
+
+		if (PrevNode->right){
+
+		  ActualNode->setOprtr("*");
+
+		} else{      /* Prev hat kein ->right */
+
+		  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+
+		  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
+		    ActualNode->setOprtr(exprstring);
+		  else if (functionlist){
+
+		    if (functionlist->isMember(exprstring))
+		      ActualNode->setOprtr(exprstring);
+		    else
+		      ActualNode->setVariable(exprstring);
+
+		  } else
+		    ActualNode->setVariable(exprstring);
+
 		  this->clearString(exprstring);
 		}
 	      }
-	    }
-	    else{  /* Prev kein operator also Zahl */
+	    } else{  /* Prev kein operator also Zahl */
+
 	      ActualNode->setOprtr("*");
+
 	    }
-	  }
-	  else{ /* Arithmetischer Operator */
+	  } else{ /* Arithmetischer Operator */
+
 	    if (PrevNode->isOprtr()){
 	      /* behandelt werden sollen Ausdruecke der Form: "sin^2(...)": */
 	      /* ist das  aktuelle Zeichen ein "^" und der PrevNode ein
@@ -668,13 +716,17 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		   automatisch zu einem Syntaxfehler fuehren. */
 		if (PrevNode->pred){
 		  if (PrevNode==PrevNode->pred->left){
+
 		    prevn=PrevNode;
+
 		    while (prevn->left)
 		      prevn=prevn->left;
+
 		    prevn->left=ActualNode;
 		    ActualNode->pred=prevn;
 		    e_indx++;
 		    continue;
+
 		  }
 		}
 		/* hier ist alles ok (es handelt sich also um das erste "^"),
@@ -684,11 +736,13 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		/* hat der "sin"-Node einen Vorgaenger, muss diese Verbindung
 		   auch verbogen werden */
 		if (PrevNode->pred){
+
 		  ActualNode->pred=PrevNode->pred;
 		  PrevNode->pred->right=ActualNode;
-		}
-		else
+
+		} else
 		  TopNode=ActualNode;
+
 		PrevNode->pred=ActualNode;
 		e_indx++;
 		/* Auswertung der Potenz: handelt es sich um einen
@@ -696,206 +750,300 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		if (!expr[e_indx])
 		  continue;
 		else if (expr[e_indx]=='('){
+
 		  if ((offs=this->brackcpy(bracketstring,&expr[e_indx],
 					   '(',')'))==-1){
+
 		    delete TopNode;
 		    throw SubException<SyntaxErr,MathExpression>("missing bracket!");
+
 		  }
 		  
 		  e_indx+=offs;
+
 		  if (!(actn=this->parse(bracketstring,locals)))
 		    actn = new MathExpression(varlist,functionlist);
+
 		  this->clearString(bracketstring);
-		}
-		/* oder um eine simple Zahl? */
-		else{
+
+		} else{ /* oder um eine simple Zahl? */
+
 		  if (!(actn = new MathExpression(varlist,functionlist))){
+
 		    delete TopNode;
 		    throw OutOfMemException();
+
 		  }
+
 		  e_indx+=this->flcpy(exprstring,&expr[e_indx]);
 		  actn->setValue(atof(exprstring));
 		  this->clearString(exprstring);
+
 		}
+
 		actn->pred=ActualNode;
 		ActualNode->right=actn;
 		actn=PrevNode->pred;
 		continue;
-	      }
-	      else{
+
+	      } else{
+
 		if (expr[e_indx]=='!'){
+
 		  if (!(actn = new MathExpression(varlist,functionlist))){
+
 		    delete TopNode;
 		    throw OutOfMemException();
+
 		  }
+
 		  actn->setOprtr("!");
 		  e_indx++;
+
 		  if (PrevNode->pred){
+
 		    PrevNode->pred->right=actn;
 		    actn->pred=PrevNode->pred;
-		  }
-		  else
+
+		  }  else
 		    TopNode=actn;
+
 		  actn->right=PrevNode;
 		  PrevNode->pred=actn;
 		  continue;
-		}
-		else if (expr[e_indx]=='='){
+
+		} else if (expr[e_indx]=='='){
+
 		  // it's a functiondefinition
 		  // to build a correct tree, the local vars must be remembered
 		  if (PrevNode)
 		    PrevNode->addVarsToList(&locals);
+
 		}
+
 		e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+
 		if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
 		  ActualNode->setOprtr(exprstring);
 		else if (functionlist){
+
 		  if (functionlist->isMember(exprstring))
 		    ActualNode->setOprtr(exprstring);
 		  else
 		    ActualNode->setVariable(exprstring);
-		}
-		else
+
+		} else
 		  ActualNode->setVariable(exprstring);
+
 		this->clearString(exprstring);
+
 	      }
-	    }
-	    else{ /* der Vorgaenger ist kein Operator, also "normale"
-		     Verhaeltnisse */
+	    } else{ /* der Vorgaenger ist kein Operator, also "normale"
+		       Verhaeltnisse */
 	      if (expr[e_indx]=='!'){
+
 		if (!(actn = new MathExpression(varlist,functionlist))){
+
 		  delete TopNode;
 		  throw OutOfMemException();
+
 		}
+
 		actn->setOprtr("!");
 		e_indx++;
+
 		if (PrevNode->pred){
+
 		  PrevNode->pred->right=actn;
 		  actn->pred=PrevNode->pred;
-		}
-		else
+
+		} else
 		  TopNode=actn;
+
 		actn->right=PrevNode;
 		PrevNode->pred=actn;
 		continue;
+
 	      }
+
 	      e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+
 	      if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
 		ActualNode->setOprtr(exprstring);
 	      else if (functionlist){
+
 		if (functionlist->isMember(exprstring))
 		  ActualNode->setOprtr(exprstring);
 		else
 		  ActualNode->setVariable(exprstring);
+
 	      }
 	      else
 		ActualNode->setVariable(exprstring);
+
 	      this->clearString(exprstring);
+
 	    }
 	  }
-	}
-	else{ /* kein PrevNode */
+	} else{ /* kein PrevNode */
+
 	  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+
 	  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
 	    ActualNode->setOprtr(exprstring);
 	  else if (functionlist){
+
 	    if (functionlist->isMember(exprstring))
 	      ActualNode->setOprtr(exprstring);
 	    else
 	      ActualNode->setVariable(exprstring);
-	  }
-	  else
+
+	  } else
 	    ActualNode->setVariable(exprstring);
+
 	  this->clearString(exprstring);
+
 	}
       }
     }
     if (PrevNode){
       if (ActualNode->isOprtr()){
 	if (PrevNode->isOprtr()){
-	  if (PrevNode->right){
-	    if (PrevNode->pred){ /* Da Prev pred hat, muss prioritaet des
-				    operators gecheckt werden */
-	      actn=ActualNode, prevn=PrevNode->pred;
-	      while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
-		     && prevn->pred)
-		prevn=prevn->pred;
-	      if (priority<=0){  /* hier muss prevn Top sein */
-		actn->left=prevn;
-		prevn->pred=actn;
-		TopNode=actn;
-	      }
-	      else{               /* actn hat hoehere Prioritaet */
-		actn->left=prevn->right;
-		actn->pred=prevn;
-		prevn->right=actn;
-	      }
-	    }
-	    else{
-	      ActualNode->left=PrevNode;
-	      PrevNode->pred=ActualNode;
-	      TopNode=ActualNode;
-	    }
-	  }
-	  else{   /* Prev hat keinen rechten Unterbaum, also wird hier neuer
-		     Ast angefuegt */
-	    // z.B "3+sin2"
-// 	    if (pri(ActualNode->oprtr,PrevNode->oprtr)){
-	      PrevNode->right=ActualNode;
-	      ActualNode->pred=PrevNode;
-// 	    }
-	  }
-	}
-	else{      /* Prev ist Zahl */
-	  if (PrevNode->pred){
-	    actn=ActualNode, prevn=PrevNode->pred;
-	    while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
-		   && prevn->pred)
-	      prevn=prevn->pred;
-	    if (priority<=0){  /* hier muss prevn Top sein */
-	      actn->left=prevn;
-	      prevn->pred=actn;
-	      TopNode=actn;
-	    }
-	    else{               /* actn hat hoehere Prioritaet */
-	      actn->left=prevn->right;
-	      actn->pred=prevn;
-	      prevn->right=actn;
-	    }
-	  }
-	  else{    /* Prev ist Top */
-	    ActualNode->left=PrevNode;
-	    PrevNode->pred=ActualNode;
-	    TopNode=ActualNode;
-	  }
-	}
-      }
-      else{        /* Act ist Zahl */
-	PrevNode->right=ActualNode;
-	ActualNode->pred=PrevNode;
-      }
-      PrevNode=ActualNode;
-    }
-    else{               /* erstes Zeichen */
+
       if ((ActualNode->oprtr[0]=='-' || ActualNode->oprtr[0]=='+')
-	  && !ActualNode->left){
-	if (ActualNode->oprtr[0]=='-')          /* falls unaerer minus- oder
-						   plusoperator */
-	  ActualNode->setValue(-1);                 /* wird eine Mult. mit -
-						   bzw. +1 in den Baum */
-	else                                    /* eingefuegt */
+	  && !ActualNode->left && !PrevNode->right){
+
+	/* falls unaerer minus- oder plusoperator */
+	/* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
+	if (ActualNode->oprtr[0]=='-')         
+	  ActualNode->setValue(-1);
+	else                                   
 	  ActualNode->setValue(1);
+
 	prevn=ActualNode;
+
 	if (!(ActualNode = new MathExpression(varlist,functionlist))){
+
 	  delete TopNode;
 	  throw OutOfMemException();
+
 	}
+
 	ActualNode->setOprtr("*");
 	ActualNode->left=prevn;
 	prevn->pred=ActualNode;
+
+	PrevNode->right = ActualNode;
+	ActualNode->pred = PrevNode;
+
+      } else if (PrevNode->right){
+	    if (PrevNode->pred){ /* Da Prev pred hat, muss prioritaet des
+				    operators gecheckt werden */
+	      actn=ActualNode, prevn=PrevNode->pred;
+
+	      while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
+		     && prevn->pred)
+		prevn=prevn->pred;
+
+	      if (priority<=0){  /* hier muss prevn Top sein */
+
+		actn->left=prevn;
+		prevn->pred=actn;
+		TopNode=actn;
+
+	      }
+	      else{               /* actn hat hoehere Prioritaet */
+
+		actn->left=prevn->right;
+		actn->pred=prevn;
+		prevn->right=actn;
+
+	      }
+	    } else{
+
+	      ActualNode->left=PrevNode;
+	      PrevNode->pred=ActualNode;
+	      TopNode=ActualNode;
+
+	    }
+	  } else{   /* Prev hat keinen rechten Unterbaum, also wird hier neuer
+		       Ast angefuegt */
+	    // z.B "3+sin2"
+	    // 	    if (pri(ActualNode->oprtr,PrevNode->oprtr)){
+	    PrevNode->right=ActualNode;
+	    ActualNode->pred=PrevNode;
+	    // 	    }
+	  }
+	} else{      /* Prev ist Zahl */
+
+	  if (PrevNode->pred){
+
+	    actn=ActualNode, prevn=PrevNode->pred;
+
+	    while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
+		   && prevn->pred)
+	      prevn=prevn->pred;
+
+	    if (priority<=0){  /* hier muss prevn Top sein */
+
+	      actn->left=prevn;
+	      prevn->pred=actn;
+	      TopNode=actn;
+
+	    } else{               /* actn hat hoehere Prioritaet */
+
+	      actn->left=prevn->right;
+	      actn->pred=prevn;
+	      prevn->right=actn;
+
+	    }
+	  } else{    /* Prev ist Top */
+
+	    ActualNode->left=PrevNode;
+	    PrevNode->pred=ActualNode;
+	    TopNode=ActualNode;
+
+	  }
+	}
+      } else{        /* Act ist Zahl */
+
+	PrevNode->right=ActualNode;
+	ActualNode->pred=PrevNode;
+
       }
+
+      PrevNode=ActualNode;
+
+    } else{               /* erstes Zeichen */
+
+      if ((ActualNode->oprtr[0]=='-' || ActualNode->oprtr[0]=='+')
+	  && !ActualNode->left){
+
+	/* falls unaerer minus- oder plusoperator */
+	/* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
+	if (ActualNode->oprtr[0]=='-')         
+	  ActualNode->setValue(-1);
+	else                                   
+	  ActualNode->setValue(1);
+
+	prevn=ActualNode;
+
+	if (!(ActualNode = new MathExpression(varlist,functionlist))){
+
+	  delete TopNode;
+	  throw OutOfMemException();
+
+	}
+
+	ActualNode->setOprtr("*");
+	ActualNode->left=prevn;
+	prevn->pred=ActualNode;
+
+      }
+
       PrevNode=ActualNode;
       TopNode=ActualNode;
+
     }
   }
   return(TopNode);
@@ -992,13 +1140,11 @@ int MathExpression::brackcpy(char *exprstring, const char *arg, char open,
       else
 	eindx--;
       br_cnt++;
-    }
-    else if (arg[indx]==close){
+    } else if (arg[indx]==close){
       br_cnt--; 
       if (br_cnt)
 	exprstring[eindx]=arg[indx];
-    }
-    else
+    } else
       exprstring[eindx]=arg[indx];
     indx++;
     eindx++;
@@ -1030,8 +1176,7 @@ int MathExpression::oprcpy(char *exprstring, const char *arg){
     if (checkOprtr(arg[indx])){
       exprstring[indx]=arg[indx];
       indx++;
-    }
-    else{
+    } else{
       while (arg[indx] && indx<OP_LEN){ 
 	if (!(checkLetter(arg[indx])))
 	  break;
@@ -1109,8 +1254,7 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 	      if (!this->left->left && !this->left->right)
 		if (this->right->checkSyntax())
 		  return(true);
-	    }
-	    else if (this->left->isOprtr()){
+	    } else if (this->left->isOprtr()){
 	      if (!this->left->left && this->left->right)
 		if (this->right->checkSyntax())
 		  return true;
@@ -1127,8 +1271,7 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 	    return(true);
       }
       throw SubException<SyntaxErr,MathExpression>("invalid expression!");
-    }
-    else{
+    } else{
       if (!strcmp(this->getOprtr(),"log")){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty())
@@ -1136,9 +1279,8 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>
 	  ("invalid expression in function log!");
-      }
-      else if (!strcmp(this->getOprtr(),SUM)
-	       || !strcmp(this->getOprtr(),PROD)){
+      } else if (!strcmp(this->getOprtr(),SUM)
+		 || !strcmp(this->getOprtr(),PROD)){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty())
 	    if (this->left->oprtr[0]==';')
@@ -1157,23 +1299,20 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 		  }
 	throw SubException<SyntaxErr,MathExpression>
 	  ("invalid expression in function Sum/Prod!");
-      }
-      else if (isBuiltinFunc(this->getOprtr())){
+      } else if (isBuiltinFunc(this->getOprtr())){
 	if (!this->left && this->right)
 	  if (this->right->empty()==false)
 	    if (this->right->checkSyntax())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>("invalid expression!");
-      }
-      else if (functionlist->isMember(this->getOprtr())){
+      } else if (functionlist->isMember(this->getOprtr())){
 	if (!this->left && this->right)
 	  if (this->right->checkSyntax())
 	    if (this->right->countArgs() ==
 		functionlist->get(this->getOprtr())->getParList()->countArgs())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>("invalid expression!");
-      }
-      else
+      } else
 	return true;
     }
   }
@@ -1195,25 +1334,22 @@ string MathExpression::toString() const{
 	if (this->right)
 	  exp << this->right->toString();
 	exp << this->getOprtr();
-      }
-      else if (!strcmp(this->getOprtr(),"log")
-	       || !strcmp(this->getOprtr(),SUM)
-	       || !strcmp(this->getOprtr(),PROD)){
+      } else if (!strcmp(this->getOprtr(),"log")
+		 || !strcmp(this->getOprtr(),SUM)
+		 || !strcmp(this->getOprtr(),PROD)){
 	exp << this->getOprtr();
 	exp << "[";
 	exp << this->left->toString();
 	exp << "]";
 	exp << this->right->toString();
-      }
-      else{
+      } else{
 	if (this->left)
 	  exp << this->left->toString();
 	exp << this->getOprtr();
 	if (this->right)
 	  exp << this->right->toString();
       }
-    }
-    else if (this->isVariable())
+    } else if (this->isVariable())
       exp << this->getVariable();
     else
       exp << this->getValue();
@@ -1259,12 +1395,12 @@ double MathExpression::eval()
       break;
     case '^':
       result=right->eval();/*
-      if (left->eval()<=0 && (result/(int)result)){
-	fprintf(stderr,"negative root!\n");
-	exit(1);
-      }
-      else*/
-	return(pow(left->eval(),right->eval()));
+			     if (left->eval()<=0 && (result/(int)result)){
+			     fprintf(stderr,"negative root!\n");
+			     exit(1);
+			     }
+			     else*/
+      return(pow(left->eval(),right->eval()));
       break;
     case '!':
       return faculty(right->eval());
@@ -1312,34 +1448,27 @@ double MathExpression::eval()
 	  throw EvalException("argument of ln negative!");
 	else
 	  return(log(right->eval()));
-      }
-      else if (!strcmp("ld",getOprtr())){
+      } else if (!strcmp("ld",getOprtr())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of ld negative!");
 	else
 	  return(log(right->eval())/log(2));
-      }
-      else if (!strcmp("log",getOprtr())){
+      } else if (!strcmp("log",getOprtr())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of log negative!");
 	else
 	  return(log(right->eval())/log(left->eval()));
-      }
-      else if (!strcmp("exp",getOprtr()))
+      } else if (!strcmp("exp",getOprtr()))
 	return(exp(right->eval()));
       else if (!strcmp(SUM,getOprtr()) || !strcmp(PROD,getOprtr())){
 	return sumProd();
-      }
-      else if (!strcmp("sgn",getOprtr())){
+      } else if (!strcmp("sgn",getOprtr())){
 	result=right->eval();
 	if (result<0)
 	  return -1;
-	else if (result>0)
-	  return 1;
 	else
-	  return 0;
-      }
-      else{  // user defined function
+	  return 1;
+      } else{  // user defined function
 
 	if (functionlist){
 	  if (functionlist->isMember(getOprtr()))
@@ -1352,8 +1481,7 @@ double MathExpression::eval()
       }
       break;
     }
-  }
-  else if (isVariable()){
+  } else if (isVariable()){
     if (varlist)
       return (varlist->getValue(getVariable()));
     else
@@ -1529,8 +1657,6 @@ void MathExpression::defineFunction(void){
   
   this->functionlist->insert(fe); // insert in functionlist;
   
-  cout << functionname << " defined\n";
-  
 }
 
 bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
@@ -1584,8 +1710,7 @@ bool MathExpression::checkForVartree(){
     }
     if (this->oprtr[0]!=',')
       return false;
-  }
-  else{
+  } else{
     if (!this->isVariable()){
       return false;
     }

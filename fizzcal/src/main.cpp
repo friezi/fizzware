@@ -28,9 +28,10 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.51";
+const char *version="2.52";
 
 const static string formula = "formula";
+const static string commands = "commands";
 
 int main(int argc, char **argv, char **envp){
 
@@ -80,6 +81,9 @@ int main(int argc, char **argv, char **envp){
     varlist->insert("e",M_E,true);
 
     functionlist = new FunctionList();
+
+    if ( cmdlparser.checkParameter(commands).first == true )
+      load(varlist,functionlist,cmdlparser.checkParameter(commands).second);
     
     if ( cmdlparser.checkParameter(formula).first == true ){
 
@@ -142,11 +146,11 @@ int main(int argc, char **argv, char **envp){
 	  continue;
 	}
 	else if ( firstword == SAVE ){
-	  save(varlist,functionlist,lscanner);
+	  save(varlist,functionlist,lscanner.nextToken(),lscanner);
 	  continue;
 	}
 	else if ( firstword == LOAD ){
-	  load(varlist,functionlist,lscanner);
+	  load(varlist,functionlist,lscanner.nextToken());
 	  continue;
 	}
 	else if (!strcmp(input.get(),FUNCS)){
@@ -224,6 +228,9 @@ string setupParser(CmdlParser& parser){
   parser.addParameter(formula,formula,"a formula to be evaluated");
   parser.synonym(formula) << "f" << "Formula" << "F";
 
+  parser.addParameter(commands,commands,"commands that should be load before execution");
+  parser.synonym(commands) << "c" << "Commands" << "C";
+
   return parser.usage();
 
 }
@@ -273,10 +280,9 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
     cout << "nothing removed\n";
 
 }
-void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
+void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanner){
 
   bool write = true;
-  string filename = lscanner.nextToken();
 
   if ( filename == "" ){
 
@@ -322,13 +328,11 @@ void save(VarList *vl, FunctionList *fl, LineScanner & lscanner){
   
 }
 
-void load(VarList *vl, FunctionList *fl, LineScanner & lscanner){
-
-  string filename = lscanner.nextToken();
+void load(VarList *vl, FunctionList *fl,  string filename){
 
   if ( filename == "" ){
 
-    cout << "expecting filename!" << endl;
+    cerr << "expecting filename!" << endl;
     return;
 
   }
@@ -337,7 +341,7 @@ void load(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
   if ( file == NULL ){
 
-    cout << "file " << filename << " doesn't exist!" << endl;
+    cerr << "file " << filename << " doesn't exist!" << endl;
     return;
 
   }
@@ -351,11 +355,10 @@ void load(VarList *vl, FunctionList *fl, LineScanner & lscanner){
 
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
-      cout << line << endl;
 
     } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
-      cout << "syntaxerror: " << mese.getMsg() << "\n";
+      cerr << "syntaxerror: " << mese.getMsg() << "\n";
 
     } catch (EvalException &meee){
 

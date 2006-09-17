@@ -1,0 +1,6 @@
+v1.94:
+- MathExpression:
+  - builtin function sgn() returns now "1" for input "0"
+  - unary minus and plus can be used anywhere in the expression, not only at the beginning,
+    that's why "a=-2" will work now
+
