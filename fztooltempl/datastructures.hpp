@@ -402,28 +402,28 @@ namespace ds{
 
 
   /**
-     @brief A two dimensional bit-area
+     @brief A two dimensional bit-matrix
   **/
-  class BitArea{
+  class BitMatrix{
 
   private:
 
     long rows;
     long columns;
 
-    MemPointer<char> bitarea;
+    MemPointer<char> bitmatrix;
 
   public:
 
     /**
-       This will setup a bit-area of the given dimensions. counting of the elements starts from 0 to rows-1, resp. columns-1.
+       This will setup a bit-matrix of the given dimensions. counting of the elements starts from 0 to rows-1, resp. columns-1.
        @param rows number of rows
        @param columns number of columns
     **/
-    BitArea(long rows, long columns) throw (Exception<BitArea>) : rows(rows),columns(columns){
+    BitMatrix(long rows, long columns) throw (Exception<BitMatrix>) : rows(rows),columns(columns){
 
-      if ( !(bitarea = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
-	throw Exception<BitArea>("calloc() failed!");
+      if ( !(bitmatrix = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
+	throw Exception<BitMatrix>("calloc() failed!");
 
     }
 
@@ -432,12 +432,12 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void setBit(long row, long column) throw (Exception<BitArea>){
+    void setBit(long row, long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw Exception<BitArea>("OutOfBounds");
+	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitarea.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
       
     }      
     
@@ -446,12 +446,12 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void clearBit(long row, long column) throw (Exception<BitArea>){
+    void clearBit(long row, long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw Exception<BitArea>("OutOfBounds");
+	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitarea.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
       
     }   
     
@@ -461,12 +461,12 @@ namespace ds{
        @param column the column-position
        @return 0 or 1 if bit is unset resp. set
     **/
-    char getBit(long row, long column) throw (Exception<BitArea>){
+    char getBit(long row, long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw Exception<BitArea>("OutOfBounds");
+	throw Exception<BitMatrix>("OutOfBounds");
 
-      return (char)(bitarea.get()[(long)((row*columns+column)/sizeof(char))] & (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1)));
+      return (char)(bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] & (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1)));
       
     }  
 

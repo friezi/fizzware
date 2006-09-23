@@ -6,7 +6,7 @@ v1.94:
 
 v1.95:
 - namespace ds:
-  - class BitArea
+  - class BitMatrix
 - MemPointer:
   - added operator!()
 

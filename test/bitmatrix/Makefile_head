@@ -1,0 +1,29 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = bitmatrix
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+CLASSLIBRARY_PATH = ../classes/
+CLASSLIBRARY = fztooltempl
+CLASS_MODULES = exception
+CM_PATH = $(CLASSLIBRARY_PATH)
+
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/datastructures
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+ADDITIONAL_DISTFILES =
+
+# in case that ansi is not allowed
+# NOANSI = true
+
+### check the field CC ########################################################
+################################################################################
+################################################################################
