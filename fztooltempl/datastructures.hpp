@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2004 Friedemann Zintel
+  Copyright (C) 1999-2004 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 /**
@@ -137,7 +137,7 @@ namespace ds{
        @param mempointer a mempointer to be compared to
        @return true, if both point to a different memory-address, false otherwise
     */
-   bool operator!=(const MemPointer & mempointer){ return this->get() != mempointer.get(); }
+    bool operator!=(const MemPointer & mempointer){ return this->get() != mempointer.get(); }
     /**
        returns the content of the contained pointer
        @return content of pointer
@@ -219,7 +219,7 @@ namespace ds{
   };
   
   /**
-    @brief The base-node class
+     @brief The base-node class
   **/
   class Node{
     
@@ -234,7 +234,7 @@ namespace ds{
   
   /**
      It stores a key of the template-classtype TKey.
-    @brief The base-class for a branch of a tree
+     @brief The base-class for a branch of a tree
   **/
   template< typename TKey, typename TLess, typename TDel >
   class KeyNode : public Node{
@@ -251,16 +251,16 @@ namespace ds{
 
   /**
      The template-parameters are
-      - TKey:\n
-        the class-type of the key
-      - TLess:\n
-        Less-Comparator: the class-type for a function-object (let's say less), containing the comparison-function. It must be
-	a binary function, both parameters of type TKey, returning a bool. It has to return true on less(x,y) iff (!) x < y.
-      - TDel:\n
-        Deleter : the class-type for a function-object, containing the delete-function. It will be called on destructor-call
-	and can delete the key (if it's a pointer or something more complicated). Usefull if the key should be deleted automatically on
-	destruction of the BinaryTreeBranch. If the key should not be destructed just leave the function-body empty of the Deleter-class.
-	@see nofree
+     - TKey:\n
+     the class-type of the key
+     - TLess:\n
+     Less-Comparator: the class-type for a function-object (let's say less), containing the comparison-function. It must be
+     a binary function, both parameters of type TKey, returning a bool. It has to return true on less(x,y) iff (!) x < y.
+     - TDel:\n
+     Deleter : the class-type for a function-object, containing the delete-function. It will be called on destructor-call
+     and can delete the key (if it's a pointer or something more complicated). Usefull if the key should be deleted automatically on
+     destruction of the BinaryTreeBranch. If the key should not be destructed just leave the function-body empty of the Deleter-class.
+     @see nofree
 
      @brief A class for a branch of a binary-tree
      @see STL-documentation on the use of function-objects.
@@ -302,9 +302,9 @@ namespace ds{
   };
 
   /**
-    @brief A class for a branch of a multiple-tree
-    @attention not yet supported!
-    @todo supporting MultipleTreeBranch
+     @brief A class for a branch of a multiple-tree
+     @attention not yet supported!
+     @todo supporting MultipleTreeBranch
   **/
   template< typename TKey, typename TLess, typename TDel >
   class MultipleTreeBranch : virtual KeyNode<TKey,TLess,TDel>{
@@ -370,7 +370,7 @@ namespace ds{
   template< typename TKey,typename TLess, typename TDel >
   class BTree : public KeyNodeContainer< BinaryTreeBranch,TKey,TLess,TDel >{
 
-    public:
+  public:
 
     unsigned long count;
     
@@ -400,6 +400,10 @@ namespace ds{
 
   };
 
+
+  /**
+     @brief A two dimensional bit-area
+  **/
   class BitArea{
 
   private:
@@ -411,13 +415,23 @@ namespace ds{
 
   public:
 
+    /**
+       This will setup a bit-area of the given dimensions. counting of the elements starts from 0 to rows-1, resp. columns-1.
+       @param rows number of rows
+       @param columns number of columns
+    **/
     BitArea(long rows, long columns) throw (Exception<BitArea>) : rows(rows),columns(columns){
 
       if ( !(bitarea = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
 	throw Exception<BitArea>("calloc() failed!");
 
     }
-    
+
+    /**
+       Sets the bit at the given position. counting starts at 0 in each dimension
+       @param row the row-position
+       @param column the column-position
+    **/
     void setBit(long row, long column) throw (Exception<BitArea>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
@@ -427,6 +441,11 @@ namespace ds{
       
     }      
     
+    /**
+       Clears the bit at the given position. counting starts at 0 in each dimension
+       @param row the row-position
+       @param column the column-position
+    **/
     void clearBit(long row, long column) throw (Exception<BitArea>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
@@ -436,6 +455,12 @@ namespace ds{
       
     }   
     
+    /**
+       ClearsReturns the bit at the given position. counting starts at 0 in each dimension
+       @param row the row-position
+       @param column the column-position
+       @return 0 or 1 if bit is unset resp. set
+    **/
     char getBit(long row, long column) throw (Exception<BitArea>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
@@ -631,9 +656,9 @@ clear(){
     
     while (curr){
       
-	next = curr->next;
-	delete curr;
-	curr = next;
+      next = curr->next;
+      delete curr;
+      curr = next;
     }
   }
   memblock = NULL;
@@ -975,7 +1000,7 @@ erase(TKey key){
   else if ( right ){
 
     if ( parent )
-     parent->concat(right);
+      parent->concat(right);
 
     else
       this->root = right;
