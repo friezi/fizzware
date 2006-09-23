@@ -60,6 +60,30 @@ int main(int argc, char ** argv){
 
   cout << endl;
 
+  for (int j=0;j<21;j++)
+    for (int i=0;i<17;i++)
+      bigbitarea.setBit(j,i);
+
+  for (int j=0;j<21;j++){
+    for (int i=0;i<17;i++)
+      cout << (int)bigbitarea.getBit(j,i);
+    cout << endl;
+  }
+
+  cout << endl;
+
+  for (int j=0;j<21;j++)
+    for (int i=0;i<17;i++)
+      bigbitarea.clearBit(j,i);
+
+  for (int j=0;j<21;j++){
+    for (int i=0;i<17;i++)
+      cout << (int)bigbitarea.getBit(j,i);
+    cout << endl;
+  }
+
+  cout << endl;
+
   return 0;
 
   }catch (Exception_T &e){

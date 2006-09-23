@@ -402,7 +402,7 @@ namespace ds{
 
 
   /**
-     @brief A two dimensional bit-matrix
+     @brief A bit-matrix
   **/
   class BitMatrix{
 
@@ -437,7 +437,7 @@ namespace ds{
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << (row*columns+column)%sizeof(char));
       
     }      
     
@@ -451,7 +451,7 @@ namespace ds{
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << (row*columns+column)%sizeof(char));
       
     }   
     
@@ -466,7 +466,7 @@ namespace ds{
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      return (char)(bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] & (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1)));
+      return (char)(bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] & (1L << (row*columns+column)%sizeof(char)));
       
     }  
 
