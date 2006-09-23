@@ -4,3 +4,9 @@ v1.94:
   - unary minus and plus can be used anywhere in the expression, not only at the beginning,
     that's why "a=-2" will work now
 
+v1.95:
+- namespace ds:
+  - class BitArea
+- MemPointer:
+  - added operator!()
+

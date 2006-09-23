@@ -84,9 +84,7 @@ namespace ds{
        If clear_on_exit was true, memory is freed
     */
     ~MemPointer() {
-      if ( clearflag == true )
-	free(ptr);
-      ptr = (T *)0;
+      clear(clearflag);
     }
     
     /**
@@ -145,6 +143,11 @@ namespace ds{
        @return content of pointer
     */
     T operator*(){ return *this->get(); }
+
+    /**
+       @return true, if contained pointer is a null-pointer
+    */
+    bool operator!(){ return ( this->get() == (T *)0 ); }
     
   };
   
@@ -394,6 +397,53 @@ namespace ds{
   public:
 
     void operator()(T){}
+
+  };
+
+  class BitArea{
+
+  private:
+
+    long rows;
+    long columns;
+
+    MemPointer<char> bitarea;
+
+  public:
+
+    BitArea(long rows, long columns) throw (Exception<BitArea>) : rows(rows),columns(columns){
+
+      if ( !(bitarea = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
+	throw Exception<BitArea>("calloc() failed!");
+
+    }
+    
+    void setBit(long row, long column) throw (Exception<BitArea>){
+      
+      if ( row < 0 || row >= rows  || column < 0 || column >= columns )
+	throw Exception<BitArea>("OutOfBounds");
+
+      bitarea.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      
+    }      
+    
+    void clearBit(long row, long column) throw (Exception<BitArea>){
+      
+      if ( row < 0 || row >= rows  || column < 0 || column >= columns )
+	throw Exception<BitArea>("OutOfBounds");
+
+      bitarea.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << sizeof(char)-((row*columns+column)%sizeof(char)+1));
+      
+    }   
+    
+    char getBit(long row, long column) throw (Exception<BitArea>){
+      
+      if ( row < 0 || row >= rows  || column < 0 || column >= columns )
+	throw Exception<BitArea>("OutOfBounds");
+
+      return (char)(bitarea.get()[(long)((row*columns+column)/sizeof(char))] & (1L << sizeof(char)-((row*columns+column)%sizeof(char)+1)));
+      
+    }  
 
   };
   
