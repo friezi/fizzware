@@ -44,7 +44,7 @@
 #define BLKSIZE 20
 
 /**
-   @class PropertyReader
+   It reads key/value-pairs from files. Sections are supported but not required.
    @brief To extract properties from a property-file
 */
 
