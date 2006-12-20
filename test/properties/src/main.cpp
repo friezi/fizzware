@@ -39,13 +39,17 @@ int main(int argc, char **argv){
 //     prop2.erase("NEUES_PROPERTY");
 //     prop2.show();
 
+    PropertyReader prop2(prop);
+    prop2.setFilename((parser.checkParameter("filename")).second + "__second");
+    prop2.write();
+
     PropertyReader prop3(prop);
 
     prop3.setFilename((parser.checkParameter("filename")).second + "__new");
     cout << "filename_3:::::::::::::::::::::: " << (parser.checkParameter("filename")).second << endl;
     prop3.erase("PRINTER");
     prop3["NEUES_PROPERTY"] = "Neuer_Wert";
-//     prop3.set("NEUES_PROPERTY","Neuer_Wert");
+    prop3.set("Neue Section","NEUES_PROPERTY","Neuer_Wert");
     prop3.set("JUPPY","JIPJAP");
 
     prop3.modify();

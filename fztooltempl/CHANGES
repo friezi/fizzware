@@ -10,3 +10,5 @@ v1.95:
 - MemPointer:
   - added operator!()
 
+v1.96:
+- added sections in PropertyReader
