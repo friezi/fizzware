@@ -191,13 +191,29 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 
       if ( written_section != section ){
 
-	// at starting of file, NO_SECTION should not been written
-	if ( !(written_section == "" && section == NO_SECTION) ){
+	// on new section: write remaining properties of old section
+	if ( written_section != "" ){
 
-	  output << '[' << section << ']' << endl;
-	  written_section = section;
+	  bool written_something = false;
+
+	  for ( PropertyReader::iterator p_it = propertyreader.begin(written_section); p_it != propertyreader.end(written_section); p_it++ ){
+
+	    output << (*p_it).first << '=' << (*p_it).second << endl;
+	    propertyreader.erase(written_section,(*p_it).first);
+	    written_something = true;
+
+	  }
+
+	  if ( written_something == true )
+	    output << endl;
 
 	}
+
+	// at starting of file, NO_SECTION should not been written
+	if ( !(written_section == "" && section == NO_SECTION) )
+	  output << '[' << section << ']' << endl;
+
+	written_section = section;
 
       }
      
@@ -230,7 +246,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 
     modfile << output.str();
 
-    // write all remaining properties to file
+    // write all remaining sections and properties to file
     for ( Sections::iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
 
       if ( (*s_it).second->empty() == true )
@@ -426,7 +442,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
   line++;
 
   
-  // Kommentare ueberlesen, Seketionen bestimmen
+  // Kommentare ueberlesen, Sektionen bestimmen
   while ( true ){
     
     if ( input.eof() == true )
@@ -530,11 +546,9 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 
 	}
 	
-	else{  // nichts gelesen
-	  // 	  free(propptr);
+	else  // nichts gelesen
 	  throw SubException<NoValErr,Parser>();
-	}
-
+	
 	break;
 
       } else if ( isABlank(c) == true ){  // Leerzeichen
