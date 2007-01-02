@@ -40,6 +40,7 @@
 #include <datastructures.hpp>
 #include <exception.hpp>
 #include <cmdlparser.hpp>
+#include <utils.hpp>
 
 #define BLKSIZE 20
 
@@ -122,7 +123,7 @@ private:
     /**
        @pre line is a comment line and has already started with a '#'
     */
-    void overreadCommentline(char &c, std::ostringstream * comments) throw (SubException<EOFErr,Parser>);
+    void overreadCommentline(char &c, std::ostream * comments) throw (SubException<EOFErr,Parser>);
     /**
        @pre line is a section-definition and has already started with a '['
     */
@@ -163,7 +164,7 @@ private:
        @exception SubException<NoIDErr,Parser>
        @exception SubException<NoValErr,Parser>
     */
-    Property nextKeyValuePairSaveComments(std::ostringstream *comments) throw (SubException<InputInvalidErr,Parser>,
+    Property nextKeyValuePairSaveComments(std::ostream *comments) throw (SubException<InputInvalidErr,Parser>,
 									       SubException<IncompleteErr,Parser>,
 									       SubException<EOFErr,Parser>,
 									       SubException<SyntaxErr,Parser>,
@@ -191,6 +192,7 @@ private:
     void operator++(int){ p_it++; }
     void operator--(int){ p_it--; }
     Property operator*(){ return *p_it; }
+    Properties::iterator operator->(){ return p_it; }
     bool operator==(PropertyReader::iterator it){ return ( &*p_it == &*(it.p_it) ); }
     bool operator!=(PropertyReader::iterator it){ return ( &*p_it != &*(it.p_it) ); }
     void operator=(PropertyReader::iterator it){ p_it = it.p_it; }

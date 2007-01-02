@@ -32,6 +32,7 @@
 #define DATASTRUCTURES_HPP
 #include <utility>
 #include <map>
+#include <string>
 #include <exception.hpp>
 
 /**
@@ -138,11 +139,18 @@ namespace ds{
        @return true, if both point to a different memory-address, false otherwise
     */
     bool operator!=(const MemPointer & mempointer){ return this->get() != mempointer.get(); }
+
     /**
        returns the content of the contained pointer
        @return content of pointer
     */
     T operator*(){ return *this->get(); }
+
+    /**
+       returns the pointer itself
+       @return the pointer
+    */
+    T* operator->(){ return this-get(); }
 
     /**
        @return true, if contained pointer is a null-pointer

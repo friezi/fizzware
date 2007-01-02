@@ -33,8 +33,9 @@
 using namespace std;
 using namespace ds;
 using namespace cmdl;
+using namespace util;
 
-string PropertyReader::NO_SECTION = "No_Section";
+string PropertyReader::NO_SECTION = "NO_SECTION";
 
 PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparser(0){
 
@@ -44,10 +45,10 @@ PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparse
   for ( Sections::const_iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
 
     properties = new Properties();
-    sections[(*s_it).first] = properties;
+    sections[s_it->first] = properties;
 
-    for ( Properties::iterator p_it = (*s_it).second->begin(); p_it != (*s_it).second->end(); p_it++ )
-      (*properties)[(*p_it).first] = (*p_it).second;
+    for ( Properties::iterator p_it = s_it->second->begin(); p_it != s_it->second->end(); p_it++ )
+      (*properties)[p_it->first] = p_it->second;
 
   }
 
@@ -58,7 +59,7 @@ PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparse
 PropertyReader::~PropertyReader(){
 
   for (Sections::iterator it = sections.begin(); it != sections.end(); it++ )
-    delete (*it).second;
+    delete it->second;
 
 }
 
@@ -107,7 +108,7 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
 	sections[section] = properties;
 
       } else
-	properties = (*p_it).second;
+	properties = p_it->second;
       
       (*properties)[property.first] = property.second;
     }
@@ -130,13 +131,13 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
       if ( p_it == sections.end() ){
 
 	properties = new Properties();
-	sections[section] = properties;
+	sections[NO_SECTION] = properties;
 
       } else
-	properties = (*p_it).second;
+	properties = p_it->second;
 
       for (CmdlParser::Parameters::const_iterator it = cmdlparser->beginParameters(); it != cmdlparser->endParameters(); it++ )
-	(*properties)[(*it).first] = (*it).second;
+	(*properties)[it->first] = it->second;
 
     }
 
@@ -167,14 +168,18 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
   Property property;
   PropertyReader propertyreader(*this);
   string section, written_section="";
+  ostream & store = output;
 
   try {
-    
+
+    // debugging
+    // store << "# --- store start ---" << endl;
+
     while ( true ){
 
       try {
-	
-  	property = parser.nextKeyValuePairSaveComments(&output);
+
+  	property = parser.nextKeyValuePairSaveComments(&store);
 
       } catch ( SubException<Parser::NoValErr,Parser> &se ){
   	cout.flush(); // probably due to a bug in the compiler or libstdc++, whithout flushing the program will segfault
@@ -194,24 +199,29 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 	// on new section: write remaining properties of old section
 	if ( written_section != "" ){
 
+	  PropertyReader::iterator p_it = propertyreader.begin(written_section);
+	  string temp_prop;
 	  bool written_something = false;
 
-	  for ( PropertyReader::iterator p_it = propertyreader.begin(written_section); p_it != propertyreader.end(written_section); p_it++ ){
+	  while ( p_it != propertyreader.end(written_section) ){
 
-	    output << (*p_it).first << '=' << (*p_it).second << endl;
-	    propertyreader.erase(written_section,(*p_it).first);
+	    store << p_it->first << '=' << p_it->second << endl;
+
+	    temp_prop = p_it->first;
+	    p_it++;
+	    propertyreader.erase(written_section,temp_prop);
 	    written_something = true;
 
 	  }
 
 	  if ( written_something == true )
-	    output << endl;
+	    store << endl;
 
 	}
 
-	// at starting of file, NO_SECTION should not been written
+	// at starting of file, NO_SECTION should not be written
 	if ( !(written_section == "" && section == NO_SECTION) )
-	  output << '[' << section << ']' << endl;
+	  store << '[' << section << ']' << endl;
 
 	written_section = section;
 
@@ -220,8 +230,8 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
       // only if property is a member in the list write it out
       if ( propertyreader.isMember(section,property.first) == true ){
 
-  	output << property.first << '=' << propertyreader.get(section,property.first) << endl;
-  	propertyreader.erase(section,property.first);
+  	store << property.first << '=' << propertyreader.get(section,property.first) << endl;
+	propertyreader.erase(section,property.first);
 
       }
 
@@ -239,6 +249,26 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
   } catch ( SubException<Parser::EOFErr,Parser> &se ){
 
     file.close();
+
+    // write all remaining sections and properties to file
+    for ( Sections::iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
+
+      if ( s_it->second->empty() == true )
+	continue;
+
+      if ( (written_section != NO_SECTION && written_section != "") || (written_section != s_it->first && s_it->first != NO_SECTION) )
+	store << '[' << s_it->first << ']' << endl;
+
+      for ( PropertyReader::iterator p_it = propertyreader.begin(s_it->first); p_it != propertyreader.end(s_it->first); p_it++ )
+	store << p_it->first << '=' << p_it->second << endl;
+
+      written_section = s_it->first;
+
+    }
+
+    // debugging
+    // store << "# --- store end ---" << endl;
+
     ofstream modfile(filename.c_str());
 
     if ( modfile == NULL )
@@ -246,24 +276,11 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 
     modfile << output.str();
 
-    // write all remaining sections and properties to file
-    for ( Sections::iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
-
-      if ( (*s_it).second->empty() == true )
-	continue;
-
-      modfile << '[' << (*s_it).first << ']' << endl;
-
-      for ( PropertyReader::iterator p_it = propertyreader.begin((*s_it).first); p_it != propertyreader.end((*s_it).first); p_it++ )
-	modfile << (*p_it).first << '=' << (*p_it).second << endl;
-
-    }
-
     return;
   }
 }
 
-char PropertyReader::Parser::delimitors[] = {'\n','\0'};
+char PropertyReader::Parser::delimitors[] = {'\n','\r','\0'};
 char PropertyReader::Parser::separators[] = {'=',':'};
 char PropertyReader::Parser::blanks[] = {' ','\t'};
 char PropertyReader::Parser::zero = '\0';
@@ -330,7 +347,7 @@ void PropertyReader::Parser::skipRestOfLine(char &c) throw (SubException<EOFErr,
 
 }
 
-void PropertyReader::Parser::overreadCommentline(char &c, ostringstream * comments) throw (SubException<EOFErr,Parser>){
+void PropertyReader::Parser::overreadCommentline(char &c, ostream * comments) throw (SubException<EOFErr,Parser>){
 
   bool comment = true;
 
@@ -383,34 +400,12 @@ void PropertyReader::Parser::readCurrentSection(char &c) throw (SubException<EOF
 
   }
 
-  currentSection = truncateString(section.str());
+  currentSection = ((String)section.str()).trunc();
+
   if ( currentSection == "" )
     currentSection = NO_SECTION;
 
   skipRestOfLine(c);
-
-}
-
-string PropertyReader::Parser::truncateString(string str){
-
-  unsigned int leftend;
-  signed int rightstart;
-  string truncstring;
-
-  for ( leftend=0; leftend<str.length(); leftend++ )
-    if ( !isABlank(str[leftend]) )
-      break;
-
-  truncstring = str.erase(0,leftend);
-
-  for ( rightstart=(unsigned int)truncstring.length()-1; rightstart>=0; rightstart-- )
-    if ( !isABlank(str[rightstart]) )
-      break;
-
-  rightstart++;
-
-  return truncstring.erase(rightstart,truncstring.length());
-
 
 }
 
@@ -421,9 +416,10 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePair() throw (SubEx
 									   SubException<NoIDErr,Parser>,
 									   SubException<NoValErr,Parser>){
   return nextKeyValuePairSaveComments(0);
+
 }
 
-PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(ostringstream *comments) throw (SubException<InputInvalidErr,Parser>,
+PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(ostream *comments) throw (SubException<InputInvalidErr,Parser>,
 													      SubException<IncompleteErr,Parser>,
 													      SubException<EOFErr,Parser>,
 													      SubException<SyntaxErr,Parser>,
@@ -442,7 +438,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
   line++;
 
   
-  // Kommentare ueberlesen, Sektionen bestimmen
+  // overread comments, determine sections
   while ( true ){
     
     if ( input.eof() == true )
@@ -450,7 +446,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
     
     input.read(&c,1);
 
-    // fuehrende Leerzeichen ueberlesen
+    // skip leading blanks
     if ( skipSpaces(c) == false )
       throw SubException<EOFErr,Parser>();
 
@@ -491,6 +487,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 	input.read(&c,1);
 	
 	break;
+
       } else if ( isDelimitor(c) ){  // darf noch nicht auftreten
 	throw SubException<NoValErr,Parser>();
 
@@ -539,14 +536,12 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
       if ( isDelimitor(c) ){
 	
 	if ( val == true ){
-
+	  
 	  buffer.put(zero); // fuer string '\0' anhaengen
 	  valueptr = buffer.merge();
 	  break;
 
-	}
-	
-	else  // nichts gelesen
+	} else  // nichts gelesen
 	  throw SubException<NoValErr,Parser>();
 	
 	break;
@@ -564,6 +559,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 
 	buffer.put(c);
 	val = true;
+
       }
       
       if ( input.eof() == true ){  // EOF -> return
@@ -586,7 +582,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
   return Property(string(propptr.get()),string(valueptr.get()));
 }
  
-void PropertyReader::set(const string & section, const std::string & property, const std::string & value){
+void PropertyReader::set(const string & section, const string & property, const string & value){
 
   Properties *properties;
   Sections::iterator p_it = sections.find(section);
@@ -597,64 +593,64 @@ void PropertyReader::set(const string & section, const std::string & property, c
     sections[section] = properties;
 
   } else
-    properties = (*p_it).second;
+    properties = p_it->second;
 
   (*properties)[property] = value;
 
 }
 
-std::string PropertyReader::get(const std::string section, const std::string property) throw (SubException<NoSectionErr,PropertyReader>){
+std::string PropertyReader::get(const string section, const string property) throw (SubException<NoSectionErr,PropertyReader>){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return (*((*properties).second))[property];
+  return (*properties->second)[property];
 
 }
 
-void PropertyReader::erase(const string section, const std::string property){ 
+void PropertyReader::erase(const string section, const string property){ 
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     return;
 
-  (*properties).second->erase(property);
+  properties->second->erase(property);
 
 }
 
-PropertyReader::iterator PropertyReader::begin(const std::string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::iterator PropertyReader::begin(const string section) throw (SubException<NoSectionErr,PropertyReader>){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return iterator((*properties).second->begin());
+  return iterator(properties->second->begin());
 
 }
 
-PropertyReader::iterator PropertyReader::end(const std::string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::iterator PropertyReader::end(const string section) throw (SubException<NoSectionErr,PropertyReader>){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return iterator((*properties).second->end());
+  return iterator(properties->second->end());
 
 }
 
-bool PropertyReader::isMember(const std::string section, std::string property){
+bool PropertyReader::isMember(const string section, string property){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return ( (*properties).second->find(property) != (*properties).second->end() );
+  return ( properties->second->find(property) != properties->second->end() );
 }
 
 void PropertyReader::write() throw (Exception<PropertyReader>){
@@ -668,7 +664,7 @@ void PropertyReader::write() throw (Exception<PropertyReader>){
 void PropertyReader::clear(){
 
   for ( Sections::iterator it = sections.begin() ; it != sections.end() ; it++ )
-    delete (*it).second;
+    delete it->second;
 
   sections.clear();
 
@@ -685,7 +681,7 @@ string PropertyReader::toString(){
   ostringstream outstring;
 
   for ( PropertyReader::iterator it = begin(); it != end(); it++ )
-    outstring << (*it).first << '=' << (*it).second << endl;
+    outstring << it->first << '=' << it->second << endl;
 
   for ( PropertyReader::sections_iterator s_it = beginSections(); s_it != endSections(); s_it++ ){
 
@@ -695,7 +691,7 @@ string PropertyReader::toString(){
     outstring << endl << '[' << *s_it << ']' << endl;
 
     for ( PropertyReader::iterator p_it = begin(*s_it); p_it != end(*s_it); p_it++ )
-      outstring << (*p_it).first << '=' << (*p_it).second << endl;
+      outstring << p_it->first << '=' << p_it->second << endl;
 
   }
 

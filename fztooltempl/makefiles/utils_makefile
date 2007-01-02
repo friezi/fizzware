@@ -6,9 +6,9 @@
 #################################################################
 ################### zum Editieren ###############################
 
-OBJECT = propertyreader
+OBJECT = utils
 
-DEPENDS_ON = exception datastructures utils
+DEPENDS_ON = exception
 
 ############### check the CC Variable ###########################
 #################################################################
@@ -17,7 +17,7 @@ INCLUDE_PATH = ./
 
 EDITOR ?= vi
 
-CC = g++ -Wall -Wconversion -ansi -pedantic -c -I $(INCLUDE_PATH)
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
 
 DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
 
