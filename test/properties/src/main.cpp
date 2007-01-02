@@ -51,7 +51,9 @@ int main(int argc, char **argv){
     prop3["NEUES_PROPERTY"] = "Neuer_Wert";
     prop3.set("Neue Section","NEUES_PROPERTY","Neuer_Wert");
     prop3.set("JUPPY","JIPJAP");
-
+    prop3.set("POL","true","false");
+    prop3.erase("POL","a");
+    
     prop3.modify();
 
     cout << endl;
