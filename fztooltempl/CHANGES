@@ -12,3 +12,5 @@ v1.95:
 
 v1.96:
 - added sections in PropertyReader
+- classname PropertyReader::iterator changed to PropertyReader::properties_iterator
+
