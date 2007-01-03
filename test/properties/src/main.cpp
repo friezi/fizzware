@@ -57,6 +57,9 @@ int main(int argc, char **argv){
     prop3.modify();
 
     cout << endl;
+
+    cout << endl << "--------- show ---------" << endl << endl;
+
     prop.show();
 
   } catch (Exception<CmdlParser> &pe){

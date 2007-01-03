@@ -55,6 +55,7 @@ private:
 
   typedef std::pair< std::string, std::string > Property;
   typedef std::map< std::string, std::string, std::less<std::string> > Properties;
+  typedef std::pair< std::string, Properties * > Section;
   typedef std::map< std::string, Properties *, std::less<std::string> > Sections;
 
   static std::string NO_SECTION;
@@ -174,7 +175,10 @@ private:
     
   };
 
-  class iterator{
+  /**
+     @brief iterator to properties
+  */
+  class properties_iterator{
 
     friend class PropertyReader;
 
@@ -184,21 +188,24 @@ private:
 
   public:
 
-    iterator(const PropertyReader::iterator &it){ *this = it; }
-    iterator(Properties::iterator it) : p_it(it){}
+    properties_iterator(const PropertyReader::properties_iterator & it) { *this = it; }
+    properties_iterator(const Properties::iterator & it) : p_it(it){}
       
     void operator++(){ ++p_it; }
     void operator--(){ --p_it; }
     void operator++(int){ p_it++; }
     void operator--(int){ p_it--; }
-    Property operator*(){ return *p_it; }
-    Properties::iterator operator->(){ return p_it; }
-    bool operator==(PropertyReader::iterator it){ return ( &*p_it == &*(it.p_it) ); }
-    bool operator!=(PropertyReader::iterator it){ return ( &*p_it != &*(it.p_it) ); }
-    void operator=(PropertyReader::iterator it){ p_it = it.p_it; }
+    Property operator*() const { return *p_it; }
+    Properties::iterator operator->() const { return p_it; }
+    bool operator==(const PropertyReader::properties_iterator & it) const { return ( &*p_it == &*(it.p_it) ); }
+    bool operator!=(const PropertyReader::properties_iterator & it) const { return ( &*p_it != &*(it.p_it) ); }
+    void operator=(const PropertyReader::properties_iterator & it){ p_it = it.p_it; }
       
   };
 
+  /**
+     @brief iterator to sections
+  */
   class sections_iterator{
 
     friend class PropertyReader;
@@ -206,20 +213,21 @@ private:
   private :
       
     Sections::iterator s_it;
-
+    
   public:
 
-    //     iterator(const PropertyReader::sections_iterator &it){ *this = it; }
-    sections_iterator(Sections::iterator it) : s_it(it){}
+    sections_iterator(const PropertyReader::sections_iterator &it){ *this = it; }
+    sections_iterator(const Sections::iterator & it) : s_it(it){}
       
     void operator++(){ ++s_it; }
     void operator--(){ --s_it; }
     void operator++(int){ s_it++; }
     void operator--(int){ s_it--; }
-    std::string operator*(){ return (*s_it).first; }
-    bool operator==(PropertyReader::sections_iterator it){ return ( &*s_it == &*(it.s_it) ); }
-    bool operator!=(PropertyReader::sections_iterator it){ return ( &*s_it != &*(it.s_it) ); }
-    void operator=(PropertyReader::sections_iterator it){ s_it = it.s_it; }
+    Section operator*() const { return *s_it; }
+    Sections::iterator operator->() const { return s_it; }
+    bool operator==(const PropertyReader::sections_iterator & it) const { return ( &*s_it == &*(it.s_it) ); }
+    bool operator!=(const PropertyReader::sections_iterator & it) const { return ( &*s_it != &*(it.s_it) ); }
+    void operator=(const PropertyReader::sections_iterator & it){ s_it = it.s_it; }
       
   };
 
@@ -384,29 +392,51 @@ public:
 
   /**
      @brief iterator pointing to beginning of properties of a specific section
+     @param section-iterator of section
+     @return the iterator pointing to the first element
+  */
+  properties_iterator begin(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){
+    return properties_iterator(s_it->second->begin());
+  }
+  
+  /**
+     For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
+     @brief iterator pointing to beginning of properties of a specific section
      @param section name of section
      @return the iterator pointing to the first element
   */
-  iterator begin(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
+  properties_iterator begin(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
-     @brief iterator pointing to beginning of properties of section "No_Section"
+     For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
+     @brief iterator pointing to beginning of properties of section "NO_SECTION"
      @return the iterator pointing to the first element
   */
-  iterator begin() throw (SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
+  properties_iterator begin() throw (SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
 
   /**
+     @brief iterator pointing to end of properties
+     @param section-iterator of section
+     @return the iterator pointing beyond last element
+  */
+  properties_iterator end(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){
+    return properties_iterator(s_it->second->end());
+  }
+  
+  /**
+     For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
      @brief iterator pointing to end of properties
      @param section name of section
      @return the iterator pointing beyond last element
   */
-  iterator end(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
+  properties_iterator end(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
-     @brief iterator pointing to end of properties
+     For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
+     @brief iterator pointing to end of properties of section "NO_SECTION"
      @return the iterator pointing beyond end
   */
-  iterator end() throw (SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
+  properties_iterator end() throw (SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
 
   /**
      @brief iterator pointing to beginning of sections
@@ -421,7 +451,7 @@ public:
   sections_iterator endSections() { return sections_iterator(sections.end()); }
 
   /**
-     @brief syntactic sugar
+     @brief syntactic sugar for section "NO_SECTION"
   */
   std::string & operator[](const std::string & property) throw (SubException<NoSectionErr,PropertyReader>) { return (*sections[NO_SECTION])[property]; }
 

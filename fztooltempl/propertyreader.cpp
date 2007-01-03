@@ -199,7 +199,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 	// on new section: write remaining properties of old section
 	if ( written_section != "" ){
 
-	  PropertyReader::iterator p_it = propertyreader.begin(written_section);
+	  PropertyReader::properties_iterator p_it = propertyreader.begin(written_section);
 	  string temp_prop;
 	  bool written_something = false;
 
@@ -259,7 +259,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
       if ( (written_section != NO_SECTION && written_section != "") || (written_section != s_it->first && s_it->first != NO_SECTION) )
 	store << '[' << s_it->first << ']' << endl;
 
-      for ( PropertyReader::iterator p_it = propertyreader.begin(s_it->first); p_it != propertyreader.end(s_it->first); p_it++ )
+      for ( PropertyReader::properties_iterator p_it = propertyreader.begin(s_it->first); p_it != propertyreader.end(s_it->first); p_it++ )
 	store << p_it->first << '=' << p_it->second << endl;
 
       written_section = s_it->first;
@@ -621,25 +621,25 @@ void PropertyReader::erase(const string section, const string property){
 
 }
 
-PropertyReader::iterator PropertyReader::begin(const string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::properties_iterator PropertyReader::begin(const string section) throw (SubException<NoSectionErr,PropertyReader>){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return iterator(properties->second->begin());
+  return properties_iterator(properties->second->begin());
 
 }
 
-PropertyReader::iterator PropertyReader::end(const string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::properties_iterator PropertyReader::end(const string section) throw (SubException<NoSectionErr,PropertyReader>){
 
   Sections::iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
 
-  return iterator(properties->second->end());
+  return properties_iterator(properties->second->end());
 
 }
 
@@ -680,17 +680,20 @@ string PropertyReader::toString(){
 
   ostringstream outstring;
 
-  for ( PropertyReader::iterator it = begin(); it != end(); it++ )
+  PropertyReader::properties_iterator start = begin();
+  PropertyReader::properties_iterator stop = end();
+
+  for ( PropertyReader::properties_iterator it = start; it != stop; it++ )
     outstring << it->first << '=' << it->second << endl;
 
   for ( PropertyReader::sections_iterator s_it = beginSections(); s_it != endSections(); s_it++ ){
 
-    if ( *s_it == NO_SECTION )
+    if ( s_it->first == NO_SECTION )
       continue;
 
-    outstring << endl << '[' << *s_it << ']' << endl;
+    outstring << endl << '[' << s_it->first << ']' << endl;
 
-    for ( PropertyReader::iterator p_it = begin(*s_it); p_it != end(*s_it); p_it++ )
+    for ( PropertyReader::properties_iterator p_it = begin(s_it); p_it != end(s_it); p_it++ )
       outstring << p_it->first << '=' << p_it->second << endl;
 
   }
