@@ -257,7 +257,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
 	continue;
 
       if ( (written_section != NO_SECTION && written_section != "") || (written_section != s_it->first && s_it->first != NO_SECTION) )
-	store << '[' << s_it->first << ']' << endl;
+	store << endl << '[' << s_it->first << ']' << endl;
 
       for ( PropertyReader::properties_iterator p_it = propertyreader.begin(s_it->first); p_it != propertyreader.end(s_it->first); p_it++ )
 	store << p_it->first << '=' << p_it->second << endl;
