@@ -54,7 +54,7 @@ int main(int argc, char **argv){
     prop3.set("POL","true","false");
     prop3.erase("POL","a");
     
-    prop3.modify();
+    prop3.update();
 
     cout << endl;
 

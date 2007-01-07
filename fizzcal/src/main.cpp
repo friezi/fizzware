@@ -28,20 +28,21 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.52";
+const char *version="2.53";
 
 const static string formula = "formula";
 const static string commands = "commands";
+const static string exit_modified_text = "Variables or functions have been modified! Do you really want to quit without saving? (y,n) ";
 
 int main(int argc, char **argv, char **envp){
 
   CmdlParser cmdlparser(argc,argv);
   string usage;
   const char *programname = 0;
-  MathExpression *mathexpression;
-  VarList *varlist=0;
-  FunctionList *functionlist=0;
-  bool bflag=false;
+  MathExpression *mathexpression = 0;
+  VarList *varlist = 0;
+  FunctionList *functionlist = 0;
+  bool bflag = false;
   MemPointer<char> input;
   MemPointer<char> pathname;
 
@@ -109,53 +110,76 @@ int main(int argc, char **argv, char **envp){
 	  } else
 	    continue;
 	} else {
+
+	  if ( varlist->isModified() == true || functionlist->isModified() == true )
+	    if ( checkAnswer(exit_modified_text) == false )
+	      continue;
+
 	  break;
+	  
 	}
 
 	LineScanner lscanner = LineScanner(input.get()); 
 	string firstword = lscanner.nextToken();
 	
-	if (!strcmp(input.get(),QUIT))
+	if (!strcmp(input.get(),QUIT)){
+
+	  if ( varlist->isModified() == true || functionlist->isModified() == true )
+	    if ( checkAnswer(exit_modified_text) == false )
+	      continue;
+
 	  break;
-	else if (!strcmp(input.get(),HELP)){
+
+	} else if (!strcmp(input.get(),HELP)){
+
 	  show(programname,printHelp);
 	  continue;
-	}
-	else if (!strcmp(input.get(),GPL)){
+
+	} else if (!strcmp(input.get(),GPL)){
+
 	  show(programname,gpl);
 	  continue;
-	}
-	else if (!strcmp(input.get(),FON)){
+
+	} else if (!strcmp(input.get(),FON)){
+
 	  bflag=true;
 	  continue;
-	}
-	else if (!strcmp(input.get(),FOFF)){
+
+	} else if (!strcmp(input.get(),FOFF)){
+
 	  bflag=false;
 	  continue;
-	}
-	else if (!strcmp(input.get(),VARS)){
+
+	} else if (!strcmp(input.get(),VARS)){
+
 	  varlist->print();
 	  continue;
-	}
-	else if ( firstword == REMVAR ){
+
+	} else if ( firstword == REMVAR ){
+
 	  removeVariables(varlist,lscanner);
 	  continue;
-	}
-	else if ( firstword == UNDEF ){
+
+	} else if ( firstword == UNDEF ){
+
 	  undefineFunctions(functionlist,lscanner);
 	  continue;
-	}
-	else if ( firstword == SAVE ){
+
+	} else if ( firstword == SAVE ){
+
 	  save(varlist,functionlist,lscanner.nextToken(),lscanner);
 	  continue;
-	}
-	else if ( firstword == LOAD ){
+
+	} else if ( firstword == LOAD ){
+
 	  load(varlist,functionlist,lscanner.nextToken());
 	  continue;
-	}
-	else if (!strcmp(input.get(),FUNCS)){
+
+	} else if (!strcmp(input.get(),FUNCS)){
+
 	  functionlist->print();
 	  continue;;
+
 	}
 
 	MathExpression mathexpression(input.get(),varlist,functionlist);
@@ -163,7 +187,7 @@ int main(int argc, char **argv, char **envp){
 	if ( bflag == true ){
 
 	  mathexpression.print();
-	  cout << "\n";
+	  cout << endl;
 
 	}
 
@@ -172,7 +196,11 @@ int main(int argc, char **argv, char **envp){
 
       } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
-	cout << "syntaxerror: " << mese.getMsg() << "\n";
+	cerr << "syntaxerror: " << mese.getMsg() << endl;
+
+      } catch (SubException<MathExpression::DefinitionError,MathExpression> &mede){
+
+	cerr << "error: " << mede.getMsg() << endl;
 
       } catch (EvalException &meee){
 
@@ -181,7 +209,7 @@ int main(int argc, char **argv, char **envp){
 	meee.show();
 
 	if (meee.getObjName() != "")
-	  cout << " : " << meee.getObjName();
+	  cerr << " : " << meee.getObjName();
 // 	cout << "\n";
 
       }
@@ -196,9 +224,9 @@ int main(int argc, char **argv, char **envp){
 
   } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
-    // komischerweise werden ohne diesen catch-block die excpetions im inneren
+    // komischerweise werden ohne diesen catch-block die exceptions im inneren
     // nicht abgefangen !?!? (Ist eigentlich unnoetig)
-    cout << "syntaxerror: " << mese.getMsg() << "\n";
+    cerr << "syntaxerror: " << mese.getMsg() << "\n";
     exit(1);
 
   } catch (Exception_T &e){
@@ -296,15 +324,12 @@ void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanne
   
   if ( oldfile != NULL ){
 
-    char *answer;
     ostringstream prompt;
     prompt << "file " << filename << " exists! Really overwrite it? (y,n) ";
-    answer = (char *)readline(prompt.str().c_str());
 
-    if (strcmp(answer,"y"))
+    if ( checkAnswer(prompt.str()) == false )
       write = false;
 
-    free(answer);
     oldfile.close();
 
   }
@@ -325,10 +350,17 @@ void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanne
   file << fl->toString();
 
   cout << "commands saved to file \"" << filename << "\"" << endl;
+
+  vl->setModified(false);
+  fl->setModified(false);
   
 }
 
 void load(VarList *vl, FunctionList *fl,  string filename){
+
+  // save initial state
+  bool vl_modified = vl->isModified();
+  bool fl_modified = fl->isModified();
 
   if ( filename == "" ){
 
@@ -371,6 +403,26 @@ void load(VarList *vl, FunctionList *fl,  string filename){
     }
 
   }
+
+  // reset initial state
+  vl->setModified(vl_modified);
+  fl->setModified(fl_modified);
+
+}
+
+bool checkAnswer(const string & text){
+
+    char *answer;
+    bool result = true;
+
+    answer = (char *)readline(text.c_str());
+
+    if (strcmp(answer,"y"))
+      result = false;
+
+    free(answer);
+
+    return result;
 
 }
 

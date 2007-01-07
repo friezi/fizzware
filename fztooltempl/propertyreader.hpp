@@ -166,11 +166,11 @@ private:
        @exception SubException<NoValErr,Parser>
     */
     Property nextKeyValuePairSaveComments(std::ostream *comments) throw (SubException<InputInvalidErr,Parser>,
-									       SubException<IncompleteErr,Parser>,
-									       SubException<EOFErr,Parser>,
-									       SubException<SyntaxErr,Parser>,
-									       SubException<NoIDErr,Parser>,
-									       SubException<NoValErr,Parser>);
+									 SubException<IncompleteErr,Parser>,
+									 SubException<EOFErr,Parser>,
+									 SubException<SyntaxErr,Parser>,
+									 SubException<NoIDErr,Parser>,
+									 SubException<NoValErr,Parser>);
     std::string getCurrentSection(){ return currentSection; }
     
   };
@@ -184,19 +184,19 @@ private:
 
   private :
       
-    Properties::iterator p_it;
+    Properties::const_iterator p_it;
 
   public:
 
     properties_iterator(const PropertyReader::properties_iterator & it) { *this = it; }
-    properties_iterator(const Properties::iterator & it) : p_it(it){}
+    properties_iterator(const Properties::const_iterator & it) : p_it(it){}
       
     void operator++(){ ++p_it; }
     void operator--(){ --p_it; }
     void operator++(int){ p_it++; }
     void operator--(int){ p_it--; }
     Property operator*() const { return *p_it; }
-    Properties::iterator operator->() const { return p_it; }
+    Properties::const_iterator operator->() const { return p_it; }
     bool operator==(const PropertyReader::properties_iterator & it) const { return ( &*p_it == &*(it.p_it) ); }
     bool operator!=(const PropertyReader::properties_iterator & it) const { return ( &*p_it != &*(it.p_it) ); }
     void operator=(const PropertyReader::properties_iterator & it){ p_it = it.p_it; }
@@ -212,19 +212,19 @@ private:
 
   private :
       
-    Sections::iterator s_it;
+    Sections::const_iterator s_it;
     
   public:
 
     sections_iterator(const PropertyReader::sections_iterator &it){ *this = it; }
-    sections_iterator(const Sections::iterator & it) : s_it(it){}
+    sections_iterator(const Sections::const_iterator & it) : s_it(it){}
       
     void operator++(){ ++s_it; }
     void operator--(){ --s_it; }
     void operator++(int){ s_it++; }
     void operator--(int){ s_it--; }
     Section operator*() const { return *s_it; }
-    Sections::iterator operator->() const { return s_it; }
+    Sections::const_iterator operator->() const { return s_it; }
     bool operator==(const PropertyReader::sections_iterator & it) const { return ( &*s_it == &*(it.s_it) ); }
     bool operator!=(const PropertyReader::sections_iterator & it) const { return ( &*s_it != &*(it.s_it) ); }
     void operator=(const PropertyReader::sections_iterator & it){ s_it = it.s_it; }
@@ -234,25 +234,24 @@ private:
   Sections sections;
   const cmdl::CmdlParser *cmdlparser;
   std::string filename;
-  unsigned int line;
   
 protected:
 
   /// The system-error
-  std::string err(){ return std::string(strerror(errno)); }
+  std::string err() const { return std::string(strerror(errno)); }
 
 public:
 
   /**
      @param filename the file conatining the properties
   */
-  PropertyReader(const std::string &filename) : cmdlparser(0), filename(filename), line(0){};
+  PropertyReader(const std::string &filename) : cmdlparser(0), filename(filename){};
 
   /**
      @param filename the file containing the properties
      @param cmdlparser from this cmdlparser all parameters (key/value-pairs) will inserted in the property-list
   */
-  PropertyReader(const std::string &filename, const cmdl::CmdlParser &cmdlparser) : cmdlparser(&cmdlparser), filename(filename), line(0){};
+  PropertyReader(const std::string &filename, const cmdl::CmdlParser &cmdlparser) : cmdlparser(&cmdlparser), filename(filename){};
 
   /**
      @param propertyreader another PropertyReader, its entries wil be copied to this new one.
@@ -279,9 +278,10 @@ public:
 		     SubException<Parser::NoIDErr,Parser>);
 
   /**
-     All the properties in the file \<filename\> will be modified, non-existing properties will
+     All the properties in the file \<filename\> will be updated, non-existing properties will
      be erased, comments will stay
-     @brief Modifies all the properties in file \<filename\>
+     @brief Updates all the properties in file \<filename\>
+     @deprecated Use update() instead
      @exception Exception<PropertyReader>
      @exception SubException<OpenErr,PropertyReader>
      @exception SubException<Parser::IncompleteErr,Parser>
@@ -289,19 +289,39 @@ public:
      @exception  SubException<Parser::SyntaxErr,Parser>
      @exception SubException<Parser::InputInvalidErr,Parser>
   */
-  void modify() throw (Exception<PropertyReader>,
-		       SubException<OpenErr,PropertyReader>,
-		       SubException<Parser::InputInvalidErr,Parser>,
-		       SubException<Parser::IncompleteErr,Parser>,
-		       SubException<Parser::SyntaxErr,Parser>,
-		       SubException<Parser::NoValErr,Parser>,
-		       SubException<Parser::NoIDErr,Parser>);
+  void modify() const throw (Exception<PropertyReader>,
+			     SubException<OpenErr,PropertyReader>,
+			     SubException<Parser::InputInvalidErr,Parser>,
+			     SubException<Parser::IncompleteErr,Parser>,
+			     SubException<Parser::SyntaxErr,Parser>,
+			     SubException<Parser::NoValErr,Parser>,
+			     SubException<Parser::NoIDErr,Parser>){ update(); }
 
+  /**
+     All the properties in the file \<filename\> will be updated, non-existing properties will
+     be erased, comments will stay
+     @brief Updates all the properties in file \<filename\>
+     @since V1.96
+     @exception Exception<PropertyReader>
+     @exception SubException<OpenErr,PropertyReader>
+     @exception SubException<Parser::IncompleteErr,Parser>
+     @exception SubException<Parser::NoValErr,Parser>
+     @exception  SubException<Parser::SyntaxErr,Parser>
+     @exception SubException<Parser::InputInvalidErr,Parser>
+  */
+  void update() const throw (Exception<PropertyReader>,
+			     SubException<OpenErr,PropertyReader>,
+			     SubException<Parser::InputInvalidErr,Parser>,
+			     SubException<Parser::IncompleteErr,Parser>,
+			     SubException<Parser::SyntaxErr,Parser>,
+			     SubException<Parser::NoValErr,Parser>,
+			     SubException<Parser::NoIDErr,Parser>);
+  
   /**
      @brief Writes all the properties to file \<filename\>
      @exception Exception<PropertyReader>
   */
-  void write() throw (Exception<PropertyReader>);
+  void write() const throw (Exception<PropertyReader>);
 
   /**
      @brief Get the value of the property of a specific section 
@@ -309,14 +329,14 @@ public:
      @param property name of property
      @return value of property
   */
-  std::string get(const std::string section, const std::string property) throw (SubException<NoSectionErr,PropertyReader>);
+  std::string get(const std::string section, const std::string property) const throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
      @brief Get the value of the property of section "No_Section"
      @param property name of property
      @return value of property
   */
-  std::string get(const std::string property){ return get(NO_SECTION,property); }
+  std::string get(const std::string property) const { return get(NO_SECTION,property); }
 
   /**
      @brief Set the value of the property of a specific section
@@ -339,14 +359,14 @@ public:
      @param property the property
      @return true or false
   */
-  bool isMember(const std::string section, std::string property);
+  bool isMember(const std::string section, std::string property) const;
 
   /**
      @brief checks if property is a member of section NO_SECTION
      @param property the property
      @return true or false
   */
-  bool isMember(std::string property) throw (SubException<NoSectionErr,PropertyReader>) { return isMember(NO_SECTION,property); }
+  bool isMember(std::string property) const throw (SubException<NoSectionErr,PropertyReader>){ return isMember(NO_SECTION,property); }
 
   /**
      @brief erases one entry of the properties of a specific section
@@ -365,7 +385,7 @@ public:
      @brief Get the filename
      @return filename
   */
-  std::string getFilename(){ return filename; }
+  std::string getFilename() const { return filename; }
 
   /**
      @brief Sets a new filename
@@ -388,7 +408,7 @@ public:
   /**
      @brief Show all properties
   */
-  void show();
+  void show() const;
 
   /**
      @brief iterator pointing to beginning of properties of a specific section
@@ -405,14 +425,14 @@ public:
      @param section name of section
      @return the iterator pointing to the first element
   */
-  properties_iterator begin(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
+  properties_iterator begin(const std::string section) const throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
      For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
      @brief iterator pointing to beginning of properties of section "NO_SECTION"
      @return the iterator pointing to the first element
   */
-  properties_iterator begin() throw (SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
+  properties_iterator begin() const throw (SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
 
   /**
      @brief iterator pointing to end of properties
@@ -429,26 +449,26 @@ public:
      @param section name of section
      @return the iterator pointing beyond last element
   */
-  properties_iterator end(const std::string section) throw (SubException<NoSectionErr,PropertyReader>);
+  properties_iterator end(const std::string section) const throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
      For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
      @brief iterator pointing to end of properties of section "NO_SECTION"
      @return the iterator pointing beyond end
   */
-  properties_iterator end() throw (SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
+  properties_iterator end() const throw (SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
 
   /**
      @brief iterator pointing to beginning of sections
      @return the iterator pointing to the first element
   */
-  sections_iterator beginSections() { return sections_iterator(sections.begin()); }
+  sections_iterator beginSections() const { return sections_iterator(sections.begin()); }
 
   /**
      @brief iterator pointing to end of sections
      @return the iterator pointing beyond last element
   */
-  sections_iterator endSections() { return sections_iterator(sections.end()); }
+  sections_iterator endSections() const { return sections_iterator(sections.end()); }
 
   /**
      @brief syntactic sugar for section "NO_SECTION"
@@ -459,7 +479,7 @@ public:
      @brief return a string-representation of all properties
      @return the string
   */
-  std::string toString();
+  std::string toString() const;
 
 };
 

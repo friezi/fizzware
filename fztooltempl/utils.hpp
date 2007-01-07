@@ -25,6 +25,7 @@
 
 /**
    @file utils.hpp
+   @since V1.96
    @author Friedemann Zintel
 */
 
@@ -36,12 +37,13 @@
 /**
    @brief Contains templates for several utilities
    @ingroup utilities
+   @since V1.96
 */
-
 namespace util{
 
   /**
      @brief An extended string-class
+     @since V1.96
   */
   class String : public std::string{
 

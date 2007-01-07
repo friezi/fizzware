@@ -78,6 +78,7 @@ namespace mexp{
     // Exception-Classes
     /** @internal */
     class SyntaxErr{};
+    class DefinitionError{};
     
   private:
     
@@ -91,26 +92,26 @@ namespace mexp{
     double value;
     char type;
     
-    MathExpression *parse(const char *expr, VarList& locals)
-    throw (SubException<SyntaxErr,MathExpression>,Exception_T);
+    MathExpression *parse(const char *expr, VarList& locals) throw (SubException<SyntaxErr,MathExpression>,Exception_T);
     
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int pri(const char *c0, const char *c1);
-    bool checkSyntax(void) throw (SubException<SyntaxErr,MathExpression>);
+    bool checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,MathExpression>);
     double faculty(double fac) throw (Exception_T);
     double sumProd(void) throw (Exception_T);
     double assignValue(void) throw (Exception_T);
     double evalFunction(void) throw (Exception_T);
-    void defineFunction(void);
+    void defineFunction(void) throw (SubException<DefinitionError,MathExpression>);
     bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
     bool empty(void) const { return (getType()==EMPTY); }
     void setOprtr(const char *name);
     void setVariable(const char *name);
     void setValue(double value);
     void setType(char type) { this->type=type; }
-    bool isVariable(void) const { return (getType()==VAR); }
-    bool isOprtr(void) const { return (getType()==OP); }
+    bool isVariable(void) const { return ( getType() == VAR ); }
+    bool isOprtr(void) const { return ( getType() == OP ); }
+    bool isValue(void) const { return ( getType() == VAL ); }
     const char *getOprtr(void) const { return oprtr; }
     const char *getVariable(void) const { return variable; }
     double getValue(void) const { return value; }
@@ -183,6 +184,20 @@ namespace mexp{
        @exception OutOfMemException
     */
     double eval() throw (Exception_T);
+
+    /**
+       @brief returns the signum of the value
+       @param value the value
+       @return the signum
+    */
+    static double sgn(double value);
+
+    /**
+       @brief returns the absolute value
+       @param value the value
+       @return the absolute value
+    */
+    static double abs(double value);
     
     // more usefull functions:
     
@@ -273,8 +288,7 @@ namespace mexp{
       this->objname = "";
     }
     
-    EvalException(char *errormsg, char *objname=0)
-      : Exception<MathExpression>(std::string(errormsg)){
+    EvalException(char *errormsg, char *objname=0) : Exception<MathExpression>(std::string(errormsg)){
 
       if (objname)
 	this->objname = objname;
@@ -339,6 +353,8 @@ namespace mexp{
   protected:
     VarElement *first;
     VarElement *last;
+
+    bool modified;
     
     
   public:
@@ -369,14 +385,15 @@ namespace mexp{
     };
     
     // constructor:
-    VarList() : first(0), last(0){}
+    VarList() : first(0), last(0), modified(false){}
+
     // copyconstructor:
     /**
        @exception EvalException
        @exception OutOfMemException
     */
-    VarList(const VarList& vl)
-      throw (Exception_T);
+    VarList(const VarList& vl) throw (Exception_T);
+
     // destructor:
     ~VarList();
  
@@ -397,6 +414,18 @@ namespace mexp{
     std::string toString(const bool include_protected) const;
     VarList::iterator begin(){ return iterator(first); }
     VarList::iterator end(){ return iterator(0); }
+
+    /**
+       Automatically called by a MathExpression-object with value=true if a variable-definition occurs.
+       @brief Sets the MathExpression-object to be modified.
+    */
+    void setModified(bool value){ modified = value; }
+
+    /**
+       @brief returns the modified-status of the object.
+       @return modified-status
+    */
+    bool isModified(){ return modified; }
     
   };
   
@@ -439,6 +468,8 @@ namespace mexp{
   private:
     FunctionElement *first;
     FunctionElement *last;
+
+    bool modified;
     
     // copyconstructor: not for use
     FunctionList(const FunctionList& fl){}
@@ -446,7 +477,7 @@ namespace mexp{
   public:
     
     // constructor:
-    FunctionList(): first(0), last(0){}
+    FunctionList(): first(0), last(0), modified(false){}
     
     // destructor:
     ~FunctionList();
@@ -486,6 +517,19 @@ namespace mexp{
        @return the functionelement
     */
     FunctionElement *get(const char *name) const;
+
+    /**
+       Automatically called with value=true by a MathExpression-object if a function-definition occurs.
+       @brief Sets the MathExpression-object to be modified.
+       @param value the value
+    */
+    void setModified(bool value){ modified = value; }
+
+    /**
+       @brief returns the modified-status of the object.
+       @return modified-status
+    */
+    bool isModified(){ return modified; }
     
   };
   

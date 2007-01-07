@@ -47,18 +47,16 @@ PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparse
     properties = new Properties();
     sections[s_it->first] = properties;
 
-    for ( Properties::iterator p_it = s_it->second->begin(); p_it != s_it->second->end(); p_it++ )
+    for ( Properties::const_iterator p_it = s_it->second->begin(); p_it != s_it->second->end(); p_it++ )
       (*properties)[p_it->first] = p_it->second;
 
   }
-
-  line = 0;
 
 }
 
 PropertyReader::~PropertyReader(){
 
-  for (Sections::iterator it = sections.begin(); it != sections.end(); it++ )
+  for (Sections::const_iterator it = sections.begin(); it != sections.end(); it++ )
     delete it->second;
 
 }
@@ -75,7 +73,7 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
   ifstream file(filename.c_str());
   ostringstream lines;
 
-  line = 0;
+  unsigned int line = 0;
 
   if ( file == NULL )
     throw SubException<OpenErr,PropertyReader>("Error: could not open file " + filename + ": " + err());
@@ -100,7 +98,7 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
 
       section = parser.getCurrentSection();
 
-      Sections::iterator p_it = sections.find(section);
+      Sections::const_iterator p_it = sections.find(section);
 
       if ( p_it == sections.end() ){
 
@@ -126,7 +124,7 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
 
     if ( cmdlparser != 0 ){
 
-      Sections::iterator p_it = sections.find(NO_SECTION);
+      Sections::const_iterator p_it = sections.find(NO_SECTION);
 
       if ( p_it == sections.end() ){
 
@@ -147,19 +145,19 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
   }
 }
 
-void PropertyReader::modify() throw (Exception<PropertyReader>,
-				     SubException<OpenErr,PropertyReader>,
-				     SubException<Parser::InputInvalidErr,Parser>,
-				     SubException<Parser::IncompleteErr,Parser>,
-				     SubException<Parser::SyntaxErr,Parser>,
-				     SubException<Parser::NoValErr,Parser>,
-				     SubException<Parser::NoIDErr,Parser>){
+void PropertyReader::update() const throw (Exception<PropertyReader>,
+					   SubException<OpenErr,PropertyReader>,
+					   SubException<Parser::InputInvalidErr,Parser>,
+					   SubException<Parser::IncompleteErr,Parser>,
+					   SubException<Parser::SyntaxErr,Parser>,
+					   SubException<Parser::NoValErr,Parser>,
+					   SubException<Parser::NoIDErr,Parser>){
 
   ifstream file(filename.c_str());
   ostringstream lines;
   ostringstream output;
 
-  line = 0;
+  unsigned int line = 0;
 
   if ( file == NULL )
     throw SubException<OpenErr,PropertyReader>("Error: could not open file " + filename + ": " + err());
@@ -188,7 +186,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
  
       section = parser.getCurrentSection();
 
-      Sections::iterator p_it = sections.find(section);
+      Sections::const_iterator p_it = sections.find(section);
 
       // falls section nicht existiert, muss sie gelöscht werden
       if ( p_it == sections.end() )
@@ -251,7 +249,7 @@ void PropertyReader::modify() throw (Exception<PropertyReader>,
     file.close();
 
     // write all remaining sections and properties to file
-    for ( Sections::iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
+    for ( Sections::const_iterator s_it = propertyreader.sections.begin(); s_it != propertyreader.sections.end(); s_it++ ){
 
       if ( s_it->second->empty() == true )
 	continue;
@@ -420,11 +418,11 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePair() throw (SubEx
 }
 
 PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(ostream *comments) throw (SubException<InputInvalidErr,Parser>,
-													      SubException<IncompleteErr,Parser>,
-													      SubException<EOFErr,Parser>,
-													      SubException<SyntaxErr,Parser>,
-													      SubException<NoIDErr,Parser>,
-													      SubException<NoValErr,Parser>){
+													SubException<IncompleteErr,Parser>,
+													SubException<EOFErr,Parser>,
+													SubException<SyntaxErr,Parser>,
+													SubException<NoIDErr,Parser>,
+													SubException<NoValErr,Parser>){
 
   Buffer<char> buffer(BLKSIZE);
   MemPointer<char> propptr,valueptr;
@@ -585,7 +583,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 void PropertyReader::set(const string & section, const string & property, const string & value){
 
   Properties *properties;
-  Sections::iterator p_it = sections.find(section);
+  Sections::const_iterator p_it = sections.find(section);
 
   if ( p_it == sections.end() ){
 
@@ -599,9 +597,9 @@ void PropertyReader::set(const string & section, const string & property, const 
 
 }
 
-std::string PropertyReader::get(const string section, const string property) throw (SubException<NoSectionErr,PropertyReader>){
+std::string PropertyReader::get(const string section, const string property) const throw (SubException<NoSectionErr,PropertyReader>){
 
-  Sections::iterator properties;
+  Sections::const_iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
@@ -612,7 +610,7 @@ std::string PropertyReader::get(const string section, const string property) thr
 
 void PropertyReader::erase(const string section, const string property){ 
 
-  Sections::iterator properties;
+  Sections::const_iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     return;
@@ -621,9 +619,9 @@ void PropertyReader::erase(const string section, const string property){
 
 }
 
-PropertyReader::properties_iterator PropertyReader::begin(const string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::properties_iterator PropertyReader::begin(const string section) const throw (SubException<NoSectionErr,PropertyReader>){
 
-  Sections::iterator properties;
+  Sections::const_iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
@@ -632,9 +630,9 @@ PropertyReader::properties_iterator PropertyReader::begin(const string section) 
 
 }
 
-PropertyReader::properties_iterator PropertyReader::end(const string section) throw (SubException<NoSectionErr,PropertyReader>){
+PropertyReader::properties_iterator PropertyReader::end(const string section) const throw (SubException<NoSectionErr,PropertyReader>){
 
-  Sections::iterator properties;
+  Sections::const_iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
@@ -643,9 +641,9 @@ PropertyReader::properties_iterator PropertyReader::end(const string section) th
 
 }
 
-bool PropertyReader::isMember(const string section, string property){
+bool PropertyReader::isMember(const string section, string property) const {
 
-  Sections::iterator properties;
+  Sections::const_iterator properties;
   
   if ( (properties = sections.find(section)) == sections.end() )
     throw SubException<NoSectionErr,PropertyReader>(section);
@@ -653,7 +651,7 @@ bool PropertyReader::isMember(const string section, string property){
   return ( properties->second->find(property) != properties->second->end() );
 }
 
-void PropertyReader::write() throw (Exception<PropertyReader>){
+void PropertyReader::write() const throw (Exception<PropertyReader>){
 
   ofstream file(filename.c_str());
   
@@ -663,20 +661,20 @@ void PropertyReader::write() throw (Exception<PropertyReader>){
 
 void PropertyReader::clear(){
 
-  for ( Sections::iterator it = sections.begin() ; it != sections.end() ; it++ )
+  for ( Sections::const_iterator it = sections.begin() ; it != sections.end() ; it++ )
     delete it->second;
 
   sections.clear();
 
 }
 
-void PropertyReader::show(){
+void PropertyReader::show() const {
 
   cout << toString();
 
 }
 
-string PropertyReader::toString(){
+string PropertyReader::toString() const {
 
   ostringstream outstring;
 

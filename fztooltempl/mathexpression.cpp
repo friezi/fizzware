@@ -27,11 +27,11 @@
 
 #define SUM "Sum"
 #define PROD "Prod"
-#define FLIST "sin","cos","tan","asin","acos","atan","sinh","cosh","tanh",\
-  "asinh","acosh","atanh","ln","ld","log","exp","sgn",SUM,PROD
+#define FLIST "sin","cos","tan","asin","acos","atan","sinh","cosh","tanh", \
+    "asinh","acosh","atanh","ln","ld","log","exp","sgn",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
 
-using namespace std;
+  using namespace std;
 using namespace mexp;
 
 VarElement::VarElement(const char *name, double value, char protect)
@@ -46,16 +46,16 @@ VarElement::~VarElement(){
   delete [] this->name;
 }
 
-VarList::VarList(const VarList& vl)
-  throw (Exception_T)
-  : first(0), last(0){
+VarList::VarList(const VarList& vl) throw (Exception_T) : first(0), last(0), modified(false){
 
   const VarElement *curr;
 
   curr = vl.first;
   while (curr){
+
     this->insert(curr->getName(),curr->getValue(),curr->protect);
     curr = curr->next;
+
   }
 }
 
@@ -337,7 +337,7 @@ MathExpression::MathExpression(VarList *vl, FunctionList *fl) :
     oprtr[i]=0;
   for (int i=0;i<VARLEN;i++)
     variable[i]=0;
-}
+  }
 
 MathExpression::MathExpression(const char *expression, VarList *vl,
 			       FunctionList *fl)
@@ -376,16 +376,20 @@ MathExpression::MathExpression(const char *expression, VarList *vl,
   }
   
   try{
-    this->checkSyntax();
+
+    this->checkSyntaxAndOptimize();
+
   }catch (SubException<SyntaxErr,MathExpression> &mese){
+
     delete top;
     throw SubException<SyntaxErr,MathExpression>(mese.getMsg());
+
   }
 
   // Es wird nur free() aufgerufen, da die Unteraeste schon in den
   // Klassenvariablen gespeischert wurden und nicht geloescht werden sollen
   free(top);
-}
+    }
 
 MathExpression::MathExpression(MathExpression *me, VarList *vl,
 			       FunctionList *fl)
@@ -424,7 +428,7 @@ MathExpression::MathExpression(MathExpression *me, VarList *vl,
     this->right = new MathExpression(me->right,vl,fl);
     this->right->pred=this;
   }
-}
+    }
   
 MathExpression::~MathExpression(){
   
@@ -910,33 +914,33 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
       if (ActualNode->isOprtr()){
 	if (PrevNode->isOprtr()){
 
-      if ((ActualNode->oprtr[0]=='-' || ActualNode->oprtr[0]=='+')
-	  && !ActualNode->left && !PrevNode->right){
+	  if ((ActualNode->oprtr[0]=='-' || ActualNode->oprtr[0]=='+')
+	      && !ActualNode->left && !PrevNode->right){
 
-	/* falls unaerer minus- oder plusoperator */
-	/* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
-	if (ActualNode->oprtr[0]=='-')         
-	  ActualNode->setValue(-1);
-	else                                   
-	  ActualNode->setValue(1);
+	    /* falls unaerer minus- oder plusoperator */
+	    /* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
+	    if (ActualNode->oprtr[0]=='-')         
+	      ActualNode->setValue(-1);
+	    else                                   
+	      ActualNode->setValue(1);
 
-	prevn=ActualNode;
+	    prevn=ActualNode;
 
-	if (!(ActualNode = new MathExpression(varlist,functionlist))){
+	    if (!(ActualNode = new MathExpression(varlist,functionlist))){
 
-	  delete TopNode;
-	  throw OutOfMemException();
+	      delete TopNode;
+	      throw OutOfMemException();
 
-	}
+	    }
 
-	ActualNode->setOprtr("*");
-	ActualNode->left=prevn;
-	prevn->pred=ActualNode;
+	    ActualNode->setOprtr("*");
+	    ActualNode->left=prevn;
+	    prevn->pred=ActualNode;
 
-	PrevNode->right = ActualNode;
-	ActualNode->pred = PrevNode;
+	    PrevNode->right = ActualNode;
+	    ActualNode->pred = PrevNode;
 
-      } else if (PrevNode->right){
+	  } else if (PrevNode->right){
 	    if (PrevNode->pred){ /* Da Prev pred hat, muss prioritaet des
 				    operators gecheckt werden */
 	      actn=ActualNode, prevn=PrevNode->pred;
@@ -1243,7 +1247,7 @@ int MathExpression::pri(const char *c0, const char *c1){
   return(p[0]-p[1]);
 }
 
-bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpression>){
+bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,MathExpression>){
 
   if (this->isOprtr()){
     if (checkOprtr(this->oprtr[0])){
@@ -1252,11 +1256,11 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 	  if (!this->left->empty() && !this->right->empty()){
 	    if (this->left->isVariable()){
 	      if (!this->left->left && !this->left->right)
-		if (this->right->checkSyntax())
+		if (this->right->checkSyntaxAndOptimize())
 		  return(true);
 	    } else if (this->left->isOprtr()){
 	      if (!this->left->left && this->left->right)
-		if (this->right->checkSyntax())
+		if (this->right->checkSyntaxAndOptimize())
 		  return true;
 	    }
 	    throw SubException<SyntaxErr,MathExpression>("invalid expression!");
@@ -1267,15 +1271,34 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 	    return (true);
       } else if (this->left && this->right){
 	if (!this->left->empty() && !this->right->empty())
-	  if (this->left->checkSyntax() && this->right->checkSyntax())
+	  if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize()){
+
+	    // optimization: reduction  of "({-,+}1)*({-,+}1)" to "{-,+}1"
+	    if ( this->oprtr[0] == '*' )
+	      if ( this->left->isValue() == true && this->right->isValue() == true )
+		if ( abs(this->left->getValue()) == 1 && abs(this->right->getValue()) == 1 ){
+
+		  this->setOprtr("");
+		  this->setValue(sgn(this->left->getValue()) * this->right->getValue());
+
+		  delete this->left;
+		  delete this->right;
+		  this->left = this->right = 0;
+
+		}
+	      
 	    return(true);
+
+	  }
       }
+
       throw SubException<SyntaxErr,MathExpression>("invalid expression!");
+
     } else{
       if (!strcmp(this->getOprtr(),"log")){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty())
-	    if (this->left->checkSyntax() && this->right->checkSyntax())
+	    if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>
 	  ("invalid expression in function log!");
@@ -1288,9 +1311,9 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
 		if (!this->left->left->empty() && !this->left->right->empty())
 		  if (this->left->left->oprtr[0]=='='){
 		    try{
-		      if (this->left->left->checkSyntax())
-			if (this->left->right->checkSyntax())
-			  if (this->right->checkSyntax())
+		      if (this->left->left->checkSyntaxAndOptimize())
+			if (this->left->right->checkSyntaxAndOptimize())
+			  if (this->right->checkSyntaxAndOptimize())
 			    return(true);
 		    } catch (SubException<SyntaxErr,MathExpression> mese){
 		      throw SubException<SyntaxErr,MathExpression>
@@ -1302,12 +1325,12 @@ bool MathExpression::checkSyntax(void) throw (SubException<SyntaxErr,MathExpress
       } else if (isBuiltinFunc(this->getOprtr())){
 	if (!this->left && this->right)
 	  if (this->right->empty()==false)
-	    if (this->right->checkSyntax())
+	    if (this->right->checkSyntaxAndOptimize())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>("invalid expression!");
       } else if (functionlist->isMember(this->getOprtr())){
 	if (!this->left && this->right)
-	  if (this->right->checkSyntax())
+	  if (this->right->checkSyntaxAndOptimize())
 	    if (this->right->countArgs() ==
 		functionlist->get(this->getOprtr())->getParList()->countArgs())
 	      return(true);
@@ -1360,8 +1383,7 @@ string MathExpression::toString() const{
 
 }
 
-double MathExpression::eval()
-  throw (Exception_T){
+double MathExpression::eval() throw (Exception_T){
 
   double result;
   if (isOprtr()){
@@ -1461,13 +1483,13 @@ double MathExpression::eval()
       } else if (!strcmp("exp",getOprtr()))
 	return(exp(right->eval()));
       else if (!strcmp(SUM,getOprtr()) || !strcmp(PROD,getOprtr())){
+
 	return sumProd();
+
       } else if (!strcmp("sgn",getOprtr())){
-	result=right->eval();
-	if (result<0)
-	  return -1;
-	else
-	  return 1;
+
+	return sgn(right->eval());
+
       } else{  // user defined function
 
 	if (functionlist){
@@ -1487,7 +1509,22 @@ double MathExpression::eval()
     else
       throw EvalException("unauthorized use of variables!");
   }
+
   return(value);
+
+}
+
+double MathExpression::sgn(double value){
+
+  if ( value < 0 )
+    return -1;
+  else
+    return 1;
+
+}
+
+double MathExpression::abs(double value){
+  return sgn(value) * value;
 }
 
 double MathExpression::faculty(double fac) throw (Exception_T){
@@ -1555,22 +1592,31 @@ double MathExpression::assignValue(void) throw (Exception_T){
   double result;
 
   result=right->eval();
-  if (functionlist){
-    if (functionlist->isMember(left->getOprtr())){
-      throw EvalException
-	("variable already defined as function");
-    }
-  }
+
+  if (functionlist)
+    if (functionlist->isMember(left->getOprtr()))
+      throw EvalException ("variable already defined as function");
+
   if (varlist){
+
     try{
+
       varlist->insert(left->getVariable(),result);
+
     }catch (OutOfMemException &oome){
+
       delete varlist;
       throw OutOfMemException();
+
     }
+
+    varlist->setModified(true);
     return result;
+
   }
+
   throw EvalException("invalid use of assignment!");
+
 }
 
 double MathExpression::evalFunction(void) throw (Exception_T){
@@ -1586,12 +1632,17 @@ double MathExpression::evalFunction(void) throw (Exception_T){
 
   // eval args and insert them in varlist
   if (!args->empty()){
+
     while (args->oprtr[0] == ','){
+
       vl.insert(params->right->getVariable(),args->right->eval());
       args = args->left;
       params = params->left;
+
     }
+
     vl.insert(params->getVariable(),args->eval());
+
   }
 
   MathExpression function(f_template->getBody(),&vl,functionlist);
@@ -1600,44 +1651,42 @@ double MathExpression::evalFunction(void) throw (Exception_T){
 
 }
 
-void MathExpression::defineFunction(void){
+void MathExpression::defineFunction(void) throw (SubException<MathExpression::DefinitionError,MathExpression>){
 
   const char *functionname;
   MathExpression *paramlist=0, *body=0;
   FunctionElement *fe=0;
   VarList locals;
 
-  functionname=this->left->getOprtr();
+  functionname = this->left->getOprtr();
   
   // already declared as variable? (impossible to happen)
-  if (varlist->isMember(functionname)){
-    cout << functionname << " already declared as variable, definition "
-	 << "not possible!\n";
-    return;
-  }
+  if (varlist->isMember(functionname))
+    throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
+									  + " already declared as variable, definition "
+									  + "not possible!");
   
   // built-in function?
-  if (isBuiltinFunc(functionname)){
-    cout << functionname << " is built-in function and can't be replaced!\n";
-    return;
-  }
+  if (isBuiltinFunc(functionname))
+    throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
+								       + " is built-in function and can't be replaced!");
   
   // already declared as function?
-  if (functionlist->isMember(functionname)){
-    cout << functionname << " already declared as function, to redefine it"
-	 << " first undefine it!\n";
-    return;
-  }
+  if (functionlist->isMember(functionname))
+    throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
+									   + " already declared as function, to redefine it"
+									   + " first undefine it!");
 
   // build parameterlist
   paramlist = new MathExpression(this->left->right,varlist,functionlist);
   
   // must be a variabletree
   if (paramlist->checkForVartree()==false){
-    cout << "only letters and non-built-in functionnames allowed,"
-	 << " variables must be seperated by commas!\n";
+
     delete paramlist;
-    return;
+    throw SubException<MathExpression::DefinitionError,MathExpression>(string("only letters and non-built-in functionnames allowed,")
+								       + " variables must be seperated by commas!");
+
   }
   
   // build functionbody
@@ -1645,17 +1694,20 @@ void MathExpression::defineFunction(void){
   
   // body must only contain defined variables/functions/operators
   if (!checkBody(body,paramlist,&locals)){
-    cout << "undefined variables/functions/operators used, "
-	 << "no definition possible!\n";
+
     delete body;
     delete paramlist;
-    return;
+    throw SubException<MathExpression::DefinitionError,MathExpression>(string("undefined variables/functions/operators used, ")
+								       + "no definition possible!");
+
   }
   
   // build functionelement
   fe = new FunctionElement(functionname,paramlist,body);
   
   this->functionlist->insert(fe); // insert in functionlist;
+
+  functionlist->setModified(true);
   
 }
 

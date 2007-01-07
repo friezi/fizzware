@@ -1,3 +1,5 @@
 v2.52:
 - added commandline-parameter "commands": commands will be loaded before execution
 
+v2.53:
+- if variables or functions are modified, the user will be prompted on exiting
