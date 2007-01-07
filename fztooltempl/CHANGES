@@ -11,6 +11,9 @@ v1.95:
   - added operator!()
 
 v1.96:
-- added sections in PropertyReader
-- classname PropertyReader::iterator changed to PropertyReader::properties_iterator
+- PropertyReader:
+  - added sections
+  - classname PropertyReader::iterator changed to PropertyReader::properties_iterator
+  - new method update() : substitute for modify()
+  - method modify() deprecated
 
