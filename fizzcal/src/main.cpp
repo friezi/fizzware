@@ -205,12 +205,12 @@ int main(int argc, char **argv, char **envp){
       } catch (EvalException &meee){
 
 	// why this sometimes doesn't work I really don't know
-	// 	cout << meee.getMsg();
-	meee.show();
+	cerr << "error: " << meee.getMsg();
 
 	if (meee.getObjName() != "")
-	  cerr << " : " << meee.getObjName();
-// 	cout << "\n";
+	  cerr << ": " << meee.getObjName();
+
+	cerr << endl;
 
       }
 
