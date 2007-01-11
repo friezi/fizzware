@@ -97,7 +97,7 @@ int main(int argc, char **argv, char **envp){
     if ( interactive == false ){
 
       mathexpression = new MathExpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
-      cout << mathexpression->eval() << "\n";
+      cout << mathexpression->eval() << endl;
       delete mathexpression;
       delete varlist;
       return(0);
@@ -200,7 +200,7 @@ int main(int argc, char **argv, char **envp){
 	}
 
 	double result = mathexpression.eval();
-	cout << result << "\n";
+	cout << result << endl;
 
       } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
@@ -234,7 +234,7 @@ int main(int argc, char **argv, char **envp){
 
     // komischerweise werden ohne diesen catch-block die exceptions im inneren
     // nicht abgefangen !?!? (Ist eigentlich unnoetig)
-    cerr << "syntaxerror: " << mese.getMsg() << "\n";
+    cerr << "syntaxerror: " << mese.getMsg() << endl;
     exit(1);
 
   } catch (Exception_T &e){
@@ -281,7 +281,7 @@ void undefineFunctions(FunctionList *fl, LineScanner & lscanner){
     try{
 
       fl->remove(fun.c_str());
-      cout << fun << " undefined\n";
+      cout << fun << " undefined" << endl;
       removed = true;
 
     } catch (Exception<FunctionList> &fle){
@@ -290,7 +290,7 @@ void undefineFunctions(FunctionList *fl, LineScanner & lscanner){
   }
   
   if ( removed == false )
-    cout << "nothing undefined\n";
+    cout << "nothing undefined" << endl;
 
 }
 
@@ -304,7 +304,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
     try{
 
       vl->remove(var.c_str());
-      cout << var << " removed\n";
+      cout << var << " removed" << endl;
       removed = true;
 
     } catch (Exception<VarList> &vle){
@@ -313,7 +313,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
   }
   
   if ( removed == false )
-    cout << "nothing removed\n";
+    cout << "nothing removed" << endl;
 
 }
 void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanner){
@@ -401,7 +401,7 @@ void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
 
     } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
-      cerr << "syntaxerror: " << mese.getMsg() << "\n";
+      cerr << "syntaxerror: " << mese.getMsg() << endl;
 
     } catch (EvalException &meee){
 
@@ -409,7 +409,7 @@ void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
 
       if (meee.getObjName() != "")
 	cout << " : " << meee.getObjName();
-      cout << "\n";
+      cout << endl;
 
     }
 

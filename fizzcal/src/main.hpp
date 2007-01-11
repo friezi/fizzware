@@ -65,7 +65,7 @@ void gpl(const char *nix);
 void undefineFunctions(mexp::FunctionList *fl, LineScanner & lscanner);
 void removeVariables(mexp::VarList *vl, LineScanner & lscanner);
 void save(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename, LineScanner & lscanner);
-void load(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename);
+void load(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename, bool interactive);
 bool checkAnswer(const std::string & text);
 
 #endif
