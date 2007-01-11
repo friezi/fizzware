@@ -1,0 +1,3 @@
+v1.96:
+- file mathexpression.cpp:
+  - line 1477: ambiguity of log() is solved

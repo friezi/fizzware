@@ -1474,7 +1474,7 @@ double MathExpression::eval() throw (Exception_T){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of ld negative!");
 	else
-	  return(log(right->eval())/log(2));
+	  return(log(right->eval())/log(2.0));
       } else if (!strcmp("log",getOprtr())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of log negative!");
