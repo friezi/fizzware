@@ -3,3 +3,5 @@ v2.52:
 
 v2.53:
 - if variables or functions are modified, the user will be prompted on exiting
+- prompting in each input-line
+- on load, the loaded variables and functions are shown

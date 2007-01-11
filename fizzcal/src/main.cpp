@@ -32,6 +32,7 @@ const char *version="2.53";
 
 const static string formula = "formula";
 const static string commands = "commands";
+const static string prompt = ">>> ";
 const static string exit_modified_text = "Variables or functions have been modified! Do you really want to quit without saving? (y,n) ";
 
 int main(int argc, char **argv, char **envp){
@@ -102,7 +103,7 @@ int main(int argc, char **argv, char **envp){
 
       try{
 
-	input = (char *)readline(NULL);
+	input = (char *)readline(prompt.c_str());
 
 	if ( input.get() ){
 	  if ( *input.get() ){
@@ -115,6 +116,8 @@ int main(int argc, char **argv, char **envp){
 	    if ( checkAnswer(exit_modified_text) == false )
 	      continue;
 
+	  cout << endl;
+	  
 	  break;
 	  
 	}
@@ -192,7 +195,7 @@ int main(int argc, char **argv, char **envp){
 	}
 
 	double result = mathexpression.eval();
-	cout << "result: " << result << "\n";
+	cout << result << "\n";
 
       } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
@@ -384,6 +387,8 @@ void load(VarList *vl, FunctionList *fl,  string filename){
   while ( (line = fscanner.nextLine()) != "" ){
 
     try{
+
+      cout << "loading " << line.c_str() << endl;
 
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
