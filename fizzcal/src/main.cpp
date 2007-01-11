@@ -44,6 +44,7 @@ int main(int argc, char **argv, char **envp){
   VarList *varlist = 0;
   FunctionList *functionlist = 0;
   bool bflag = false;
+  bool interactive = true;
   MemPointer<char> input;
   MemPointer<char> pathname;
 
@@ -78,16 +79,22 @@ int main(int argc, char **argv, char **envp){
 
     }
     
+    if ( cmdlparser.checkParameter(formula).first == true )
+      interactive = false;
+
+    if ( interactive == true )
+      header(programname);
+    
     varlist = new VarList();
     varlist->insert("pi",M_PI,true);
     varlist->insert("e",M_E,true);
 
     functionlist = new FunctionList();
-
-    if ( cmdlparser.checkParameter(commands).first == true )
-      load(varlist,functionlist,cmdlparser.checkParameter(commands).second);
     
-    if ( cmdlparser.checkParameter(formula).first == true ){
+    if ( cmdlparser.checkParameter(commands).first == true )
+      load(varlist,functionlist,cmdlparser.checkParameter(commands).second,interactive);
+    
+    if ( interactive == false ){
 
       mathexpression = new MathExpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
       cout << mathexpression->eval() << "\n";
@@ -96,8 +103,6 @@ int main(int argc, char **argv, char **envp){
       return(0);
 
     }
-
-    header(programname);
 
     for (;;){
 
@@ -175,7 +180,7 @@ int main(int argc, char **argv, char **envp){
 
 	} else if ( firstword == LOAD ){
 
-	  load(varlist,functionlist,lscanner.nextToken());
+	  load(varlist,functionlist,lscanner.nextToken(),interactive);
 	  continue;
 
 	} else if (!strcmp(input.get(),FUNCS)){
@@ -359,7 +364,7 @@ void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanne
   
 }
 
-void load(VarList *vl, FunctionList *fl,  string filename){
+void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
 
   // save initial state
   bool vl_modified = vl->isModified();
@@ -388,7 +393,8 @@ void load(VarList *vl, FunctionList *fl,  string filename){
 
     try{
 
-      cout << "loading " << line.c_str() << endl;
+      if ( interactive == true )
+	cout << "loading " << line.c_str() << endl;
 
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
