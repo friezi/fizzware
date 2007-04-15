@@ -235,7 +235,7 @@ int main(int argc, char **argv, char **envp){
 
       } catch (EvalException &meee){
 
-	// why this sometimes doesn't work I really don't know
+	// why this doesn't work sometimes I really don't know
 	cerr << "error: " << meee.getMsg();
 
 	if (meee.getObjName() != "")
@@ -287,10 +287,10 @@ string setupParser(CmdlParser& parser){
   parser.addParameter(formula,formula,"a formula to be evaluated");
   parser.synonym(formula) << "f" << "Formula" << "F";
 
-  parser.addParameter("precision","value","display-precision of post decimal position of floating-points");
+  parser.addParameter("precision","value","display-precision of post decimal positions of floating-points");
   parser.synonym("precision") << "p" << "Precision" << "P";
 
-  parser.addParameter(commands,commands,"commands that should be load before execution");
+  parser.addParameter(commands,commands,"commands that should be loaded before execution");
   parser.synonym(commands) << "c" << "Commands" << "C";
 
   return parser.usage();
