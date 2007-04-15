@@ -18,3 +18,8 @@ v1.96:
   - method modify() deprecated
 - MathExpression:
   - constructor mathexpression throws additionaly a SubException<MathExpression::DefinitionError,MathExpression> 
+
+v1.97:
+- MathExpression:
+  - changed method-signature:
+    The methods "print" and "toString" expect a parameter defining the display-precision of post decimals.

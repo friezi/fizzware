@@ -6,3 +6,7 @@ v2.52:
 - builtin function sgn() returns now "1" for input "0"
 - unary minus and plus can be used anywhere in the expression, not only at the beginning,
   that's why "a=-2" will work now
+
+v2.54:
+- due to scientific-mode output of floatingpoints, there was a syntaxcheck-problem while reading floatingpoints in
+  scientific notation. This problem is fixed because there's no scientific-mode output anymore.

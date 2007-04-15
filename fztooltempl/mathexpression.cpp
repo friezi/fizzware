@@ -158,21 +158,31 @@ void VarList::unprotect(const char *name){
   return;
 }
 
-void VarList::print() const{
-  cout << toString(true);
+void VarList::print(streamsize precision) const{
+  cout << toString(true,precision);
 }
 
-string VarList::toString(bool include_protected) const{
+string VarList::toString(bool include_protected, streamsize precision) const{
 
   ostringstream vars;
 
   const VarElement *ve;
 
   ve=first;
+
   while(ve){
 
-    if ( ve->protect == false || include_protected == true )
-      vars << ve->getName() << "=" << ve->getValue() << endl;
+    if ( ve->protect == false || include_protected == true ){
+
+      ostringstream value;
+      value.setf(ios::fixed);
+      value.precision(precision);
+
+      value << ve->getValue();
+
+      vars << ve->getName() << "=" << MathExpression::skipTrailingZeros(value.str()) << endl;
+
+    }
 
     ve = ve->next;
 
@@ -262,7 +272,7 @@ void FunctionList::remove(const char *name) throw(Exception<FunctionList>){
   throw Exception<FunctionList>("not defined!");
 }
 
-void FunctionList::print(const char *name){
+void FunctionList::print(streamsize precision, const char *name){
 
   FunctionElement *curr;
   bool match=true, stop=false;
@@ -286,12 +296,12 @@ void FunctionList::print(const char *name){
       std::cout << curr->getName();
 
       if ( curr->paramlist )
-	curr->paramlist->print();
+	curr->paramlist->print(precision);
       else
 	std::cout << "()";
 
       std::cout << "=";
-      curr->body->print();
+      curr->body->print(precision);
       std::cout << "\n";
     }
     curr = curr->next;
@@ -300,11 +310,14 @@ void FunctionList::print(const char *name){
   }
 }
 
-string FunctionList::toString() const{
+string FunctionList::toString(streamsize precision) const{
 
   ostringstream funs;
 
   FunctionElement *curr;
+
+  funs.setf(ios::fixed);
+  funs.precision(precision);
 
   curr = this->first;
 
@@ -313,12 +326,12 @@ string FunctionList::toString() const{
     funs << curr->getName();
 
     if (curr->paramlist)
-      funs << curr->paramlist->toString();
+      funs << curr->paramlist->toString(precision);
     else
       funs << "()";
 
     funs << "=";
-    funs << curr->body->toString();
+    funs << curr->body->toString(precision);
     funs << endl;
 
     curr = curr->next;
@@ -1342,11 +1355,11 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,
   return(true);
 }
 
-void MathExpression::print() const{
-  cout << toString();
+void MathExpression::print(streamsize precision) const{
+  cout << toString(precision);
 }
 
-string MathExpression::toString() const{
+string MathExpression::toString(streamsize precision) const{
 
   ostringstream exp;
 
@@ -1355,27 +1368,37 @@ string MathExpression::toString() const{
     if (this->isOprtr()){
       if (this->oprtr[0]=='!'){
 	if (this->right)
-	  exp << this->right->toString();
+	  exp << this->right->toString(precision);
 	exp << this->getOprtr();
       } else if (!strcmp(this->getOprtr(),"log")
 		 || !strcmp(this->getOprtr(),SUM)
 		 || !strcmp(this->getOprtr(),PROD)){
 	exp << this->getOprtr();
 	exp << "[";
-	exp << this->left->toString();
+	exp << this->left->toString(precision);
 	exp << "]";
-	exp << this->right->toString();
+	exp << this->right->toString(precision);
       } else{
 	if (this->left)
-	  exp << this->left->toString();
+	  exp << this->left->toString(precision);
 	exp << this->getOprtr();
 	if (this->right)
-	  exp << this->right->toString();
+	  exp << this->right->toString(precision);
       }
     } else if (this->isVariable())
       exp << this->getVariable();
-    else
-      exp << this->getValue();
+    else{
+
+      ostringstream value;
+
+      value.setf(ios::fixed);
+      value.precision(precision);
+
+      value << this->getValue();
+
+      exp << skipTrailingZeros(value.str());
+
+    }
   }
   exp << ")";
 
@@ -1525,6 +1548,27 @@ double MathExpression::sgn(double value){
 
 double MathExpression::abs(double value){
   return sgn(value) * value;
+}
+
+string MathExpression::skipTrailingZeros(string value){
+
+  int stop = 0;
+  int pos = 0;
+  bool pflag = false;
+
+  for ( string::iterator it = value.begin(); it != value.end(); it++, pos++ ){
+
+    if ( *it == '.' ){
+
+      pflag = true;
+      stop = pos;
+
+    } else if ( ( pflag == false ) || ( *it != '0' && pflag == true ) )
+      stop = pos+1;
+
+  }
+  
+  return value.substr(0,stop);
 }
 
 double MathExpression::faculty(double fac) throw (Exception_T){

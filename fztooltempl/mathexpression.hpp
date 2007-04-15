@@ -32,6 +32,7 @@
 #define MATHEXPRESSION_HPP
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <stdlib.h>
 #include <memory.h>
@@ -167,13 +168,13 @@ namespace mexp{
     /**
        @brief print prints the mathematic expression totally bracketed to stdout
     */
-    void print() const;
+    void print(std::streamsize precision) const;
 
     /**
        @brief returns a string-representation of the expression
        @return the string-representation
     */
-    std::string toString() const;
+    std::string toString(std::streamsize precision) const;
     
     // eval evaluates the expression
     // return: the result
@@ -200,7 +201,9 @@ namespace mexp{
     static double abs(double value);
     
     // more usefull functions:
-    
+ 
+    static std::string skipTrailingZeros(std::string value);
+   
     /**
        brackcpy copies all from "arg" into "exprstring" between "open" and 
        "close"; is "open"=0 all to "close" will be copied
@@ -410,8 +413,8 @@ namespace mexp{
     double getValue(const char *name) const throw (Exception_T);
     VarElement *isMember(const char *name) const;
     void unprotect(const char *name=0);
-    void print() const;    
-    std::string toString(const bool include_protected) const;
+    void print(std::streamsize precision) const;    
+    std::string toString(const bool include_protected, std::streamsize precision) const;
     VarList::iterator begin(){ return iterator(first); }
     VarList::iterator end(){ return iterator(0); }
 
@@ -497,13 +500,13 @@ namespace mexp{
        @brief prints the complete list (if name==0) or the function with name <name> to standard-output
        @param name a functionname
     */
-    void print(const char *name=0);
+    void print(std::streamsize precision,const char *name=0);
 
     /**
        @brief returns the complete list represented as a string
        @return the string representing the list
     */
-    std::string toString() const;
+    std::string toString(std::streamsize precision) const;
 
     /**
        @brief tests if function <name> is a member of list

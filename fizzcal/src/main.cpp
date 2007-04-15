@@ -28,7 +28,7 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.53";
+const char *version="2.54";
 
 const static string formula = "formula";
 const static string commands = "commands";
@@ -47,6 +47,7 @@ int main(int argc, char **argv, char **envp){
   bool interactive = true;
   MemPointer<char> input;
   MemPointer<char> pathname;
+  streamsize precision = 6;
 
 
   try{
@@ -78,6 +79,9 @@ int main(int argc, char **argv, char **envp){
       exit(0);
 
     }
+
+    if ( cmdlparser.checkParameter("precision").first == true )
+      precision = (streamsize)atoi(cmdlparser.checkParameter("precision").second.c_str());
     
     if ( cmdlparser.checkParameter(formula).first == true )
       interactive = false;
@@ -160,7 +164,7 @@ int main(int argc, char **argv, char **envp){
 
 	} else if (!strcmp(input.get(),VARS)){
 
-	  varlist->print();
+	  varlist->print(precision);
 	  continue;
 
 	} else if ( firstword == REMVAR ){
@@ -175,7 +179,7 @@ int main(int argc, char **argv, char **envp){
 
 	} else if ( firstword == SAVE ){
 
-	  save(varlist,functionlist,lscanner.nextToken(),lscanner);
+	  save(varlist,functionlist,precision,lscanner.nextToken(),lscanner);
 	  continue;
 
 	} else if ( firstword == LOAD ){
@@ -183,9 +187,23 @@ int main(int argc, char **argv, char **envp){
 	  load(varlist,functionlist,lscanner.nextToken(),interactive);
 	  continue;
 
+	} else if ( firstword == SETPRECISION ){
+
+	  string value = lscanner.nextToken();
+
+	  if ( value != "" )
+	    precision = (streamsize)atoi(value.c_str());
+
+	  continue;
+
+	} else if ( firstword == SHOWPRECISION ){
+
+	  cout << precision << endl;
+	  continue;
+
 	} else if (!strcmp(input.get(),FUNCS)){
 
-	  functionlist->print();
+	  functionlist->print(precision);
 	  continue;;
 
 	}
@@ -194,13 +212,18 @@ int main(int argc, char **argv, char **envp){
 
 	if ( bflag == true ){
 
-	  mathexpression.print();
+	  mathexpression.print(precision);
 	  cout << endl;
 
 	}
 
-	double result = mathexpression.eval();
-	cout << result << endl;
+	ostringstream result;
+
+	result.setf(ios::fixed);
+	result.precision(precision);
+
+	result << mathexpression.eval();
+	cout << MathExpression::skipTrailingZeros(result.str()) << endl;
 
       } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
 
@@ -264,6 +287,9 @@ string setupParser(CmdlParser& parser){
   parser.addParameter(formula,formula,"a formula to be evaluated");
   parser.synonym(formula) << "f" << "Formula" << "F";
 
+  parser.addParameter("precision","value","display-precision of post decimal position of floating-points");
+  parser.synonym("precision") << "p" << "Precision" << "P";
+
   parser.addParameter(commands,commands,"commands that should be load before execution");
   parser.synonym(commands) << "c" << "Commands" << "C";
 
@@ -316,7 +342,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
     cout << "nothing removed" << endl;
 
 }
-void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanner){
+void save(VarList *vl, FunctionList *fl, streamsize precision, string filename, LineScanner & lscanner){
 
   bool write = true;
 
@@ -354,8 +380,8 @@ void save(VarList *vl, FunctionList *fl, string filename,  LineScanner & lscanne
 
   }
 
-  file << vl->toString(false);
-  file << fl->toString();
+  file << vl->toString(false,precision);
+  file << fl->toString(precision);
 
   cout << "commands saved to file \"" << filename << "\"" << endl;
 
@@ -494,18 +520,20 @@ void show(const char *pname, void (*what)(const char *)){
 
 void printHelp(const char *pname){
   cout << "help:\n\n"
-       << "the following commands are accessible:\n\n"
-       << HELP << "\t\tdisplay this helpfile\n"
-       << GPL << "\t\tshows the GPL\n"
-       << QUIT << "\t\tends the program\n"
-       << VARS << "\t\tshows all variables with values\n"
-       << REMVAR << " [var1 [...]]" << "\t\tundefines the variables\n"
-       << UNDEF << " [fun1 [...]]" << "\t\tundefines the functions\n"
-       << FUNCS << "\t\tshows all user-defined functions\n"
+       << "the following commands are accessible:" << endl << endl
+       << HELP << "\t\tdisplay this helpfile" << endl
+       << GPL << "\t\tdisplays the GPL" << endl
+       << QUIT << "\t\tends the program" << endl
+       << VARS << "\t\tdisplays all variables with values" << endl
+       << REMVAR << " [var1 [...]]" << "\t\tundefines the variables" << endl
+       << UNDEF << " [fun1 [...]]" << "\t\tundefines the functions" << endl
+       << FUNCS << "\t\tdisplays all user-defined functions\n"
        << SAVE << " <filename>" << "\t\tsaves all user-defined variables and commands to file <filename>" << endl
        << LOAD << " <filename>" << "\t\tloads all user-defined variables and commands from file <filename>" << endl
-       << FON << "\t\tdisplays the formula\n"
-       << FOFF << "\t\thides the formula\n"
+       << SETPRECISION << " <value>" << "\tsets the display-precision for the post decimal position for floating-points" << endl
+       << SHOWPRECISION << "\t\tdisplays the display-precision for the post decimal position for floatong-points" << endl
+       << FON << "\t\tdisplays the formula" << endl
+       << FOFF << "\t\thides the formula" << endl
        << "\n\n"
        << "In " << pname << " you can type a mathematical formula which will"
        << " be evaluated. The\nspeciality of " << pname << " is that you can "

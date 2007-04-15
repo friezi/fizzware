@@ -54,6 +54,8 @@
 #define FUNCS "funs"  // show functiondefinitions
 #define SAVE "save" // save the variables and commands to file
 #define LOAD "load" // load variables and commands from file
+#define SETPRECISION "setprecision" // set precision for post decimal position for float-values
+#define SHOWPRECISION "showprecision" // show pd-precision for float-values
 #define SHOWHELP "less" // program to show help
 #define SHOWHELP2 "more" // program to show help
 
@@ -64,7 +66,7 @@ void printHelp(const char *pname);
 void gpl(const char *nix);
 void undefineFunctions(mexp::FunctionList *fl, LineScanner & lscanner);
 void removeVariables(mexp::VarList *vl, LineScanner & lscanner);
-void save(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename, LineScanner & lscanner);
+void save(mexp::VarList *vl, mexp::FunctionList *fl, std::streamsize precision, std::string filename, LineScanner & lscanner);
 void load(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename, bool interactive);
 bool checkAnswer(const std::string & text);
 

@@ -10,7 +10,7 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception propertyreader datastructures cmdlparser utils
+CLASS_MODULES = exception propertyreader datastructures cmdlparser
 CM_PATH = $(CLASSLIBRARY_PATH)
 
 IMPORTANT_HEADERS =
@@ -59,7 +59,7 @@ LIB_NAME = $(CLASSLIBRARY:%=$(CLASSLIBRARY_PATH)/lib%.a)
 MAKE_CL_LIB = $(CLASSLIBRARY_PATH:%=$(MAKE) -k -C $(CLASSLIBRARY_PATH) -f %/Makefile)
 
 #bei systemspezifischer Programmierung "-ansi" ausschalten
-CC = g++ -Wall -Wconversion $(ANSI) -pedantic $(INC_EM_PATH) $(INC_CM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
+CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
 
 .PHONY: all clean $(LIB_NAME)_all dist
 
