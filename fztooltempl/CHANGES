@@ -23,3 +23,5 @@ v1.97:
 - MathExpression:
   - changed method-signature:
     The methods "print" and "toString" expect a parameter defining the display-precision of post decimals.
+  - if the upper bound of a Sum or a Prod is less then the startvalue 0 is returned
+

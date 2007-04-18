@@ -1605,27 +1605,37 @@ double MathExpression::sumProd(void)
   from=vl.getValue(me.left->left->left->getVariable());
   to=me.left->right->eval();
 
-  if (from!=(int)from || from<0 || to!=(int)to || to<0)
+  if ( from!=(int)from || from<0 || to!=(int)to )
     throw EvalException
       ("indices in Sum/Prod not natural or negative!");
 
-  for (int i=(int)from;i<=(int)to;){
+  if ( to<from )
+    return 0;
+
+  for ( int i=(int)from;i<=(int)to; ){
+
     if (!p)
-      res+=me.right->eval();  // Summe
+      res += me.right->eval();  // Summe
     else
-      res*=me.right->eval();  // Produkt
+      res *= me.right->eval();  // Produkt
+
     i++;
+
     // neuen Wert der Zaehlvariablen eintragen
     vl.insert(this->left->left->left->getVariable(),(double)i);
+
   }
 
   // neu definierte Variablen in globale Varlist eintragen
-  currve=vl.first;
-  while (currve){
+  currve = vl.first;
+  while ( currve ){
+
     if (strcmp(currve->getName(),this->left->left->left->getVariable())
 	&& !currve->protect)
       this->varlist->insert(currve->getName(),currve->getValue());
+
     currve=currve->next;
+
   }
 
   return res;
