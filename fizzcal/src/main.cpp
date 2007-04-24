@@ -101,7 +101,15 @@ int main(int argc, char **argv, char **envp){
     if ( interactive == false ){
 
       mathexpression = new MathExpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
-      cout << mathexpression->eval() << endl;
+      
+      ostringstream result;
+      
+      result.setf(ios::fixed);
+      result.precision(precision);
+      
+      result << mathexpression->eval();
+      cout << MathExpression::skipTrailingZeros(result.str()) << endl;
+      
       delete mathexpression;
       delete varlist;
       return(0);
