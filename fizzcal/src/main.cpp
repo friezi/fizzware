@@ -40,7 +40,6 @@ int main(int argc, char **argv, char **envp){
   CmdlParser cmdlparser(argc,argv);
   string usage;
   const char *programname = 0;
-  MathExpression *mathexpression = 0;
   VarList *varlist = 0;
   FunctionList *functionlist = 0;
   bool bflag = false;
@@ -100,17 +99,17 @@ int main(int argc, char **argv, char **envp){
     
     if ( interactive == false ){
 
-      mathexpression = new MathExpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
+      MathExpression mathexpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
       
       ostringstream result;
       
       result.setf(ios::fixed);
       result.precision(precision);
       
-      result << mathexpression->eval();
+      result << mathexpression.eval();
       cout << MathExpression::skipTrailingZeros(result.str()) << endl;
       
-      delete mathexpression;
+      delete functionlist;
       delete varlist;
       return(0);
 
@@ -457,17 +456,17 @@ void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
 
 bool checkAnswer(const string & text){
 
-    char *answer;
-    bool result = true;
+  char *answer;
+  bool result = true;
 
-    answer = (char *)readline(text.c_str());
+  answer = (char *)readline(text.c_str());
 
-    if (strcmp(answer,"y"))
-      result = false;
+  if (strcmp(answer,"y"))
+    result = false;
 
-    free(answer);
+  free(answer);
 
-    return result;
+  return result;
 
 }
 
