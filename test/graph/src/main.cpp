@@ -179,6 +179,7 @@ int main(int argc, char **argv){
   tg.insertNeighbour(10,9);
   tg.insertNeighbour(9,11);
   tg.insertNeighbour(11,10);
+  tg.insertNeighbour(3,7);
 
   
   // print the graph-structure for demonstration
@@ -203,17 +204,29 @@ int main(int argc, char **argv){
 
   }
 
-  list< list<int> > *scc;
+  SCCGraph<int> *scc;
 
   // find all strongly connected components
-  scc = tg.find_scc();
+  scc = tg.find_scc(true);
 
-  int count = 1;
-  for ( list< list<int> >::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++, count++ ){
-    cout << "component " << count << ": ";
-    for ( list<int>::iterator c_it = (*scc_it).begin(); c_it != (*scc_it).end(); c_it++ ){
-      cout << *c_it << " ";
+  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+    cout << "component " << (*scc_it)->getId() << ": {";
+    for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+
+      if ( c_it != (*scc_it)->beginNodes() )
+	cout << ",";
+      cout << *c_it;
+
     }
+    cout << "}" << endl;
+  }
+
+  cout << "componentgraph:" << endl;
+
+  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+    cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    for ( SCCGraphComponent<int>::neighbouriterator c_it = (*scc_it)->beginNeighbours(); c_it != (*scc_it)->endNeighbours(); c_it++ )
+      cout << (*c_it)->getId() << " ";
     cout << endl;
   }
 

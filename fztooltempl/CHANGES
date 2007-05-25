@@ -28,7 +28,7 @@ v1.97:
 v1.98:
 - Graphable:
   - find_scc() got the optional parameter construct_scc_graph. If set to true, find_scc() will construct the scc-graph (which is a dag)
-    besides determining the components.
+    besides determining the components. The return-value of find_scc() has been changed to SCCGraph * .
   - for this purpose two new classes have been designed:
 	SCCGraph and SCCGraphComponent
 
