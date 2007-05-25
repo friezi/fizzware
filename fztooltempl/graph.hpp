@@ -360,11 +360,11 @@ scc_visit(TNode node, SCCGraph<TNode> & scc, std::stack<TNode> & nodestack, Valu
 
 	for ( neighbour_iterator *tnit = (neighbour_iterator *)tnit_begin.get(); *tnit != *tnit_end.get(); (*tnit)++ ){
 
-	  SCCGraphComponent<TNode> * cn_component;
+	  SCCGraphComponent<TNode> * tn_component;
 
-	  if ( ( cn_component = nodecomponents[**tnit] ) != 0 )
-	    if ( cn_component != component)
-	      component->insertNeighbour(cn_component);
+	  if ( ( tn_component = nodecomponents[**tnit] ) != 0 )
+	    if ( tn_component != component)
+	      component->insertNeighbour(tn_component);
 
 	}
 
