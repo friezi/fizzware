@@ -45,7 +45,9 @@
 #define BLKSIZE 20
 
 /**
-   It reads key/value-pairs from files. Sections are supported but not required.
+   It reads key/value-pairs from files. Sections are optional and not required.
+   If the parser finds a section-definition all subsequent parameters will be stored in this section until a different
+   section-definition is found. If properties are not bound to a section, they're internally stored in the section "NO_SECTION". 
    @brief To extract properties from a property-file
 */
 
@@ -332,7 +334,7 @@ public:
   std::string get(const std::string section, const std::string property) const throw (SubException<NoSectionErr,PropertyReader>);
 
   /**
-     @brief Get the value of the property of section "No_Section"
+     @brief Get the value of the property of section "NO_SECTION"
      @param property name of property
      @return value of property
   */
@@ -347,7 +349,7 @@ public:
   void set(const std::string & section, const std::string & property, const std::string & value);
 
   /**
-     @brief Set the value of the a property of section "No_Section"
+     @brief Set the value of the a property of section "NO_SECTION"
      @param property name of property
      @param value value of property
   */
@@ -362,21 +364,21 @@ public:
   bool isMember(const std::string section, std::string property) const;
 
   /**
-     @brief checks if property is a member of section NO_SECTION
+     @brief checks if property is a member of section "NO_SECTION"
      @param property the property
      @return true or false
   */
   bool isMember(std::string property) const throw (SubException<NoSectionErr,PropertyReader>){ return isMember(NO_SECTION,property); }
 
   /**
-     @brief erases one entry of the properties of a specific section
+     @brief erases one entry of the properties of the a specific section
      @param section name of section
      @param property name of property to be erased
   */
   void erase(const std::string section, const std::string property);
 
   /**
-     @brief erases one entry of the properties
+     @brief erases one entry of the properties of section "NO_SECTION"
      @param property name of property to be erased
   */
   void erase(const std::string property){ erase(NO_SECTION,property); }
