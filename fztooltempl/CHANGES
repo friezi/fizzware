@@ -25,3 +25,10 @@ v1.97:
     The methods "print" and "toString" expect a parameter defining the display-precision of post decimals.
   - if the upper bound of a Sum or a Prod is less then the startvalue 0 is returned
 
+v1.98:
+- Graphable:
+  - find_scc() got the optional parameter construct_scc_graph. If set to true, find_scc() will construct the scc-graph (which is a dag)
+    besides determining the components.
+  - for this purpose two new classes have been designed:
+	SCCGraph and SCCGraphComponent
+
