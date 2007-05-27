@@ -57,7 +57,7 @@ namespace graph{
      So you resp. your graph-class has to provide several methods which are important to execute graph-algorithms.
      You can define any graph-structure you want, just define the purely virtual methods, which are mainly iterators for
      neighbours and nodes. Furthermore you have to extend the nested classes neighbour_iterator and node_iterator and override
-     methods from their super-class iterator. With these methods any data-structure can behave as a graph-structure.
+     methods from their super-class abstract_iterator. With these methods any data-structure can behave as a graph-structure.
      @brief If a class extends Graphable it has access to graph-algorithms
      @pre For an object of type Graphable<Anytype> two objects t1 and t2 of type Anytype must be comparable by t1<t2. Thus "<" must be overloaded for
      the class Anytype.
@@ -77,21 +77,21 @@ namespace graph{
        classes node_iterator and neighbour_iterator
        @nosubgrouping
     */
-    class iterator{
+    class abstract_iterator{
 
       friend class Graphable<TNode>;
 
     public:
 
-      virtual ~iterator(){}
+      virtual ~abstract_iterator(){}
 
       /** @name common iterator-functions */
       //@{
       virtual void operator++() = 0;
       virtual void operator++(int) = 0;
-      virtual TNode & operator*() = 0;
-      virtual bool operator!=(const iterator & it_rval) = 0;
-      virtual bool operator==(const iterator & it_rval) = 0;
+      virtual const TNode & operator*() = 0;
+      virtual bool operator!=(const abstract_iterator & it_rval) = 0;
+      virtual bool operator==(const abstract_iterator & it_rval) = 0;
       //@}
       
     };
@@ -100,9 +100,9 @@ namespace graph{
 
     /**
        @brief To implement Graphable you have to extend this class and override
-       methods from the super-class iterator
+       methods from the super-class abstract_iterator
     */
-    class node_iterator : public iterator{
+    class node_iterator : public abstract_iterator{
 
       friend class Graphable<TNode>;
 
@@ -114,9 +114,9 @@ namespace graph{
 
     /**
        @brief To implement Graphable you have to extend this class and override
-       methods from the super-class iterator
+       methods from the super-class abstract_iterator
     */
-    class neighbour_iterator : public iterator{
+    class neighbour_iterator : public abstract_iterator{
 
       friend class Graphable<TNode>;
 
@@ -127,70 +127,106 @@ namespace graph{
     };
 
     /**
-       Since Graphable is an abstract class it's impossible for the neighboursBegin() - and neighboursEnd() - method
-       to return a class-object, it has to return a pointer which won't be destructed automatically. temp_iterator just
-       contains this pointer and destroys it automatically on destruction.
-       @attention Destruction of two different temp_iterators containing the same reference will result (of course) in a segmentation-fault!
-       @brief very useful for creating temporary iterators which are destructed automatically
+       This is a wrapper-class for an abstract_iterator. Since Graphable is an abstract class and a user must define its own subclasses of node_iterator and
+       neighbour_iterator it's impossible for the beginNodesPtr() - and beginNeighboursPtr() - method
+       to return a class-object, they have to return a pointer which won't be destructed automatically. iterator just
+       contains this pointer and destroys the referenced object  automatically on destruction. Use beginNodes() and beginNeighbours() (resp. end...()) for creating
+       iterators.
+       @attention Destruction of two different iterators containing the same reference will result (of course) in a segmentation-fault!
+       @brief For creating iterators which are destructed automatically
     */
-    class temp_iterator{
+    class iterator{
 
-      iterator *it;
+    private:
 
-      temp_iterator(){}
+      abstract_iterator *it;
 
-      temp_iterator(const temp_iterator &){}
+      bool delete_on_destruction;
+
+      iterator(){}
 
     public:
 
-      temp_iterator(iterator *it) : it(it){}
+      iterator(abstract_iterator *it, bool delete_on_destruction = true) : it(it), delete_on_destruction(delete_on_destruction){}
 
-      ~temp_iterator(){ delete it; }
+      /**
+	 This should never be used because copied iterators will point to the same abstract_iterators. Multiple deletion will
+	 most probably result in segmentation-fault or bus-error.
+	 @internal
+      */
+      iterator(const iterator & it){
+	
+	this->it = it.it;
+	this->delete_on_destruction = true;
 
-      iterator * get(){ return it; }
+      }
+
+      ~iterator(){
+	
+	if ( delete_on_destruction == true )
+	  delete it;
+
+      }
+
+      void operator++(){ ++(*it); }
+      void operator++(int){ (*it)++; }
+      const TNode & operator*(){ return **it; }
+      bool operator!=(const iterator & it_rval){ return ( *this->it != *it_rval.it ); }
+      bool operator==(const abstract_iterator & it_rval){ return ( *this->it == *it_rval.it ); }
 
     };
 
     virtual ~Graphable(){}
 
-
     /**
        @name override these methods*/
     //@{
     /**
+       This method must be overridden. This is only for internal use. Use beginNodes() which takes
+       advantage of this method.
        @brief points to the first entry
-       @return the iterator
+       @return pointer to the node_iterator
+       @internal
     */
-    virtual node_iterator * nodesBegin() = 0;
+    virtual node_iterator * beginNodesPtr() = 0;
 
     /**
+       This method must be overridden. This is only for internal use. Use endNodes() which takes
+       advantage of this method.
        @brief points to the point beyond the last entry
-       @return the iterator
+       @return pointer to a node_iterator
+       @internal
     */
-    virtual node_iterator * nodesEnd() = 0;
+    virtual node_iterator * endNodesPtr() = 0;
 
     /**
+       This method must be overridden. This is only for internal use. Use beginNeighbours() which takes
+       advantage of this method.
        @brief points to the first entry
        @param node a node neighbours should be searched for
-       @return the iterator
+       @return pointer to a neighbour_iterator
+       @internal
     */
-    virtual neighbour_iterator * neighboursBegin(const TNode & node) = 0;
+    virtual neighbour_iterator * beginNeighboursPtr(const TNode & node) = 0;
 
     /**
+       This method must be overridden. This is only for internal use. Use endNeighbours() which takes
+       advantage of this method.
        @brief points to the point beyond the last entry
        @param node a node neighbours should be searched for
-       @return the iterator
+       @return pointer to a neighbour_iterator
+       @internal
     */
-    virtual neighbour_iterator * neighboursEnd(const TNode & node) = 0;
+    virtual neighbour_iterator * endNeighboursPtr(const TNode & node) = 0;
 
     /**
-       @brief should return the maximum number of nodes in the structure
+       @brief returns the maximum number of nodes in the structure
        @return maximum number
     */
     virtual unsigned int maxNodes() = 0;
 
     /**
-       @brief should return the starting-node for some graph-algorithms
+       @brief returns the starting-node
        @return starting node
     */
     virtual TNode startNode() = 0;
@@ -204,6 +240,33 @@ namespace graph{
        @return a list resp. graph-structure of components containing the connected nodes
     */
     SCCGraph<TNode> * find_scc(bool construct_scc_graph);
+    
+    /**
+       @brief creates an iterator pointing to the first node
+       @return the iterator (wrapped)
+    */
+    iterator beginNodes(){ return iterator(beginNodesPtr(),false); }
+    
+    /**
+       @brief creates an iterator pointing beyond the last node
+       @return the iterator (wrapped)
+    */
+    iterator endNodes(){ return iterator(endNodesPtr(),false); }
+    
+    /**
+       @brief creates an iterator pointing to the first neighbour of a node
+       @param node the node
+       @return the iterator (wrapped)
+    */
+    iterator beginNeighbours(const TNode & node){ return iterator(beginNeighboursPtr(node),false); }
+    
+    /**
+       @brief creates an iterator pointing beyond the last neighbour of a node
+       @param node the node
+       @return the iterator (wrapped)
+    */
+    iterator endNeighbours(const TNode & node){ return iterator(endNeighboursPtr(node),false); }
+
     //@}
 
   private:
@@ -217,6 +280,7 @@ namespace graph{
      It stores all containing nodes. Besides a list containing
      all neighbours in the resulting component-graph will be filled if the proper option in find_scc() is provided.
      @brief This class represents a strongly connected component.
+     @since v1.98
   */
   template <typename TNode>
   class SCCGraphComponent{
@@ -311,9 +375,10 @@ namespace graph{
      Besides this graph represents a component-dag of strongly connected components. I.e. The sccs form nodes in a graph where scc1 is neighbour of scc2
      (for any two vertices scc1 and scc2) if any of the included nodes of scc1 is neighbour of any included node of scc2.
      @brief The purpose of this class is to store the strongly connected components of a graph.
+     @since v1.98
   */ 
   template <typename TNode>
-  class SCCGraph /*: public Graphable<SCCGraphComponent<TNode> *>*/ {
+  class SCCGraph : public Graphable<SCCGraphComponent< TNode > *> {
 
   private:
     
@@ -326,8 +391,8 @@ namespace graph{
     SCCGraph(const SCCGraph &){}
 
   public:
-    /* 
-    class scc_node_iterator : public Graphable<SCCGraphComponent<TNode> *>::node_iterator{
+    
+    class node_iterator : public Graphable<SCCGraphComponent<TNode> *>::node_iterator{
 
       friend class SCCGraph<TNode>;
 
@@ -335,46 +400,48 @@ namespace graph{
 
       typename SCCGraph<TNode>::Componentlist::iterator it;
 
-      scc_node_iterator(typename SCCGraph<TNode>::Componentlist::iterator it) : it(it){}
+      node_iterator(typename SCCGraph<TNode>::Componentlist::iterator it) : it(it){}
 
     public:
 
-      ~scc_node_iterator(){}
+      ~node_iterator(){}
 
       // Implement the virtual methods.
       void operator++(){ ++it; }
       void operator++(int){ it++; }
-      SCCGraphComponent<TNode> * & operator*(){ return *it; }
-      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it != ((scc_node_iterator &)it_rval).it ); }
-      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it == ((scc_node_iterator &)it_rval).it ); }
+      SCCGraphComponent<TNode> * const & operator*(){ return *it; }
+      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){ return ( this->it != ((node_iterator &)it_rval).it ); }
+      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){ return ( this->it == ((node_iterator &)it_rval).it ); }
     
 
     };
     
-    class scc_neighbour_iterator : public Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator{
+    class neighbour_iterator : public Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator{
 
       friend class SCCGraph<TNode>;
 
     private:
 
-      typename SCCGraphComponent<TNode>::Neighbourset::iterator it;
+      typename SCCGraphComponent<TNode>::neighbouriterator it;
 
-      void setIt(typename SCCGraphComponent<TNode>::Neighbourset::iterator it_rval){ it = it_rval; }
+      void setIt(typename SCCGraphComponent<TNode>::neighbouriterator it_rval){ it = it_rval; }
 
     public:
 
-      ~scc_neighbour_iterator(){}
+      ~neighbour_iterator(){}
 
       // Implement the virtual methods.
       void operator++(){ ++it; }
       void operator++(int){ it++; }
-      SCCGraphComponent<TNode> * & operator*(){ return *it; }
-      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it != ((scc_neighbour_iterator &)it_rval).it ); }
-      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it == ((scc_neighbour_iterator &)it_rval).it ); }
+      SCCGraphComponent<TNode> * const & operator*(){ return *it; }
+      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){ 
+	return ( this->it != ((neighbour_iterator &)it_rval).it );
+      }
+      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){
+	return ( this->it == ((neighbour_iterator &)it_rval).it );
+      }
     
     };
-    */ 
-    typedef typename Componentlist::iterator iterator;
 
     SCCGraph() : componentcounter(1){}
     
@@ -397,42 +464,31 @@ namespace graph{
       return component;
 
     }
-
-    /**
-       @brief iterator pointing to beginning of components
-       @return the iterator
-    */
-    iterator begin(){ return components.begin(); }
-
-    /**
-       @brief iterator pointing to end of components
-       @return the iterator
-    */
-    iterator end(){ return components.end(); }
     
     /**
        @brief size, i.e. number of contained components in the graph
        @return the size
     */
     int size(){ return componentcounter; }
-    /*
+    
     // We have to provide the Graphable-class Tstgraph with the implementation of the following pure virtual methods.
 
-    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * nodesBegin(){
+    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * beginNodesPtr(){
 
-      return new scc_node_iterator(components.begin());
-
-    }
-
-    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * nodesEnd(){
-
-      return new scc_node_iterator(components.end());
+      return new node_iterator(components.begin());
 
     }
 
-    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * neighboursBegin(const SCCGraphComponent<TNode> * & node){
+    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * endNodesPtr(){
 
-      scc_neighbour_iterator * it = new scc_neighbour_iterator();
+      return new node_iterator(components.end());
+
+    }
+
+    // note: the "const" must be placed after the pointer-declaration. Otherwise the compiler misinterprets the meaning
+    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * beginNeighboursPtr(SCCGraphComponent<TNode> * const & node){
+
+      neighbour_iterator * it = new neighbour_iterator();
 
       typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
     
@@ -442,9 +498,9 @@ namespace graph{
 
     }
 
-    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * neighboursEnd(const SCCGraphComponent<TNode> * & node){
+    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * endNeighboursPtr(SCCGraphComponent<TNode> * const & node){
 
-      scc_neighbour_iterator * it = new scc_neighbour_iterator();
+      neighbour_iterator * it = new neighbour_iterator();
 
       typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
     
@@ -457,7 +513,7 @@ namespace graph{
     unsigned int maxNodes(){ return components.size(); }
 
     SCCGraphComponent<TNode> * startNode(){ return *components.begin(); }
-    */
+    
   };
   
 }
@@ -477,18 +533,14 @@ scc_visit(TNode node, SCCGraph<TNode> & scc, std::stack<TNode> & nodestack, Valu
 
   nodestack.push(node);
 
-  temp_iterator nit_begin(neighboursBegin(node));
-  temp_iterator nit_end(neighboursEnd(node));
-
-  for ( neighbour_iterator *nit = (neighbour_iterator *)nit_begin.get(); *nit != *nit_end.get(); (*nit)++ ){
+  for ( iterator nit = beginNeighbours(node); nit != endNeighbours(node); nit++ ){
     
-    m = (!values[**nit]) ? scc_visit(**nit,scc,nodestack,values,nodecomponents,id,construct_scc_graph) : values[**nit];
+    m = (!values[*nit]) ? scc_visit(*nit,scc,nodestack,values,nodecomponents,id,construct_scc_graph) : values[*nit];
 
     if ( m < min )
       min = m;
     
   }
-
 
   if ( min == values[node] ){
 
@@ -509,14 +561,11 @@ scc_visit(TNode node, SCCGraph<TNode> & scc, std::stack<TNode> & nodestack, Valu
 
 	nodecomponents[topnode] = component;
 
-	temp_iterator tnit_begin(neighboursBegin(topnode));
-	temp_iterator tnit_end(neighboursEnd(topnode));
-
-	for ( neighbour_iterator *tnit = (neighbour_iterator *)tnit_begin.get(); *tnit != *tnit_end.get(); (*tnit)++ ){
+	for ( iterator nit = beginNeighbours(topnode); nit != endNeighbours(topnode); nit++ ){
 
 	  SCCGraphComponent<TNode> * tn_component;
 
-	  if ( ( tn_component = nodecomponents[**tnit] ) != 0 )
+	  if ( ( tn_component = nodecomponents[*nit] ) != 0 )
 	    if ( tn_component != component)
 	      component->insertNeighbour(tn_component);
 
@@ -525,7 +574,6 @@ scc_visit(TNode node, SCCGraph<TNode> & scc, std::stack<TNode> & nodestack, Valu
       }
 
     } while ( topnode != node );
-
 
   }
   
@@ -546,34 +594,25 @@ find_scc(bool construct_scc_graph = false){
   unsigned int min;
 
   // set all values to 0 -> no node is visited yet
-  {
-    temp_iterator ndit_begin(nodesBegin());
-    temp_iterator ndit_end(nodesEnd());
 
-    for ( node_iterator *ndit = (node_iterator *)ndit_begin.get(); *ndit != *ndit_end.get(); (*ndit)++ ){
+  for ( iterator ndit = beginNodes(); ndit != endNodes(); ndit++ ){
 
-      values[**ndit] = 0;
+    values[*ndit] = 0;
 
-      if ( construct_scc_graph == true )
-	nodecomponents[**ndit] = 0;
-
-    }
+    if ( construct_scc_graph == true )
+      nodecomponents[*ndit] = 0;
 
   }
 
   // since not every node must have a neighbour which points to it, we have to start from all unvisited nodes
-  {
-    temp_iterator ndit_begin(nodesBegin());
-    temp_iterator ndit_end(nodesEnd());
 
-    for ( node_iterator *ndit = (node_iterator *)ndit_begin.get(); *ndit != *ndit_end.get(); (*ndit)++ ){
+  for ( iterator ndit = beginNodes(); ndit != endNodes(); ndit++ ){
       
-      if ( values[**ndit] == 0 )
-	min = scc_visit(**ndit,*scc,nodestack,values,nodecomponents,id,construct_scc_graph);
+    if ( values[*ndit] == 0 )
+      min = scc_visit(*ndit,*scc,nodestack,values,nodecomponents,id,construct_scc_graph);
 
-    }
-      
   }
+      
 
   return scc;
 

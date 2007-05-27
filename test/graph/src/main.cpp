@@ -37,9 +37,9 @@ public:
     // Implement the virtual methods.
     void operator++(){ ++count; }
     void operator++(int){ count++; }
-    int & operator*(){ return count; }
-    bool operator!=(const iterator & it_rval){ return ( this->count != ((tg_node_iterator &)it_rval).count ); }
-    bool operator==(const iterator & it_rval){ return ( this->count == ((tg_node_iterator &)it_rval).count ); }
+    const int & operator*(){ return count; }
+    bool operator!=(const abstract_iterator & it_rval){ return ( this->count != ((tg_node_iterator &)it_rval).count ); }
+    bool operator==(const abstract_iterator & it_rval){ return ( this->count == ((tg_node_iterator &)it_rval).count ); }
     
 
   };
@@ -61,9 +61,9 @@ public:
     // Implement the virtual methods.
     void operator++(){ ++it; }
     void operator++(int){ it++; }
-    int & operator*(){ return *it; }
-    bool operator!=(const iterator & it_rval){ return ( this->it != ((tg_neighbour_iterator &)it_rval).it ); }
-    bool operator==(const iterator & it_rval){ return ( this->it == ((tg_neighbour_iterator &)it_rval).it ); }
+    const int & operator*(){ return *it; }
+    bool operator!=(const abstract_iterator & it_rval){ return ( this->it != ((tg_neighbour_iterator &)it_rval).it ); }
+    bool operator==(const abstract_iterator & it_rval){ return ( this->it == ((tg_neighbour_iterator &)it_rval).it ); }
     
 
   };
@@ -101,14 +101,14 @@ public:
 
     list<int>::iterator it = find(neighbourlist->begin(),neighbourlist->end(),neighbour);
 
-      if ( it != neighbourlist->end() )
-	neighbourlist->erase(it);
+    if ( it != neighbourlist->end() )
+      neighbourlist->erase(it);
 
   }
 
   // We have to provide the Graphable-class Tstgraph with the implementation of the following pure virtual methods.
 
-  node_iterator * nodesBegin(){
+  node_iterator * beginNodesPtr(){
 
     tg_node_iterator * it = new tg_node_iterator();
     
@@ -117,7 +117,7 @@ public:
     return it;
 
   }
-  node_iterator * nodesEnd(){
+  node_iterator * endNodesPtr(){
 
     tg_node_iterator * it = new tg_node_iterator();
    
@@ -127,7 +127,7 @@ public:
 
   }
 
-  neighbour_iterator * neighboursBegin(const int & node){
+  neighbour_iterator * beginNeighboursPtr(const int & node){
 
     tg_neighbour_iterator * it = new tg_neighbour_iterator();
     
@@ -136,7 +136,7 @@ public:
     return it;
 
   }
-  neighbour_iterator * neighboursEnd(const int & node){
+  neighbour_iterator * endNeighboursPtr(const int & node){
 
     tg_neighbour_iterator * it = new tg_neighbour_iterator();
    
@@ -198,18 +198,8 @@ int main(int argc, char **argv){
 
     cout << "neighbours from node " << (*nm_it).first << ": ";
 
-    {
-
-      // because we put the temp_iterators in a separat block, they and their contents will be destroyed automatically
-      // at end of the block.
-
-      Graphable<int>::temp_iterator ni_begin(tg.neighboursBegin((*nm_it).first));
-      Graphable<int>::temp_iterator ni_end(tg.neighboursEnd((*nm_it).first));
-
-      for ( Tstgraph::tg_neighbour_iterator *ni = (Tstgraph::tg_neighbour_iterator *)ni_begin.get(); *ni != *ni_end.get(); (*ni)++ )
-	cout << **ni << " ";
-
-    }
+    for ( Tstgraph::iterator ni = tg.beginNeighbours((*nm_it).first); ni != tg.endNeighbours((*nm_it).first); ni++ )
+      cout << *ni << " ";
 
     cout << endl;
 
@@ -220,7 +210,8 @@ int main(int argc, char **argv){
   // find all strongly connected components
   scc = tg.find_scc(true);
 
-  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+      
     cout << "component " << (*scc_it)->getId() << ": {";
     for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
@@ -234,11 +225,14 @@ int main(int argc, char **argv){
 
   cout << "componentgraph:" << endl;
 
-  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+
     cout << "neighbours of component " << (*scc_it)->getId() << ": ";
-    for ( SCCGraphComponent<int>::neighbouriterator c_it = (*scc_it)->beginNeighbours(); c_it != (*scc_it)->endNeighbours(); c_it++ )
-      cout << (*c_it)->getId() << " ";
+    
+    for ( SCCGraph<int>::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
+      cout << (*nb_it)->getId() << " ";
     cout << endl;
+
   }
 
   delete scc;
@@ -276,7 +270,8 @@ int main(int argc, char **argv){
 
   cout << "finished" << endl << flush;
 
-  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+      
     cout << "component " << (*scc_it)->getId() << ": {";
     for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
@@ -290,12 +285,31 @@ int main(int argc, char **argv){
 
   cout << "componentgraph:" << endl;
 
-  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+
     cout << "neighbours of component " << (*scc_it)->getId() << ": ";
-    for ( SCCGraphComponent<int>::neighbouriterator c_it = (*scc_it)->beginNeighbours(); c_it != (*scc_it)->endNeighbours(); c_it++ )
-      cout << (*c_it)->getId() << " ";
+    
+    for ( SCCGraph<int>::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
+      cout << (*nb_it)->getId() << " ";
     cout << endl;
   }
+
+  // scc is a graph itself so we can call find_scc() as well on this graph (won't make any difference because a dag just stays a dag; only for
+  // demonstrative purpose).
+  SCCGraph< SCCGraphComponent<int> *> * sccscc = scc->find_scc(true);
+
+  cout << endl << "componentgraph's componentgraph:" << endl;
+
+  for ( SCCGraph< SCCGraphComponent<int> *>::iterator scc_it = sccscc->beginNodes(); scc_it != sccscc->endNodes(); scc_it++ ){
+
+    cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    
+    for ( SCCGraph< SCCGraphComponent<int> *>::iterator nb_it = sccscc->beginNeighbours(*scc_it); nb_it != sccscc->endNeighbours(*scc_it); nb_it++ )
+      cout << (*nb_it)->getId() << " ";
+    cout << endl;
+  }
+
+  delete sccscc;
 
   delete scc;
 

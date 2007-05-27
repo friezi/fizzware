@@ -42,8 +42,10 @@
 namespace util{
 
   /**
+     Unfortunately the string-class of the STL doesn't include some more usefull strings-operations (like trunc() for cutting off
+     leading and trailing blanks). The String-class enhances the STL-string-class with usefull functions.
      @brief An extended string-class
-     @since V1.96
+     @since v1.96
   */
   class String : public std::string{
 
@@ -61,7 +63,7 @@ namespace util{
     String(const std::string & s){ (*(std::string *)this) = s; }
     
     /**
-       @brief truncates leading and trailing blanks;
+       @brief cuts off leading and trailing blanks;
        @return an truncated string
     */
     std::string trunc();
