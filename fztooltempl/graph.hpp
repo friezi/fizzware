@@ -47,100 +47,9 @@
 */
 namespace graph{
 
-  /**
-     It stores all containing nodes. Besides a list containing
-     all neighbours in the resulting component-graph will be filled if the proper option in find_scc() is provided.
-     @brief This class represents a strongly connected component.
-  */
+  template <typename TNode> class SCCGraph;
 
-  template <typename TNode>
-  class SCCGraphComponent{
-
-  public:
-
-    typedef std::set< TNode, std::less<TNode> > Nodeset;
-    typedef std::set< SCCGraphComponent<TNode> *, std::less<SCCGraphComponent<TNode> *> > Neighbourset;
-
-  private:
-
-    unsigned int id;
-
-    Nodeset nodes;
-    Neighbourset neighbours;
-
-    // copy-constructor not allowed
-    SCCGraphComponent(const SCCGraphComponent<TNode> &){}
-
-  public:
-
-    typedef typename Nodeset::iterator nodeiterator;
-    typedef typename Neighbourset::iterator neighbouriterator;
-
-    SCCGraphComponent(unsigned int id) : id(id){}
-
-    std::pair<typename Nodeset::iterator, bool> insertComponentnode(const TNode & componentnode){ return nodes.insert(componentnode); }
-    size_t eraseComponentnode(const TNode & componentnode){ return nodes.erase(componentnode); }
-
-    std::pair<typename Neighbourset::iterator, bool> insertNeighbour(SCCGraphComponent<TNode> * neighbour){ return neighbours.insert(neighbour); }
-    size_t eraseNeighbour(const SCCGraphComponent<TNode> * neighbour){ return neighbours.erase(neighbour); }
-
-    typename Nodeset::iterator beginNodes(){ return nodes.begin(); }
-    typename Nodeset::iterator endNodes(){ return nodes.end(); }
-    
-    typename Neighbourset::iterator beginNeighbours(){ return neighbours.begin(); }
-    typename Neighbourset::iterator endNeighbours(){ return neighbours.end(); }
-
-    inline unsigned int getId(){ return id; }
-   
-  };
-
-  /**
-     Besides this graph represents a component-dag of strongly connected components. I.e. The sccs form nodes in a graph where scc1 is neighbour of scc2
-     (for any two vertices scc1 and scc2) if any of the included nodes of scc1 is neighbour of any included node of scc2.
-     @brief The purpose of this class is to store the strongly connected components of a graph.
-  */ 
-  template <typename TNode>
-  class SCCGraph{
-
-
-  private:
-    
-    typedef std::list< SCCGraphComponent<TNode> * > Componentlist;
-
-    Componentlist components;
-
-    int componentcounter;
-
-  public:
-
-    typedef typename Componentlist::iterator iterator;
-
-    SCCGraph(const SCCGraph &){}
-
-    SCCGraph() : componentcounter(1){}
-    
-    ~SCCGraph(){
-
-      for ( typename Componentlist::iterator it = components.begin(); it != components.end(); it++ )
-	delete *it;
-
-    }
-
-    SCCGraphComponent<TNode> * newComponent(){
-
-      SCCGraphComponent<TNode> *component = new SCCGraphComponent<TNode>(componentcounter++);
-
-      components.push_back(component);
-      return component;
-
-    }
-
-    iterator begin(){ return components.begin(); }
-    iterator end(){ return components.end(); }
-    
-    int size(){ return componentcounter; }
-
-  };
+  template <typename TNode> class SCCGraphComponent;
 
   /**
      This class does not define any graph-structure in the way of a data-structure, instead a class can be a graph in a
@@ -166,6 +75,7 @@ namespace graph{
     /**
        @brief To implement Graphable you have to override methods from this class by extending the derived
        classes node_iterator and neighbour_iterator
+       @nosubgrouping
     */
     class iterator{
 
@@ -245,8 +155,7 @@ namespace graph{
 
 
     /**
-       @name override these methods
-    */
+       @name override these methods*/
     //@{
     /**
        @brief points to the first entry
@@ -287,9 +196,7 @@ namespace graph{
     virtual TNode startNode() = 0;
     //@}
 
-    /**
-       @name provided algorithms
-    */
+    /** @name provided algorithms*/
     //@{
     /**
        @brief for finding strongly connected components (Tarjan)
@@ -304,6 +211,253 @@ namespace graph{
     unsigned int scc_visit(TNode node, SCCGraph<TNode> & scc, std::stack<TNode> & nodestack, Valuemap & values, Componentmap & nodecomponents,
 			   unsigned int id, bool construct_scc_graph);
     
+  };
+
+  /**
+     It stores all containing nodes. Besides a list containing
+     all neighbours in the resulting component-graph will be filled if the proper option in find_scc() is provided.
+     @brief This class represents a strongly connected component.
+  */
+  template <typename TNode>
+  class SCCGraphComponent{
+
+  public:
+
+    typedef std::set< TNode, std::less<TNode> > Nodeset;
+    typedef std::set< SCCGraphComponent<TNode> *, std::less<SCCGraphComponent<TNode> *> > Neighbourset;
+
+  private:
+
+    unsigned int id;
+
+    Nodeset nodes;
+    Neighbourset neighbours;
+
+    // copy-constructor not allowed
+    SCCGraphComponent(const SCCGraphComponent<TNode> &){}
+
+  public:
+
+    typedef typename Nodeset::iterator nodeiterator;
+    typedef typename Neighbourset::iterator neighbouriterator;
+
+    /**
+       @brief Default-constructor
+       @param a numerical id identifing the component
+    */
+    SCCGraphComponent(unsigned int id) : id(id){}
+
+    /**
+       @brief inserts a node to the component's node-list
+       @param componentnode the node which should be a member of the component
+       @return a pair consisting of an iterator to the inserted node and a bool-value expressing if insertion was first time made.
+    **/
+    std::pair<typename Nodeset::iterator, bool> insertComponentnode(const TNode & componentnode){ return nodes.insert(componentnode); }
+
+    /**
+       @brief erases a node from the component's node-list
+       @param componentnode the node to be erased from list
+       @return resulting size of the list
+    */
+    size_t eraseComponentnode(const TNode & componentnode){ return nodes.erase(componentnode); }
+
+    /**
+       @brief inserts a component to the component's neighbour-list
+       @param neighbour the component which should be a neighbour of the component
+       @return a pair consisting of an iterator to the inserted component and a bool-value expressing if insertion was first time made.
+    **/
+    std::pair<typename Neighbourset::iterator, bool> insertNeighbour(SCCGraphComponent<TNode> * neighbour){ return neighbours.insert(neighbour); }
+
+    /**
+       @brief erases a component from the component's neighbour-list
+       @param neighbour the component to be erased from list
+       @return resulting size of the list
+    */
+    size_t eraseNeighbour(const SCCGraphComponent<TNode> * neighbour){ return neighbours.erase(neighbour); }
+
+    /**
+       @brief iterator pointing to beginning of contained nodes of the component
+       @return the iterator
+    */
+    typename Nodeset::iterator beginNodes(){ return nodes.begin(); }
+
+    /**
+       @brief iterator pointing to end of contained nodes of components
+       @return the iterator
+    */
+    typename Nodeset::iterator endNodes(){ return nodes.end(); }
+    
+    /**
+       @brief iterator pointing to beginning of neighbours of the component
+       @return the iterator
+    */
+    typename Neighbourset::iterator beginNeighbours(){ return neighbours.begin(); }
+
+    /**
+       @brief iterator pointing to end of neighbours of the component
+       @return the iterator
+    */
+    typename Neighbourset::iterator endNeighbours(){ return neighbours.end(); }
+
+    /**
+       @brief the numerical id of the component
+       @return the id
+    */
+    inline unsigned int getId(){ return id; }
+   
+  };
+
+  /**
+     Besides this graph represents a component-dag of strongly connected components. I.e. The sccs form nodes in a graph where scc1 is neighbour of scc2
+     (for any two vertices scc1 and scc2) if any of the included nodes of scc1 is neighbour of any included node of scc2.
+     @brief The purpose of this class is to store the strongly connected components of a graph.
+  */ 
+  template <typename TNode>
+  class SCCGraph /*: public Graphable<SCCGraphComponent<TNode> *>*/ {
+
+  private:
+    
+    typedef std::list<SCCGraphComponent<TNode> *> Componentlist;
+
+    Componentlist components;
+
+    int componentcounter;
+
+    SCCGraph(const SCCGraph &){}
+
+  public:
+    /* 
+    class scc_node_iterator : public Graphable<SCCGraphComponent<TNode> *>::node_iterator{
+
+      friend class SCCGraph<TNode>;
+
+    private:
+
+      typename SCCGraph<TNode>::Componentlist::iterator it;
+
+      scc_node_iterator(typename SCCGraph<TNode>::Componentlist::iterator it) : it(it){}
+
+    public:
+
+      ~scc_node_iterator(){}
+
+      // Implement the virtual methods.
+      void operator++(){ ++it; }
+      void operator++(int){ it++; }
+      SCCGraphComponent<TNode> * & operator*(){ return *it; }
+      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it != ((scc_node_iterator &)it_rval).it ); }
+      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it == ((scc_node_iterator &)it_rval).it ); }
+    
+
+    };
+    
+    class scc_neighbour_iterator : public Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator{
+
+      friend class SCCGraph<TNode>;
+
+    private:
+
+      typename SCCGraphComponent<TNode>::Neighbourset::iterator it;
+
+      void setIt(typename SCCGraphComponent<TNode>::Neighbourset::iterator it_rval){ it = it_rval; }
+
+    public:
+
+      ~scc_neighbour_iterator(){}
+
+      // Implement the virtual methods.
+      void operator++(){ ++it; }
+      void operator++(int){ it++; }
+      SCCGraphComponent<TNode> * & operator*(){ return *it; }
+      bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it != ((scc_neighbour_iterator &)it_rval).it ); }
+      bool operator==(const typename Graphable<SCCGraphComponent<TNode> *>::iterator & it_rval){ return ( this->it == ((scc_neighbour_iterator &)it_rval).it ); }
+    
+    };
+    */ 
+    typedef typename Componentlist::iterator iterator;
+
+    SCCGraph() : componentcounter(1){}
+    
+    ~SCCGraph(){
+
+      for ( typename Componentlist::iterator it = components.begin(); it != components.end(); it++ )
+	delete *it;
+
+    }
+
+    /**
+       @brief constructs a new and empty (no nodes containing) component
+       @return pointer to the newly created component
+    */
+    SCCGraphComponent<TNode> * newComponent(){
+
+      SCCGraphComponent<TNode> *component = new SCCGraphComponent<TNode>(componentcounter++);
+
+      components.push_back(component);
+      return component;
+
+    }
+
+    /**
+       @brief iterator pointing to beginning of components
+       @return the iterator
+    */
+    iterator begin(){ return components.begin(); }
+
+    /**
+       @brief iterator pointing to end of components
+       @return the iterator
+    */
+    iterator end(){ return components.end(); }
+    
+    /**
+       @brief size, i.e. number of contained components in the graph
+       @return the size
+    */
+    int size(){ return componentcounter; }
+    /*
+    // We have to provide the Graphable-class Tstgraph with the implementation of the following pure virtual methods.
+
+    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * nodesBegin(){
+
+      return new scc_node_iterator(components.begin());
+
+    }
+
+    typename Graphable<SCCGraphComponent<TNode> *>::node_iterator * nodesEnd(){
+
+      return new scc_node_iterator(components.end());
+
+    }
+
+    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * neighboursBegin(const SCCGraphComponent<TNode> * & node){
+
+      scc_neighbour_iterator * it = new scc_neighbour_iterator();
+
+      typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
+    
+      it->setIt((*cit)->beginNeighbours());
+
+      return it;
+
+    }
+
+    typename Graphable<SCCGraphComponent<TNode> *>::neighbour_iterator * neighboursEnd(const SCCGraphComponent<TNode> * & node){
+
+      scc_neighbour_iterator * it = new scc_neighbour_iterator();
+
+      typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
+    
+      it->setIt((*cit)->endNeighbours());
+
+      return it;
+
+    }
+
+    unsigned int maxNodes(){ return components.size(); }
+
+    SCCGraphComponent<TNode> * startNode(){ return *components.begin(); }
+    */
   };
   
 }

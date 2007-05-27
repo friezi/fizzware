@@ -89,9 +89,20 @@ public:
   
   }
 
-  void insertNeighbour(int node, int neighbour){
+  void insertEdge(int node, int neighbour){
 
     (*nodes)[node]->push_back(neighbour);
+
+  }
+
+  void removeEdge(int node, int neighbour){
+
+    list<int> * neighbourlist = (*nodes)[node];
+
+    list<int>::iterator it = find(neighbourlist->begin(),neighbourlist->end(),neighbour);
+
+      if ( it != neighbourlist->end() )
+	neighbourlist->erase(it);
 
   }
 
@@ -162,24 +173,24 @@ int main(int argc, char **argv){
   tg.insertNode(11);
   
 
-  tg.insertNeighbour(0,1);
-  tg.insertNeighbour(0,2);
+  tg.insertEdge(0,1);
+  tg.insertEdge(0,2);
 
-  tg.insertNeighbour(2,0);
-  tg.insertNeighbour(1,3);
-  tg.insertNeighbour(3,4);
-  tg.insertNeighbour(3,1);
-  tg.insertNeighbour(4,1);
-  tg.insertNeighbour(5,3);
-  tg.insertNeighbour(2,6);
-  tg.insertNeighbour(6,7);
-  tg.insertNeighbour(7,8);
-  tg.insertNeighbour(8,5);
-  tg.insertNeighbour(8,9);
-  tg.insertNeighbour(10,9);
-  tg.insertNeighbour(9,11);
-  tg.insertNeighbour(11,10);
-  tg.insertNeighbour(3,7);
+  tg.insertEdge(2,0);
+  tg.insertEdge(1,3);
+  tg.insertEdge(3,4);
+  tg.insertEdge(3,1);
+  tg.insertEdge(4,1);
+  tg.insertEdge(5,3);
+  tg.insertEdge(2,6);
+  tg.insertEdge(6,7);
+  tg.insertEdge(7,8);
+  tg.insertEdge(8,5);
+  tg.insertEdge(8,9);
+  tg.insertEdge(10,9);
+  tg.insertEdge(9,11);
+  tg.insertEdge(11,10);
+  tg.insertEdge(3,7);
 
   
   // print the graph-structure for demonstration
@@ -231,6 +242,62 @@ int main(int argc, char **argv){
   }
 
   delete scc;
+
+  Tstgraph cplg;
+  int max = 1000;
+
+  cout << "building complete graph ... " << flush;
   
+  for ( int i = 0; i < max; i++ )
+    cplg.insertNode(i);
+
+  for ( int i = 0; i < max; i++ )
+    for ( int j = 0; j < max; j++ )
+      if ( j != i )
+	cplg.insertEdge(i,j);
+
+  for ( int i = max/2-1; i < max ; i++ )
+    if ( i != max/2 )
+      cplg.removeEdge(max/2-1,i);
+
+  for ( int i = 0 ; i < max/2-1; i++ )
+    for ( int j = max/2; j < max; j++ )
+      cplg.removeEdge(i,j);
+
+  for ( int i = max/2; i < max; i++ )
+    for ( int j=0; j < max/2; j++ )
+      cplg.removeEdge(i,j);
+
+  cout << "finished" << endl << flush;
+
+  cout << "constructing component-graph ... " << flush;
+
+  scc = cplg.find_scc(true);
+
+  cout << "finished" << endl << flush;
+
+  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+    cout << "component " << (*scc_it)->getId() << ": {";
+    for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+
+      if ( c_it != (*scc_it)->beginNodes() )
+	cout << ",";
+      cout << *c_it;
+
+    }
+    cout << "}" << endl;
+  }
+
+  cout << "componentgraph:" << endl;
+
+  for ( SCCGraph<int>::iterator scc_it = scc->begin(); scc_it != scc->end(); scc_it++ ){
+    cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    for ( SCCGraphComponent<int>::neighbouriterator c_it = (*scc_it)->beginNeighbours(); c_it != (*scc_it)->endNeighbours(); c_it++ )
+      cout << (*c_it)->getId() << " ";
+    cout << endl;
+  }
+
+  delete scc;
+
   return 0;
 }

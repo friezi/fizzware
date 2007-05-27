@@ -4,6 +4,7 @@
 #include <exception.hpp>
 #include <list>
 #include <map>
+#include <algorithm>
 #include <graph.hpp>
 
 #endif

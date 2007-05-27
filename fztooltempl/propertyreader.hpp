@@ -47,7 +47,14 @@
 /**
    It reads key/value-pairs from files. Sections are optional and not required.
    If the parser finds a section-definition all subsequent parameters will be stored in this section until a different
-   section-definition is found. If properties are not bound to a section, they're internally stored in the section "NO_SECTION". 
+   section-definition is found. If properties are not bound to a section, they're internally stored in the section "NO_SECTION".
+   Section-names are surround by "[" and "]". Values must be separated from keys with either "=" or ":". The syntax of property-files is as follows:
+   \verbatim
+   [<Section1>]
+   <key1>=<value1>
+   <key2>=<value2>
+   ...
+   \endverbatim
    @brief To extract properties from a property-file
 */
 
