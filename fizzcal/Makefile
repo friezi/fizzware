@@ -111,7 +111,6 @@ ed:
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
 Makefile: Makefile_head
 	cat Makefile_head ../Makefile_body > Makefile;
-	$(MAKE) -f Makefile
 
 # erstelle Packet fuer Distribution
 dist:

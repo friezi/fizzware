@@ -502,7 +502,7 @@ namespace ds{
        @brief shows the bitmatrix on standart-output
        @since v1.98
     */
-    void show(){ std::cout << toString(); }
+    void show(){ std::cout << toString() << std::flush; }
 
   };
   

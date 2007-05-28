@@ -10,10 +10,10 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception datastructures
+CLASS_MODULES = exception graph
 CM_PATH = $(CLASSLIBRARY_PATH)
 
-IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/graph
+IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
@@ -103,7 +103,6 @@ ed:
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
 Makefile: Makefile_head
 	cat Makefile_head ../Makefile_body > Makefile;
-	$(MAKE) -f Makefile
 
 # erstelle Packet fuer Distribution
 dist:

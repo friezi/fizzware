@@ -7,11 +7,12 @@ LIBRARY = fztooltempl
 VERSION_NUMBER = 1.98
 
 OBJECTS = exception messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
-	semaphor mathexpression signalhandler stdmessageserver cmdlparser propertyreader utils
+	semaphor mathexpression signalhandler stdmessageserver cmdlparser propertyreader \
+	utils graph
 
 #old: 
 
-HEADERS_ONLY = functions datastructures graph
+HEADERS_ONLY = functions datastructures
 
 EDITOR ?= vi
 
