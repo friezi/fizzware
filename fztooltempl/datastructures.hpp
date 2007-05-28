@@ -33,6 +33,7 @@
 #include <utility>
 #include <map>
 #include <string>
+#include <sstream>
 #include <exception.hpp>
 
 /**
@@ -416,8 +417,8 @@ namespace ds{
 
   private:
 
-    long rows;
-    long columns;
+    unsigned long rows;
+    unsigned long columns;
 
     MemPointer<char> bitmatrix;
 
@@ -428,7 +429,7 @@ namespace ds{
        @param rows number of rows
        @param columns number of columns
     **/
-    BitMatrix(long rows, long columns) throw (Exception<BitMatrix>) : rows(rows),columns(columns){
+    BitMatrix(unsigned long rows, unsigned long columns) throw (Exception<BitMatrix>) : rows(rows),columns(columns){
 
       if ( !(bitmatrix = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
 	throw Exception<BitMatrix>("calloc() failed!");
@@ -440,12 +441,12 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void setBit(long row, long column) throw (Exception<BitMatrix>){
+    void setBit(unsigned long row, unsigned long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] |= (1L << (row*columns+column)%sizeof(char));
+      bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] |= (1L << (row*columns+column)%sizeof(char));
       
     }      
     
@@ -454,12 +455,12 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void clearBit(long row, long column) throw (Exception<BitMatrix>){
+    void clearBit(unsigned long row, unsigned long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] &= ~(1L << (row*columns+column)%sizeof(char));
+      bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] &= ~(1L << (row*columns+column)%sizeof(char));
       
     }   
     
@@ -469,14 +470,39 @@ namespace ds{
        @param column the column-position
        @return 0 or 1 if bit is unset resp. set
     **/
-    char getBit(long row, long column) throw (Exception<BitMatrix>){
+    char getBit(unsigned long row, unsigned long column) throw (Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
 	throw Exception<BitMatrix>("OutOfBounds");
 
-      return (char)(bitmatrix.get()[(long)((row*columns+column)/sizeof(char))] & (1L << (row*columns+column)%sizeof(char)));
+      return (char)(bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] & (1L << (row*columns+column)%sizeof(char)));
       
     }  
+
+    /**
+       @brief string-representation
+       @return the string
+       @since v1.98
+    */
+    std::string toString(){
+
+      std::ostringstream sstream;
+
+      for ( unsigned long row = 0; row < rows; row++ ){
+	for ( unsigned long column = 0; column < columns; column++ )
+	  sstream << (int)getBit(row,column);
+	sstream << std::endl;
+      }
+
+      return sstream.str();
+
+    }
+
+    /**
+       @brief shows the bitmatrix on standart-output
+       @since v1.98
+    */
+    void show(){ std::cout << toString(); }
 
   };
   

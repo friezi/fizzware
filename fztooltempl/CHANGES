@@ -31,4 +31,5 @@ v1.98:
     besides determining the components. The return-value of find_scc() has been changed to SCCGraph * .
   - for this purpose two new classes have been designed:
 	SCCGraph and SCCGraphComponent
-
+- BitMatrix:
+  - two functions added: toString() and show()

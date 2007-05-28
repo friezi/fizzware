@@ -3,11 +3,15 @@
 #include <map>
 #include <algorithm>
 #include <graph.hpp>
+#include <datastructures.hpp>
 
 using namespace std;
 using namespace graph;
+using namespace ds;
 
-// a class which derives from Graphable
+// in the following we will define two different graph-representations
+
+// the nodes will be stored in a map with lists holding the neighbours
 class Tstgraph : public Graphable<int>{
 
 public:
@@ -153,6 +157,175 @@ public:
   int startNode(){ return (*nodes->begin()).first; }
 
 };
+
+// a graph represented by a matrix (note that the nodes must be accessible objects)
+class MatrixGraph : public Graphable<int>{
+
+private:
+  
+  unsigned int number_nodes;
+
+  int *nodes;
+
+  BitMatrix *adjacencymatrix;
+
+public:
+  
+  class node_iterator : public Graphable<int>::node_iterator{
+
+    friend class MatrixGraph;
+
+  private:
+
+    int *nodes;
+
+    unsigned int maxpos;
+    
+    unsigned int pos;
+
+    node_iterator(int *nodes, unsigned int maxpos, unsigned int pos) : nodes(nodes), maxpos(maxpos), pos(pos){}
+
+  public:
+
+    node_iterator(int *nodes, unsigned int maxpos) : nodes(nodes), maxpos(maxpos){
+      
+      if ( 1 > maxpos )
+	this->pos = 0;
+      else
+	this->pos = 1;
+      
+    }
+    
+    void operator++(int){ 
+     
+      pos > 0 && pos < maxpos ? pos++ : pos = 0;
+      
+    }
+    
+    const int & operator*(){ return nodes[pos-1]; }
+    
+  bool operator!=(const abstract_iterator & it_rval){ return ( this->pos != ((node_iterator &)it_rval).pos ); }
+  bool operator==(const abstract_iterator & it_rval){ return ( this->pos == ((node_iterator &)it_rval).pos ); }
+
+  };
+
+  class neighbour_iterator : public Graphable<int>::neighbour_iterator{
+
+    friend class MatrixGraph;
+
+  private:
+
+    int *nodes;
+
+    BitMatrix *adjacencymatrix;
+
+    unsigned int maxnodes;
+
+    unsigned int node;
+    
+    unsigned int neighbour;
+
+  public:
+
+    neighbour_iterator(int *nodes, BitMatrix *adjacencymatrix, unsigned int node, unsigned int maxnodes) : nodes(nodes),
+      adjacencymatrix(adjacencymatrix), maxnodes(maxnodes){
+
+      if ( node > maxnodes )
+	this->node = 0;
+      else
+	this->node = node;
+
+      neighbour = 0;
+
+    }
+
+    void nextNeighbour(){
+
+      if ( node == 0 )
+	return;
+
+      neighbour++;
+
+      while ( neighbour <= maxnodes ) {
+
+	if ( adjacencymatrix->getBit(node-1,neighbour-1) == 1 )
+	  return;
+
+	neighbour++;
+
+      }
+
+      neighbour = 0;
+      
+    }
+
+    void operator++(int){ 
+
+      if ( node == 0 || neighbour == 0 )
+	return;
+
+      nextNeighbour();
+
+    }
+
+    const int & operator*(){ return nodes[neighbour-1]; }
+
+    bool operator!=(const abstract_iterator & it_rval){ return ( this->neighbour != ((neighbour_iterator &)it_rval).neighbour ); }
+    bool operator==(const abstract_iterator & it_rval){ return ( this->neighbour == ((neighbour_iterator &)it_rval).neighbour ); }
+
+  };
+
+  MatrixGraph(unsigned int number_nodes) : number_nodes(number_nodes){
+
+    nodes = new int[number_nodes];
+    
+    for ( unsigned int i = 0; i< number_nodes; i++ )
+      nodes[i] = i+1;
+    
+    adjacencymatrix = new BitMatrix(number_nodes,number_nodes);
+    
+  }
+  
+  ~MatrixGraph(){
+    
+    delete adjacencymatrix;
+    delete nodes;
+    
+  }
+  
+  node_iterator * beginNodesPtr(){ return new node_iterator(nodes,number_nodes); }
+  node_iterator * endNodesPtr(){ return new node_iterator(nodes,number_nodes,0); }
+  
+  neighbour_iterator * beginNeighboursPtr(const int & node){
+    
+    neighbour_iterator * neighbours = new neighbour_iterator(nodes,adjacencymatrix,node,number_nodes);
+    
+    neighbours->nextNeighbour();
+    
+    return neighbours;
+
+  }
+
+  neighbour_iterator * endNeighboursPtr(const int & node){ return new neighbour_iterator(nodes,adjacencymatrix,node,number_nodes); }
+
+  unsigned int maxNodes(){ return number_nodes; }
+  int startNode(){ return number_nodes > 0 ? 1 : 0; }
+
+  void insertEdge(int node, int neighbour){
+
+    adjacencymatrix->setBit(node-1,neighbour-1);
+
+  }
+
+  void removeEdge(int node, int neighbour){
+
+    adjacencymatrix->clearBit(node-1,neighbour-1);
+
+  }
+
+  void showAdjacencymatrix(){ adjacencymatrix->show(); }
+
+};
   
 
 int main(int argc, char **argv){
@@ -174,7 +347,6 @@ int main(int argc, char **argv){
   tg.insertNode(10);
   tg.insertNode(11);
   
-
   tg.insertEdge(0,1);
   tg.insertEdge(0,2);
 
@@ -240,9 +412,9 @@ int main(int argc, char **argv){
   delete scc;
 
   Tstgraph cplg;
-  int max = 1000;
+  int max = 100;
 
-  cout << "building complete graph ... " << flush;
+  cout << endl << "building a bigger graph ... " << flush;
   
   for ( int i = 0; i < max; i++ )
     cplg.insertNode(i);
@@ -313,6 +485,67 @@ int main(int argc, char **argv){
 
   delete sccscc;
 
+  delete scc;
+
+  // at last a Graph represented by a Matrix
+
+  cout << endl << "building Matrixgraph ... ";
+
+  MatrixGraph mgraph(max);
+  
+  for ( int i = 1; i <= max; i++ )
+    for ( int j = 1; j <= max; j++ )
+      if ( j != i )
+	mgraph.insertEdge(i,j);
+  
+  for ( int i = max/2-1; i <= max ; i++ )
+    if ( i != max/2 )
+      mgraph.removeEdge(max/2-1,i);
+  
+  for ( int i = 1 ; i <= max/2-1; i++ )
+    for ( int j = max/2; j <= max; j++ )
+      mgraph.removeEdge(i,j);
+  
+  for ( int i = max/2; i <= max; i++ )
+    for ( int j=1; j <= max/2; j++ )
+      mgraph.removeEdge(i,j);
+
+  cout << "finished" << endl;
+
+  cout << "adjacencymatrix:" << endl;
+
+  mgraph.showAdjacencymatrix();
+
+  cout << "constructing component-graph ... " << flush;
+
+  scc = mgraph.find_scc(true);
+
+  cout << "finished" << endl << flush;
+
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+      
+    cout << "component " << (*scc_it)->getId() << ": {";
+    for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+
+      if ( c_it != (*scc_it)->beginNodes() )
+	cout << ",";
+      cout << *c_it;
+
+    }
+    cout << "}" << endl;
+  }
+
+  cout << "componentgraph:" << endl;
+
+  for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+
+    cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    
+    for ( SCCGraph<int>::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
+      cout << (*nb_it)->getId() << " ";
+    cout << endl;
+  }
+  
   delete scc;
 
   return 0;

@@ -4,7 +4,9 @@ using namespace std;
 using namespace graph;
 using namespace ds;
 
-// a class which derives from Graphable
+// in the following we will define two different graph-representations
+
+// the nodes will be stored in a map with lists holding the neighbours
 class Tstgraph : public Graphable<int>{
 
 public:
@@ -151,6 +153,7 @@ public:
 
 };
 
+// a graph represented by a matrix (note that the nodes must be accessible objects)
 class MatrixGraph : public Graphable<int>{
 
 private:
@@ -241,7 +244,7 @@ public:
       while ( neighbour <= maxnodes ) {
 
 	if ( adjacencymatrix->getBit(node-1,neighbour-1) == 1 )
-	  break;
+	  return;
 
 	neighbour++;
 
@@ -260,7 +263,7 @@ public:
 
     }
 
-    const int & operator*(){ cout << "neighbour of node " << node << ": " << nodes[neighbour-1] << endl;return nodes[neighbour-1]; }
+    const int & operator*(){ return nodes[neighbour-1]; }
 
     bool operator!=(const abstract_iterator & it_rval){ return ( this->neighbour != ((neighbour_iterator &)it_rval).neighbour ); }
     bool operator==(const abstract_iterator & it_rval){ return ( this->neighbour == ((neighbour_iterator &)it_rval).neighbour ); }
@@ -293,8 +296,6 @@ public:
     neighbour_iterator * neighbours = new neighbour_iterator(nodes,adjacencymatrix,node,number_nodes);
     
     neighbours->nextNeighbour();
-
-    cout << "node: " << neighbours->node << " neighbour: " << neighbours->neighbour;
     
     return neighbours;
 
@@ -316,6 +317,8 @@ public:
     adjacencymatrix->clearBit(node-1,neighbour-1);
 
   }
+
+  void showAdjacencymatrix(){ adjacencymatrix->show(); }
 
 };
   
@@ -339,7 +342,6 @@ int main(int argc, char **argv){
   tg.insertNode(10);
   tg.insertNode(11);
   
-
   tg.insertEdge(0,1);
   tg.insertEdge(0,2);
 
@@ -405,9 +407,9 @@ int main(int argc, char **argv){
   delete scc;
 
   Tstgraph cplg;
-  int max = 1000;
+  int max = 100;
 
-  cout << "building complete graph ... " << flush;
+  cout << endl << "building a bigger graph ... " << flush;
   
   for ( int i = 0; i < max; i++ )
     cplg.insertNode(i);
@@ -480,7 +482,7 @@ int main(int argc, char **argv){
 
   delete scc;
 
-  // at last a Graph as a Matrix
+  // at last a Graph represented by a Matrix
 
   cout << endl << "building Matrixgraph ... ";
 
@@ -491,19 +493,23 @@ int main(int argc, char **argv){
       if ( j != i )
 	mgraph.insertEdge(i,j);
   
-//   for ( int i = max/2-1; i <= max ; i++ )
-//     if ( i != max/2 )
-//       mgraph.removeEdge(max/2-1,i);
+  for ( int i = max/2-1; i <= max ; i++ )
+    if ( i != max/2 )
+      mgraph.removeEdge(max/2-1,i);
   
-//   for ( int i = 1 ; i <= max/2-1; i++ )
-//     for ( int j = max/2; j <= max; j++ )
-//       mgraph.removeEdge(i,j);
+  for ( int i = 1 ; i <= max/2-1; i++ )
+    for ( int j = max/2; j <= max; j++ )
+      mgraph.removeEdge(i,j);
   
-//   for ( int i = max/2; i <= max; i++ )
-//     for ( int j=1; j <= max/2; j++ )
-//       mgraph.removeEdge(i,j);
+  for ( int i = max/2; i <= max; i++ )
+    for ( int j=1; j <= max/2; j++ )
+      mgraph.removeEdge(i,j);
 
   cout << "finished" << endl;
+
+  cout << "adjacencymatrix:" << endl;
+
+  mgraph.showAdjacencymatrix();
 
   cout << "constructing component-graph ... " << flush;
 
@@ -534,8 +540,6 @@ int main(int argc, char **argv){
       cout << (*nb_it)->getId() << " ";
     cout << endl;
   }
-
-  cout << "due to a program-bug, it doesn't work yet. check array and matrix" << endl;
   
   delete scc;
 
