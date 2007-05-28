@@ -10,7 +10,7 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception
+CLASS_MODULES = exception datastructures
 CM_PATH = $(CLASSLIBRARY_PATH)
 
 IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/graph

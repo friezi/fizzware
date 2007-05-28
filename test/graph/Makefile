@@ -10,7 +10,7 @@ EM_PATH =
 
 CLASSLIBRARY_PATH = ../classes
 CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception
+CLASS_MODULES = exception datastructures
 CM_PATH = $(CLASSLIBRARY_PATH)
 
 IMPORTANT_HEADERS = $(CLASSLIBRARY_PATH)/graph
@@ -28,6 +28,7 @@ LIBRARY_PATHS =
 DIST_DIR = ../dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
 
+# Default-editor if Env-Variable "EDITOR" is not defined
 EDITOR ?= vi
 
 ifeq ($(NOANSI),true)
@@ -61,7 +62,7 @@ MAKE_CL_LIB = $(CLASSLIBRARY_PATH:%=$(MAKE) -k -C $(CLASSLIBRARY_PATH) -f %/Make
 #bei systemspezifischer Programmierung "-ansi" ausschalten
 CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
 
-.PHONY: all clean $(LIB_NAME)_all dist
+.PHONY: all clean $(LIB_NAME)_all ed dist
 
 # falls von lokaler Bibliothek abhaengig, soll diese erst generiert werden
 all: $(LIB_NAME)_all $(TARGET)
@@ -71,33 +72,38 @@ $(TARGET): $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAME)
 	$(CC) $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) -o $(TARGET) $(LIBS) $(CL_LIB)
 	strip $(TARGET)
 
-# Zeilen zählen, falls gewünscht
+# Zeilen zaehlen, falls gewuenscht
 #	wc -l $(MM_SOURCE) $(MM_HEADER) $(LM_SOURCES) $(LM_HEADERS) $(EM_SOURCES) $(EM_HEADERS)
 
 # compilieren der Module 
 %.o: %.cpp %.hpp $(IM_HEADERS)
 	$(CC) $< -c -o $@
 
-# <MAIN_MODULE> hängt von allen Header-files ab
+# <MAIN_MODULE> haengt von allen Header-files ab
 $(MM_OBJECT): $(LM_HEADERS) $(EM_HEADERS) $(CM_HEADERS) $(IM_HEADERS)
 
-# es können zusäzliche spezielle Abhängigkeiten definiert werden
+# es koennen zusaezliche spezielle Abhaengigkeiten definiert werden
 
 
-# Generierung der lokalen Bibliothek (ist so eingestellt, dass sie nur bei Aenderungen generiert wird
+# Generierung der lokalen Bibliothek (ist so eingestellt, dass sie nur bei Aenderungen generiert wird)
 $(LIB_NAME)_all:
 	$(MAKE_CL_LIB)
 
 $(LIB_NAME):
 # hier braucht nichts zu passieren, da die Library sowieso im Feld $(TARGET) generiert wird
 
-# alle Module löschen
+# alle Module loeschen
 clean:
 	rm -f $(TARGET) *.o $(EM_OBJECTS)
 
 # Editor aufrufen
 ed:
 	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IM_HEADERS) &
+
+# lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
+Makefile: Makefile_head
+	cat Makefile_head ../Makefile_body > Makefile;
+	$(MAKE) -f Makefile
 
 # erstelle Packet fuer Distribution
 dist:

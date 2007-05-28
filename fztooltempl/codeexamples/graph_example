@@ -39,7 +39,6 @@ public:
     ~tg_node_iterator(){}
 
     // Implement the virtual methods.
-    void operator++(){ ++count; }
     void operator++(int){ count++; }
     const int & operator*(){ return count; }
     bool operator!=(const abstract_iterator & it_rval){ return ( this->count != ((tg_node_iterator &)it_rval).count ); }
@@ -63,7 +62,6 @@ public:
     ~tg_neighbour_iterator(){}
 
     // Implement the virtual methods.
-    void operator++(){ ++it; }
     void operator++(int){ it++; }
     const int & operator*(){ return *it; }
     bool operator!=(const abstract_iterator & it_rval){ return ( this->it != ((tg_neighbour_iterator &)it_rval).it ); }

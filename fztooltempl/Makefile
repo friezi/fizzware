@@ -72,7 +72,7 @@ $(LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo
 	@echo '****************' generating the static-library $(LIB_NAME) '****************'
 	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk);)
-	ar rs $(LIB_NAME) $(OBJECTNAMES)
+	$(AR) rs $(LIB_NAME) $(OBJECTNAMES)
 	@echo '****************' generation of $(LIB_NAME) finished '***********************'
 	@echo
 

@@ -56,11 +56,12 @@ namespace graph{
      functional way, i.e. offers functions which are necessary (and hopefully enough) for any graph-structure.
      So you resp. your graph-class has to provide several methods which are important to execute graph-algorithms.
      You can define any graph-structure you want, just define the purely virtual methods, which are mainly iterators for
-     neighbours and nodes. Furthermore you have to extend the nested classes neighbour_iterator and node_iterator and override
+     neighbours and nodes.\n\n
+     Furthermore you have to extend the nested classes neighbour_iterator and node_iterator and override
      methods from their super-class abstract_iterator. With these methods any data-structure can behave as a graph-structure.
      @brief If a class extends Graphable it has access to graph-algorithms
-     @pre For an object of type Graphable<Anytype> two objects t1 and t2 of type Anytype must be comparable by t1<t2. Thus "<" must be overloaded for
-     the class Anytype.
+     @pre For an object of type Graphable<Nodetype> two objects t1 and t2 of type Nodetype must be comparable by t1<t2. Thus the operator
+     "<" must be overloaded for the class Nodetype.
   */
   template <typename TNode>
   class Graphable{
@@ -75,7 +76,6 @@ namespace graph{
     /**
        @brief To implement Graphable you have to override methods from this class by extending the derived
        classes node_iterator and neighbour_iterator
-       @nosubgrouping
     */
     class abstract_iterator{
 
@@ -87,10 +87,28 @@ namespace graph{
 
       /** @name common iterator-functions */
       //@{
-      virtual void operator++() = 0;
+ 
+      /**
+	 @brief postincrement
+      */
       virtual void operator++(int) = 0;
+
+      /**
+	 @brief returns the referenced object the iterator is pointing at
+	 @return the referenced object
+      */
       virtual const TNode & operator*() = 0;
+ 
+      /**
+	 @brief unequality
+	 @return true if iterators are not pointing to the same position (resp. object), false otherwise
+      */
       virtual bool operator!=(const abstract_iterator & it_rval) = 0;
+      
+      /**
+	 @brief equality
+	 @return true if iterators are pointing to the same position (resp. object), false otherwise
+      */
       virtual bool operator==(const abstract_iterator & it_rval) = 0;
       //@}
       
@@ -98,6 +116,9 @@ namespace graph{
 
   public:
 
+    /**
+       @name extend these classes*/
+    //@{
     /**
        @brief To implement Graphable you have to extend this class and override
        methods from the super-class abstract_iterator
@@ -125,15 +146,16 @@ namespace graph{
       virtual ~neighbour_iterator(){}
       
     };
+    //@}
 
     /**
        This is a wrapper-class for an abstract_iterator. Since Graphable is an abstract class and a user must define its own subclasses of node_iterator and
        neighbour_iterator it's impossible for the beginNodesPtr() - and beginNeighboursPtr() - method
        to return a class-object, they have to return a pointer which won't be destructed automatically. iterator just
-       contains this pointer and destroys the referenced object  automatically on destruction. Use beginNodes() and beginNeighbours() (resp. end...()) for creating
+       contains this pointer and destroys the referenced object automatically on destruction. Use beginNodes() and beginNeighbours() (resp. end...()) for creating
        iterators.
        @attention Destruction of two different iterators containing the same reference will result (of course) in a segmentation-fault!
-       @brief For creating iterators which are destructed automatically
+       @brief A wrapper-class for an abstract_iterator.
     */
     class iterator{
 
@@ -167,8 +189,7 @@ namespace graph{
 	  delete it;
 
       }
-
-      void operator++(){ ++(*it); }
+      
       void operator++(int){ (*it)++; }
       const TNode & operator*(){ return **it; }
       bool operator!=(const iterator & it_rval){ return ( *this->it != *it_rval.it ); }
@@ -240,7 +261,11 @@ namespace graph{
        @return a list resp. graph-structure of components containing the connected nodes
     */
     SCCGraph<TNode> * find_scc(bool construct_scc_graph);
-    
+
+    //@}
+
+    /** @name access-methods*/
+    //@{
     /**
        @brief creates an iterator pointing to the first node
        @return the iterator (wrapped)
@@ -407,7 +432,6 @@ namespace graph{
       ~node_iterator(){}
 
       // Implement the virtual methods.
-      void operator++(){ ++it; }
       void operator++(int){ it++; }
       SCCGraphComponent<TNode> * const & operator*(){ return *it; }
       bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){ return ( this->it != ((node_iterator &)it_rval).it ); }
@@ -431,7 +455,6 @@ namespace graph{
       ~neighbour_iterator(){}
 
       // Implement the virtual methods.
-      void operator++(){ ++it; }
       void operator++(int){ it++; }
       SCCGraphComponent<TNode> * const & operator*(){ return *it; }
       bool operator!=(const typename Graphable<SCCGraphComponent<TNode> *>::abstract_iterator & it_rval){ 

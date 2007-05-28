@@ -6,5 +6,6 @@
 #include <map>
 #include <algorithm>
 #include <graph.hpp>
+#include <datastructures.hpp>
 
 #endif
