@@ -3,7 +3,7 @@
 using namespace graph;
 
 // basically Tarjan's algorithm
-unsigned int graph::Graphable::scc_visit(const TNode node, SCCGraph & scc, std::stack<TNode> & nodestack, Valuemap & values, Componentmap & nodecomponents, 
+unsigned int graph::GraphableBase::scc_visit(const TNode node, SCCGraph & scc, std::stack<TNode> & nodestack, Valuemap & values, Componentmap & nodecomponents, 
 	  unsigned int id, bool construct_scc_graph){
   
   unsigned int m = 0, min;
@@ -62,7 +62,7 @@ unsigned int graph::Graphable::scc_visit(const TNode node, SCCGraph & scc, std::
     
 }
 
-graph::SCCGraph * graph::Graphable::find_scc(bool construct_scc_graph = false){
+graph::SCCGraph * graph::GraphableBase::find_scc(bool construct_scc_graph = false){
 
   graph::SCCGraph *scc = new graph::SCCGraph();
   std::stack<TNode> nodestack;

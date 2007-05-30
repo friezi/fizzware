@@ -60,12 +60,12 @@ namespace graph{
      You can define any graph-structure you want, just define the purely virtual methods, which are mainly iterators for
      neighbours and nodes.\n\n
      Furthermore you have to extend the nested classes neighbour_iterator and node_iterator and override
-     methods from their super-class abstract_iterator. With these methods any data-structure can behave as a graph-structure.
-     @brief If a class extends Graphable it has access to graph-algorithms
-     @pre For an object of type Graphable<Nodetype> two objects t1 and t2 of type Nodetype must be comparable by t1<t2. Thus the operator
-     "<" must be overloaded for the class Nodetype.
+     methods from their super-class abstract_iterator. With these methods any data-structure can behave as a graph-structure.\n\n
+     For generic handling of objects instantiated from different GraphableBase-subclasses use this type as a baseclass.\n
+     For type-safe operation derive not directly from this class but rather from the subclass Graphable.
+     @brief If a class extends GraphableBase it has access to graph-algorithms
   */
-  class Graphable{
+  class GraphableBase{
 
   private:
 
@@ -75,18 +75,18 @@ namespace graph{
   protected:
 
     /**
-       @brief To implement Graphable you have to override methods from this class by extending the derived
+       @brief To implement GraphableBase you have to override methods from this class by extending the derived
        classes node_iterator and neighbour_iterator
     */
     class abstract_iterator{
 
-      friend class Graphable;
+      friend class GraphableBase;
 
     public:
 
       virtual ~abstract_iterator(){}
 
-      /** @name common iterator-functions */
+      /** @name override these iterator-functions */
       //@{
  
       /**
@@ -98,13 +98,7 @@ namespace graph{
 	 @brief returns the referenced object the iterator is pointing at
 	 @return the referenced object
       */
-      virtual const TNode operator*() = 0;
- 
-      /**
-	 @brief unequality
-	 @return true if iterators are not pointing to the same position (resp. object), false otherwise
-      */
-      virtual bool operator!=(const abstract_iterator & it_rval) = 0;
+      virtual TNode operator*() = 0;
       
       /**
 	 @brief equality
@@ -112,7 +106,16 @@ namespace graph{
       */
       virtual bool operator==(const abstract_iterator & it_rval) = 0;
       //@}
-      
+ 
+      /** @name derived functions */
+      //@{
+      /**
+	 @brief unequality
+	 @return true if iterators are not pointing to the same position (resp. object), false otherwise
+      */
+      bool operator!=(const abstract_iterator & it_rval) { return !(*this == it_rval); }
+      //@}      
+
     };
 
   public:
@@ -121,12 +124,12 @@ namespace graph{
        @name extend these classes*/
     //@{
     /**
-       @brief To implement Graphable you have to extend this class and override
+       @brief To implement GraphableBase you have to extend this class and override
        methods from the super-class abstract_iterator
     */
     class node_iterator : public abstract_iterator{
 
-      friend class Graphable;
+      friend class GraphableBase;
 
     public:
 
@@ -135,12 +138,12 @@ namespace graph{
     };
 
     /**
-       @brief To implement Graphable you have to extend this class and override
+       @brief To implement GraphableBase you have to extend this class and override
        methods from the super-class abstract_iterator
     */
     class neighbour_iterator : public abstract_iterator{
 
-      friend class Graphable;
+      friend class GraphableBase;
 
     public:
 
@@ -150,7 +153,7 @@ namespace graph{
     //@}
 
     /**
-       This is a wrapper-class for an abstract_iterator. Since Graphable is an abstract class and a user must define its own subclasses of node_iterator and
+       This is a wrapper-class for an abstract_iterator. Since GraphableBase is an abstract class and a user must define its own subclasses of node_iterator and
        neighbour_iterator it's impossible for the beginNodesPtr() - and beginNeighboursPtr() - method
        to return a class-object, they have to return a pointer which won't be destructed automatically. iterator just
        contains this pointer and destroys the referenced object automatically on destruction. Use beginNodes() and beginNeighbours() (resp. end...()) for creating
@@ -192,13 +195,13 @@ namespace graph{
       }
       
       void operator++(int){ (*it)++; }
-      const TNode operator*(){ return **it; }
+      TNode operator*(){ return **it; }
       bool operator!=(const iterator & it_rval){ return ( *this->it != *it_rval.it ); }
       bool operator==(const iterator & it_rval){ return ( *this->it == *it_rval.it ); }
 
     };
 
-    virtual ~Graphable(){}
+    virtual ~GraphableBase(){}
 
     /**
        @name override these methods*/
@@ -297,6 +300,59 @@ namespace graph{
   };
 
   /**
+     To create your own Graph-structures it is recommended to derive from this class instead of the baseclass GraphableBase.
+     @brief This subclass to GraphableBase makes operations more type-safe.
+  */
+  template<typename TTNode> class Graphable : public GraphableBase{
+
+  public:
+    
+    class iterator : public GraphableBase::iterator{
+
+    public:
+
+      iterator(abstract_iterator *it, bool delete_on_destruction = true) : GraphableBase::iterator::iterator(it,delete_on_destruction){}
+
+      /**
+	 This should never be used because copied iterators will point to the same abstract_iterators. Multiple deletion will
+	 most probably result in segmentation-fault or bus-error.
+	 @internal
+      */
+      iterator(const iterator & it) : GraphableBase::iterator::iterator(it){}
+
+      TTNode * operator*(){ return (TTNode *)(this->GraphableBase::iterator::operator*()); }
+
+    };
+
+    /**
+       @brief creates an iterator pointing to the first node
+       @return the iterator (wrapped)
+    */
+    iterator beginNodes(){ return iterator(beginNodesPtr(),false); }
+    
+    /**
+       @brief creates an iterator pointing beyond the last node
+       @return the iterator (wrapped)
+    */
+    iterator endNodes(){ return iterator(endNodesPtr(),false); }
+    
+    /**
+       @brief creates an iterator pointing to the first neighbour of a node
+       @param node the node
+       @return the iterator (wrapped)
+    */
+    iterator beginNeighbours(const TNode node){ return iterator(beginNeighboursPtr(node),false); }
+    
+    /**
+       @brief creates an iterator pointing beyond the last neighbour of a node
+       @param node the node
+       @return the iterator (wrapped)
+    */
+    iterator endNeighbours(const TNode node){ return iterator(endNeighboursPtr(node),false); }
+
+  };
+
+  /**
      It stores all containing nodes. Besides a list containing
      all neighbours in the resulting component-graph will be filled if the proper option in find_scc() is provided.
      @brief This class represents a strongly connected component.
@@ -386,7 +442,7 @@ namespace graph{
        @brief the numerical id of the component
        @return the id
     */
-    inline unsigned int getId(){ return id; }
+    inline unsigned int getId() const { return id; }
    
   };
 
@@ -396,7 +452,7 @@ namespace graph{
      @brief The purpose of this class is to store the strongly connected components of a graph.
      @since v1.98
   */ 
-  class SCCGraph : public Graphable{
+  class SCCGraph : public Graphable<SCCGraphComponent>{
 
   private:
     
@@ -410,7 +466,7 @@ namespace graph{
 
   public:
     
-    class node_iterator : public Graphable::node_iterator{
+    class node_iterator : public GraphableBase::node_iterator{
 
       friend class SCCGraph;
 
@@ -426,14 +482,13 @@ namespace graph{
 
       // Implement the virtual methods.
       void operator++(int){ it++; }
-      const TNode operator*(){ return *it; }
-      bool operator!=(const Graphable::abstract_iterator & it_rval){ return ( this->it != ((node_iterator &)it_rval).it ); }
-      bool operator==(const Graphable::abstract_iterator & it_rval){ return ( this->it == ((node_iterator &)it_rval).it ); }
+      TNode operator*(){ return *it; }
+      bool operator==(const GraphableBase::abstract_iterator & it_rval){ return ( this->it == ((node_iterator &)it_rval).it ); }
     
 
     };
     
-    class neighbour_iterator : public Graphable::neighbour_iterator{
+    class neighbour_iterator : public GraphableBase::neighbour_iterator{
 
       friend class SCCGraph;
 
@@ -449,13 +504,8 @@ namespace graph{
 
       // Implement the virtual methods.
       void operator++(int){ it++; }
-      const TNode operator*(){ return *it; }
-      bool operator!=(const Graphable::abstract_iterator & it_rval){ 
-	return ( this->it != ((neighbour_iterator &)it_rval).it );
-      }
-      bool operator==(const Graphable::abstract_iterator & it_rval){
-	return ( this->it == ((neighbour_iterator &)it_rval).it );
-      }
+      TNode operator*(){ return *it; }
+      bool operator==(const GraphableBase::abstract_iterator & it_rval){ return ( this->it == ((neighbour_iterator &)it_rval).it ); }
     
     };
 
@@ -487,22 +537,22 @@ namespace graph{
     */
     int size(){ return componentcounter; }
     
-    // We have to provide the Graphable-class Tstgraph with the implementation of the following pure virtual methods.
+    // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
 
-    Graphable::node_iterator * beginNodesPtr(){
+    GraphableBase::node_iterator * beginNodesPtr(){
 
       return new node_iterator(components.begin());
 
     }
 
-    Graphable::node_iterator * endNodesPtr(){
+    GraphableBase::node_iterator * endNodesPtr(){
 
       return new node_iterator(components.end());
 
     }
 
     // note: the "const" must be placed after the pointer-declaration. Otherwise the compiler misinterprets the meaning
-    Graphable::neighbour_iterator * beginNeighboursPtr(const TNode node){
+    GraphableBase::neighbour_iterator * beginNeighboursPtr(const TNode node){
 
       neighbour_iterator * it = new neighbour_iterator();
 
@@ -514,7 +564,7 @@ namespace graph{
 
     }
 
-    Graphable::neighbour_iterator * endNeighboursPtr(const TNode node){
+    GraphableBase::neighbour_iterator * endNeighboursPtr(const TNode node){
 
       neighbour_iterator * it = new neighbour_iterator();
 

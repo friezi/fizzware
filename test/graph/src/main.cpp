@@ -7,7 +7,7 @@ using namespace ds;
 // in the following we will define two different graph-representations
 
 // // the nodes will be stored in a map with lists holding the neighbours
-// class Tstgraph : public Graphable{
+// class Tstgraph : public GraphableBase{
 
 // public:
 
@@ -20,8 +20,8 @@ using namespace ds;
 
 // public:
 
-//   // Here we derive from the nested classes Graphable::node_iterator and Graphable::neighbour_iterator. We have to implement the pure virtual (abstract)
-//   // methods which are declared in Graphable::iterator.
+//   // Here we derive from the nested classes GraphableBase::node_iterator and GraphableBase::neighbour_iterator. We have to implement the pure virtual (abstract)
+//   // methods which are declared in GraphableBase::iterator.
 
 //   class tg_node_iterator : public node_iterator{
 
@@ -82,7 +82,7 @@ using namespace ds;
 
 //   Nodemap * getNodes(){ return nodes; }
 
-//   // The following methods are only necessary for our local Graphable-class Tstgraph. 
+//   // The following methods are only necessary for our local GraphableBase-class Tstgraph. 
 
 //   void insertNode(int node){ 
     
@@ -107,7 +107,7 @@ using namespace ds;
 
 //   }
 
-//   // We have to provide the Graphable-class Tstgraph with the implementation of the following pure virtual methods.
+//   // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
 
 //   node_iterator * beginNodesPtr(){
 
@@ -154,7 +154,7 @@ using namespace ds;
 // };
 
 // a graph represented by a matrix (note that the nodes must be accessible objects)
-class MatrixGraph : public Graphable{
+class MatrixGraph : public GraphableBase{
 
 private:
   
@@ -166,7 +166,7 @@ private:
 
 public:
   
-  class node_iterator : public Graphable::node_iterator{
+  class node_iterator : public GraphableBase::node_iterator{
 
     friend class MatrixGraph;
 
@@ -197,14 +197,13 @@ public:
       
     }
     
-    const TNode operator*(){ return &nodes[pos-1]; }
+    TNode operator*(){ return &nodes[pos-1]; }
     
-    bool operator!=(const abstract_iterator & it_rval){ return ( this->pos != ((node_iterator &)it_rval).pos ); }
     bool operator==(const abstract_iterator & it_rval){ return ( this->pos == ((node_iterator &)it_rval).pos ); }
 
   };
 
-  class neighbour_iterator : public Graphable::neighbour_iterator{
+  class neighbour_iterator : public GraphableBase::neighbour_iterator{
 
     friend class MatrixGraph;
 
@@ -263,9 +262,8 @@ public:
 
     }
 
-    const TNode operator*(){ return &nodes[neighbour-1]; }
+    TNode operator*(){ return &nodes[neighbour-1]; }
 
-    bool operator!=(const abstract_iterator & it_rval){ return ( this->neighbour != ((neighbour_iterator &)it_rval).neighbour ); }
     bool operator==(const abstract_iterator & it_rval){ return ( this->neighbour == ((neighbour_iterator &)it_rval).neighbour ); }
 
   };
@@ -517,9 +515,12 @@ int main(int argc, char **argv){
 
   cout << "finished" << endl << flush;
 
-  for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+  // we can consider scc as GraphableBase ...
+  for ( GraphableBase::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
       
+    // ...then we have to cast the administered nodes explicitly, ...
     SCCGraphComponent * component = (SCCGraphComponent *)(*scc_it);
+    // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
 
     cout << "component " << component->getId() << ": {";
     for ( SCCGraphComponent::nodeiterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
@@ -534,14 +535,16 @@ int main(int argc, char **argv){
 
   cout << "componentgraph:" << endl;
 
+  // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
+  // This version is type-safe.
   for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
       
-    SCCGraphComponent * component = (SCCGraphComponent *)(*scc_it);
+    SCCGraphComponent * component = *scc_it;
 
     cout << "neighbours of component " << component->getId() << ": ";
     
     for ( SCCGraph::iterator nb_it = scc->beginNeighbours(component); nb_it != scc->endNeighbours(component); nb_it++ )
-      cout << ((SCCGraphComponent *)(*nb_it))->getId() << " ";
+      cout << (*nb_it)->getId() << " ";
     cout << endl;
   }
   
