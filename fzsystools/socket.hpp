@@ -122,7 +122,7 @@ namespace sys{
     */
     Socket(unsigned short int port, struct hostent *host, int family, int socket_domain,
 	   int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	   int socket_backlog) throw(Exception_T);
+	   int socket_backlog) throw(ExceptionBase);
   
   
     /**
@@ -140,7 +140,7 @@ namespace sys{
     */
     Socket(std::string spath, int family, int socket_domain,
 	   int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	   int socket_backlog) throw(Exception_T);
+	   int socket_backlog) throw(ExceptionBase);
     /**
        @remark close() will be called
     */
@@ -229,7 +229,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     TCPSocket(unsigned short int port, struct hostent *host, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(Exception_T)
+	      int socket_backlog) throw(ExceptionBase)
       : Socket(port,host,AF_INET,PF_INET,SOCK_STREAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
   
@@ -243,7 +243,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     TCPSocket(std::string spath, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(Exception_T)
+	      int socket_backlog) throw(ExceptionBase)
       : Socket(spath,AF_LOCAL,PF_LOCAL,SOCK_STREAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
 
@@ -276,7 +276,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     UDPSocket(unsigned short int port, struct hostent *host, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(Exception_T)
+	      int socket_backlog) throw(ExceptionBase)
       : Socket(port,host,AF_INET,PF_INET,SOCK_DGRAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
   
@@ -290,7 +290,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     UDPSocket(std::string spath, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(Exception_T)
+	      int socket_backlog) throw(ExceptionBase)
       : Socket(spath,AF_LOCAL,PF_LOCAL,SOCK_DGRAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
 

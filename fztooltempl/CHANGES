@@ -33,3 +33,5 @@ v1.98:
 	SCCGraph and SCCGraphComponent
 - BitMatrix:
   - two functions added: toString() and show()
+
+- renamed Exception_T to ExceptionBase

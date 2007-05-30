@@ -35,7 +35,7 @@
 using namespace mexp;
 
 VarElement::VarElement(const char *name, double value, char protect)
-  throw (Exception_T) : value(value), protect(protect), next(0){
+  throw (ExceptionBase) : value(value), protect(protect), next(0){
 
   if (!(this->name = new char[strlen(name)+1]))
     throw OutOfMemException();
@@ -46,7 +46,7 @@ VarElement::~VarElement(){
   delete [] this->name;
 }
 
-VarList::VarList(const VarList& vl) throw (Exception_T) : first(0), last(0), modified(false){
+VarList::VarList(const VarList& vl) throw (ExceptionBase) : first(0), last(0), modified(false){
 
   const VarElement *curr;
 
@@ -72,7 +72,7 @@ VarList::~VarList(){
 }
 
 void VarList::insert(const char *name, double value, char protect)
-  throw (Exception_T){
+  throw (ExceptionBase){
 
   VarElement *ve;
 
@@ -116,7 +116,7 @@ void VarList::remove(const char *name) throw (Exception<VarList>){
   throw Exception<VarList>("not defined!");
 }
 
-double VarList::getValue(const char *name) const throw (Exception_T){
+double VarList::getValue(const char *name) const throw (ExceptionBase){
 
   const VarElement *ve;
 
@@ -354,7 +354,7 @@ MathExpression::MathExpression(VarList *vl, FunctionList *fl) :
 
 MathExpression::MathExpression(const char *expression, VarList *vl,
 			       FunctionList *fl)
-  throw (SubException<SyntaxErr,MathExpression>,Exception_T)
+  throw (SubException<SyntaxErr,MathExpression>,ExceptionBase)
   : varlist(vl), functionlist(fl), left(0), right(0), pred(0), value(0),
     type(EMPTY){
 
@@ -406,7 +406,7 @@ MathExpression::MathExpression(const char *expression, VarList *vl,
 
 MathExpression::MathExpression(MathExpression *me, VarList *vl,
 			       FunctionList *fl)
-  throw (SubException<SyntaxErr,MathExpression>,Exception_T)
+  throw (SubException<SyntaxErr,MathExpression>,ExceptionBase)
   : varlist(vl), functionlist(fl), left(0), right(0), pred(0), value(0),
     type(EMPTY){
   
@@ -454,7 +454,7 @@ MathExpression::~MathExpression(){
 }
 
 MathExpression *MathExpression::parse(const char *expr, VarList& locals)
-  throw (SubException<SyntaxErr,MathExpression>,Exception_T){
+  throw (SubException<SyntaxErr,MathExpression>,ExceptionBase){
 
   int e_indx, priority, offs;
   char exprstring[OP_LEN]={0}, bracketstring[BR_LEN]={0};
@@ -1406,7 +1406,7 @@ string MathExpression::toString(streamsize precision) const{
 
 }
 
-double MathExpression::eval() throw (Exception_T){
+double MathExpression::eval() throw (ExceptionBase){
 
   double result;
   if (isOprtr()){
@@ -1571,7 +1571,7 @@ string MathExpression::skipTrailingZeros(string value){
   return value.substr(0,stop);
 }
 
-double MathExpression::faculty(double fac) throw (Exception_T){
+double MathExpression::faculty(double fac) throw (ExceptionBase){
   
   if (fac!=(double)((int)(fac)) || fac<0)
     throw EvalException
@@ -1584,7 +1584,7 @@ double MathExpression::faculty(double fac) throw (Exception_T){
 }
 
 double MathExpression::sumProd(void)
-  throw (Exception_T){
+  throw (ExceptionBase){
 
   VarList vl = *this->varlist;  // lokaler Scope: Kopie der globalen Varlist
   MathExpression me(this,&vl,this->functionlist);
@@ -1641,7 +1641,7 @@ double MathExpression::sumProd(void)
   return res;
 }
 
-double MathExpression::assignValue(void) throw (Exception_T){
+double MathExpression::assignValue(void) throw (ExceptionBase){
 
   double result;
 
@@ -1673,7 +1673,7 @@ double MathExpression::assignValue(void) throw (Exception_T){
 
 }
 
-double MathExpression::evalFunction(void) throw (Exception_T){
+double MathExpression::evalFunction(void) throw (ExceptionBase){
 
   VarList vl = *this->varlist; // local scope
   MathExpression *args =  0,*params = 0;

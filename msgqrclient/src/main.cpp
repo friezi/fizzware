@@ -47,7 +47,7 @@ int main(int argc, char **argv){
     else
       cout << "Konnte Queue 'MessageQueue' nicht entfernen, wohl nicht existent\n";
 
-  }catch(Exception_T &e){
+  }catch(ExceptionBase &e){
     e.show();
   }
   

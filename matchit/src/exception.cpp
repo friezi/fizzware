@@ -30,19 +30,19 @@
 
 #include <exception.hpp>
   
-Exception_T::Exception_T(const std::string &id){
+ExceptionBase::ExceptionBase(const std::string &id){
     this->errormsg = "";
     this->spc_id = id;
     this->id_errormsg = this->spc_id;
   }
   
-Exception_T::Exception_T(const std::string &id, const std::string &errormsg){
+ExceptionBase::ExceptionBase(const std::string &id, const std::string &errormsg){
     this->errormsg = errormsg;
     this->spc_id = id;
     this->id_errormsg = this->spc_id + ": " + this->errormsg;
   }
 
-std::string Exception_T::skipDigits(const std::string &s){
+std::string ExceptionBase::skipDigits(const std::string &s){
 
   const char *sptr = s.c_str();
 
@@ -52,7 +52,7 @@ std::string Exception_T::skipDigits(const std::string &s){
   return std::string(sptr);
 }
 
-std::string Exception_T::skipLetters(const std::string &s){
+std::string ExceptionBase::skipLetters(const std::string &s){
 
   const char *sptr = s.c_str();
 
@@ -62,13 +62,13 @@ std::string Exception_T::skipLetters(const std::string &s){
   return std::string(sptr);
 }
 
-std::ostream& operator<<(std::ostream& ostr, const Exception_T& e){
+std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e){
 
   ostr << e.getIdMsg();
   return ostr;
 }
 
-void Exception_T::show() const{
+void ExceptionBase::show() const{
 
   std::cerr << *this << std::endl;
 }

@@ -163,9 +163,9 @@ protected:
     
     ~Scanner() { fd = 0; }
     
-    Token *nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
+    Token *nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase);
     
-    ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
+    ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase);
     
     int isBlank(char c);
   };
@@ -180,9 +180,9 @@ public:
 
   /**
      @exception Exception<MsgQueueRegClient>
-     @exception Exception_T
+     @exception ExceptionBase
   */
-  MsgQueueRegClient(std::string socket_path) throw(Exception<MsgQueueRegClient>,Exception_T);
+  MsgQueueRegClient(std::string socket_path) throw(Exception<MsgQueueRegClient>,ExceptionBase);
   
   ~MsgQueueRegClient();
 
@@ -190,34 +190,34 @@ public:
      @brief Commands the msgpd to install a new MsgQueue
      @param name the desired name for the MsgQueue
      @exception Exception<MsgQueueRegClient>
-     @exception Exception_T
+     @exception ExceptionBase
   */
-  bool newPort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T);
+  bool newPort(std::string name) throw (Exception<MsgQueueRegClient>,ExceptionBase);
 
   /**
      @brief Commands the msgpd to add an already existing MsgQueue
      @param name the desired name for the MsgQueue
      @param id the id of the message-queue
      @exception Exception<MsgQueueRegClient>
-     @exception Exception_T
+     @exception ExceptionBase
   */
-  bool addPort(std::string name, int id) throw (Exception<MsgQueueRegClient>,Exception_T);
+  bool addPort(std::string name, int id) throw (Exception<MsgQueueRegClient>,ExceptionBase);
 
   /**
      @brief Commands the msgpd to find the ID of a MsgQueue
      @param name the desired name for the MsgQueue
      @exception Exception<MsgQueueRegClient>
-     @exception Exception_T
+     @exception ExceptionBase
   */
-  int findPort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T);
+  int findPort(std::string name) throw (Exception<MsgQueueRegClient>,ExceptionBase);
 
   /**
      @brief Commands the msgpd to remove a MsgQueue of the list
      @param name the desired name for the MsgQueue
      @exception Exception<MsgQueueRegClient>
-     @exception Exception_T
+     @exception ExceptionBase
   */
-  bool removePort(std::string name) throw (Exception<MsgQueueRegClient>,Exception_T);
+  bool removePort(std::string name) throw (Exception<MsgQueueRegClient>,ExceptionBase);
 
 };
 

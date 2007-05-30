@@ -90,33 +90,33 @@ public:
      @exception ActiveErr
      @exception RuntimeErr
   */
-  void launch() throw (Exception_T);
+  void launch() throw (ExceptionBase);
 
   /**
      @brief Sends the signal SIGKILL to process
      @exception AbortErr
   */
-  void abort() throw(Exception_T);
+  void abort() throw(ExceptionBase);
 
   /**
      @brief sends the signal SIGTERM to process
      @exception TerminateErr
   */
-  void terminate() throw(Exception_T);
+  void terminate() throw(ExceptionBase);
 
   /**
      @brief Sends a signal to the process
      @param signal the signal
      @exception SignalErr
   */
-  void sendSignal(int signal) throw(Exception_T);
+  void sendSignal(int signal) throw(ExceptionBase);
 
   /**
      @brief Waits for process to exit
      @param status will be filled with exit-status of the process, if status != 0
      @exception WaitErr
   */
-  pid_t wait(int *status = 0) throw(Exception_T);
+  pid_t wait(int *status = 0) throw(ExceptionBase);
 
   /**
      @brief Get the Process-ID

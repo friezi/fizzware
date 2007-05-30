@@ -31,7 +31,7 @@ int main(int argc, char *argv[]){
     cout << "\n";
     
     return 0;
-  }catch (Exception_T & e){
+  }catch (ExceptionBase & e){
     e.show();
     exit(1);
   }

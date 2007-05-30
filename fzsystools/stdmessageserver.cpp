@@ -147,7 +147,7 @@ void StdMessageServer::start() throw(Exception<StdMessageServer>){
       }
     }
     
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     log(LOG_ERR,e.getMsgCharPtr());
     goto error1;
   }
@@ -236,7 +236,7 @@ void StdMessageServer::connectionHandler(){
 
       close(msgserver_fd);
     }
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
 
     delete msgserver;
 
@@ -279,7 +279,7 @@ void StdMessageServer::handleClient(int fd){
     else  
       log(LOG_INFO,"client has disconnected!");
     
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     log(LOG_ERR,e.getIdMsgCharPtr());
   }
   

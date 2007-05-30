@@ -129,7 +129,7 @@ unsigned int MsgQueueRegDaemon::parse(int fd){
     }
     delete token;
     
-  } catch(Exception_T &e) {
+  } catch(ExceptionBase &e) {
     log(LOG_DEBUG,e.getIdMsgCharPtr());
   }
   
@@ -392,7 +392,7 @@ MQMBody::~MQMBody(){
     free(body);
 }
 
-MsgQuMessage::MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type) throw(Exception_T){
+MsgQuMessage::MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type) throw(ExceptionBase){
 
   this->msg = 0;
 
@@ -422,7 +422,7 @@ FMBody::~FMBody(){
     free(body);
 }
 
-FindMessage::FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type) throw(Exception_T){
+FindMessage::FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type) throw(ExceptionBase){
 
   this->msg = 0;
 

@@ -30,7 +30,7 @@ using namespace sys;
 
 Socket::Socket(unsigned short int port, struct hostent *host, int family, int socket_domain,
 	       int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	       int socket_backlog) throw(Exception_T) :
+	       int socket_backlog) throw(ExceptionBase) :
   port(port), spath(""), sock(0), family(family), socket_domain(socket_domain), socket_type(socket_type),
   socket_protocol(socket_protocol), socket_opt_level(socket_opt_level), socket_opt_name(socket_opt_name),
   socket_backlog(socket_backlog),initialized(false), host(host){
@@ -40,7 +40,7 @@ Socket::Socket(unsigned short int port, struct hostent *host, int family, int so
 
 Socket::Socket(string spath, int family, int socket_domain,
 	       int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	       int socket_backlog) throw(Exception_T) :
+	       int socket_backlog) throw(ExceptionBase) :
   port(0), spath(spath), sock(0), family(family), socket_domain(socket_domain), socket_type(socket_type),
   socket_protocol(socket_protocol), socket_opt_level(socket_opt_level), socket_opt_name(socket_opt_name),
   socket_backlog(socket_backlog),initialized(false), host(0){

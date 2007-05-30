@@ -54,7 +54,7 @@ int main(int argc, char **argv){
 
     cout << endl << parser.infoUsage();
 
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     e.show();
     cerr << usage << endl;
   }

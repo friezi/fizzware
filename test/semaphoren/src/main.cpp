@@ -15,7 +15,7 @@ int main(){
     sem2.V();
     sem1.V();
 
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     e.show();
   }
     

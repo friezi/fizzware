@@ -103,9 +103,9 @@ public:
 
   ~Scanner() { fd = 0; }
 
-  Token *nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
+  Token *nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase);
 
-  ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T);
+  ULongToken *nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase);
 
   // in BSD-Un*x isblank is a macro and must be deactivated
 #ifdef isblank

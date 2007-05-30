@@ -34,7 +34,7 @@ int main(int argc, char **argv){
     
     delete automat;
     
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     e.show();
   }
 

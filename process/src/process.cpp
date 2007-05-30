@@ -23,7 +23,7 @@
 
 unsigned int Process::pcount=0;
 
-pid_t Process::wait(int *status) throw(Exception_T){
+pid_t Process::wait(int *status) throw(ExceptionBase){
   
   pid_t wpid;
   bool delstat=false;
@@ -52,7 +52,7 @@ Process::Process(bool daemon) : pid(0),ppid(0),setprot(daemon),pprotect(true){
   pnmb=pcount;
 }
 
-void Process::launch() throw (Exception_T){
+void Process::launch() throw (ExceptionBase){
   
   pid_t pid;
   
@@ -75,7 +75,7 @@ void Process::launch() throw (Exception_T){
   this->pprotect=setprot;
 }
 
-void Process::abort() throw(Exception_T){
+void Process::abort() throw(ExceptionBase){
   
   if (!pid)
     throw AbortErr(getPnmb());
@@ -83,7 +83,7 @@ void Process::abort() throw(Exception_T){
   kill(pid,SIGKILL);
 }
 
-void Process::terminate() throw(Exception_T){
+void Process::terminate() throw(ExceptionBase){
   
   if (!pid)
     throw TerminateErr(getPnmb());
@@ -91,7 +91,7 @@ void Process::terminate() throw(Exception_T){
   kill(pid,SIGTERM);
 }
 
-void Process::sendSignal(int signal) throw(Exception_T){
+void Process::sendSignal(int signal) throw(ExceptionBase){
   
   if (!pid)
     throw SignalErr(getPnmb());

@@ -236,9 +236,9 @@ namespace sys{
        @param flag the flag of the message (see the unix/linux-documentation on messagequeues
        @return pointer to the message
        @exception Exception<MessageQueue>
-       @exception Exception_T
+       @exception ExceptionBase
     */
-    Message *receive(size_t maxlength = 4096, long typ = 0, int flag = MSG_NOERROR) throw(Exception<MessageQueue>,Exception_T);
+    Message *receive(size_t maxlength = 4096, long typ = 0, int flag = MSG_NOERROR) throw(Exception<MessageQueue>,ExceptionBase);
 
     // Abfragen/Aendern/Loeschen
     /**

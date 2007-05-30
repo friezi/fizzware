@@ -134,7 +134,7 @@ int main(int argc, char **argv){
 //     pltree.erase(PrimKey(4,pl4));
     pltree.erase(PrimKey(15,pl15));
   }
-  catch (Exception_T &e){
+  catch (ExceptionBase &e){
     e.show();
   }
   

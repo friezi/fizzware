@@ -267,7 +267,7 @@ int main(int argc, char **argv, char **envp){
     cerr << "syntaxerror: " << mese.getMsg() << endl;
     exit(1);
 
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
 
     e.show();
     cerr << usage << endl;

@@ -31,7 +31,7 @@ using namespace ds;
 
 const string MsgQueueRegClient::default_socket_path = "/var/run/msgqrd_socket";
 
-MsgQueueRegClient::MsgQueueRegClient(string socket_path) throw(Exception<MsgQueueRegClient>,Exception_T){
+MsgQueueRegClient::MsgQueueRegClient(string socket_path) throw(Exception<MsgQueueRegClient>,ExceptionBase){
  
 //   struct servent *msgqrd_entry;
 
@@ -53,7 +53,7 @@ MsgQueueRegClient::~MsgQueueRegClient(){
 }
 
 
-bool MsgQueueRegClient::newPort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::newPort(string name) throw (Exception<MsgQueueRegClient>,ExceptionBase){
 
 //   int sockfd;
 
@@ -81,7 +81,7 @@ bool MsgQueueRegClient::newPort(string name) throw (Exception<MsgQueueRegClient>
 
 }
 
-bool MsgQueueRegClient::addPort(string name, int id) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::addPort(string name, int id) throw (Exception<MsgQueueRegClient>,ExceptionBase){
 
   string commandadd = "CMD_ADD_MSGQUEUE";
   int sockfd;
@@ -119,7 +119,7 @@ bool MsgQueueRegClient::addPort(string name, int id) throw (Exception<MsgQueueRe
   return result;
 }
 
-int MsgQueueRegClient::findPort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+int MsgQueueRegClient::findPort(string name) throw (Exception<MsgQueueRegClient>,ExceptionBase){
 
   string commandfind = "CMD_FIND_MSGQUEUE";
   int sockfd;
@@ -156,7 +156,7 @@ int MsgQueueRegClient::findPort(string name) throw (Exception<MsgQueueRegClient>
   return id;
 }
 
-bool MsgQueueRegClient::removePort(string name) throw (Exception<MsgQueueRegClient>,Exception_T){
+bool MsgQueueRegClient::removePort(string name) throw (Exception<MsgQueueRegClient>,ExceptionBase){
 
   string commandfind = "CMD_REMOVE_MSGQUEUE";
   int sockfd;
@@ -232,7 +232,7 @@ int MsgQueueRegClient::Scanner::isBlank(char c){
   return ((c == ' ') || (c == '\t'));
 }
 
-MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
+MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
 
   Buffer<char> buffer(BLKSIZE);
   MemPointer<char> input(false);
@@ -275,7 +275,7 @@ MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Excepti
 }
 
 MsgQueueRegClient::ULongToken *MsgQueueRegClient::Scanner::nextULongToken()
-  throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
+  throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
   
   unsigned long tmp = 0;
   

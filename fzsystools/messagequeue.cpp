@@ -142,7 +142,7 @@ void MessageQueue::get() throw(Exception<MessageQueue>){
 
 // Message erhalten
 Message *MessageQueue::receive(size_t maxlength, long typ, int flag)
-  throw(Exception<MessageQueue>,Exception_T){
+  throw(Exception<MessageQueue>,ExceptionBase){
   
   int length;
   Message *msg = new Message(NULL,maxlength);

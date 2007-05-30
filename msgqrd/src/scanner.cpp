@@ -47,7 +47,7 @@ int Scanner::isblank(char c){
   return ((c == ' ') || (c == '\t'));
 }
 
-Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
+Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
 
   Buffer<char> buffer(BLKSIZE);
   MemPointer<char> input(false);
@@ -89,7 +89,7 @@ Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Except
   return new Token(input.get(),count);
 }
 
-ULongToken *Scanner::nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,Exception_T){
+ULongToken *Scanner::nextULongToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
   
   unsigned long tmp = 0;
   

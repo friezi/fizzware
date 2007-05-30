@@ -68,7 +68,7 @@ int main(int argc, char **argv){
     e.show();
     cerr << usage << endl;
     
-  } catch (Exception_T& e){
+  } catch (ExceptionBase& e){
     e.show();
     status = -1;
   }

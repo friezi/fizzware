@@ -56,10 +56,10 @@ namespace ds{
     T *buf;
     
     // Konstruktor:
-    MemBlock(unsigned long blksize) throw (Exception_T);
+    MemBlock(unsigned long blksize) throw (ExceptionBase);
     
     // Destruktor:
-    ~MemBlock() throw (Exception_T);
+    ~MemBlock() throw (ExceptionBase);
     
   };
   
@@ -184,17 +184,17 @@ namespace ds{
     
     // Destruktor:
     /**
-       @exception Exception_T
+       @exception ExceptionBase
     */
-    ~Buffer() throw (Exception_T);
+    ~Buffer() throw (ExceptionBase);
     
     // Element in den Puffer schreiben
     /**
        @brief put a new object in the buffer
        @param c reference to the object
-       @exception Exception_T
+       @exception ExceptionBase
     */
-    void put(T &c) throw (Exception_T);
+    void put(T &c) throw (ExceptionBase);
     
     // Bloecke zu einem Block zusammenfuegen (NULL terminiert)
     /**
@@ -204,7 +204,7 @@ namespace ds{
        to convert it to a string, e.g. use put(0);
        @exception Exception< Buffer<T> >
     */
-    MemPointer<T> merge() throw (Exception_T);
+    MemPointer<T> merge() throw (ExceptionBase);
     
     // Anzahl der Bloecke
     /**
@@ -570,7 +570,7 @@ operator--(){
 
 template<typename T>
 ds::MemBlock<T>::
-MemBlock(unsigned long blksize) throw (Exception_T) : next(0){
+MemBlock(unsigned long blksize) throw (ExceptionBase) : next(0){
   
   if (!(buf = (T *)calloc(blksize,sizeof(T))))
     throw Exception< ds::MemBlock<T> >("MemBlock(): calloc() failed!");
@@ -578,7 +578,7 @@ MemBlock(unsigned long blksize) throw (Exception_T) : next(0){
 
 template<typename T>
 ds::MemBlock<T>::
-~MemBlock() throw (Exception_T){
+~MemBlock() throw (ExceptionBase){
   
   if (buf)
     free(buf);
@@ -589,7 +589,7 @@ ds::MemBlock<T>::
 
 template<typename T>
 ds::Buffer<T>::
-~Buffer() throw (Exception_T){
+~Buffer() throw (ExceptionBase){
   
   ds::MemBlock<T> *curr,*next;
   
@@ -609,7 +609,7 @@ ds::Buffer<T>::
 template<typename T>
 void
 ds::Buffer<T>::
-put(T &c) throw (Exception_T){
+put(T &c) throw (ExceptionBase){
   
   ds::MemBlock<T> *curr;
   
@@ -644,7 +644,7 @@ put(T &c) throw (Exception_T){
 template<typename T>
 ds::MemPointer<T>
 ds::Buffer<T>::
-merge() throw (Exception_T){
+merge() throw (ExceptionBase){
   
   unsigned long units=0, pos=0;
   ds::MemBlock<T> *curr;

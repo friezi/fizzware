@@ -93,16 +93,16 @@ namespace mexp{
     double value;
     char type;
     
-    MathExpression *parse(const char *expr, VarList& locals) throw (SubException<SyntaxErr,MathExpression>,Exception_T);
+    MathExpression *parse(const char *expr, VarList& locals) throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
     
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int pri(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,MathExpression>);
-    double faculty(double fac) throw (Exception_T);
-    double sumProd(void) throw (Exception_T);
-    double assignValue(void) throw (Exception_T);
-    double evalFunction(void) throw (Exception_T);
+    double faculty(double fac) throw (ExceptionBase);
+    double sumProd(void) throw (ExceptionBase);
+    double assignValue(void) throw (ExceptionBase);
+    double evalFunction(void) throw (ExceptionBase);
     void defineFunction(void) throw (SubException<DefinitionError,MathExpression>);
     bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
     bool empty(void) const { return (getType()==EMPTY); }
@@ -151,12 +151,12 @@ namespace mexp{
        @exception OutOfMemException
     */
     MathExpression(const char *expression, VarList *vl = 0, FunctionList *fl = 0)
-      throw (SubException<SyntaxErr,MathExpression>,Exception_T);
+      throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
  
   protected:
 
     MathExpression(MathExpression *me, VarList *vl, FunctionList *fl)
-      throw (SubException<SyntaxErr,MathExpression>,Exception_T);
+      throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
 
   public:
     
@@ -184,7 +184,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    double eval() throw (Exception_T);
+    double eval() throw (ExceptionBase);
 
     /**
        @brief returns the signum of the value
@@ -335,7 +335,7 @@ namespace mexp{
        @exception OutOfMemException
     */
     VarElement(const char *name, double value, char protect)
-      throw (Exception_T);
+      throw (ExceptionBase);
     // destructor:
     ~VarElement();
     char *getName() const{ return name; }
@@ -395,7 +395,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    VarList(const VarList& vl) throw (Exception_T);
+    VarList(const VarList& vl) throw (ExceptionBase);
 
     // destructor:
     ~VarList();
@@ -405,12 +405,12 @@ namespace mexp{
        @exception OutOfMemException
     */
     void insert(const char *name, double value, char protect=0)
-      throw (Exception_T);
+      throw (ExceptionBase);
     void remove(const char *name) throw (Exception<VarList>);
     /**
        @exception EvalException
     */
-    double getValue(const char *name) const throw (Exception_T);
+    double getValue(const char *name) const throw (ExceptionBase);
     VarElement *isMember(const char *name) const;
     void unprotect(const char *name=0);
     void print(std::streamsize precision) const;    

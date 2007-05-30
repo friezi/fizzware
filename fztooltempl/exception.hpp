@@ -43,15 +43,15 @@
 
 // Not for direct use!!!
 /**
-   @class Exception_T
+   @class ExceptionBase
    @internal Use Exception< T > instead
    @brief The baseclass for all exceptions
 */
-class Exception_T{
+class ExceptionBase{
 
 private:
 
-  Exception_T(){}
+  ExceptionBase(){}
   
 protected:
   
@@ -59,9 +59,9 @@ protected:
   std::string spc_id;
   std::string id_errormsg;
   
-  Exception_T(const std::string &id);
+  ExceptionBase(const std::string &id);
   
-  Exception_T(const std::string &id, const std::string &errormsg);
+  ExceptionBase(const std::string &id, const std::string &errormsg);
   
   // um fuehrende Zahlen bei durch typeid() generierten Klassennamen zu entfernen
   /**
@@ -79,14 +79,14 @@ protected:
 
 public:
   
-  virtual ~Exception_T(){}
+  virtual ~ExceptionBase(){}
 
   /** For using like: \n cout << e;
       @brief to pass it to an output-stream
       @param ostr the output-stream
       @param e the exception
   */
-  friend std::ostream& operator<<(std::ostream& ostr, const Exception_T& e);
+  friend std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e);
 
   /// prints the exception
   virtual void show() const;
@@ -117,40 +117,40 @@ public:
     @brief A general exception-classtemplate
     @see SubException
 */
-template<typename T> class Exception : public Exception_T{
+template<typename T> class Exception : public ExceptionBase{
 
 public:
 
   /**
      constructor whithout message
  */
-  Exception() : Exception_T(classname()){}
+  Exception() : ExceptionBase(classname()){}
 
   /**
      constructor whith errormessage
      @param errormsg pointer to the errormessage
   */
-  Exception(const char * const  errormsg) : Exception_T(classname() + "Exception",std::string(errormsg)){}
+  Exception(const char * const  errormsg) : ExceptionBase(classname() + "Exception",std::string(errormsg)){}
   
   /**
      constructor whith errormessage
      @param errormsg the errormessage
   */
-  Exception(const std::string &errormsg) : Exception_T(classname() + "Exception",errormsg){}
+  Exception(const std::string &errormsg) : ExceptionBase(classname() + "Exception",errormsg){}
 
   /**
      extensibility for derived classes
      @param id the identifikation-string for the class (classname)
      @param errormsg the errormessage
   */
-  Exception(const std::string &id, const std::string &errormsg) : Exception_T(id,errormsg){}
+  Exception(const std::string &id, const std::string &errormsg) : ExceptionBase(id,errormsg){}
 
   virtual ~Exception(){}
 
 protected:
 
   /// Extracts the class-name from a typeid()-information
-  std::string extract(const std::string &s){ return Exception_T::skipDigits(Exception_T::skipLetters(s)); }
+  std::string extract(const std::string &s){ return ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)); }
 
   /**
      Generates the corresponding classname
@@ -194,7 +194,7 @@ protected:
 
   /// Extracts the subclass-name from a typeid()-information
   std::string extract_sub(const std::string &s){
-    return Exception_T::skipDigits(Exception_T::skipLetters(Exception_T::skipDigits(Exception_T::skipLetters(s)))); }
+    return ExceptionBase::skipDigits(ExceptionBase::skipLetters(ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)))); }
 
   virtual std::string classname(){ return ( this->extract(typeid(TBase).name()) + this->extract_sub(typeid(TSub).name()) + "Exception" ); }
 };

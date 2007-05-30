@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
     primlist->show();
    
     delete primlist;
-  } catch (Exception_T &e){
+  } catch (ExceptionBase &e){
     e.show();
   }
   return 0;

@@ -243,7 +243,7 @@ protected:
 
 public:
 
-  MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type = getpid()) throw(Exception_T);
+  MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type = getpid()) throw(ExceptionBase);
 };
 
 class FMBody{
@@ -276,7 +276,7 @@ protected:
 
 public:
 
-  FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type = getpid()) throw(Exception_T);
+  FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type = getpid()) throw(ExceptionBase);
 };
 
 #endif

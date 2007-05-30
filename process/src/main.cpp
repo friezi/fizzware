@@ -127,7 +127,7 @@ int main(){
     }
 
 
-   } catch (Exception_T &e){
+   } catch (ExceptionBase &e){
     e.show();
   }
   
