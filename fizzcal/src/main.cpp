@@ -461,10 +461,19 @@ bool checkAnswer(const string & text){
 
   answer = (char *)readline(text.c_str());
 
-  if (strcmp(answer,"y"))
+  if ( answer ){
+
+    if ( strcmp(answer,"y") )
+      result = false;
+
+    free(answer);
+    
+  } else{
+
+    cout << endl;
     result = false;
 
-  free(answer);
+  }
 
   return result;
 

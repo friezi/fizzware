@@ -10,3 +10,4 @@ v2.52:
 v2.54:
 - due to scientific-mode output of floatingpoints, there was a syntaxcheck-problem while reading floatingpoints in
   scientific notation. This problem is fixed because there's no scientific-mode output anymore.
+- exiting cleanly on input of CTRL-D on exitcheck

@@ -52,14 +52,26 @@
 
 // abstrakte Klasse:
 /**
-    @interface StdMessageServer
-    If a Client builds up a connection to the standard-message-server, the sms opens a socket and passes
-    its descriptor to the abstract method parse(), which parses the output of the socket. Within parse() an
-    appropriet message should be send to the sms via Message::send(). The handling of the message will be
-    executed by handleMessage().So you have to overwrite the following abstract methods:\n
+    @class StdMessageServer
+    The StdMessageServer-class serves for building up arbitrary service-daemons. When running it consists at first of two processes:
+    the server which does the actual processing and a process (the connection-observer) who's only task is to wait for connection-requests.
+    The connection-observer will fork a third task for each built up connection. This third task is a per user protocol-handler which does all the
+    communication with the user. The protocol-handler sends internal messages to the service-process (i.e. to the service-process' MessageQueue) for
+    triggering the required service.
+    The server in turn can send it's results to the protocol-handler's MessageQueue, which in this case has to wait for new messages. This is up to you:
+    you have to program this part of code and maintain a PH's MessageQueue (if needed); of course also you have to define an appropriate Message-format.
+    Only the service-process has a already set up a MessageQueue who's id can be obtained by the protocol-handler by calling getMsgQuId().\n
+    By decoupling the protocol-handler from the service, the service (and the connection-observer) will not crash (if programmed properly) if
+    there is a failure in the communication between the protocol-handler and the user.\n
+    For building up a StdMessageServer you need to overwrite the following abstract methods:\n
     - parse()\n
     - handleMessage()\n
-    - log()
+    - log()\n
+
+    The protocol-handler's parse()-method reads from a TCP-Socket connected with a user. It may then send internal messages (see class Message)
+    to the service's MessageQueue (id via getMsgQuId()). The service's handleMessage()-method receives a Message from it's MessageQueue and does
+    all the necessary processing. The method log() is ment for printing logging-information in any way you wish (in case of a service-daemon you
+    would normally sent it to syslogd).
     @brief A standard-server based on message-communication
 */
 class StdMessageServer{
@@ -128,6 +140,8 @@ public:
 
   virtual ~StdMessageServer() {}
 
+  /** @name controlling-methods */
+  //@{
   // starten des Daemons: solange Daemon läuft, kehrt start nicht zurück
   /**
      @brief Starts the server
@@ -150,9 +164,12 @@ public:
      @exception Exception<StdMessageServer>
   */
   void daemonize(void) throw(Exception<StdMessageServer>);
+  //@}
 
   // zu überschreibende Funktionen:
 
+  /** @name override these methods */
+  //@{
   // was soll mit log-informationen geschehen?
   /**
      @brief to write logging-information
@@ -181,6 +198,8 @@ public:
      @param message is the message (must be parsed as well)
   */
   virtual void handleMessage(sys::Message *message) = 0;
+
+  //@}
 
 };
 

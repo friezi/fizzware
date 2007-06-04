@@ -7,16 +7,18 @@ using namespace ds;
 // in the following we will define two different graph-representations
 
 // // the nodes will be stored in a map with lists holding the neighbours
-// class Tstgraph : public GraphableBase{
+// class Tstgraph : public Graphable<int>{
 
 // public:
 
 //   typedef map< int, list<int> *, less<int> > Nodemap;
 
 // private:
+
+//   int * tempnode;
   
 //   // our definition of nodes
-//   Nodemap * nodes;
+//   Nodemap * neighbours;
 
 // public:
 
@@ -31,16 +33,27 @@ using namespace ds;
 
 //     int count;
 
+//     int **tempnode;
+
 //     void setCount(int rval_count){ count = rval_count; }
 
 //   public:
+
+//     tg_node_iterator(int **tempnode) : tempnode(tempnode){}
 
 //     ~tg_node_iterator(){}
 
 //     // Implement the virtual methods.
 //     void operator++(int){ count++; }
-//     const int operator*(){ return count; }
-//     bool operator!=(const abstract_iterator & it_rval){ return ( this->count != ((tg_node_iterator &)it_rval).count ); }
+//     TNode operator*(){
+
+//       if ( *tempnode )
+// 	delete *tempnode;
+
+//       *tempnode = new int(count);
+//       return *tempnode;
+
+// }
 //     bool operator==(const abstract_iterator & it_rval){ return ( this->count == ((tg_node_iterator &)it_rval).count ); }
     
 
@@ -62,43 +75,49 @@ using namespace ds;
 
 //     // Implement the virtual methods.
 //     void operator++(int){ it++; }
-//     const int operator*(){ return *it; }
-//     bool operator!=(const abstract_iterator & it_rval){ return ( this->it != ((tg_neighbour_iterator &)it_rval).it ); }
+//     TNode operator*(){ return &(*it); }
 //     bool operator==(const abstract_iterator & it_rval){ return ( this->it == ((tg_neighbour_iterator &)it_rval).it ); }
     
 
 //   };
 
-//   Tstgraph(){ nodes = new Nodemap(); }
+//   Tstgraph() : tempnode(0){ 
+
+//     neighbours = new Nodemap();
+
+//   }
 
 //   ~Tstgraph(){
 
-//     for ( Nodemap::iterator it = nodes->begin(); it != nodes->end(); it++ )
+//     for ( Nodemap::iterator it = neighbours->begin(); it != neighbours->end(); it++ )
 //       delete (*it).second;
     
-//     delete nodes;
+//     delete neighbours;
+
+//     if ( tempnode )
+//       delete tempnode;
     
 //   }
 
-//   Nodemap * getNodes(){ return nodes; }
+//   Nodemap * getNodes(){ return neighbours; }
 
 //   // The following methods are only necessary for our local GraphableBase-class Tstgraph. 
 
 //   void insertNode(int node){ 
     
-//     (*nodes)[node] = new list<int>();
+//     (*neighbours)[node] = new list<int>();
   
 //   }
 
 //   void insertEdge(int node, int neighbour){
 
-//     (*nodes)[node]->push_back(neighbour);
+//     (*neighbours)[node]->push_back(neighbour);
 
 //   }
 
 //   void removeEdge(int node, int neighbour){
 
-//     list<int> * neighbourlist = (*nodes)[node];
+//     list<int> * neighbourlist = (*neighbours)[node];
 
 //     list<int>::iterator it = find(neighbourlist->begin(),neighbourlist->end(),neighbour);
 
@@ -111,7 +130,7 @@ using namespace ds;
 
 //   node_iterator * beginNodesPtr(){
 
-//     tg_node_iterator * it = new tg_node_iterator();
+//     tg_node_iterator * it = new tg_node_iterator(&tempnode);
     
 //     it->setCount(0);
 
@@ -120,7 +139,7 @@ using namespace ds;
 //   }
 //   node_iterator * endNodesPtr(){
 
-//     tg_node_iterator * it = new tg_node_iterator();
+//     tg_node_iterator * it = new tg_node_iterator(&tempnode);
    
 //     it->setCount(maxNodes());
 
@@ -128,28 +147,26 @@ using namespace ds;
 
 //   }
 
-//   neighbour_iterator * beginNeighboursPtr(const int & node){
+//   neighbour_iterator * beginNeighboursPtr(const TNode node){
 
 //     tg_neighbour_iterator * it = new tg_neighbour_iterator();
     
-//     it->setIt((*nodes->find(node)).second->begin());
+//     it->setIt((*neighbours->find(*((int *)node))).second->begin());
 
 //     return it;
 
 //   }
-//   neighbour_iterator * endNeighboursPtr(const int & node){
+//   neighbour_iterator * endNeighboursPtr(const TNode node){
 
 //     tg_neighbour_iterator * it = new tg_neighbour_iterator();
    
-//     it->setIt((*nodes->find(node)).second->end());
+//     it->setIt((*neighbours->find(*((int *)node))).second->end());
 
 //     return it;
 
 //   }
 
-//   unsigned int maxNodes(){ return nodes->size(); }
-
-//   int startNode(){ return (*nodes->begin()).first; }
+//   unsigned int maxNodes(){ return neighbours->size(); }
 
 // };
 
@@ -325,160 +342,160 @@ int main(int argc, char **argv){
     int max = 100;
     SCCGraph *scc;
 
-  //   Tstgraph tg;
+//     Tstgraph tg;
 
-  //   // just build up a graph-structure
+//     // just build up a graph-structure
 
-  //   tg.insertNode(1);
-  //   tg.insertNode(0);
-  //   tg.insertNode(2);
-  //   tg.insertNode(3);
-  //   tg.insertNode(4);
-  //   tg.insertNode(5);
-  //   tg.insertNode(6);
-  //   tg.insertNode(7);
-  //   tg.insertNode(8);
-  //   tg.insertNode(9);
-  //   tg.insertNode(10);
-  //   tg.insertNode(11);
+//     tg.insertNode(1);
+//     tg.insertNode(0);
+//     tg.insertNode(2);
+//     tg.insertNode(3);
+//     tg.insertNode(4);
+//     tg.insertNode(5);
+//     tg.insertNode(6);
+//     tg.insertNode(7);
+//     tg.insertNode(8);
+//     tg.insertNode(9);
+//     tg.insertNode(10);
+//     tg.insertNode(11);
   
-  //   tg.insertEdge(0,1);
-  //   tg.insertEdge(0,2);
+//     tg.insertEdge(0,1);
+//     tg.insertEdge(0,2);
 
-  //   tg.insertEdge(2,0);
-  //   tg.insertEdge(1,3);
-  //   tg.insertEdge(3,4);
-  //   tg.insertEdge(3,1);
-  //   tg.insertEdge(4,1);
-  //   tg.insertEdge(5,3);
-  //   tg.insertEdge(2,6);
-  //   tg.insertEdge(6,7);
-  //   tg.insertEdge(7,8);
-  //   tg.insertEdge(8,5);
-  //   tg.insertEdge(8,9);
-  //   tg.insertEdge(10,9);
-  //   tg.insertEdge(9,11);
-  //   tg.insertEdge(11,10);
-  //   tg.insertEdge(3,7);
+//     tg.insertEdge(2,0);
+//     tg.insertEdge(1,3);
+//     tg.insertEdge(3,4);
+//     tg.insertEdge(3,1);
+//     tg.insertEdge(4,1);
+//     tg.insertEdge(5,3);
+//     tg.insertEdge(2,6);
+//     tg.insertEdge(6,7);
+//     tg.insertEdge(7,8);
+//     tg.insertEdge(8,5);
+//     tg.insertEdge(8,9);
+//     tg.insertEdge(10,9);
+//     tg.insertEdge(9,11);
+//     tg.insertEdge(11,10);
+//     tg.insertEdge(3,7);
 
   
-  //   // print the graph-structure for demonstration
-  //   for ( Tstgraph::Nodemap::iterator nm_it = tg.getNodes()->begin(); nm_it != tg.getNodes()->end(); nm_it++ ){
+//     // print the graph-structure for demonstration
+//     for ( Tstgraph::Nodemap::iterator nm_it = tg.getNodes()->begin(); nm_it != tg.getNodes()->end(); nm_it++ ){
 
-  //     cout << "neighbours from node " << (*nm_it).first << ": ";
+//       cout << "neighbours from node " << (*nm_it).first << ": ";
 
-  //     for ( Tstgraph::iterator ni = tg.beginNeighbours((*nm_it).first); ni != tg.endNeighbours((*nm_it).first); ni++ )
-  //       cout << *ni << " ";
+//       for ( Tstgraph::iterator ni = tg.beginNeighbours(&((void *)((*nm_it).first))); ni != tg.endNeighbours(&((void *)((*nm_it).first))); ni++ )
+//         cout << *ni << " ";
 
-  //     cout << endl;
+//       cout << endl;
 
-  //   }
+//     }
 
 
-  //   // find all strongly connected components
-  //   scc = tg.find_scc(true);
+//     // find all strongly connected components
+//     scc = tg.find_scc(true);
 
-  //   for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
       
-  //     cout << "component " << (*scc_it)->getId() << ": {";
-  //     for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+//       cout << "component " << (*scc_it)->getId() << ": {";
+//       for ( SCCGraphComponent::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
-  //       if ( c_it != (*scc_it)->beginNodes() )
-  // 	cout << ",";
-  //       cout << *c_it;
+//         if ( c_it != (*scc_it)->beginNodes() )
+//   	cout << ",";
+//         cout << *c_it;
 
-  //     }
-  //     cout << "}" << endl;
-  //   }
+//       }
+//       cout << "}" << endl;
+//     }
 
-  //   cout << "componentgraph:" << endl;
+//     cout << "componentgraph:" << endl;
 
-  //   for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
 
-  //     cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
     
-  //     for ( SCCGraph<int>::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
-  //       cout << (*nb_it)->getId() << " ";
-  //     cout << endl;
+//       for ( SCCGraph::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
+//         cout << (*nb_it)->getId() << " ";
+//       cout << endl;
 
-  //   }
+//     }
 
-  //   delete scc;
+//     delete scc;
 
-  //   Tstgraph cplg;
+//     Tstgraph cplg;
 
-  //   cout << endl << "building a bigger graph ... " << flush;
+//     cout << endl << "building a bigger graph ... " << flush;
   
-  //   for ( int i = 0; i < max; i++ )
-  //     cplg.insertNode(i);
+//     for ( int i = 0; i < max; i++ )
+//       cplg.insertNode(i);
 
-  //   for ( int i = 0; i < max; i++ )
-  //     for ( int j = 0; j < max; j++ )
-  //       if ( j != i )
-  // 	cplg.insertEdge(i,j);
+//     for ( int i = 0; i < max; i++ )
+//       for ( int j = 0; j < max; j++ )
+//         if ( j != i )
+//   	cplg.insertEdge(i,j);
 
-  //   for ( int i = max/2-1; i < max ; i++ )
-  //     if ( i != max/2 )
-  //       cplg.removeEdge(max/2-1,i);
+//     for ( int i = max/2-1; i < max ; i++ )
+//       if ( i != max/2 )
+//         cplg.removeEdge(max/2-1,i);
 
-  //   for ( int i = 0 ; i < max/2-1; i++ )
-  //     for ( int j = max/2; j < max; j++ )
-  //       cplg.removeEdge(i,j);
+//     for ( int i = 0 ; i < max/2-1; i++ )
+//       for ( int j = max/2; j < max; j++ )
+//         cplg.removeEdge(i,j);
 
-  //   for ( int i = max/2; i < max; i++ )
-  //     for ( int j=0; j < max/2; j++ )
-  //       cplg.removeEdge(i,j);
+//     for ( int i = max/2; i < max; i++ )
+//       for ( int j=0; j < max/2; j++ )
+//         cplg.removeEdge(i,j);
 
-  //   cout << "finished" << endl << flush;
+//     cout << "finished" << endl << flush;
 
-  //   cout << "constructing component-graph ... " << flush;
+//     cout << "constructing component-graph ... " << flush;
 
-  //   scc = cplg.find_scc(true);
+//     scc = cplg.find_scc(true);
 
-  //   cout << "finished" << endl << flush;
+//     cout << "finished" << endl << flush;
 
-  //   for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
       
-  //     cout << "component " << (*scc_it)->getId() << ": {";
-  //     for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+//       cout << "component " << (*scc_it)->getId() << ": {";
+//       for ( SCCGraphComponent::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
-  //       if ( c_it != (*scc_it)->beginNodes() )
-  // 	cout << ",";
-  //       cout << *c_it;
+//         if ( c_it != (*scc_it)->beginNodes() )
+//   	cout << ",";
+//         cout << *c_it;
 
-  //     }
-  //     cout << "}" << endl;
-  //   }
+//       }
+//       cout << "}" << endl;
+//     }
 
-  //   cout << "componentgraph:" << endl;
+//     cout << "componentgraph:" << endl;
 
-  //   for ( SCCGraph<int>::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
 
-  //     cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
     
-  //     for ( SCCGraph<int>::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
-  //       cout << (*nb_it)->getId() << " ";
-  //     cout << endl;
-  //   }
+//       for ( SCCGraph::iterator nb_it = scc->beginNeighbours(&(*scc_it)); nb_it != scc->endNeighbours(&(*scc_it)); nb_it++ )
+//         cout << (*nb_it)->getId() << " ";
+//       cout << endl;
+//     }
 
-  //   // scc is a graph itself so we can call find_scc() as well on this graph (won't make any difference because a dag just stays a dag; only for
-  //   // demonstrative purpose).
-  //   SCCGraph< SCCGraphComponent<int> *> * sccscc = scc->find_scc(true);
+//     // scc is a graph itself so we can call find_scc() as well on this graph (won't make any difference because a dag just stays a dag; only for
+//     // demonstrative purpose).
+//     SCCGraph * sccscc = scc->find_scc(true);
 
-  //   cout << endl << "componentgraph's componentgraph:" << endl;
+//     cout << endl << "componentgraph's componentgraph:" << endl;
 
-  //   for ( SCCGraph< SCCGraphComponent<int> *>::iterator scc_it = sccscc->beginNodes(); scc_it != sccscc->endNodes(); scc_it++ ){
+//     for ( SCCGraph::iterator scc_it = sccscc->beginNodes(); scc_it != sccscc->endNodes(); scc_it++ ){
 
-  //     cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
     
-  //     for ( SCCGraph< SCCGraphComponent<int> *>::iterator nb_it = sccscc->beginNeighbours(*scc_it); nb_it != sccscc->endNeighbours(*scc_it); nb_it++ )
-  //       cout << (*nb_it)->getId() << " ";
-  //     cout << endl;
-  //   }
+//       for ( SCCGraph::iterator nb_it = sccscc->beginNeighbours(*scc_it); nb_it != sccscc->endNeighbours(*scc_it); nb_it++ )
+//         cout << (*nb_it)->getId() << " ";
+//       cout << endl;
+//     }
 
-  //   delete sccscc;
+//     delete sccscc;
 
-  //   delete scc;
+//     delete scc;
 
   // at last a Graph represented by a Matrix
 
