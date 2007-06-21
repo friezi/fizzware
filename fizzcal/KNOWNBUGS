@@ -1,0 +1,2 @@
+v2.54:
+  -  in the expression "Sum[n=1;100](n(n+1)/2)" n is not recognized. If we say "n*(..." it works mysteriosly 
