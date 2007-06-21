@@ -549,6 +549,7 @@ void printHelp(const char *pname){
        << REMVAR << " [var1 [...]]" << "\t\tundefines the variables" << endl
        << UNDEF << " [fun1 [...]]" << "\t\tundefines the functions" << endl
        << FUNCS << "\t\tdisplays all user-defined functions\n"
+       << BUILTINS << "\tdisplays all builtin-functions and -operators" << endl
        << SAVE << " <filename>" << "\t\tsaves all user-defined variables and commands to file <filename>" << endl
        << LOAD << " <filename>" << "\t\tloads all user-defined variables and commands from file <filename>" << endl
        << SETPRECISION << " <value>" << "\tsets the display-precision for the post decimal position for floating-points" << endl

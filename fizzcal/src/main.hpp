@@ -52,6 +52,7 @@
 #define REMVAR "undefvar" // remove variable
 #define UNDEF "undeffun"  // undefine functions
 #define FUNCS "funs"  // show functiondefinitions
+#define BUILTINS "builtins" // show builtin-functions
 #define SAVE "save" // save the variables and commands to file
 #define LOAD "load" // load variables and commands from file
 #define SETPRECISION "setprecision" // set precision for post decimal position for float-values
