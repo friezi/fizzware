@@ -31,7 +31,7 @@
     "asinh","acosh","atanh","ln","ld","log","exp","sgn",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
 
-  using namespace std;
+    using namespace std;
 using namespace mexp;
 
 VarElement::VarElement(const char *name, double value, char protect)
@@ -487,7 +487,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	      ActualNode->setOperator("*");
 	    } else{      /* Prev hat kein ->right */
 	      if ((offs=this->copyBracketContent(bracketstring,
-				       &expr[e_indx],'(',')'))==-1){
+						 &expr[e_indx],'(',')'))==-1){
 		delete TopNode;
 		throw SubException<SyntaxErr,MathExpression>("missing bracket!");
 	      }	      
@@ -514,7 +514,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	    } else{      /* Prev hat kein ->right */
 
 	      if ((offs=this->copyBracketContent(bracketstring,
-				       &expr[e_indx],'(',')'))==-1){
+						 &expr[e_indx],'(',')'))==-1){
 
 		delete TopNode;
 		throw SubException<SyntaxErr,MathExpression>("missing bracket!");
@@ -771,7 +771,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		else if (expr[e_indx]=='('){
 
 		  if ((offs=this->copyBracketContent(bracketstring,&expr[e_indx],
-					   '(',')'))==-1){
+						     '(',')'))==-1){
 
 		    delete TopNode;
 		    throw SubException<SyntaxErr,MathExpression>("missing bracket!");
@@ -882,6 +882,13 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		actn->right=PrevNode;
 		PrevNode->pred=actn;
 		continue;
+
+	      } else if (expr[e_indx]=='='){
+
+		// it's a functiondefinition
+		// to build a correct tree, the local vars must be remembered
+		if (PrevNode)
+		  PrevNode->addVariablesToList(&locals);
 
 	      }
 
@@ -1143,7 +1150,7 @@ bool MathExpression::isBuiltinOperator(char op){
 }
 
 int MathExpression::copyBracketContent(char *exprstring, const char *arg, char open,
-			     char close){
+				       char close){
 
   int br_cnt=0, indx=0, eindx=0;
 
@@ -1608,8 +1615,7 @@ double MathExpression::sumProd(void)
   to=me.left->right->eval();
 
   if ( from!=(int)from || from<0 || to!=(int)to )
-    throw EvalException
-      ("indices in Sum/Prod not natural or negative!");
+    throw EvalException("indices in Sum/Prod not natural or negative!");
 
   if ( to<from )
     return 0;
@@ -1719,8 +1725,8 @@ void MathExpression::defineFunction(void) throw (SubException<MathExpression::De
   // already declared as variable? (impossible to happen)
   if (varlist->isMember(functionname))
     throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
-									  + " already declared as variable, definition "
-									  + "not possible!");
+								       + " already declared as variable, definition "
+								       + "not possible!");
   
   // built-in function?
   if (isBuiltinFunction(functionname))
@@ -1730,8 +1736,8 @@ void MathExpression::defineFunction(void) throw (SubException<MathExpression::De
   // already declared as function?
   if (functionlist->isMember(functionname))
     throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
-									   + " already declared as function, to redefine it"
-									   + " first undefine it!");
+								       + " already declared as function, to redefine it"
+								       + " first undefine it!");
 
   // build parameterlist
   paramlist = new MathExpression(this->left->right,varlist,functionlist);
