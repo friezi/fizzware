@@ -373,7 +373,7 @@ MathExpression::MathExpression(const char *expression, VarList *vl,
     this->pred=top->pred;
     switch (top->getType()){
     case OP:
-      this->setOprtr(top->getOprtr());
+      this->setOperator(top->getOperator());
       break;
     case VAR:
       this->setVariable(top->getVariable());
@@ -420,7 +420,7 @@ MathExpression::MathExpression(MathExpression *me, VarList *vl,
 
   switch (me->getType()){
   case OP:
-    this->setOprtr(me->getOprtr());
+    this->setOperator(me->getOperator());
     break;
   case VAR:
     this->setVariable(me->getVariable());
@@ -474,7 +474,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
     if (expr[e_indx]=='('){
       if (PrevNode){
-	if (PrevNode->isOprtr()){
+	if (PrevNode->isOperator()){
 	  if (PrevNode->pred){
 	    if (PrevNode->right){
 	      /* hier handelt es sich um Ausdruecke der Form
@@ -484,9 +484,9 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		delete TopNode;
 		throw OutOfMemException();
 	      }
-	      ActualNode->setOprtr("*");
+	      ActualNode->setOperator("*");
 	    } else{      /* Prev hat kein ->right */
-	      if ((offs=this->brackcpy(bracketstring,
+	      if ((offs=this->copyBracketContent(bracketstring,
 				       &expr[e_indx],'(',')'))==-1){
 		delete TopNode;
 		throw SubException<SyntaxErr,MathExpression>("missing bracket!");
@@ -509,11 +509,11 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      }
 
-	      ActualNode->setOprtr("*");
+	      ActualNode->setOperator("*");
 
 	    } else{      /* Prev hat kein ->right */
 
-	      if ((offs=this->brackcpy(bracketstring,
+	      if ((offs=this->copyBracketContent(bracketstring,
 				       &expr[e_indx],'(',')'))==-1){
 
 		delete TopNode;
@@ -533,10 +533,9 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	  if (PrevNode->isVariable()){
 	    if (!varlist->isMember(PrevNode->getVariable())
 		&& !locals.isMember(PrevNode->getVariable())){
-
 	      // a functioncall/-definition is following, thus variable
 	      // must be operator
-	      PrevNode->setOprtr(PrevNode->getVariable());
+	      PrevNode->setOperator(PrevNode->getVariable());
 	      continue;
 
 	    }
@@ -549,11 +548,11 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	  }
 
-	  ActualNode->setOprtr("*");
+	  ActualNode->setOperator("*");
 
 	}
       } else{ /* kein Prev vorhanden */
-	if ((offs=this->brackcpy(bracketstring,&expr[e_indx],'(',')'))==-1){
+	if ((offs=this->copyBracketContent(bracketstring,&expr[e_indx],'(',')'))==-1){
 
 	  delete TopNode;
 	  throw SubException<SyntaxErr,MathExpression>("missing bracket!");
@@ -576,16 +575,16 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	throw SubException<SyntaxErr,MathExpression>("invalid operator \"[\"!");
 
       }
-      if (!PrevNode->isOprtr()){
+      if (!PrevNode->isOperator()){
 
 	delete TopNode;
 	throw SubException<SyntaxErr,MathExpression>("invalid operator \"[\"!");
 
       }
 
-      if (!strcmp(PrevNode->getOprtr(),"log")
-	  || !strcmp(PrevNode->getOprtr(),SUM)
-	  || !strcmp(PrevNode->getOprtr(),PROD)){
+      if (!strcmp(PrevNode->getOperator(),"log")
+	  || !strcmp(PrevNode->getOperator(),SUM)
+	  || !strcmp(PrevNode->getOperator(),PROD)){
 
 	if (PrevNode->left){
 
@@ -594,7 +593,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	}
 
-	if ((offs=this->brackcpy(bracketstring,&expr[e_indx],'[',']'))==-1){
+	if ((offs=this->copyBracketContent(bracketstring,&expr[e_indx],'[',']'))==-1){
 
 	  delete TopNode;
 	  throw SubException<SyntaxErr,MathExpression>("missing bracket!");
@@ -605,6 +604,9 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	if (!(ActualNode=this->parse(bracketstring,locals)))
 	  ActualNode = new MathExpression(varlist,functionlist);
+
+	// variables defined in Sum or Prod must be added to local Scope
+	ActualNode->addVariablesToList(&locals);
 
 	PrevNode->left=ActualNode;
 	ActualNode->pred=PrevNode;
@@ -627,27 +629,27 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
       if (checkDigit(expr[e_indx])){
 	if (PrevNode){
-	  if (PrevNode->isOprtr()){
+	  if (PrevNode->isOperator()){
 	    if (PrevNode->right){
 
-	      ActualNode->setOprtr("*");
+	      ActualNode->setOperator("*");
 
 	    } else{ /* Prev hat kein right */
 
-	      e_indx+=this->flcpy(exprstring,&expr[e_indx]);
+	      e_indx+=this->copyFloatContent(exprstring,&expr[e_indx]);
 	      ActualNode->setValue(atof(exprstring));
 	      this->clearString(exprstring);
 
 	    }
 	  } else{  /* Prev kein operator
 		      ( Actual=Zahl, Prev=Zahl => Prev->pred=ln o.a") */
-	    ActualNode->setOprtr("*");
+	    ActualNode->setOperator("*");
 
 	  }
 
 	} else{ /* kein Prev */
 
-	  e_indx+=this->flcpy(exprstring,&expr[e_indx]);
+	  e_indx+=this->copyFloatContent(exprstring,&expr[e_indx]);
 	  ActualNode->setValue(atof(exprstring));
 	  this->clearString(exprstring);
 
@@ -656,22 +658,22 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
       } else{               /* keine Zahl */
 	if (PrevNode){
 	  if (checkLetter(expr[e_indx])){
-	    if (PrevNode->isOprtr()){
+	    if (PrevNode->isOperator()){
 	      if (PrevNode->pred){
 		if (PrevNode->right){
 
-		  ActualNode->setOprtr("*");
+		  ActualNode->setOperator("*");
 
 		} else{      /* Prev hat kein ->right */
 
-		  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+		  e_indx+=this->copyOperatorContent(exprstring,&expr[e_indx]);
 
-		  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-		    ActualNode->setOprtr(exprstring);
+		  if (isBuiltinFunction(exprstring) || checkOperator(exprstring[0]))
+		    ActualNode->setOperator(exprstring);
 		  else if (functionlist){
 
 		    if (functionlist->isMember(exprstring))
-		      ActualNode->setOprtr(exprstring);
+		      ActualNode->setOperator(exprstring);
 		    else
 		      ActualNode->setVariable(exprstring);
 
@@ -685,18 +687,18 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		if (PrevNode->right){
 
-		  ActualNode->setOprtr("*");
+		  ActualNode->setOperator("*");
 
 		} else{      /* Prev hat kein ->right */
 
-		  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+		  e_indx+=this->copyOperatorContent(exprstring,&expr[e_indx]);
 
-		  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-		    ActualNode->setOprtr(exprstring);
+		  if (isBuiltinFunction(exprstring) || checkOperator(exprstring[0]))
+		    ActualNode->setOperator(exprstring);
 		  else if (functionlist){
 
 		    if (functionlist->isMember(exprstring))
-		      ActualNode->setOprtr(exprstring);
+		      ActualNode->setOperator(exprstring);
 		    else
 		      ActualNode->setVariable(exprstring);
 
@@ -708,12 +710,12 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	      }
 	    } else{  /* Prev kein operator also Zahl */
 
-	      ActualNode->setOprtr("*");
+	      ActualNode->setOperator("*");
 
 	    }
 	  } else{ /* Arithmetischer Operator */
 
-	    if (PrevNode->isOprtr()){
+	    if (PrevNode->isOperator()){
 	      /* behandelt werden sollen Ausdruecke der Form: "sin^2(...)": */
 	      /* ist das  aktuelle Zeichen ein "^" und der PrevNode ein
 		 Operator, handelt es sich um die Form wie z.B. "sin^2",
@@ -721,9 +723,9 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		 Unterast hat, denn dann muss es sich um eine Form wie
 		 "(sin2)^3" handeln */
 	      if (expr[e_indx]=='^'
-		  && (pri(&expr[e_indx],PrevNode->getOprtr())==POT_PRI-SIN_PRI)
+		  && (pri(&expr[e_indx],PrevNode->getOperator())==POT_PRI-SIN_PRI)
 		  && !PrevNode->right){
-		ActualNode->setOprtr("^");
+		ActualNode->setOperator("^");
 		/* im Folgenden wird geprueft, ob eine fehlerhafte Eingabe
 		   der Form "sin^^ ..." gemacht wurde. Dann ist der PrevNode
 		   (immer noch der sin) schon der linke Unterast eines
@@ -768,7 +770,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		  continue;
 		else if (expr[e_indx]=='('){
 
-		  if ((offs=this->brackcpy(bracketstring,&expr[e_indx],
+		  if ((offs=this->copyBracketContent(bracketstring,&expr[e_indx],
 					   '(',')'))==-1){
 
 		    delete TopNode;
@@ -792,7 +794,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  }
 
-		  e_indx+=this->flcpy(exprstring,&expr[e_indx]);
+		  e_indx+=this->copyFloatContent(exprstring,&expr[e_indx]);
 		  actn->setValue(atof(exprstring));
 		  this->clearString(exprstring);
 
@@ -814,7 +816,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  }
 
-		  actn->setOprtr("!");
+		  actn->setOperator("!");
 		  e_indx++;
 
 		  if (PrevNode->pred){
@@ -834,18 +836,18 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		  // it's a functiondefinition
 		  // to build a correct tree, the local vars must be remembered
 		  if (PrevNode)
-		    PrevNode->addVarsToList(&locals);
+		    PrevNode->addVariablesToList(&locals);
 
 		}
 
-		e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+		e_indx+=this->copyOperatorContent(exprstring,&expr[e_indx]);
 
-		if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-		  ActualNode->setOprtr(exprstring);
+		if (isBuiltinFunction(exprstring) || checkOperator(exprstring[0]))
+		  ActualNode->setOperator(exprstring);
 		else if (functionlist){
 
 		  if (functionlist->isMember(exprstring))
-		    ActualNode->setOprtr(exprstring);
+		    ActualNode->setOperator(exprstring);
 		  else
 		    ActualNode->setVariable(exprstring);
 
@@ -866,7 +868,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		}
 
-		actn->setOprtr("!");
+		actn->setOperator("!");
 		e_indx++;
 
 		if (PrevNode->pred){
@@ -883,14 +885,14 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      }
 
-	      e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+	      e_indx+=this->copyOperatorContent(exprstring,&expr[e_indx]);
 
-	      if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-		ActualNode->setOprtr(exprstring);
+	      if (isBuiltinFunction(exprstring) || checkOperator(exprstring[0]))
+		ActualNode->setOperator(exprstring);
 	      else if (functionlist){
 
 		if (functionlist->isMember(exprstring))
-		  ActualNode->setOprtr(exprstring);
+		  ActualNode->setOperator(exprstring);
 		else
 		  ActualNode->setVariable(exprstring);
 
@@ -904,14 +906,14 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	  }
 	} else{ /* kein PrevNode */
 
-	  e_indx+=this->oprcpy(exprstring,&expr[e_indx]);
+	  e_indx+=this->copyOperatorContent(exprstring,&expr[e_indx]);
 
-	  if (isBuiltinFunc(exprstring) || checkOprtr(exprstring[0]))
-	    ActualNode->setOprtr(exprstring);
+	  if (isBuiltinFunction(exprstring) || checkOperator(exprstring[0]))
+	    ActualNode->setOperator(exprstring);
 	  else if (functionlist){
 
 	    if (functionlist->isMember(exprstring))
-	      ActualNode->setOprtr(exprstring);
+	      ActualNode->setOperator(exprstring);
 	    else
 	      ActualNode->setVariable(exprstring);
 
@@ -924,8 +926,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
       }
     }
     if (PrevNode){
-      if (ActualNode->isOprtr()){
-	if (PrevNode->isOprtr()){
+      if (ActualNode->isOperator()){
+	if (PrevNode->isOperator()){
 
 	  if ((ActualNode->oprtr[0]=='-' || ActualNode->oprtr[0]=='+')
 	      && !ActualNode->left && !PrevNode->right){
@@ -946,7 +948,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	    }
 
-	    ActualNode->setOprtr("*");
+	    ActualNode->setOperator("*");
 	    ActualNode->left=prevn;
 	    prevn->pred=ActualNode;
 
@@ -958,7 +960,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 				    operators gecheckt werden */
 	      actn=ActualNode, prevn=PrevNode->pred;
 
-	      while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
+	      while ((priority=pri(actn->getOperator(),prevn->getOperator()))<=0
 		     && prevn->pred)
 		prevn=prevn->pred;
 
@@ -997,7 +999,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	    actn=ActualNode, prevn=PrevNode->pred;
 
-	    while ((priority=pri(actn->getOprtr(),prevn->getOprtr()))<=0
+	    while ((priority=pri(actn->getOperator(),prevn->getOperator()))<=0
 		   && prevn->pred)
 	      prevn=prevn->pred;
 
@@ -1052,7 +1054,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	}
 
-	ActualNode->setOprtr("*");
+	ActualNode->setOperator("*");
 	ActualNode->left=prevn;
 	prevn->pred=ActualNode;
 
@@ -1066,7 +1068,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
   return(TopNode);
 }
 
-inline bool MathExpression::checkOprtr(char x){ 
+inline bool MathExpression::checkOperator(char x){ 
   return (((unsigned char)(x)>=1 && (unsigned char)(x)<='/')
 	  || ((unsigned char)(x)>=':' && (unsigned char)(x)<='@')
 	  || ((unsigned char)(x)>='[' && (unsigned char)(x)<='`')
@@ -1083,7 +1085,7 @@ inline bool MathExpression::checkLetter(char x){
 	  || ((unsigned char)(x)>='a' && (unsigned char)(x)<='z'));
 }
 
-bool MathExpression::isBuiltinFunc(const char *strname){
+bool MathExpression::isBuiltinFunction(const char *strname){
 
   char *flist[]={FLIST};
 
@@ -1093,7 +1095,7 @@ bool MathExpression::isBuiltinFunc(const char *strname){
   return false;
 }
 
-void MathExpression::setOprtr(const char *name){
+void MathExpression::setOperator(const char *name){
 
   clearString(oprtr);
   strcpy(oprtr,name);
@@ -1119,18 +1121,18 @@ void MathExpression::setValue(double value){
   type=VAL;
 }
 
-void MathExpression::addVarsToList(VarList *varlist){
+void MathExpression::addVariablesToList(VarList *varlist){
 
   if (isVariable())
     varlist->insert(getVariable(),0);
 
   if (right)
-    right->addVarsToList(varlist);
+    right->addVariablesToList(varlist);
   if (left)
-    left->addVarsToList(varlist);
+    left->addVariablesToList(varlist);
 }
  
-bool MathExpression::isBuiltinOp(char op){
+bool MathExpression::isBuiltinOperator(char op){
 
   char oplist[]={OPLIST};
 
@@ -1140,7 +1142,7 @@ bool MathExpression::isBuiltinOp(char op){
   return false;
 }
 
-int MathExpression::brackcpy(char *exprstring, const char *arg, char open,
+int MathExpression::copyBracketContent(char *exprstring, const char *arg, char open,
 			     char close){
 
   int br_cnt=0, indx=0, eindx=0;
@@ -1171,7 +1173,7 @@ int MathExpression::brackcpy(char *exprstring, const char *arg, char open,
   return(indx);
 }
   
-int MathExpression::flcpy(char *exprstring, const char *arg){
+int MathExpression::copyFloatContent(char *exprstring, const char *arg){
 
   int indx=0;
   while (checkDigit(arg[indx])){ 
@@ -1181,7 +1183,7 @@ int MathExpression::flcpy(char *exprstring, const char *arg){
   return(indx);
 }
 
-int MathExpression::oprcpy(char *exprstring, const char *arg){
+int MathExpression::copyOperatorContent(char *exprstring, const char *arg){
 
   int indx=0;
 
@@ -1190,7 +1192,7 @@ int MathExpression::oprcpy(char *exprstring, const char *arg){
   case ')':
     break;
   default:
-    if (checkOprtr(arg[indx])){
+    if (checkOperator(arg[indx])){
       exprstring[indx]=arg[indx];
       indx++;
     } else{
@@ -1262,8 +1264,8 @@ int MathExpression::pri(const char *c0, const char *c1){
 
 bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,MathExpression>){
 
-  if (this->isOprtr()){
-    if (checkOprtr(this->oprtr[0])){
+  if (this->isOperator()){
+    if (checkOperator(this->oprtr[0])){
       if (this->oprtr[0]=='='){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty()){
@@ -1271,7 +1273,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,
 	      if (!this->left->left && !this->left->right)
 		if (this->right->checkSyntaxAndOptimize())
 		  return(true);
-	    } else if (this->left->isOprtr()){
+	    } else if (this->left->isOperator()){
 	      if (!this->left->left && this->left->right)
 		if (this->right->checkSyntaxAndOptimize())
 		  return true;
@@ -1291,7 +1293,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,
 	      if ( this->left->isValue() == true && this->right->isValue() == true )
 		if ( abs(this->left->getValue()) == 1 && abs(this->right->getValue()) == 1 ){
 
-		  this->setOprtr("");
+		  this->setOperator("");
 		  this->setValue(sgn(this->left->getValue()) * this->right->getValue());
 
 		  delete this->left;
@@ -1308,15 +1310,15 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,
       throw SubException<SyntaxErr,MathExpression>("invalid expression!");
 
     } else{
-      if (!strcmp(this->getOprtr(),"log")){
+      if (!strcmp(this->getOperator(),"log")){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty())
 	    if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>
 	  ("invalid expression in function log!");
-      } else if (!strcmp(this->getOprtr(),SUM)
-		 || !strcmp(this->getOprtr(),PROD)){
+      } else if (!strcmp(this->getOperator(),SUM)
+		 || !strcmp(this->getOperator(),PROD)){
 	if (this->left && this->right)
 	  if (!this->left->empty() && !this->right->empty())
 	    if (this->left->oprtr[0]==';')
@@ -1335,17 +1337,17 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,
 		  }
 	throw SubException<SyntaxErr,MathExpression>
 	  ("invalid expression in function Sum/Prod!");
-      } else if (isBuiltinFunc(this->getOprtr())){
+      } else if (isBuiltinFunction(this->getOperator())){
 	if (!this->left && this->right)
 	  if (this->right->empty()==false)
 	    if (this->right->checkSyntaxAndOptimize())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>("invalid expression!");
-      } else if (functionlist->isMember(this->getOprtr())){
+      } else if (functionlist->isMember(this->getOperator())){
 	if (!this->left && this->right)
 	  if (this->right->checkSyntaxAndOptimize())
 	    if (this->right->countArgs() ==
-		functionlist->get(this->getOprtr())->getParList()->countArgs())
+		functionlist->get(this->getOperator())->getParameterList()->countArgs())
 	      return(true);
 	throw SubException<SyntaxErr,MathExpression>("invalid expression!");
       } else
@@ -1365,15 +1367,15 @@ string MathExpression::toString(streamsize precision) const{
 
   exp << "(";
   if (!this->empty()){
-    if (this->isOprtr()){
+    if (this->isOperator()){
       if (this->oprtr[0]=='!'){
 	if (this->right)
 	  exp << this->right->toString(precision);
-	exp << this->getOprtr();
-      } else if (!strcmp(this->getOprtr(),"log")
-		 || !strcmp(this->getOprtr(),SUM)
-		 || !strcmp(this->getOprtr(),PROD)){
-	exp << this->getOprtr();
+	exp << this->getOperator();
+      } else if (!strcmp(this->getOperator(),"log")
+		 || !strcmp(this->getOperator(),SUM)
+		 || !strcmp(this->getOperator(),PROD)){
+	exp << this->getOperator();
 	exp << "[";
 	exp << this->left->toString(precision);
 	exp << "]";
@@ -1381,7 +1383,7 @@ string MathExpression::toString(streamsize precision) const{
       } else{
 	if (this->left)
 	  exp << this->left->toString(precision);
-	exp << this->getOprtr();
+	exp << this->getOperator();
 	if (this->right)
 	  exp << this->right->toString(precision);
       }
@@ -1409,7 +1411,7 @@ string MathExpression::toString(streamsize precision) const{
 double MathExpression::eval() throw (ExceptionBase){
 
   double result;
-  if (isOprtr()){
+  if (isOperator()){
     switch (oprtr[0]){
     case '+':
       return(left->eval()+right->eval());
@@ -1457,71 +1459,71 @@ double MathExpression::eval() throw (ExceptionBase){
     case '=':
       if (left->isVariable())
 	return assignValue();
-      else if (left->isOprtr()){
+      else if (left->isOperator()){
 	defineFunction();
 	return 0;
       }
       throw EvalException("invalid use of assignment!");
       break;
     default:
-      if (!strcmp("sin",getOprtr()))
+      if (!strcmp("sin",getOperator()))
 	return(sin(right->eval()));
-      else if (!strcmp("cos",getOprtr()))
+      else if (!strcmp("cos",getOperator()))
 	return(cos(right->eval()));
-      else if (!strcmp("tan",getOprtr()))
+      else if (!strcmp("tan",getOperator()))
 	return(tan(right->eval()));
-      else if (!strcmp("asin",getOprtr()))
+      else if (!strcmp("asin",getOperator()))
 	return(asin(right->eval()));
-      else if (!strcmp("acos",getOprtr()))
+      else if (!strcmp("acos",getOperator()))
 	return(acos(right->eval()));
-      else if (!strcmp("atan",getOprtr()))
+      else if (!strcmp("atan",getOperator()))
 	return(atan(right->eval()));
-      else if (!strcmp("sinh",getOprtr()))
+      else if (!strcmp("sinh",getOperator()))
 	return(sinh(right->eval()));
-      else if (!strcmp("cosh",getOprtr()))
+      else if (!strcmp("cosh",getOperator()))
 	return(cosh(right->eval()));
-      else if (!strcmp("tanh",getOprtr()))
+      else if (!strcmp("tanh",getOperator()))
 	return(tanh(right->eval()));
-      else if (!strcmp("asinh",getOprtr()))
+      else if (!strcmp("asinh",getOperator()))
 	return(asinh(right->eval()));
-      else if (!strcmp("acosh",getOprtr()))
+      else if (!strcmp("acosh",getOperator()))
 	return(acosh(right->eval()));
-      else if (!strcmp("atanh",getOprtr()))
+      else if (!strcmp("atanh",getOperator()))
 	return(atanh(right->eval()));
-      else if (!strcmp("ln",getOprtr())){
+      else if (!strcmp("ln",getOperator())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of ln negative!");
 	else
 	  return(log(right->eval()));
-      } else if (!strcmp("ld",getOprtr())){
+      } else if (!strcmp("ld",getOperator())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of ld negative!");
 	else
 	  return(log(right->eval())/log(2.0));
-      } else if (!strcmp("log",getOprtr())){
+      } else if (!strcmp("log",getOperator())){
 	if ((result=right->eval())<=0)
 	  throw EvalException("argument of log negative!");
 	else
 	  return(log(right->eval())/log(left->eval()));
-      } else if (!strcmp("exp",getOprtr()))
+      } else if (!strcmp("exp",getOperator()))
 	return(exp(right->eval()));
-      else if (!strcmp(SUM,getOprtr()) || !strcmp(PROD,getOprtr())){
+      else if (!strcmp(SUM,getOperator()) || !strcmp(PROD,getOperator())){
 
 	return sumProd();
 
-      } else if (!strcmp("sgn",getOprtr())){
+      } else if (!strcmp("sgn",getOperator())){
 
 	return sgn(right->eval());
 
       } else{  // user defined function
 
 	if (functionlist){
-	  if (functionlist->isMember(getOprtr()))
+	  if (functionlist->isMember(getOperator()))
 	    return evalFunction();
 	}
 
 	throw EvalException
-	  ("unknown operator/function!",getOprtr());
+	  ("unknown operator/function!",getOperator());
 
       }
       break;
@@ -1592,7 +1594,7 @@ double MathExpression::sumProd(void)
   double from, to, res=0;
   char p=0;
   
-  if (!strcmp(PROD,this->getOprtr())){
+  if (!strcmp(PROD,this->getOperator())){
     res=1;
     p=1;
   }
@@ -1648,7 +1650,7 @@ double MathExpression::assignValue(void) throw (ExceptionBase){
   result=right->eval();
 
   if (functionlist)
-    if (functionlist->isMember(left->getOprtr()))
+    if (functionlist->isMember(left->getOperator()))
       throw EvalException ("variable already defined as function");
 
   if (varlist){
@@ -1677,12 +1679,12 @@ double MathExpression::evalFunction(void) throw (ExceptionBase){
 
   VarList vl = *this->varlist; // local scope
   MathExpression *args =  0,*params = 0;
-  FunctionElement *f_template = functionlist->get(this->getOprtr());
+  FunctionElement *f_template = functionlist->get(this->getOperator());
 
   vl.unprotect();  // remove protection-status for all variables
 
   args = this->right;
-  params = f_template->getParList();
+  params = f_template->getParameterList();
 
   // eval args and insert them in varlist
   if (!args->empty()){
@@ -1712,7 +1714,7 @@ void MathExpression::defineFunction(void) throw (SubException<MathExpression::De
   FunctionElement *fe=0;
   VarList locals;
 
-  functionname = this->left->getOprtr();
+  functionname = this->left->getOperator();
   
   // already declared as variable? (impossible to happen)
   if (varlist->isMember(functionname))
@@ -1721,7 +1723,7 @@ void MathExpression::defineFunction(void) throw (SubException<MathExpression::De
 									  + "not possible!");
   
   // built-in function?
-  if (isBuiltinFunc(functionname))
+  if (isBuiltinFunction(functionname))
     throw SubException<MathExpression::DefinitionError,MathExpression>(string(functionname)
 								       + " is built-in function and can't be replaced!");
   
@@ -1735,7 +1737,7 @@ void MathExpression::defineFunction(void) throw (SubException<MathExpression::De
   paramlist = new MathExpression(this->left->right,varlist,functionlist);
   
   // must be a variabletree
-  if (paramlist->checkForVartree()==false){
+  if (paramlist->checkForVariableTree()==false){
 
     delete paramlist;
     throw SubException<MathExpression::DefinitionError,MathExpression>(string("only letters and non-built-in functionnames allowed,")
@@ -1776,14 +1778,14 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
   if (!body)
     return true;
 
-  if (*(body->getOprtr())){
-    if (!(isBuiltinOp(*(body->getOprtr()))))
-      if (!(isBuiltinFunc(body->getOprtr())))
-	if (!(functionlist->isMember(body->getOprtr())))
+  if (*(body->getOperator())){
+    if (!(isBuiltinOperator(*(body->getOperator()))))
+      if (!(isBuiltinFunction(body->getOperator())))
+	if (!(functionlist->isMember(body->getOperator())))
 	  return false;
   } else if (*(body->getVariable())){
     if (pl)
-      if (pl->varInTree(body->getVariable()))
+      if (pl->isVariableInTree(body->getVariable()))
 	inparam=true;
     if (!inparam){
       if (!varlist->isMember(body->getVariable())){
@@ -1791,7 +1793,7 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
 	  if (!body->getPred())
 	    return false;
 	  else{
-	    if ((body->getPred()->getOprtr())[0]!='=')
+	    if ((body->getPred()->getOperator())[0]!='=')
 	      return false;
 	    else
 	      lvl->insert(body->getVariable(),0);
@@ -1808,10 +1810,10 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
   
 }
 
-bool MathExpression::checkForVartree(){
+bool MathExpression::checkForVariableTree(){
 
   if (this->left){
-    if (this->left->checkForVartree()==false){
+    if (this->left->checkForVariableTree()==false){
       return false;
     }
     if (this->oprtr[0]!=',')
@@ -1822,22 +1824,22 @@ bool MathExpression::checkForVartree(){
     }
   }
   if (this->right){
-    if (this->right->checkForVartree()==false){
+    if (this->right->checkForVariableTree()==false){
       return false;
     }
   }
   return true;
 }
 
-bool MathExpression::varInTree(const char *name){
+bool MathExpression::isVariableInTree(const char *name){
 
   if (!this)
     return false;
 
   if (strcmp(name,this->getVariable())){
-    if (this->left->varInTree(name))
+    if (this->left->isVariableInTree(name))
       return true;
-    else if (this->right->varInTree(name))
+    else if (this->right->isVariableInTree(name))
       return true;
     else
       return false;

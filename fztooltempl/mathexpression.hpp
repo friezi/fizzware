@@ -106,14 +106,14 @@ namespace mexp{
     void defineFunction(void) throw (SubException<DefinitionError,MathExpression>);
     bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
     bool empty(void) const { return (getType()==EMPTY); }
-    void setOprtr(const char *name);
+    void setOperator(const char *name);
     void setVariable(const char *name);
     void setValue(double value);
     void setType(char type) { this->type=type; }
     bool isVariable(void) const { return ( getType() == VAR ); }
-    bool isOprtr(void) const { return ( getType() == OP ); }
+    bool isOperator(void) const { return ( getType() == OP ); }
     bool isValue(void) const { return ( getType() == VAL ); }
-    const char *getOprtr(void) const { return oprtr; }
+    const char *getOperator(void) const { return oprtr; }
     const char *getVariable(void) const { return variable; }
     double getValue(void) const { return value; }
     char getType() const { return type; }
@@ -121,16 +121,16 @@ namespace mexp{
     MathExpression *getRight(void) { return right; }
     MathExpression *getPred(void) { return pred; }
     
-    // addVarsToList adds all occuring variables in tree to varlist
-    void addVarsToList(VarList *varlist);
+    // addVariablesToList adds all occuring variables in tree to varlist
+    void addVariablesToList(VarList *varlist);
     
     // checkForVars checks, if leaf-elements of expression are only variables
     // and operators are only ","'s. No variable must have childtrees.
     // return: true, false
-    bool checkForVartree();
+    bool checkForVariableTree();
     
-    // varInTree checks, if a given variable-name is defined as variable in tree
-    bool varInTree(const char *name);
+    // isVariableInTree checks, if a given variable-name is defined as variable in tree
+    bool isVariableInTree(const char *name);
     
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
@@ -205,7 +205,7 @@ namespace mexp{
     static std::string skipTrailingZeros(std::string value);
    
     /**
-       brackcpy copies all from "arg" into "exprstring" between "open" and 
+       copyBracketContent copies all from "arg" into "exprstring" between "open" and 
        "close"; is "open"=0 all to "close" will be copied
        @brief for copying arguments
        @param exprstring pointer to the memory-area for the copy-operation
@@ -214,25 +214,25 @@ namespace mexp{
        @param close the sign for the close-bracket
        @return number of copied signs
     */
-    static int brackcpy(char *exprstring, const char *arg, char open, char close);
+    static int copyBracketContent(char *exprstring, const char *arg, char open, char close);
     
     /**
-       flcpy copies the numeric part from "arg" into "exprstring"
+       copyFloatContent copies the numeric part from "arg" into "exprstring"
        @brief for copying numeric contents
        @param exprstring pointer to the memory-area for the copy-operation
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int flcpy(char *exprstring, const char *arg);
+    static int copyFloatContent(char *exprstring, const char *arg);
     
     /**
-       oprcpy copies the operatorpart (also functionnames) from "arg" into "exprstring"
+       copyOperatorContent copies the operatorpart (also functionnames) from "arg" into "exprstring"
        @brief for copying operator contents
        @param exprstring pointer to the memory-area for the copy-operation
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int oprcpy(char *exprstring, const char *arg);
+    static int copyOperatorContent(char *exprstring, const char *arg);
     
     /**
        @brief clears a Null-terminated char-Array
@@ -245,7 +245,7 @@ namespace mexp{
        @param x value to be checked
        @return true, if x is an operator, else false
     */
-    static inline bool checkOprtr(char x);
+    static inline bool checkOperator(char x);
     
     /**
        @brief checks, whether "x" is digit
@@ -266,14 +266,14 @@ namespace mexp{
        @param strname pointer to chararray to be checked
        @return true, if strname is a built-in-function, else false
     */
-    static bool isBuiltinFunc(const char *strname);
+    static bool isBuiltinFunction(const char *strname);
     
     /**
        @brief checks, whether "op" is member of built-in operators
        @param op value to be checked
        @return true, if op is a built-in-operator, else false
     */
-    static bool isBuiltinOp(char op);
+    static bool isBuiltinOperator(char op);
     
     // constants: see top of class
     
@@ -457,7 +457,7 @@ namespace mexp{
     // destructor:
     ~FunctionElement();
     char *getName(void) const{ return name; }
-    MathExpression *getParList(void){ return paramlist; }
+    MathExpression *getParameterList(void){ return paramlist; }
     MathExpression *getBody(void){ return body; }
   };
   

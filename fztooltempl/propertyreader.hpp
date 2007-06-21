@@ -298,19 +298,20 @@ public:
      @exception  SubException<Parser::SyntaxErr,Parser>
      @exception SubException<Parser::InputInvalidErr,Parser>
   */
-  void modify() const throw (Exception<PropertyReader>,
+  void modify(bool keep_empty_sections = false) const throw (Exception<PropertyReader>,
 			     SubException<OpenErr,PropertyReader>,
 			     SubException<Parser::InputInvalidErr,Parser>,
 			     SubException<Parser::IncompleteErr,Parser>,
 			     SubException<Parser::SyntaxErr,Parser>,
 			     SubException<Parser::NoValErr,Parser>,
-			     SubException<Parser::NoIDErr,Parser>){ update(); }
+			     SubException<Parser::NoIDErr,Parser>){ update(keep_empty_sections); }
 
   /**
      All the properties in the file \<filename\> will be updated, non-existing properties will
      be erased, comments will stay
      @brief Updates all the properties in file \<filename\>
      @since V1.96
+     @param keep_empty_sections will also save declarations of empty sections; DOES NOT WORK YET!!!
      @exception Exception<PropertyReader>
      @exception SubException<OpenErr,PropertyReader>
      @exception SubException<Parser::IncompleteErr,Parser>
@@ -318,7 +319,7 @@ public:
      @exception  SubException<Parser::SyntaxErr,Parser>
      @exception SubException<Parser::InputInvalidErr,Parser>
   */
-  void update() const throw (Exception<PropertyReader>,
+  void update(bool keep_empty_sections = false) const throw (Exception<PropertyReader>,
 			     SubException<OpenErr,PropertyReader>,
 			     SubException<Parser::InputInvalidErr,Parser>,
 			     SubException<Parser::IncompleteErr,Parser>,

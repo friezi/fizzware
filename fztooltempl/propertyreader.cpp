@@ -145,13 +145,13 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
   }
 }
 
-void PropertyReader::update() const throw (Exception<PropertyReader>,
-					   SubException<OpenErr,PropertyReader>,
-					   SubException<Parser::InputInvalidErr,Parser>,
-					   SubException<Parser::IncompleteErr,Parser>,
-					   SubException<Parser::SyntaxErr,Parser>,
-					   SubException<Parser::NoValErr,Parser>,
-					   SubException<Parser::NoIDErr,Parser>){
+void PropertyReader::update(bool keep_empty_sections) const throw (Exception<PropertyReader>,
+									   SubException<OpenErr,PropertyReader>,
+									   SubException<Parser::InputInvalidErr,Parser>,
+									   SubException<Parser::IncompleteErr,Parser>,
+									   SubException<Parser::SyntaxErr,Parser>,
+									   SubException<Parser::NoValErr,Parser>,
+									   SubException<Parser::NoIDErr,Parser>){
 
   ifstream file(filename.c_str());
   ostringstream lines;
@@ -189,7 +189,7 @@ void PropertyReader::update() const throw (Exception<PropertyReader>,
       Sections::const_iterator p_it = sections.find(section);
 
       // falls section nicht existiert, muss sie gelöscht werden
-      if ( p_it == sections.end() )
+      if ( p_it == sections.end() && keep_empty_sections == false )
 	continue;
 
       if ( written_section != section ){
