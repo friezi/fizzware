@@ -34,4 +34,8 @@ v1.98:
 - BitMatrix:
   - two functions added: toString() and show()
 
+- MathExpression:
+  - added static function builtinsToString()
+
 - renamed Exception_T to ExceptionBase
+

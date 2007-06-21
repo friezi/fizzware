@@ -28,7 +28,7 @@
 #define SUM "Sum"
 #define PROD "Prod"
 #define FLIST "sin","cos","tan","asin","acos","atan","sinh","cosh","tanh", \
-    "asinh","acosh","atanh","ln","ld","log","exp","sgn",SUM,PROD
+    "asinh","acosh","atanh","ln","ld","log","exp","sgn","tst",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
 
     using namespace std;
@@ -1415,6 +1415,24 @@ string MathExpression::toString(streamsize precision) const{
 
 }
 
+string MathExpression::builtinsToString(){
+
+  ostringstream builtins;
+  
+  char oplist[]={OPLIST};
+  char *flist[]={FLIST};
+
+  for (unsigned int i=0;i<sizeof(oplist)/sizeof(char);i++)
+    builtins << oplist[i] << endl;
+
+  for (unsigned int i=0;i<sizeof(flist)/sizeof(char *);i++)
+    builtins << flist[i] << endl;
+
+  return builtins.str();
+
+}
+
+
 double MathExpression::eval() throw (ExceptionBase){
 
   double result;
@@ -1522,6 +1540,10 @@ double MathExpression::eval() throw (ExceptionBase){
 
 	return sgn(right->eval());
 
+      } else if (!strcmp("tst",getOperator())){
+
+	return ( right->eval() != 0);
+
       } else{  // user defined function
 
 	if (functionlist){
@@ -1529,8 +1551,7 @@ double MathExpression::eval() throw (ExceptionBase){
 	    return evalFunction();
 	}
 
-	throw EvalException
-	  ("unknown operator/function!",getOperator());
+	throw EvalException("unknown operator/function!",getOperator());
 
       }
       break;

@@ -211,7 +211,12 @@ int main(int argc, char **argv, char **envp){
 	} else if (!strcmp(input.get(),FUNCS)){
 
 	  functionlist->print(precision);
-	  continue;;
+	  continue;
+
+	} else if (!strcmp(input.get(),BUILTINS)){
+
+	  cout << MathExpression::builtinsToString();
+	  continue;
 
 	}
 
@@ -609,6 +614,7 @@ void printHelp(const char *pname){
        << "acosh\t\t\t\tthe inverse hyperbolic cosine\n"
        << "atanh\t\t\t\tthe inverse hyperbolic tangent\n"
        << "sgn\t\t\t\tthe signum\n"
+       << "tst\t\t\t\ttests if value is unequal to zero\n"
        << "\n"
        << "the priorities of the operator's are as follows:\n\n"
        << "high pri\n\n"

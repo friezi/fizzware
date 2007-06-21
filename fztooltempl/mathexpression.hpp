@@ -175,6 +175,12 @@ namespace mexp{
        @return the string-representation
     */
     std::string toString(std::streamsize precision) const;
+
+    /**
+       @brief returns a string-representation of the builtin functions
+       @return the string-repreentation
+    */
+    static std::string builtinsToString();
     
     // eval evaluates the expression
     // return: the result
