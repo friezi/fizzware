@@ -487,7 +487,7 @@ bool checkAnswer(const string & text){
 void header(const char *appname){
 
   cout << "\n" << appname << " version " << version
-       << ", Copyright (C) 1999-2006  Friedemann Zintel\n";
+       << ", Copyright (C) 1999-2007  Friedemann Zintel\n";
   cout << "email: friezi@cs.tu-berlin.de\n";
   cout << "If you have any questions, comments or suggestions about ";
   cout << "this programm,\n";
