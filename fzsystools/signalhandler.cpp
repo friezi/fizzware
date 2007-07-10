@@ -25,6 +25,8 @@
 
 #include <signalhandler.hpp>
 
+using namespace sys;
+
 SignalHandler::SignalHandler(int signr, void (*handler)(int), bool init, int flags)
   throw(Exception<SignalHandler>) : signr(signr){
 

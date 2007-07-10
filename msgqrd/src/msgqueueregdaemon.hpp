@@ -41,7 +41,7 @@
 #define FIND_ERROR 15
 #define NMB_CMDS 15
 
-class MsgQueueRegDaemon : public StdMessageServer{
+class MsgQueueRegDaemon : public sys::StdMessageServer{
   
 private:
 
