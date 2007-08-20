@@ -28,7 +28,7 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.54";
+const char *version="2.55";
 
 const static string formula = "formula";
 const static string commands = "commands";
@@ -123,7 +123,15 @@ int main(int argc, char **argv, char **envp){
 
 	if ( input.get() ){
 	  if ( *input.get() ){
-	    add_history(input.get());
+	    if ( current_history() ){
+	      // only add new entries to history
+
+	      if ( strcmp(input.get(),current_history()->line) )
+		add_history(input.get());
+
+	    }else
+	      add_history(input.get());
+
 	  } else
 	    continue;
 	} else {

@@ -11,3 +11,6 @@ v2.54:
 - values will won't be displayed in scientific-mode anymore (due to syntaxchecking problems on loading functions).
 - if the upper bound of a Sum or a Prod is less then the startvalue 0 is returned
 - command "builtins" shows all buitlin-functions ans -operators
+
+v2.55:
+- entry will only be added to history if it's not a copy of the previous entry
