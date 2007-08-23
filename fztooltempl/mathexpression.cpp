@@ -479,7 +479,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
     if ( expr[e_indx] == ')' ){
 
       delete TopNode;
-      throw ParseException(abs_pos, "invalid expression!");
+      throw ParseException(abs_pos, "invalid syntax!");
 
     }
 
@@ -624,7 +624,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	if ( PrevNode->left ){
 
 	  delete TopNode;
-	  throw ParseException(abs_pos, "invalid expression!");
+	  throw ParseException(abs_pos, "invalid syntax!");
 
 	}
 
@@ -1368,7 +1368,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		if (this->right->checkSyntaxAndOptimize())
 		  return true;
 	    }
-	    throw ParseException(abs_pos, "invalid expression!");
+	    throw ParseException(abs_pos, "invalid syntax!");
 	  }
       } else if (this->oprtr[0]=='!'){
 	if (!this->left && this->right)
@@ -1397,7 +1397,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	  }
       }
 
-      throw ParseException(abs_pos, "invalid expression!");
+      throw ParseException(abs_pos, "invalid syntax!");
 
     } else{
       if (!strcmp(this->getOperator(),"log")){
@@ -1405,7 +1405,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	  if (!this->left->empty() && !this->right->empty())
 	    if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize())
 	      return(true);
-	throw ParseException(abs_pos, "invalid expression in function log!");
+	throw ParseException(abs_pos, "invalid syntax in function log!");
       } else if (!strcmp(this->getOperator(),SUM)
 		 || !strcmp(this->getOperator(),PROD)){
 	if (this->left && this->right)
@@ -1420,23 +1420,23 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 			  if (this->right->checkSyntaxAndOptimize())
 			    return(true);
 		    } catch (ParseException pe){
-		      throw ParseException(abs_pos, "invalid expression in function Sum/Prod!");
+		      throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
 		    }
 		  }
-	throw ParseException(abs_pos, "invalid expression in function Sum/Prod!");
+	throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
       } else if (isBuiltinFunction(this->getOperator())){
 	if (!this->left && this->right)
 	  if (this->right->empty()==false)
 	    if (this->right->checkSyntaxAndOptimize())
 	      return(true);
-	throw ParseException(abs_pos, "invalid expression!");
+	throw ParseException(abs_pos, "invalid syntax!");
       } else if (functionlist->isMember(this->getOperator())){
 	if (!this->left && this->right)
 	  if (this->right->checkSyntaxAndOptimize())
 	    if (this->right->countArgs() ==
 		functionlist->get(this->getOperator())->getParameterList()->countArgs())
 	      return(true);
-	throw ParseException(abs_pos, "invalid expression!");
+	throw ParseException(abs_pos, "invalid syntax!");
       } else
 	return true;
     }
