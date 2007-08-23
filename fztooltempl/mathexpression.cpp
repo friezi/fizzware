@@ -518,6 +518,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	      if ( !(ActualNode = this->parse(bracketstring,locals)) )
 		ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 
+	      abs_pos++;
+
 	      this->clearString(bracketstring);
 
 	    }
@@ -549,6 +551,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      if ( !(ActualNode=this->parse(bracketstring,locals)) )
 		ActualNode = new MathExpression(abs_pos,varlist,functionlist);
+
+	      abs_pos++;
 
 	      this->clearString(bracketstring);
 
@@ -592,6 +596,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
+
+	abs_pos++;
 	
 	this->clearString(bracketstring);
 
@@ -634,6 +640,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
+
+	abs_pos++;
 
 	// variables defined in Sum or Prod must be added to local Scope
 	ActualNode->addVariablesToList(&locals);
@@ -828,6 +836,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		  
 		  if ( !(actn=this->parse(bracketstring,locals)) )
 		    actn = new MathExpression(abs_pos,varlist,functionlist);
+
+		  abs_pos++;
 
 		  this->clearString(bracketstring);
 
