@@ -279,7 +279,7 @@ namespace mexp{
        @param close the sign for the close-bracket
        @return number of copied signs
     */
-    static int copyBracketContent(char *exprstring, const char *arg, char open, char close);
+    int copyBracketContent(char *exprstring, const char *arg, char open, char close);
     
     /**
        copyFloatContent copies the numeric part from "arg" into "exprstring"
@@ -288,7 +288,7 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int copyFloatContent(char *exprstring, const char *arg);
+    int copyFloatContent(char *exprstring, const char *arg);
     
     /**
        copyOperatorContent copies the operatorpart (also functionnames) from "arg" into "exprstring"
@@ -297,7 +297,7 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    static int copyOperatorContent(char *exprstring, const char *arg);
+    int copyOperatorContent(char *exprstring, const char *arg);
     
     /**
        @brief clears a Null-terminated char-Array

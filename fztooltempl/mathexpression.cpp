@@ -512,7 +512,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	      }	      
 
 	      e_indx+=offset;
-	      abs_pos+=offset;
+	      abs_pos-=offset-1;
 
 	      // if nothing's in the brackets, we connect an empty element
 	      if ( !(ActualNode = this->parse(bracketstring,locals)) )
@@ -545,7 +545,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	      }
 
 	      e_indx+=offset;
-	      abs_pos+=offset;
+	      abs_pos-=offset-1;
 
 	      if ( !(ActualNode=this->parse(bracketstring,locals)) )
 		ActualNode = new MathExpression(abs_pos,varlist,functionlist);
@@ -588,8 +588,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	}
 	
 	e_indx+=offset;
-	abs_pos+=offset;
-	
+	abs_pos-=offset-1;
+
 	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 	
@@ -630,7 +630,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 	}
 
 	e_indx+=offset;
-	abs_pos+=offset;
+	abs_pos-=offset-1;
 
 	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
@@ -669,7 +669,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 	      e_indx+=offset;
-	      abs_pos+=offset;
+	      abs_pos-=offset-1;
 
 	      ActualNode->setValue(atof(exprstring));
 	      this->clearString(exprstring);
@@ -685,7 +685,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	  offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 	  e_indx+=offset;
-	  abs_pos+=offset;
+	  abs_pos-=offset-1;
 
 	  ActualNode->setValue(atof(exprstring));
 	  this->clearString(exprstring);
@@ -705,7 +705,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos+=offset;
+		  abs_pos-=offset-1;
 
 		  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		    ActualNode->setOperator(exprstring);
@@ -732,7 +732,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos+=offset;
+		  abs_pos-=offset-1;
 
 		  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		    ActualNode->setOperator(exprstring);
@@ -824,8 +824,8 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 		  }
 		  
 		  e_indx+=offset;
-		  abs_pos+=offset;
-
+		  abs_pos-=offset-1;
+		  
 		  if ( !(actn=this->parse(bracketstring,locals)) )
 		    actn = new MathExpression(abs_pos,varlist,functionlist);
 
@@ -842,7 +842,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos+=offset;
+		  abs_pos-=offset-1;
 
 		  actn->setValue(atof(exprstring));
 		  this->clearString(exprstring);
@@ -892,7 +892,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		e_indx+=offset;
-		abs_pos+=offset;
+		abs_pos-=offset-1;
 
 		if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		  ActualNode->setOperator(exprstring);
@@ -947,7 +947,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	      e_indx+=offset;
-	      abs_pos+=offset;
+	      abs_pos-=offset-1;
 
 	      if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		ActualNode->setOperator(exprstring);
@@ -970,7 +970,7 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	  e_indx+=offset;
-	  abs_pos+=offset;
+	  abs_pos-=offset-1;
 
 	  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 	    ActualNode->setOperator(exprstring);
@@ -1231,28 +1231,29 @@ int MathExpression::copyBracketContent(char *exprstring, const char *arg, char o
 
   int br_cnt=0, indx=0, eindx=0;
 
-  if (open && (arg[indx]!=open))
+  if ( open && (arg[indx] != open) )
     return (-1);
 
   do{
-    if (arg[indx]==open || (!open && !indx)){  // auch moeglich: alles bis ...
-      if (br_cnt)
-	exprstring[eindx]=arg[indx];
-      else if (!open && !indx)
-	exprstring[0]=arg[0];
+    if ( arg[indx] == open || ( !open && !indx) ){  // auch moeglich: alles bis ...
+      if ( br_cnt )
+	exprstring[eindx] = arg[indx];
+      else if ( !open && !indx )
+	exprstring[0] = arg[0];
       else
 	eindx--;
       br_cnt++;
-    } else if (arg[indx]==close){
+    } else if (arg[indx] == close ){
       br_cnt--; 
-      if (br_cnt)
-	exprstring[eindx]=arg[indx];
+      if ( br_cnt )
+	exprstring[eindx] = arg[indx];
     } else
-      exprstring[eindx]=arg[indx];
+      exprstring[eindx] = arg[indx];
     indx++;
     eindx++;
-  } while (br_cnt&&arg[indx]);
-  if (br_cnt)
+    abs_pos++;
+  } while ( br_cnt&&arg[indx] );
+  if ( br_cnt )
     return (-1);
   return(indx);
 }
@@ -1263,6 +1264,7 @@ int MathExpression::copyFloatContent(char *exprstring, const char *arg){
   while (checkDigit(arg[indx])){ 
     exprstring[indx]=arg[indx];
     indx++;
+    abs_pos++;
   }
   return(indx);
 }
@@ -1279,12 +1281,14 @@ int MathExpression::copyOperatorContent(char *exprstring, const char *arg){
     if (checkOperator(arg[indx])){
       exprstring[indx]=arg[indx];
       indx++;
+      abs_pos++;
     } else{
       while (arg[indx] && indx<OP_LEN){ 
 	if (!(checkLetter(arg[indx])))
 	  break;
 	exprstring[indx]=arg[indx];
 	indx++;
+	abs_pos++;
       }
     }
     break;
