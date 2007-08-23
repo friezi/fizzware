@@ -161,19 +161,19 @@ protected:
 };
 
 /**
-   Sometimes it's very usefull to be able to define a subclass of an exception-class \e Exception<Class>
-   which should have the same properties. For example a function \e Function in the class \e Class would send an exception and you want to
-   specify the exception indicating the error. But also you want to be able just to catch the exception \e Exception<Class>.
-   So you would like to create a subclass of \e Exception<Class>. It's possible with the SubException< ... >-class. The following
-   coding-method works very well and fullfills this aim:\n
+   Sometimes it's very usefull to have the possibility of defining a subclass of an exception-class \e Exception<Class>
+   which should have the same properties. For example a function \e function in the class \e Class should send an exception and you want to
+   specify the exception indicating the error more precisely. But you also want to have the possibility of just catching the exception \e Exception<Class>.
+   So your wish is to create a subclass of \e Exception<Class>. It's possible with the SubException< ... >-class. The following
+   coding-method works very well and fullfills this purpose:\n
    - define in the beginning of your class \e Class a new class:\n
    @code
    private:
    class FunctionErr{};
    @endcode
-   - call somewhere in your code:\n
+   - call somewhere in your code of \e function :\n
    @code throw SubException<FunctionErr,Class>( ... ) @endcode
-   - the code which is calling the function \e Function can now ...\n
+   - the code which is calling the function \e function can now ...\n
    @code catch ( Exception<Class> &e ) { ... } @endcode
    @brief For building derived exception-classes from Exception<T>
 */

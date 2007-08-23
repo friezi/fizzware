@@ -46,12 +46,69 @@
 namespace mexp{
   
   class MathExpression;
-  class EvalException;
   class VarList;
   class VarElement;
   class FunctionList;
   class FunctionElement;
+ 
+  class ParseException : public Exception<MathExpression> {
+    
+  private:
+    static const std::string id;
+    int pos;
+    
+  public:
+    ParseException(int pos) : Exception<MathExpression>(""){
+      this->pos = pos;
+    }
+    
+    ParseException(int pos, char *errormsg) : Exception<MathExpression>(std::string(errormsg)){
+      this->pos = pos;
+    }
+    
+    ParseException(int pos, std::string errormsg) : Exception<MathExpression>(errormsg){
+      this->pos = pos;
+    }
+    
+    ParseException(int pos, const std::string &id, const std::string &errormsg)
+      : Exception<MathExpression>(id,errormsg){
+      this->pos = pos;
+    }
+
+    int getPos(){ return pos; }
+
+  };
   
+  class EvalException : public Exception<MathExpression> {
+    
+  private:
+    static const std::string id;
+    std::string objname;
+    
+  public:
+    EvalException() : Exception<MathExpression>(""){
+      this->objname = "";
+    }
+    
+    EvalException(char *errormsg, char *objname=0) : Exception<MathExpression>(std::string(errormsg)){
+
+      if (objname)
+	this->objname = objname;
+      else
+	this->objname = "";
+
+    }
+    
+    EvalException(const std::string &id, const std::string &errormsg)
+      : Exception<MathExpression>(id,errormsg){
+      this->objname = "";
+    }
+    
+    std::string getObjName() const{
+      return this->objname;
+    }
+  };
+ 
   /**
      @brief for evaluating easy-to-write mathematical expressions
   */
@@ -75,11 +132,6 @@ namespace mexp{
     static const char OP=1;
     static const char VAR=2;
     static const char VAL=3;
-
-    // Exception-Classes
-    /** @internal */
-    class SyntaxErr{};
-    class DefinitionError{};
     
   private:
     
@@ -92,18 +144,21 @@ namespace mexp{
     char variable[VARLEN];
     double value;
     char type;
+
+    // absolute position in expression-string
+    int abs_pos;
     
-    MathExpression *parse(const char *expr, VarList& locals) throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
+    MathExpression *parse(const char *expr, VarList& locals) throw (ParseException,ExceptionBase);
     
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int pri(const char *c0, const char *c1);
-    bool checkSyntaxAndOptimize(void) throw (SubException<SyntaxErr,MathExpression>);
+    bool checkSyntaxAndOptimize(void) throw (ParseException);
     double faculty(double fac) throw (ExceptionBase);
     double sumProd(void) throw (ExceptionBase);
     double assignValue(void) throw (ExceptionBase);
     double evalFunction(void) throw (ExceptionBase);
-    void defineFunction(void) throw (SubException<DefinitionError,MathExpression>);
+    void defineFunction(void) throw (ParseException);
     bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
     bool empty(void) const { return (getType()==EMPTY); }
     void setOperator(const char *name);
@@ -113,7 +168,6 @@ namespace mexp{
     bool isVariable(void) const { return ( getType() == VAR ); }
     bool isOperator(void) const { return ( getType() == OP ); }
     bool isValue(void) const { return ( getType() == VAL ); }
-    bool isABlank(char c);
     const char *getOperator(void) const { return oprtr; }
     const char *getVariable(void) const { return variable; }
     double getValue(void) const { return value; }
@@ -137,7 +191,7 @@ namespace mexp{
     unsigned int countArgs(void);
     
     // private constructor:
-    MathExpression(VarList *vl = 0, FunctionList *fl = 0);
+    MathExpression(int abs_pos, VarList *vl = 0, FunctionList *fl = 0);
     // private copyconstructor: not for use
     MathExpression(const MathExpression&){}
     
@@ -148,16 +202,16 @@ namespace mexp{
        @param expression pointer to an expression which should be evaluated
        @param vl pointer to a list of variables
        @param fl pointer to a list of functions
-       @exception SubException<SyntaxErr,MathExpression>
+       @exception ParseException
        @exception OutOfMemException
     */
     MathExpression(const char *expression, VarList *vl = 0, FunctionList *fl = 0)
-      throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
+      throw (ParseException,ExceptionBase);
  
   protected:
 
-    MathExpression(MathExpression *me, VarList *vl, FunctionList *fl)
-      throw (SubException<SyntaxErr,MathExpression>,ExceptionBase);
+    MathExpression(MathExpression *me, VarList *vl, FunctionList *fl, int abs_pos)
+      throw (ParseException,ExceptionBase);
 
   public:
     
@@ -208,8 +262,12 @@ namespace mexp{
     static double abs(double value);
     
     // more usefull functions:
- 
+
+    static bool isABlank(char c);
+
     static std::string skipTrailingZeros(std::string value);
+
+    static int skipBlanks(const char *expr, int indx);
    
     /**
        copyBracketContent copies all from "arg" into "exprstring" between "open" and 
@@ -284,37 +342,6 @@ namespace mexp{
     
     // constants: see top of class
     
-  };
-  
-  class EvalException : public Exception<MathExpression> {
-    
-  private:
-    static const std::string id;
-    std::string objname;
-    
-  public:
-    EvalException() : Exception<MathExpression>(""){
-
-      this->objname = "";
-    }
-    
-    EvalException(char *errormsg, char *objname=0) : Exception<MathExpression>(std::string(errormsg)){
-
-      if (objname)
-	this->objname = objname;
-      else
-	this->objname = "";
-    }
-    
-    EvalException(const std::string &id, const std::string &errormsg)
-      : Exception<MathExpression>(id,errormsg){
-
-      this->objname = "";
-    }
-    
-    std::string getObjName() const{
-      return this->objname;
-    }
   };
   
   /**
