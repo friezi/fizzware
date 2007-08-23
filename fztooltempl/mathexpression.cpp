@@ -30,8 +30,8 @@
 #define FLIST "sin","cos","tan","asin","acos","atan","sinh","cosh","tanh", \
     "asinh","acosh","atanh","ln","ld","log","exp","sgn","tst",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
-
-    using namespace std;
+  
+using namespace std;
 using namespace mexp;
 
 VarElement::VarElement(const char *name, double value, char protect)
@@ -47,7 +47,7 @@ VarElement::~VarElement(){
 }
 
 VarList::VarList(const VarList& vl) throw (ExceptionBase) : first(0), last(0), modified(false){
-
+  
   const VarElement *curr;
 
   curr = vl.first;
@@ -465,14 +465,21 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
   for (e_indx=0;expr[e_indx];){
 
-    if (expr[e_indx]==')'){
+    if ( isABlank(expr[e_indx]) == true ){
+
+      e_indx++;
+      continue;
+
+    }
+
+    else if ( expr[e_indx] == ')' ){
 
       delete TopNode;
       throw SubException<SyntaxErr,MathExpression>("invalid expression!");
 
     }
 
-    if (expr[e_indx]=='('){
+    if ( expr[e_indx] == '(' ){
       if (PrevNode){
 	if (PrevNode->isOperator()){
 	  if (PrevNode->pred){
@@ -1109,6 +1116,7 @@ void MathExpression::setOperator(const char *name){
   value=0;
   clearString(variable);
   type=OP;
+
 }
 
 void MathExpression::setVariable(const char *name){
@@ -1118,14 +1126,22 @@ void MathExpression::setVariable(const char *name){
   clearString(oprtr);
   value=0;
   type=VAR;
+
 }
-
+  
 void MathExpression::setValue(double value){
-
+    
   this->value=value;
   clearString(oprtr);
   clearString(variable);
   type=VAL;
+    
+}
+
+bool MathExpression::isABlank(char c){
+
+  return ( c == ' ' || c == '\t' );
+
 }
 
 void MathExpression::addVariablesToList(VarList *varlist){

@@ -113,6 +113,7 @@ namespace mexp{
     bool isVariable(void) const { return ( getType() == VAR ); }
     bool isOperator(void) const { return ( getType() == OP ); }
     bool isValue(void) const { return ( getType() == VAL ); }
+    bool isABlank(char c);
     const char *getOperator(void) const { return oprtr; }
     const char *getVariable(void) const { return variable; }
     double getValue(void) const { return value; }
