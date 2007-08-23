@@ -677,7 +677,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 	      e_indx+=offset;
-	      abs_pos-=offset-1;
 
 	      ActualNode->setValue(atof(exprstring));
 	      this->clearString(exprstring);
@@ -693,7 +692,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	  offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 	  e_indx+=offset;
-	  abs_pos-=offset-1;
 
 	  ActualNode->setValue(atof(exprstring));
 	  this->clearString(exprstring);
@@ -713,7 +711,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos-=offset-1;
 
 		  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		    ActualNode->setOperator(exprstring);
@@ -740,7 +737,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos-=offset-1;
 
 		  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		    ActualNode->setOperator(exprstring);
@@ -852,7 +848,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		  offset = this->copyFloatContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-		  abs_pos-=offset-1;
 
 		  actn->setValue(atof(exprstring));
 		  this->clearString(exprstring);
@@ -902,7 +897,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 		offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		e_indx+=offset;
-		abs_pos-=offset-1;
 
 		if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		  ActualNode->setOperator(exprstring);
@@ -957,7 +951,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	      offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	      e_indx+=offset;
-	      abs_pos-=offset-1;
 
 	      if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		ActualNode->setOperator(exprstring);
@@ -980,7 +973,6 @@ MathExpression *MathExpression::parse(const char *expr, VarList& locals)
 
 	  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	  e_indx+=offset;
-	  abs_pos-=offset-1;
 
 	  if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 	    ActualNode->setOperator(exprstring);
