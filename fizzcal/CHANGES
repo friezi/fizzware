@@ -14,3 +14,6 @@ v2.54:
 
 v2.55:
 - entry will only be added to history if it's not a copy of the previous entry
+
+v2.56:
+- blanks won't raise a syntax-error

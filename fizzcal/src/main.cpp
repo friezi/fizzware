@@ -28,7 +28,7 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version="2.55";
+const char *version="2.56";
 
 const static string formula = "formula";
 const static string commands = "commands";
