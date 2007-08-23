@@ -17,3 +17,5 @@ v2.55:
 
 v2.56:
 - blanks won't raise a syntax-error
+- input-prompt
+- arrow indicating syntax-error

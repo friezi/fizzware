@@ -32,7 +32,7 @@ const char *version="2.56";
 
 const static string formula = "formula";
 const static string commands = "commands";
-const static string prompt = ">>> ";
+const static string prompt = "> ";
 const static string exit_modified_text = "Variables or functions have been modified! Do you really want to quit without saving? (y,n) ";
 
 int main(int argc, char **argv, char **envp){
@@ -40,6 +40,7 @@ int main(int argc, char **argv, char **envp){
   CmdlParser cmdlparser(argc,argv);
   string usage;
   const char *programname = 0;
+  string fullprompt = "";
   VarList *varlist = 0;
   FunctionList *functionlist = 0;
   bool bflag = false;
@@ -61,7 +62,7 @@ int main(int argc, char **argv, char **envp){
 
     programname = ::basename(pathname.get());
 
-
+    // help-output
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
       cout << endl << programname << " is a calculator/evaluator of mathematical formulas." << endl << endl;
@@ -72,6 +73,7 @@ int main(int argc, char **argv, char **envp){
 
     }
 
+    // version-output
     if ( cmdlparser.checkShortoption('v') == true || cmdlparser.checkOption("version") == true ){
 
       cout << version << endl;
@@ -79,24 +81,31 @@ int main(int argc, char **argv, char **envp){
 
     }
 
+    // set precision
     if ( cmdlparser.checkParameter("precision").first == true )
       precision = (streamsize)atoi(cmdlparser.checkParameter("precision").second.c_str());
     
+    // interactive-mode?
     if ( cmdlparser.checkParameter(formula).first == true )
       interactive = false;
-
+    
+    // header-output in interactive-mode
     if ( interactive == true )
       header(programname);
     
+    // setup predefined variables
     varlist = new VarList();
     varlist->insert("pi",M_PI,true);
     varlist->insert("e",M_E,true);
 
+    // setup a functionlist for self-defined functions
     functionlist = new FunctionList();
     
+    // load functions from file if given
     if ( cmdlparser.checkParameter(commands).first == true )
       load(varlist,functionlist,cmdlparser.checkParameter(commands).second,interactive);
     
+    // run-once-mode
     if ( interactive == false ){
 
       MathExpression mathexpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
@@ -115,11 +124,13 @@ int main(int argc, char **argv, char **envp){
 
     }
 
+    fullprompt = string(programname) + prompt;
+
     for (;;){
 
       try{
 
-	input = (char *)readline(prompt.c_str());
+	input = (char *)readline(fullprompt.c_str());
 
 	if ( input.get() ){
 	  if ( *input.get() ){
@@ -245,21 +256,19 @@ int main(int argc, char **argv, char **envp){
 	result << mathexpression.eval();
 	cout << MathExpression::skipTrailingZeros(result.str()) << endl;
 
-      } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+      } catch ( ParseException &pe ){
 
-	cerr << "syntaxerror: " << mese.getMsg() << endl;
+	if ( interactive == true )
+	  printErrorArrow(fullprompt.size() + pe.getPos());
+	cerr << "parse-error: '" << pe.getMsg() << "'" << endl;
 
-      } catch (SubException<MathExpression::DefinitionError,MathExpression> &mede){
-
-	cerr << "error: " << mede.getMsg() << endl;
-
-      } catch (EvalException &meee){
+      } catch ( EvalException &ee ){
 
 	// why this doesn't work sometimes I really don't know
-	cerr << "error: " << meee.getMsg();
+	cerr << "evaluation-error: '" << ee.getMsg() << "'";
 
-	if (meee.getObjName() != "")
-	  cerr << ": " << meee.getObjName();
+	if ( ee.getObjName() != "")
+	  cerr << ": '" <<ee.getObjName() << "'";
 
 	cerr << endl;
 
@@ -273,14 +282,16 @@ int main(int argc, char **argv, char **envp){
     delete varlist;
     return 0;
 
-  } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+  } catch ( ParseException &pe ){
 
     // komischerweise werden ohne diesen catch-block die exceptions im inneren
     // nicht abgefangen !?!? (Ist eigentlich unnoetig)
-    cerr << "syntaxerror: " << mese.getMsg() << endl;
+    if ( interactive == true )
+      printErrorArrow(pe.getPos());
+    cerr << "parse-error: '" << pe.getMsg() << "'" << endl;
     exit(1);
 
-  } catch (ExceptionBase &e){
+  } catch ( ExceptionBase &e ){
 
     e.show();
     cerr << usage << endl;
@@ -445,16 +456,18 @@ void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
 
-    } catch (SubException<MathExpression::SyntaxErr,MathExpression> &mese){
+    } catch (ParseException &pe){
 
-      cerr << "syntaxerror: " << mese.getMsg() << endl;
+      if ( interactive == true )
+	printErrorArrow(pe.getPos());
+      cerr << "parse-error: " << pe.getMsg() << endl;
 
-    } catch (EvalException &meee){
+    } catch (EvalException &ee){
 
-      cout << meee.getMsg();
+      cout << ee.getMsg();
 
-      if (meee.getObjName() != "")
-	cout << " : " << meee.getObjName();
+      if ( ee.getObjName() != "")
+	cout << " : " << ee.getObjName();
       cout << endl;
 
     }
@@ -489,6 +502,18 @@ bool checkAnswer(const string & text){
   }
 
   return result;
+
+}
+
+void printErrorArrow(int pos){
+
+  if ( pos <=0 )
+    return;
+
+  for ( int i = 0; i < pos-1; i++ )
+    cout << " ";
+
+  cout << "^" << endl;
 
 }
 
