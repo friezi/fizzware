@@ -1,4 +1,4 @@
-DIRS = cliparser focal funtest matchit msgqrd msgqrclient prim primfak process properties semaphoren graph tree bitmatrix
+DIRS = cliparser foc funtest matchit msgqrd msgqrclient prim primfak process properties semaphoren graph tree bitmatrix
 
 EDITOR ?= vi
 

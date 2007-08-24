@@ -1,7 +1,7 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = focal
+TARGET = foc
 
 MAIN_MODULE = main
 LOCAL_MODULES = linescanner filescanner
