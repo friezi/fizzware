@@ -621,7 +621,7 @@ void printHelp(const char *pname){
        << "The following operators are predefined:\n\n"
        << "+\taddition\n-\tsubtraction\n*\tmultiplication\n/\t"
        << "division\n\\\tnon-broken division\n%\tmodulo\n!\tfaculty\n"
-       << "@\tthe operator for binomial-coefficient (e.g. a@b means a over "
+       << "@\tthe operator for binomial coefficient (e.g. a@b means a choose "
        << "b, i.e.\n\ta!/(b!(a-b)!) )\n=\tassignment to variables\n\n"
        << "The following functions are predefined (\"var\" means local variable, "
        << "\"exp\" means\nmath.-expression):\n\n"
