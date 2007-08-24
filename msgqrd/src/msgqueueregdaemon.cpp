@@ -130,7 +130,7 @@ unsigned int MsgQueueRegDaemon::parse(int fd){
     delete token;
     
   } catch(ExceptionBase &e) {
-    log(LOG_DEBUG,e.getIdMsgCharPtr());
+    log(LOG_DEBUG,e.getIdMsg().c_str());
   }
   
   if (MsgQueueRegDaemon::status & STDMSGS_TIMEOUT)

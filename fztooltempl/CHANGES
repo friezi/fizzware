@@ -39,3 +39,10 @@ v1.98:
 
 - renamed Exception_T to ExceptionBase
 
+v1.99:
+- ExceptionBase:
+  - removed methods getMsgCharPtr() and getIdMsgCharPtr()
+
+- MathExpression:
+  - more sophisticated error-output
+  - added class ParserException, removed SubExcepion<SyntaxErr,MathExpression> and SubException<DefinitionError,MathExpression>

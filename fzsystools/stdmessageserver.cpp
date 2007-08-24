@@ -148,7 +148,7 @@ void StdMessageServer::start() throw(Exception<StdMessageServer>){
     }
     
   } catch (ExceptionBase &e){
-    log(LOG_ERR,e.getMsgCharPtr());
+    log(LOG_ERR,e.getMsg().c_str());
     goto error1;
   }
   
@@ -240,7 +240,7 @@ void StdMessageServer::connectionHandler(){
 
     delete msgserver;
 
-    log(LOG_ERR,e.getIdMsgCharPtr());
+    log(LOG_ERR,e.getIdMsg().c_str());
     // Socket konnte nicht eingerichtet werden
 
     // alle beteiligten Prozesse stoppen
@@ -280,7 +280,7 @@ void StdMessageServer::handleClient(int fd){
       log(LOG_INFO,"client has disconnected!");
     
   } catch (ExceptionBase &e){
-    log(LOG_ERR,e.getIdMsgCharPtr());
+    log(LOG_ERR,e.getIdMsg().c_str());
   }
   
   exit(0);

@@ -101,15 +101,6 @@ public:
   */
   virtual const std::string &getIdMsg() const { return id_errormsg; }
 
-  /** @brief returns only errormessage as char *
-      @return the ptr
-  */
-  virtual const char *getMsgCharPtr() const { return errormsg.c_str(); }
-
-  /** @brief returns id + errormessage as char *
-      @return the ptr
-  */
-  virtual const char *getIdMsgCharPtr() const { return id_errormsg.c_str(); }
 };
 
 /** 
@@ -140,7 +131,7 @@ public:
 
   /**
      extensibility for derived classes
-     @param id the identifikation-string for the class (classname)
+     @param id the identification-string for the class (classname)
      @param errormsg the errormessage
   */
   Exception(const std::string &id, const std::string &errormsg) : ExceptionBase(id,errormsg){}
