@@ -66,9 +66,9 @@ void show(const char *pname, void (*what)(const char *));
 void printHelp(const char *pname);
 void gpl(const char *nix);
 void undefineFunctions(mexp::FunctionList *fl, LineScanner & lscanner);
-void removeVariables(mexp::VarList *vl, LineScanner & lscanner);
-void save(mexp::VarList *vl, mexp::FunctionList *fl, std::streamsize precision, std::string filename, LineScanner & lscanner);
-void load(mexp::VarList *vl, mexp::FunctionList *fl, std::string filename, bool interactive);
+void removeVariables(mexp::VariableList *vl, LineScanner & lscanner);
+void save(mexp::VariableList *vl, mexp::FunctionList *fl, std::streamsize precision, std::string filename, LineScanner & lscanner);
+void load(mexp::VariableList *vl, mexp::FunctionList *fl, std::string filename, bool interactive);
 bool checkAnswer(const std::string & text);
 void printErrorArrow(int pos);
 

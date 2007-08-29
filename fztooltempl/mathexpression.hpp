@@ -1,26 +1,26 @@
 /*
-    Copyright (C) 1999-2004 Friedemann Zintel
+  Copyright (C) 1999-2004 Friedemann Zintel
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307  USA
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    For any questions, contact me at
-    friezi@cs.tu-berlin.de
+  For any questions, contact me at
+  friezi@cs.tu-berlin.de
 */
 
 /**
@@ -38,6 +38,7 @@
 #include <memory.h>
 #include <math.h>
 #include <string>
+#include <list>
 #include <exception.hpp>
 
 /**
@@ -46,10 +47,13 @@
 namespace mexp{
   
   class MathExpression;
-  class VarList;
-  class VarElement;
+  class VariableList;
+  class Variable;
   class FunctionList;
-  class FunctionElement;
+  class Function;
+  class Value;
+  class Tuple;
+  class Complex;
  
   class ParseException : public Exception<MathExpression> {
     
@@ -108,6 +112,136 @@ namespace mexp{
       return this->objname;
     }
   };
+
+  class Value{
+
+  public:
+
+    static const int TUPLE = 1;
+    static const int COMPLEX = 2;
+
+  protected:
+
+    int type;
+
+    Value(int type) : type(type){}
+    
+    Value *notSupported() const throw (ExceptionBase) { throw EvalException("not supported!"); }
+
+  public:
+
+    virtual ~Value(){}
+
+    int getType(){ return type; }
+
+    virtual std::string toString(std::streamsize precision) const = 0;
+
+    virtual Value *clone() const { return notSupported(); }
+
+    virtual Value *operator+(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *operator-(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *operator*(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *operator/(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *integerDivision(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *operator%(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *pow(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *faculty() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *choose(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *sin() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *cos() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *tan() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *asin() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *acos() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *atan() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *sinh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *cosh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *tanh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *asinh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *acosh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *atanh() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *ln() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *ld() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *log(Value *base) throw (ExceptionBase){ return notSupported(); }
+    virtual Value *exp() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *sumProd() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *sgn() throw (ExceptionBase){ return notSupported(); }
+    virtual Value *tst() throw (ExceptionBase){ return notSupported(); }
+
+  };
+
+  class Tuple : public Value{
+
+  private:
+
+    std::list<Value *> elements;
+
+  public:
+
+    Tuple() : Value(Value::TUPLE){}
+
+    ~Tuple(){}
+
+    std::string toString(std::streamsize precision) const { return ""; }
+
+  };
+
+  class Complex : public Value{
+
+  private:
+
+    double re;
+    double im;
+
+    static Complex *assertComplex(Value *value);
+    static Complex *assertReal(Value *value);
+    
+  public:
+
+    
+    Complex(): Value(Value::COMPLEX), re(0), im(0){}
+    Complex(double re) : Value(Value::COMPLEX), re(re), im(0){}
+    Complex(double re, double im) : Value(Value::COMPLEX), re(re), im(im){}
+
+    ~Complex(){}
+
+    std::string toString(std::streamsize precision) const;
+
+    Value *clone() const { return new Complex(getRe(), getIm()); }
+
+    double getRe() const { return re; }
+    double getIm() const { return im; }
+    bool isReal() const { return ( getIm() == 0 ); }
+
+    Value *operator+(Value *right) throw (ExceptionBase);
+    Value *operator-(Value *right) throw (ExceptionBase);
+    Value *operator*(Value *right) throw (ExceptionBase); 
+    Value *operator/(Value *right) throw (ExceptionBase);
+    Value *integerDivision(Value *right) throw (ExceptionBase);
+    Value *operator%(Value *right) throw (ExceptionBase);
+    Value *pow(Value *right) throw (ExceptionBase){ return notSupported(); }
+    Value *faculty() throw (ExceptionBase);
+    Value *choose(Value *right) throw (ExceptionBase){ return notSupported(); }
+    Value *sin() throw (ExceptionBase){ return notSupported(); }
+    Value *cos() throw (ExceptionBase){ return notSupported(); }
+    Value *tan() throw (ExceptionBase){ return notSupported(); }
+    Value *asin() throw (ExceptionBase){ return notSupported(); }
+    Value *acos() throw (ExceptionBase){ return notSupported(); }
+    Value *atan() throw (ExceptionBase){ return notSupported(); }
+    Value *sinh() throw (ExceptionBase){ return notSupported(); }
+    Value *cosh() throw (ExceptionBase){ return notSupported(); }
+    Value *tanh() throw (ExceptionBase){ return notSupported(); }
+    Value *asinh() throw (ExceptionBase){ return notSupported(); }
+    Value *acosh() throw (ExceptionBase){ return notSupported(); }
+    Value *atanh() throw (ExceptionBase){ return notSupported(); }
+    Value *ln() throw (ExceptionBase){ return notSupported(); }
+    Value *ld() throw (ExceptionBase){ return notSupported(); }
+    Value *log(Value *base) throw (ExceptionBase){ return notSupported(); }
+    Value *exp() throw (ExceptionBase){ return notSupported(); }
+    Value *sumProd() throw (ExceptionBase){ return notSupported(); }
+    Value *sgn() throw (ExceptionBase){ return notSupported(); }
+    Value *tst() throw (ExceptionBase){ return notSupported(); }
+
+  };
  
   /**
      @brief for evaluating easy-to-write mathematical expressions
@@ -135,49 +269,70 @@ namespace mexp{
     
   private:
     
-    VarList *varlist;
+    VariableList *varlist;
     FunctionList *functionlist;
+
+    // for unary and binary operators
+    // unary operators will store the argument in the 'right'-pointer
     MathExpression *left;
     MathExpression *right;
+
+    // for n-ary operators (like ',')
+    std::list<MathExpression *> elements;
     MathExpression *pred;
     char oprtr[OP_LEN];
     char variable[VARLEN];
-    double value;
+    Value *value;
     char type;
 
     // absolute position in expression-string
     int abs_pos;
+
+    char imaginary_unit;
     
-    MathExpression *parse(const char *expr, VarList& locals) throw (ParseException,ExceptionBase);
+    MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,ExceptionBase);
     
+    // erases the elements of a n-ary operator
+    void eraseElements();
+
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int pri(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (ParseException);
-    double faculty(double fac) throw (ExceptionBase);
     double sumProd(void) throw (ExceptionBase);
-    double assignValue(void) throw (ExceptionBase);
-    double evalFunction(void) throw (ExceptionBase);
+    Value *assignValue(void) throw (ExceptionBase);
+    Value *evalFunction(void) throw (ExceptionBase);
     void defineFunction(void) throw (ParseException);
-    bool checkBody(MathExpression *body, MathExpression *pl, VarList *lvl);
+    bool checkBody(MathExpression *body, MathExpression *pl, VariableList *lvl);
     bool empty(void) const { return (getType()==EMPTY); }
-    void setOperator(const char *name);
-    void setVariable(const char *name);
-    void setValue(double value);
+    void setOperatorType(const char *name);
+    void setVariableType(const char *name);
+    void setValueType(Value *value);
     void setType(char type) { this->type=type; }
     bool isVariable(void) const { return ( getType() == VAR ); }
     bool isOperator(void) const { return ( getType() == OP ); }
     bool isValue(void) const { return ( getType() == VAL ); }
+    void setValue(Value *value);
     const char *getOperator(void) const { return oprtr; }
     const char *getVariable(void) const { return variable; }
-    double getValue(void) const { return value; }
+
+    /**
+       @brief returns a pointer to the value
+       @return pointer to value
+    */
+    Value *getValue(void) const { return value; }
     char getType() const { return type; }
+
+    //TODO
     MathExpression *getLeft(void) { return left; }
     MathExpression *getRight(void) { return right; }
     MathExpression *getPred(void) { return pred; }
+
+    void setRight(MathExpression *right){}
+    void setLeft(MathExpression *left){}
     
     // addVariablesToList adds all occuring variables in tree to varlist
-    void addVariablesToList(VarList *varlist);
+    void addVariablesToList(VariableList *varlist);
     
     // checkForVars checks, if leaf-elements of expression are only variables
     // and operators are only ","'s. No variable must have childtrees.
@@ -191,7 +346,7 @@ namespace mexp{
     unsigned int countArgs(void);
     
     // private constructor:
-    MathExpression(int abs_pos, VarList *vl = 0, FunctionList *fl = 0);
+    MathExpression(int abs_pos, VariableList *vl = 0, FunctionList *fl = 0);
     // private copyconstructor: not for use
     MathExpression(const MathExpression&){}
     
@@ -205,12 +360,12 @@ namespace mexp{
        @exception ParseException
        @exception OutOfMemException
     */
-    MathExpression(const char *expression, VarList *vl = 0, FunctionList *fl = 0)
+    MathExpression(const char *expression, VariableList *vl = 0, FunctionList *fl = 0)
       throw (ParseException,ExceptionBase);
  
   protected:
 
-    MathExpression(MathExpression *me, VarList *vl, FunctionList *fl, int abs_pos)
+    MathExpression(MathExpression *me, VariableList *vl, FunctionList *fl, int abs_pos)
       throw (ParseException,ExceptionBase);
 
   public:
@@ -219,6 +374,12 @@ namespace mexp{
     ~MathExpression();
     
     // main functions:
+
+    /**
+       @brief calculates the faculty
+       @return the faculty
+    */
+    static double faculty(double fac) throw (ExceptionBase);
     
     /**
        @brief print prints the mathematic expression totally bracketed to stdout
@@ -229,7 +390,7 @@ namespace mexp{
        @brief returns a string-representation of the expression
        @return the string-representation
     */
-    std::string toString(std::streamsize precision) const;
+    std::string toString(std::streamsize precision) const throw (Exception<MathExpression>,ExceptionBase);
 
     /**
        @brief returns a string-representation of the builtin functions
@@ -245,7 +406,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    double eval() throw (ExceptionBase);
+    Value *eval() throw (ExceptionBase);
 
     /**
        @brief returns the signum of the value
@@ -341,40 +502,61 @@ namespace mexp{
     static bool isBuiltinOperator(char op);
     
     // constants: see top of class
+
+    /**
+       @brief sets the character for the imaginary unit
+       @param imaginary_unit charakter to set
+    */
+    void setImaginaryUnit(char c){ imaginary_unit = c; }
+
+    /**
+       @brief returns the charakter for imaginary unit
+       @return imaginary unit
+    */
+    char getImaginaryUnit() const { return imaginary_unit; }
     
   };
   
   /**
      @brief A variable-element
-     @see VarList
+     @see VariableList
      @internal
   */
-  class VarElement {
-    
-    friend class VarList;
-    friend class MathExpression;
-    
+  class Variable {
+
   protected:
+
+    Value *value;
     char *name;
-    double value;
     char protect;
-    VarElement *next;
+    Variable *next;
     
     // copyconstructor: not for use
-    VarElement(const VarElement&){}
+    Variable(const Variable&){}
     
   public:
     // constructor:
     /**
        @exception OutOfMemException
     */
-    VarElement(const char *name, double value, char protect)
+    Variable(const char *name, Value *value, char protect)
       throw (ExceptionBase);
     // destructor:
-    ~VarElement();
-    char *getName() const{ return name; }
-    double getValue() const{ return this->value; }
-    VarElement *getNext(){ return next; }
+    ~Variable();
+
+    void setValue(Value *value);
+    void setNext(Variable *next){ this->next = next; }
+    void setProtect(char protect){ this->protect = protect; }
+
+    char *getName() const { return name; }
+    
+    /**
+       @brief returns a pointer to the value
+       @return pointer to value
+    */
+    Value *getValue() const { return this->value; }
+    Variable *getNext() const { return next; }
+    char getProtect() const { return protect; }
     
   };
   
@@ -383,13 +565,13 @@ namespace mexp{
      @see MathExpression
      @internal
   */
-  class VarList {
+  class VariableList {
     
     friend class MathExpression;
     
   protected:
-    VarElement *first;
-    VarElement *last;
+    Variable *first;
+    Variable *last;
 
     bool modified;
     
@@ -398,15 +580,15 @@ namespace mexp{
 
     class iterator{
 
-      friend class VarList;
+      friend class VariableList;
 
     private:
 
-      VarElement *current;
+      Variable *current;
 
     public:
 
-      iterator(VarElement *velem) : current(velem){};
+      iterator(Variable *velem) : current(velem){};
 
       iterator(const iterator & it) { this->current = it.current; }
 
@@ -415,42 +597,45 @@ namespace mexp{
 	  current = current->getNext();
       }
       void operator++(int){ this->operator++(); }
-      VarElement & operator*(){ return *current; }
+      Variable & operator*(){ return *current; }
       bool operator==(const iterator & it_rval) { return it_rval.current == this->current; }
       bool operator!=(const iterator & it_rval) { return it_rval.current != this->current; }
       
     };
     
     // constructor:
-    VarList() : first(0), last(0), modified(false){}
+    VariableList() : first(0), last(0), modified(false){}
 
     // copyconstructor:
     /**
        @exception EvalException
        @exception OutOfMemException
     */
-    VarList(const VarList& vl) throw (ExceptionBase);
+    VariableList(const VariableList& vl) throw (ExceptionBase);
 
     // destructor:
-    ~VarList();
+    ~VariableList();
  
     /**
        @exception EvalException
        @exception OutOfMemException
     */
-    void insert(const char *name, double value, char protect=0)
+    void insert(const char *name, Value *value, char protect=0)
       throw (ExceptionBase);
-    void remove(const char *name) throw (Exception<VarList>);
+    void remove(const char *name) throw (Exception<VariableList>);
+
     /**
+       @brief returns a new copy of the requested value
+       @return copy of value
        @exception EvalException
     */
-    double getValue(const char *name) const throw (ExceptionBase);
-    VarElement *isMember(const char *name) const;
+    Value *getValue(const char *name) const throw (ExceptionBase);
+    Variable *isMember(const char *name) const;
     void unprotect(const char *name=0);
     void print(std::streamsize precision) const;    
     std::string toString(const bool include_protected, std::streamsize precision) const;
-    VarList::iterator begin(){ return iterator(first); }
-    VarList::iterator end(){ return iterator(0); }
+    VariableList::iterator begin(){ return iterator(first); }
+    VariableList::iterator end(){ return iterator(0); }
 
     /**
        Automatically called by a MathExpression-object with value=true if a variable-definition occurs.
@@ -471,7 +656,7 @@ namespace mexp{
      @see FunctionList
      @internal
   */
-  class FunctionElement{
+  class Function{
     
     friend class FunctionList;
     
@@ -479,17 +664,17 @@ namespace mexp{
     char *name;
     MathExpression *paramlist;
     MathExpression *body;
-    FunctionElement *next;
+    Function *next;
     
     // copyconstructor: not for use
-    FunctionElement(const FunctionElement& fe){}
+    Function(const Function& fe){}
     
   public:
     // constructor:
-    FunctionElement(const char *name, MathExpression *paramlist,
-		    MathExpression *body);
+    Function(const char *name, MathExpression *paramlist,
+	     MathExpression *body);
     // destructor:
-    ~FunctionElement();
+    ~Function();
     char *getName(void) const{ return name; }
     MathExpression *getParameterList(void){ return paramlist; }
     MathExpression *getBody(void){ return body; }
@@ -503,8 +688,8 @@ namespace mexp{
   class FunctionList{
     
   private:
-    FunctionElement *first;
-    FunctionElement *last;
+    Function *first;
+    Function *last;
 
     bool modified;
     
@@ -523,7 +708,7 @@ namespace mexp{
        @brief inserts a functionelement to the list
        @param fe the functionelement
     */
-    void insert(FunctionElement *fe) throw(Exception<FunctionList>);
+    void insert(Function *fe) throw(Exception<FunctionList>);
 
     /**
        @brief removes a function from the list
@@ -553,7 +738,7 @@ namespace mexp{
        @param name the functionname
        @return the functionelement
     */
-    FunctionElement *get(const char *name) const;
+    Function *get(const char *name) const;
 
     /**
        Automatically called with value=true by a MathExpression-object if a function-definition occurs.

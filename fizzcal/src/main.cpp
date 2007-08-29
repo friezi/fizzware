@@ -41,7 +41,7 @@ int main(int argc, char **argv, char **envp){
   string usage;
   const char *programname = 0;
   string fullprompt = "";
-  VarList *varlist = 0;
+  VariableList *varlist = 0;
   FunctionList *functionlist = 0;
   bool bflag = false;
   bool interactive = true;
@@ -94,9 +94,10 @@ int main(int argc, char **argv, char **envp){
       header(programname);
     
     // setup predefined variables
-    varlist = new VarList();
-    varlist->insert("pi",M_PI,true);
-    varlist->insert("e",M_E,true);
+    varlist = new VariableList();
+    varlist->insert("pi",new Complex(M_PI),true);
+    varlist->insert("e",new Complex(M_E),true);
+    varlist->insert("i",new Complex(0,1),true);
 
     // setup a functionlist for self-defined functions
     functionlist = new FunctionList();
@@ -110,13 +111,9 @@ int main(int argc, char **argv, char **envp){
 
       MathExpression mathexpression(cmdlparser.checkParameter(formula).second.c_str(),varlist,functionlist);
       
-      ostringstream result;
-      
-      result.setf(ios::fixed);
-      result.precision(precision);
-      
-      result << mathexpression.eval();
-      cout << MathExpression::skipTrailingZeros(result.str()) << endl;
+      Value *value = mathexpression.eval();
+
+      cout <<  value->toString(precision) << endl;
       
       delete functionlist;
       delete varlist;
@@ -229,7 +226,7 @@ int main(int argc, char **argv, char **envp){
 
 	} else if (!strcmp(input.get(),FUNCS)){
 
-	  functionlist->print(precision);
+	  cout << functionlist->toString(precision);
 	  continue;
 
 	} else if (!strcmp(input.get(),BUILTINS)){
@@ -248,13 +245,8 @@ int main(int argc, char **argv, char **envp){
 
 	}
 
-	ostringstream result;
-
-	result.setf(ios::fixed);
-	result.precision(precision);
-
-	result << mathexpression.eval();
-	cout << MathExpression::skipTrailingZeros(result.str()) << endl;
+	Value *value = mathexpression.eval();
+	cout << value->toString(precision) << endl;
 
       } catch ( ParseException &pe ){
 
@@ -351,7 +343,7 @@ void undefineFunctions(FunctionList *fl, LineScanner & lscanner){
 
 }
 
-void removeVariables(VarList *vl, LineScanner & lscanner){
+void removeVariables(VariableList *vl, LineScanner & lscanner){
 
   string var;
   bool removed = false;
@@ -364,7 +356,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
       cout << var << " removed" << endl;
       removed = true;
 
-    } catch (Exception<VarList> &vle){
+    } catch (Exception<VariableList> &vle){
       cout << vle.getMsg() << ": " << var << endl;
     }
   }
@@ -373,7 +365,7 @@ void removeVariables(VarList *vl, LineScanner & lscanner){
     cout << "nothing removed" << endl;
 
 }
-void save(VarList *vl, FunctionList *fl, streamsize precision, string filename, LineScanner & lscanner){
+void save(VariableList *vl, FunctionList *fl, streamsize precision, string filename, LineScanner & lscanner){
 
   bool write = true;
 
@@ -421,7 +413,7 @@ void save(VarList *vl, FunctionList *fl, streamsize precision, string filename, 
   
 }
 
-void load(VarList *vl, FunctionList *fl,  string filename, bool interactive){
+void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive){
 
   // save initial state
   bool vl_modified = vl->isModified();
