@@ -8,7 +8,7 @@
 
 OBJECT = mathexpression
 
-DEPENDS_ON = exception
+DEPENDS_ON = exception datastructures
 
 ############### check the CC Variable ###########################
 #################################################################

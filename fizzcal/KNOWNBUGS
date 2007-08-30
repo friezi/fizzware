@@ -1,1 +1,2 @@
 - float-values with more then one dot will be accepted: e.g. the number 1.2.3 will be regarded as 1.2.
+- following line will not be parsed properly: 2+sin^a(a) ( a must be defined as variable before )

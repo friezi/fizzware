@@ -112,19 +112,26 @@ namespace ds{
        @param freemem if true, memory will be freed
     */
     void clear ( bool freemem = false ) {
+
       if ( freemem == true )
 	free(ptr);
+
       ptr = (T *)0;
+
     }
     
     MemPointer &operator=(const MemPointer & mempointer){ 
+
       this->ptr = mempointer.get();
       return *this;
+
     }
     
     MemPointer &operator=(const T * const mempointer){
+
       this->ptr = (T *)mempointer;
       return *this;
+
     }
 
     /**
@@ -194,13 +201,13 @@ namespace ds{
        @param c reference to the object
        @exception ExceptionBase
     */
-    void put(T &c) throw (ExceptionBase);
+    void put(const T &c) throw (ExceptionBase);
     
     // Bloecke zu einem Block zusammenfuegen (NULL terminiert)
     /**
-       @brief return a MemPointer of a continuous memory-block, filled with the merged buffer-blocks
+       @brief return a MemPointer of a continuous memory-block, filled with the merged buffer-blocks.
        @return the MemPointer for the memory
-       @remark No '\\0' will be added, so take care of this by yourself if you want
+       @remark The block might be bigger than the filled area. No '\\0' will be added, so take care of this by yourself if you want
        to convert it to a string, e.g. use put(0);
        @exception Exception< Buffer<T> >
     */
@@ -582,8 +589,6 @@ ds::MemBlock<T>::
   
   if (buf)
     free(buf);
-  else
-    throw Exception< ds::MemBlock<T> >("~MemBlock(): buf==NULL!");
   
 }
 
@@ -609,7 +614,7 @@ ds::Buffer<T>::
 template<typename T>
 void
 ds::Buffer<T>::
-put(T &c) throw (ExceptionBase){
+put(const T &c) throw (ExceptionBase){
   
   ds::MemBlock<T> *curr;
   
@@ -658,18 +663,32 @@ merge() throw (ExceptionBase){
   
   units = nmb*blksize;
   
-  if ( !(block = (T *)calloc(1,units*sizeof(T)+1)) )
-    throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
-  
-  curr = memblock;
-  
-  /* alle Bloecke kopieren */
-  while ( curr ){
-    if ( !curr->buf )
-      throw Exception< ds::Buffer<T> >("merge(): curr->buf==NULL!");
-    memcpy(&block[pos],curr->buf,blksize*sizeof(T));
-    pos += blksize*sizeof(T);
-    curr = curr->next;
+  if ( nmb > 1 ){
+    
+    if ( !(block = (T *)calloc(1,units*sizeof(T)+1)) )
+      throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
+    
+    /* copy all blocks */
+    while ( curr ){
+      
+      if ( !curr->buf )
+	throw Exception< ds::Buffer<T> >("merge(): curr->buf==NULL!");
+      
+      memcpy(&block[pos],curr->buf,blksize*sizeof(T));
+      pos += blksize*sizeof(T);
+      curr = curr->next;
+      
+    }
+    
+  } else{
+    // only one block is filled
+    // we can safely return the already filled memory-area
+
+    block = curr->buf;
+    
+    // make sure that the memory will not be erased twice
+    curr->buf = 0;
+
   }
   
   mempointer = block;
@@ -695,8 +714,10 @@ clear(){
       curr = next;
     }
   }
+
   memblock = NULL;
   offs = count = 0;
+
 }
 
 template< typename TKey, typename TLess, typename TDel >

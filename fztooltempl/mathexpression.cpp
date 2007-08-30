@@ -30,13 +30,14 @@
 #define FLIST "sin","cos","tan","asin","acos","atan","sinh","cosh","tanh", \
     "asinh","acosh","atanh","ln","ld","log","exp","sgn","tst",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
-  
-  using namespace std;
+   
+using namespace std;
 using namespace mexp;
+using namespace ds;
 
 Variable::Variable(const char *name, Value *value, char protect)
   throw (ExceptionBase) : value(value), protect(protect), next(0){
-
+  
   if (!(this->name = new char[strlen(name)+1]))
     throw OutOfMemException();
   strcpy(this->name,name);
@@ -474,49 +475,58 @@ Value *Complex::faculty() throw (ExceptionBase){
 }
 
 MathExpression::MathExpression(int abs_pos, VariableList *vl, FunctionList *fl) :
-  varlist(vl),functionlist(fl),left(0), right(0), pred(0), value(0), type(EMPTY), abs_pos(abs_pos), imaginary_unit('i'){
+  varlist(vl),functionlist(fl),left(0), right(0), pred(0),
+  value(0), type(EMPTY), abs_pos(abs_pos), imaginary_unit('i'), locked(true), delete_flat(false){
   
-  for (int i=0;i<OP_LEN;i++)
-    oprtr[i]=0;
-  for (int i=0;i<VARLEN;i++)
-    variable[i]=0;
+  oprtr = string("");
+  variable = string("");
 
 }
 
 MathExpression::MathExpression(const char *expression, VariableList *vl,
 			       FunctionList *fl)
   throw (ParseException,ExceptionBase)
-  : varlist(vl), functionlist(fl), left(0), right(0), pred(0), value(0), type(EMPTY), abs_pos(1), imaginary_unit('i'){
+  : varlist(vl), functionlist(fl), left(0), right(0), pred(0),
+    value(0), type(EMPTY), abs_pos(1), imaginary_unit('i'), locked(false), delete_flat(false){
+  
+  oprtr = string("");
+  variable = string("");
 
   MathExpression *top;
   VariableList locals;
   
-  for (int i=0;i<OP_LEN;i++)
-    oprtr[i]=0;
-  for (int i=0;i<VARLEN;i++)
-    variable[i]=0;
-  
-  top=this->parse(expression,locals);
-  if (top){
-    this->left=top->left;
-    this->right=top->right;
+  top = this->parse(expression,locals);
+
+  if ( top ){
+
+    this->setLeft(top->getLeft());
+    this->setRight(top->getRight());
+    this->elements = top->elements;
     this->pred=top->pred;
+    this->locked = top->locked;
+
     switch (top->getType()){
+
     case OP:
       this->setOperatorType(top->getOperator());
       break;
+
     case VAR:
       this->setVariableType(top->getVariable());
       break;
+
     case VAL:
       // must be a flat copy because 'top' will only be freed and not deleted
       this->setValueType(top->getValue());
       break;
+
     case EMPTY:
     default:
       this->setType(top->getType());
       break;
+
     }
+
   }
   
   try{
@@ -530,21 +540,21 @@ MathExpression::MathExpression(const char *expression, VariableList *vl,
 
   }
 
-  // Es wird nur free() aufgerufen, da die Unteraeste schon in den
-  // Klassenvariablen gespeischert wurden und nicht geloescht werden sollen
-  free(top);
+  // must be only flat-destruction because the referred objects have been stored in this
+  top->delete_flat = true;
+  delete top;
+
 }
 
 MathExpression::MathExpression(MathExpression *me, VariableList *vl, FunctionList *fl, int abs_pos)
   throw (ParseException,ExceptionBase)
-  : varlist(vl), functionlist(fl), left(0), right(0), pred(0), value(0), type(EMPTY), abs_pos(abs_pos){
-  
-  for (int i=0;i<OP_LEN;i++)
-    oprtr[i]=0;
-  for (int i=0;i<VARLEN;i++)
-    variable[i]=0;
-  
-  if (!me)
+  : varlist(vl), functionlist(fl), left(0), right(0), pred(0),
+    value(0), type(EMPTY), abs_pos(abs_pos), imaginary_unit('i'), locked(false), delete_flat(false){
+
+  oprtr = string("");
+  variable = string("");
+
+  if ( !me )
     return;
 
   setImaginaryUnit(me->getImaginaryUnit());
@@ -564,27 +574,69 @@ MathExpression::MathExpression(MathExpression *me, VariableList *vl, FunctionLis
     this->setType(EMPTY);
     break;
   }
-  if (me->left){
-    this->left = new MathExpression(me->left,vl,fl,abs_pos);
-    this->left->pred=this;
+
+  for ( list<MathExpression *>::iterator it = me->elements.begin(); it != me->elements.end(); it++ ){
+
+    elements.push_back(new MathExpression(*it,vl,fl,abs_pos));
+    elements.back()->pred = this;
+
   }
-  if (me->right){
-    this->right = new MathExpression(me->right,vl,fl,abs_pos);
-    this->right->pred=this;
-  }
+
+  initLeftRight();
+
+  locked = me->locked;
+
 }
 
 MathExpression::~MathExpression(){
+
+  if ( delete_flat == false){
+    
+    eraseElements();
+    if ( this->value )
+      delete this->value;
+    
+  }
   
-  if ( !this )
-    return;
-  if ( this->left )
-    delete this->left;
-  if ( this->right )
-    delete this->right;
-  eraseElements();
-  if ( this->value )
-    delete this->value;
+}
+
+void MathExpression::initLeftRight(){
+
+  left = 0;
+  right = 0;
+
+  if ( !elements.empty() ){
+
+    left = elements.front();
+
+    if ( elements.size() > 1 )
+      right = elements.back();
+
+  }
+
+}
+
+void MathExpression::setRight(MathExpression *right){
+
+  if ( getRight() )
+    elements.pop_back();
+
+  if ( right )
+    elements.push_back(right);
+
+  this->right = right;
+
+}
+
+void MathExpression::setLeft(MathExpression *left){
+
+  if ( getLeft() )
+    elements.pop_front();
+
+  if ( left )
+    elements.push_front(left);
+
+  this->left = left;
 
 }
 
@@ -600,7 +652,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
   throw (ParseException,ExceptionBase){
 
   int e_indx, priority, offset;
-  char exprstring[OP_LEN]={0}, bracketstring[BR_LEN]={0};
+  char *exprstring=0, commastring[BUFSIZE]={0}, *bracketstring=0;
   MathExpression *TopNode=0, *ActualNode=0, *PrevNode=0, *actn, *prevn;
 
   if ( !expr[0] )
@@ -633,7 +685,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
       if ( PrevNode ){
 	if ( PrevNode->isOperator() ){
 	  if ( PrevNode->pred ){
-	    if ( PrevNode->right ){
+	    if ( PrevNode->getRight() ){
 	      /* hier handelt es sich um Ausdruecke der Form
 		 "1+sin2(...), also um eine implizite Multipikation,
 		 es muss also ein "*" in den Baum eingefuegt werden*/
@@ -666,12 +718,13 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 	      abs_pos++;
 
-	      this->clearString(bracketstring);
+	      if ( bracketstring )
+		free(bracketstring);
 
 	    }
 	  } else{          /* PrevNode has no predecessor */
 
-	    if ( PrevNode->right ){
+	    if ( PrevNode->getRight() ){
 
 	      if ( !(ActualNode = new MathExpression(abs_pos,varlist,functionlist)) ){
 
@@ -700,7 +753,8 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 	      abs_pos++;
 
-	      this->clearString(bracketstring);
+	      if ( bracketstring )
+		free(bracketstring);
 
 	    }
 	  }
@@ -745,7 +799,8 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 	abs_pos++;
 	
-	this->clearString(bracketstring);
+	if ( bracketstring )
+	  free(bracketstring);
 
       }
     } else if( expr[e_indx]=='[' ){
@@ -767,7 +822,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	   || !strcmp(PrevNode->getOperator(),SUM)
 	   || !strcmp(PrevNode->getOperator(),PROD) ){
 
-	if ( PrevNode->left ){
+	if ( PrevNode->getLeft() ){
 
 	  delete TopNode;
 	  throw ParseException(abs_pos, "invalid syntax!");
@@ -792,9 +847,12 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	// variables defined in Sum or Prod must be added to local Scope
 	ActualNode->addVariablesToList(&locals);
 
-	PrevNode->left=ActualNode;
+	PrevNode->setLeft(ActualNode);
 	ActualNode->pred=PrevNode;
-	this->clearString(bracketstring);
+
+	if ( bracketstring )
+	  free(bracketstring);
+
 	continue;
 
       } else{
@@ -815,7 +873,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
       if ( checkDigit(expr[e_indx]) ){
 	if ( PrevNode ){
 	  if ( PrevNode->isOperator() ){
-	    if ( PrevNode->right ){
+	    if ( PrevNode->getRight() ){
 
 	      ActualNode->setOperatorType("*");
 
@@ -825,7 +883,9 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	      e_indx+=offset;
 
 	      ActualNode->setValueType(new Complex(atof(exprstring)));
-	      this->clearString(exprstring);
+
+	      if ( exprstring )
+		free(exprstring);
 
 	    }
 	  } else{  /* Prev kein operator
@@ -840,7 +900,9 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	  e_indx+=offset;
 
 	  ActualNode->setValueType(new Complex(atof(exprstring)));
-	  this->clearString(exprstring);
+	  
+	  if ( exprstring )
+	    free(exprstring);
 
 	}
 
@@ -849,7 +911,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	  if ( checkLetter(expr[e_indx]) ){
 	    if ( PrevNode->isOperator() ){
 	      if ( PrevNode->pred ){
-		if ( PrevNode->right ){
+		if ( PrevNode->getRight() ){
 
 		  ActualNode->setOperatorType("*");
 
@@ -870,12 +932,13 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		  } else
 		    ActualNode->setVariableType(exprstring);
 
-		  this->clearString(exprstring);
+		  if ( exprstring )
+		    free(exprstring);
 
 		}
 	      } else{          /* Prev hat kein ->pred */
 
-		if ( PrevNode->right ){
+		if ( PrevNode->getRight() ){
 
 		  ActualNode->setOperatorType("*");
 
@@ -896,7 +959,9 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		  } else
 		    ActualNode->setVariableType(exprstring);
 
-		  this->clearString(exprstring);
+		  if ( exprstring )		    
+		    free(exprstring);
+
 		}
 	      }
 	    } else{  /* Prev kein operator also Zahl */
@@ -915,7 +980,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		 "(sin2)^3" handeln */
 	      if ( expr[e_indx]=='^'
 		   && (pri(&expr[e_indx],PrevNode->getOperator())==POT_PRI-SIN_PRI)
-		   && !PrevNode->right ){
+		   && !PrevNode->getRight() ){
 		ActualNode->setOperatorType("^");
 		/* im Folgenden wird geprueft, ob eine fehlerhafte Eingabe
 		   der Form "sin^^ ..." gemacht wurde. Dann ist der PrevNode
@@ -925,14 +990,14 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		   an den "sin"-Node gehaengt wird. Dies wird beim checken
 		   automatisch zu einem Syntaxfehler fuehren. */
 		if ( PrevNode->pred ){
-		  if ( PrevNode==PrevNode->pred->left ){
+		  if ( PrevNode==PrevNode->pred->getLeft() ){
 
 		    prevn=PrevNode;
 
-		    while ( prevn->left )
-		      prevn=prevn->left;
+		    while ( prevn->getLeft() )
+		      prevn=prevn->getLeft();
 
-		    prevn->left=ActualNode;
+		    prevn->setLeft(ActualNode);
 		    ActualNode->pred=prevn;
 		    e_indx++;
 		    abs_pos++;
@@ -944,13 +1009,13 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		/* hier ist alles ok (es handelt sich also um das erste "^"),
 		   der "sin"-Node muss also zum linken Unterast des ActualNode
 		   werden */
-		ActualNode->left=PrevNode;
+		ActualNode->setLeft(PrevNode);
 		/* hat der "sin"-Node einen Vorgaenger, muss diese Verbindung
 		   auch verbogen werden */
 		if ( PrevNode->pred){
 
 		  ActualNode->pred=PrevNode->pred;
-		  PrevNode->pred->right=ActualNode;
+		  PrevNode->pred->setRight(ActualNode);
 
 		} else
 		  TopNode=ActualNode;
@@ -981,7 +1046,8 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 		  abs_pos++;
 
-		  this->clearString(bracketstring);
+		  if ( bracketstring )
+		    free(bracketstring);
 
 		} else{ /* oder um eine simple Zahl? */
 
@@ -996,72 +1062,111 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		  e_indx+=offset;
 
 		  actn->setValueType(new Complex(atof(exprstring)));
-		  this->clearString(exprstring);
+
+		  if ( exprstring )
+		    free(exprstring);
 
 		}
 
 		actn->pred=ActualNode;
-		ActualNode->right=actn;
+		ActualNode->setRight(actn);
 		actn=PrevNode->pred;
 		continue;
 
-	      } else{
-
+	      } else {
+		
 		if ( expr[e_indx]=='!' ){
-
+		  
 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
-
+		    
 		    delete TopNode;
 		    throw OutOfMemException();
-
+		    
 		  }
-
+		  
 		  actn->setOperatorType("!");
 		  e_indx++;
 		  abs_pos++;
-
+		  
 		  if ( PrevNode->pred ){
-
-		    PrevNode->pred->right=actn;
+		    
+		    PrevNode->pred->setRight(actn);
 		    actn->pred=PrevNode->pred;
-
+		    
 		  }  else
 		    TopNode=actn;
-
-		  actn->right=PrevNode;
+		  
+		  actn->setRight(PrevNode);
 		  PrevNode->pred=actn;
 		  continue;
+		  
+// 	      } else if ( expr[e_indx] == ',' ){
+// 		// Tuple-Operator
 
-		} else if ( expr[e_indx]=='=' ){
+// 		if ( strcmp(PrevNode->getOperator(),",") || PrevNode->locked == true ){
+		    
+// 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
+		    
+// 		    delete TopNode;
+// 		    throw OutOfMemException();
+		    
+// 		  }
+		  
+// 		  actn->locked = false;
+		  
+// 		  TopNode = actn;
+// 		  PrevNode->pred = actn;
+// 		  setLeft(PrevNode);
+		  
+// 		}
 
+// 		++e_indx,++abs_pos;
+// 		offset = copyCommaContent(commastring,&expr[e_indx]);
+// 		cout << commastring << " ";
+
+// 		if ( offset == 0 )
+// 		  throw ParseException(abs_pos,"missing operand for comma-operator!");
+
+// 		abs_pos-=offset-1;
+
+// 		setRight(parse(commastring,locals));
+
+// 		clearString(commastring);
+
+// 		continue;
+
+				
+		} else if ( expr[e_indx] == '=' ){
+		  
 		  // it's a functiondefinition
 		  // to build a correct tree, the local vars must be remembered
 		  if ( PrevNode )
 		    PrevNode->addVariablesToList(&locals);
-
+		  
 		}
-
+		
 		offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		e_indx+=offset;
-
+		
 		if ( isBuiltinFunction(exprstring) || checkOperator(exprstring[0]) )
 		  ActualNode->setOperatorType(exprstring);
 		else if ( functionlist ){
-
+		  
 		  if ( functionlist->isMember(exprstring) )
 		    ActualNode->setOperatorType(exprstring);
 		  else
 		    ActualNode->setVariableType(exprstring);
-
+		  
 		} else
 		  ActualNode->setVariableType(exprstring);
 
-		this->clearString(exprstring);
-
+		  if ( exprstring )		
+		    free(exprstring);
+		
 	      }
 	    } else{ /* der Vorgaenger ist kein Operator, also "normale"
 		       Verhaeltnisse */
-	      if ( expr[e_indx]=='!' ){
+	      if ( expr[e_indx] == '!' ){
 
 		if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
 
@@ -1076,17 +1181,52 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 		if ( PrevNode->pred ){
 
-		  PrevNode->pred->right=actn;
+		  PrevNode->pred->setRight(actn);
 		  actn->pred=PrevNode->pred;
 
 		} else
 		  TopNode=actn;
 
-		actn->right=PrevNode;
+		actn->setRight(PrevNode);
 		PrevNode->pred=actn;
 		continue;
+		  
+// 	      } else if ( expr[e_indx] == ',' ){
+// 		// Tuple-Operator
 
-	      } else if ( expr[e_indx]=='=' ){
+// 		if ( strcmp(PrevNode->getOperator(),",") || PrevNode->locked == true ){
+		    
+// 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
+		    
+// 		    delete TopNode;
+// 		    throw OutOfMemException();
+		    
+// 		  }
+		  
+// 		  actn->locked = false;
+		  
+// 		  TopNode = actn;
+// 		  PrevNode->pred = actn;
+// 		  setLeft(PrevNode);
+		  
+// 		}
+
+// 		++e_indx,++abs_pos;
+// 		offset = copyCommaContent(commastring,&expr[e_indx]);
+// 		cout << commastring << " ";
+
+// 		if ( offset == 0 )
+// 		  throw ParseException(abs_pos,"missing operand for comma-operator!");
+
+// 		abs_pos-=offset-1;
+
+// 		setRight(parse(commastring,locals));
+
+// 		clearString(commastring);
+
+// 		continue;
+
+	      } else if ( expr[e_indx] == '=' ){
 
 		// it's a functiondefinition
 		// to build a correct tree, the local vars must be remembered
@@ -1111,7 +1251,8 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	      else
 		ActualNode->setVariableType(exprstring);
 
-	      this->clearString(exprstring);
+	      if ( exprstring )
+		free(exprstring);
 
 	    }
 	  }
@@ -1132,7 +1273,8 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	  } else
 	    ActualNode->setVariableType(exprstring);
 
-	  this->clearString(exprstring);
+	  if ( exprstring )
+	    free(exprstring);
 
 	}
       }
@@ -1142,7 +1284,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	if ( PrevNode->isOperator() ){
 
 	  if ( (ActualNode->oprtr[0] == '-' || ActualNode->oprtr[0] == '+')
-	       && !ActualNode->left && !PrevNode->right ){
+	       && !ActualNode->getLeft() && !PrevNode->getRight() ){
 
 	    /* falls unaerer minus- oder plusoperator */
 	    /* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
@@ -1161,13 +1303,13 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	    }
 
 	    ActualNode->setOperatorType("*");
-	    ActualNode->left=prevn;
+	    ActualNode->setLeft(prevn);
 	    prevn->pred=ActualNode;
 
-	    PrevNode->right = ActualNode;
+	    PrevNode->setRight(ActualNode);
 	    ActualNode->pred = PrevNode;
 
-	  } else if ( PrevNode->right ){
+	  } else if ( PrevNode->getRight() ){
 	    if ( PrevNode->pred ){ /* Da Prev pred hat, muss prioritaet des
 				      operators gecheckt werden */
 	      actn=ActualNode, prevn=PrevNode->pred;
@@ -1178,21 +1320,21 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 	      if ( priority <= 0 ){  /* hier muss prevn Top sein */
 
-		actn->left=prevn;
+		actn->setLeft(prevn);
 		prevn->pred=actn;
 		TopNode=actn;
 
 	      }
 	      else{               /* actn hat hoehere Prioritaet */
 
-		actn->left = prevn->right;
+		actn->setLeft(prevn->getRight());
 		actn->pred = prevn;
-		prevn->right = actn;
+		prevn->setRight(actn);
 
 	      }
 	    } else{
 
-	      ActualNode->left = PrevNode;
+	      ActualNode->setLeft(PrevNode);
 	      PrevNode->pred = ActualNode;
 	      TopNode = ActualNode;
 
@@ -1201,7 +1343,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		       Ast angefuegt */
 	    // z.B "3+sin2"
 	    // 	    if (pri(ActualNode->oprtr,PrevNode->oprtr)){
-	    PrevNode->right = ActualNode;
+	    PrevNode->setRight(ActualNode);
 	    ActualNode->pred = PrevNode;
 	    // 	    }
 	  }
@@ -1217,20 +1359,20 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
 	    if ( priority <= 0 ){  /* hier muss prevn Top sein */
 
-	      actn->left = prevn;
+	      actn->setLeft(prevn);
 	      prevn->pred = actn;
 	      TopNode = actn;
 
 	    } else{               /* actn hat hoehere Prioritaet */
 
-	      actn->left=prevn->right;
+	      actn->setLeft(prevn->getRight());
 	      actn->pred=prevn;
-	      prevn->right=actn;
+	      prevn->setRight(actn);
 
 	    }
 	  } else{    /* Prev ist Top */
 
-	    ActualNode->left=PrevNode;
+	    ActualNode->setLeft(PrevNode);
 	    PrevNode->pred=ActualNode;
 	    TopNode=ActualNode;
 
@@ -1238,7 +1380,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	}
       } else{        /* Act ist Zahl */
 
-	PrevNode->right=ActualNode;
+	PrevNode->setRight(ActualNode);
 	ActualNode->pred=PrevNode;
 
       }
@@ -1248,7 +1390,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
     } else{               /* erstes Zeichen */
 
       if ( (ActualNode->oprtr[0] == '-' || ActualNode->oprtr[0] == '+')
-	   && !ActualNode->left ){
+	   && !ActualNode->getLeft() ){
 
 	/* falls unaerer minus- oder plusoperator */
 	/* wird eine Mult. mit - bzw. +1 in den Baum eingefuegt */
@@ -1267,7 +1409,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	}
 
 	ActualNode->setOperatorType("*");
-	ActualNode->left=prevn;
+	ActualNode->setLeft(prevn);
 	prevn->pred=ActualNode;
 
       }
@@ -1277,7 +1419,10 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 
     }
   }
-  return(TopNode);
+
+  TopNode->locked = true;
+
+  return TopNode;
 }
 
 inline bool MathExpression::checkOperator(char x){ 
@@ -1309,21 +1454,20 @@ bool MathExpression::isBuiltinFunction(const char *strname){
 
 void MathExpression::setOperatorType(const char *name){
 
-  clearString(oprtr);
-  strcpy(oprtr,name);
+  oprtr = string(name);
+
   if ( value )
     delete value;
   value=0;
-  clearString(variable);
+  variable = string("");
   type=OP;
 
 }
 
 void MathExpression::setVariableType(const char *name){
 
-  clearString(variable);
-  strcpy(variable,name);
-  clearString(oprtr);
+  variable = string(name);
+  oprtr = string("");
   if ( value )
     delete value;
   value = 0;
@@ -1337,8 +1481,8 @@ void MathExpression::setValueType(Value *value){
     delete this->value;
 
   this->value = value;
-  clearString(oprtr);
-  clearString(variable);
+  oprtr = string("");
+  variable = string("");
   type=VAL;
     
 }
@@ -1371,13 +1515,13 @@ int MathExpression::skipBlanks(const char *expr, int indx){
 
 void MathExpression::addVariablesToList(VariableList *varlist){
 
-  if (isVariable())
+  if ( isVariable() )
     varlist->insert(getVariable(),new Complex(0));
 
-  if (right)
-    right->addVariablesToList(varlist);
-  if (left)
-    left->addVariablesToList(varlist);
+  if ( getRight() )
+    getRight()->addVariablesToList(varlist);
+  if ( getLeft() )
+    getLeft()->addVariablesToList(varlist);
 }
  
 bool MathExpression::isBuiltinOperator(char op){
@@ -1390,73 +1534,165 @@ bool MathExpression::isBuiltinOperator(char op){
   return false;
 }
 
-int MathExpression::copyBracketContent(char *exprstring, const char *arg, char open,
+bool MathExpression::isOpenBrace(char c){
+  return ( c == '(' || c == '[' );
+}
+
+bool MathExpression::isCloseBrace(char c){
+  return ( c == ')' || c == ']' );
+}
+
+int MathExpression::copyCommaContent(char * & exprstring, const char *arg){
+
+  int br_cnt = 0, indx=0;
+  MemPointer<char> mempointer;
+  Buffer<char> buffer(BUFSIZE);
+
+  exprstring = 0;
+
+  while ( (br_cnt || (arg[indx] != ',' && !isCloseBrace(arg[indx]))) && arg[indx] ){
+
+    if ( isOpenBrace(arg[indx]) )
+      br_cnt++;
+    else if ( isCloseBrace(arg[indx]) )
+      br_cnt--;
+
+    buffer.put(arg[indx++]);
+    abs_pos++;
+
+  } 
+
+  buffer.put('\0');
+
+  mempointer = buffer.merge();
+  mempointer.setClearflag(false);
+
+  exprstring = mempointer.get();
+
+  return indx;
+
+}
+
+int MathExpression::copyBracketContent( char * & exprstring, const char *arg, char open,
 				       char close){
 
-  int br_cnt=0, indx=0, eindx=0;
+  int br_cnt=0, indx=0;
+  MemPointer<char> mempointer;
+  Buffer<char> buffer(BUFSIZE);
+
+  exprstring = 0;
 
   if ( open && (arg[indx] != open) )
     return (-1);
 
   do{
+
     if ( arg[indx] == open || ( !open && !indx) ){  // auch moeglich: alles bis ...
+
       if ( br_cnt )
-	exprstring[eindx] = arg[indx];
+	buffer.put(arg[indx]);
       else if ( !open && !indx )
-	exprstring[0] = arg[0];
-      else
-	eindx--;
+	buffer.put(arg[0]);
+
       br_cnt++;
+
     } else if (arg[indx] == close ){
+
       br_cnt--; 
+
       if ( br_cnt )
-	exprstring[eindx] = arg[indx];
+	buffer.put(arg[indx]);
+
     } else
-      exprstring[eindx] = arg[indx];
+      buffer.put(arg[indx]);
+
     indx++;
-    eindx++;
     abs_pos++;
-  } while ( br_cnt&&arg[indx] );
+
+  } while ( br_cnt && arg[indx] );
+
+  buffer.put('\0');
+
   if ( br_cnt )
     return (-1);
+
+  mempointer = buffer.merge();
+  mempointer.setClearflag(false);
+
+  exprstring = mempointer.get();
+
   return(indx);
+
 }
   
-int MathExpression::copyFloatContent(char *exprstring, const char *arg){
+int MathExpression::copyFloatContent(char * & exprstring, const char *arg){
+
+  MemPointer<char> mempointer;
+  Buffer<char> buffer(BUFSIZE);
 
   int indx=0;
   while (checkDigit(arg[indx])){ 
-    exprstring[indx]=arg[indx];
+
+    buffer.put(arg[indx]);
     indx++;
     abs_pos++;
+
   }
+
+  buffer.put('\0');
+
+  mempointer = buffer.merge();
+  mempointer.setClearflag(false);
+
+  exprstring = mempointer.get();
+
   return(indx);
 }
 
-int MathExpression::copyOperatorContent(char *exprstring, const char *arg){
+int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
+
+  MemPointer<char> mempointer;
+  Buffer<char> buffer(BUFSIZE);
 
   int indx=0;
+
+  exprstring = 0;
 
   switch (arg[indx]){
   case '(':
   case ')':
     break;
   default:
-    if (checkOperator(arg[indx])){
-      exprstring[indx]=arg[indx];
+    if ( checkOperator(arg[indx]) ){
+
+      buffer.put(arg[indx]);
       indx++;
       abs_pos++;
+
     } else{
-      while (arg[indx] && indx<OP_LEN){ 
-	if (!(checkLetter(arg[indx])))
+
+      while ( arg[indx] ){ 
+
+	if ( !(checkLetter(arg[indx])) )
 	  break;
-	exprstring[indx]=arg[indx];
+
+	buffer.put(arg[indx]);
 	indx++;
 	abs_pos++;
+
       }
     }
+
     break;
   }
+
+  buffer.put('\0');
+
+  mempointer = buffer.merge();
+  mempointer.setClearflag(false);
+
+  exprstring = mempointer.get();
+
   return(indx);
 }
 
@@ -1519,34 +1755,34 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
   if (this->isOperator()){
     if (checkOperator(this->oprtr[0])){
       if (this->oprtr[0]=='='){
-	if (this->left && this->right)
-	  if (!this->left->empty() && !this->right->empty()){
-	    if (this->left->isVariable()){
-	      if (!this->left->left && !this->left->right)
-		if (this->right->checkSyntaxAndOptimize())
+	if (this->getLeft() && this->getRight())
+	  if (!this->getLeft()->empty() && !this->getRight()->empty()){
+	    if (this->getLeft()->isVariable()){
+	      if (!this->getLeft()->getLeft() && !this->getLeft()->getRight())
+		if (this->getRight()->checkSyntaxAndOptimize())
 		  return(true);
-	    } else if (this->left->isOperator()){
-	      if (!this->left->left && this->left->right)
-		if (this->right->checkSyntaxAndOptimize())
+	    } else if (this->getLeft()->isOperator()){
+	      if (!this->getLeft()->getLeft() && this->getLeft()->getRight())
+		if (this->getRight()->checkSyntaxAndOptimize())
 		  return true;
 	    }
 	    throw ParseException(abs_pos, "invalid syntax!");
 	  }
       } else if (this->oprtr[0]=='!'){
-	if (!this->left && this->right)
-	  if (!this->right->empty())
+	if (!this->getLeft() && this->getRight())
+	  if (!this->getRight()->empty())
 	    return (true);
-      } else if (this->left && this->right){
-	if (!this->left->empty() && !this->right->empty())
-	  if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize()){
+      } else if (this->getLeft() && this->getRight()){
+	if (!this->getLeft()->empty() && !this->getRight()->empty())
+	  if (this->getLeft()->checkSyntaxAndOptimize() && this->getRight()->checkSyntaxAndOptimize()){
 
 	    // optimization: reduction  of "({-,+}1)*({-,+}1)" to "{-,+}1"
 	    if ( this->oprtr[0] == '*' )
-	      if ( this->left->isValue() == true && this->right->isValue() == true )
-		if ( this->left->getValue()->getType() == Value::COMPLEX && this->right->getValue()->getType() == Value::COMPLEX){
+	      if ( this->getLeft()->isValue() == true && this->getRight()->isValue() == true )
+		if ( this->getLeft()->getValue()->getType() == Value::COMPLEX && this->getRight()->getValue()->getType() == Value::COMPLEX){
 		  
-		  Complex *left = (Complex *)this->left->getValue();
-		  Complex *right = (Complex *)this->right->getValue();
+		  Complex *left = (Complex *)this->getLeft()->getValue();
+		  Complex *right = (Complex *)this->getRight()->getValue();
 		  
 		  if ( left->getIm() == 0 && right->getIm() == 0 ){
 		    
@@ -1555,9 +1791,10 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		      this->setOperatorType("");
 		      this->setValueType(new Complex(sgn(left->getRe()) * right->getRe()));
 		      
-		      delete this->left;
-		      delete this->right;
-		      this->left = this->right = 0;
+		      delete this->getLeft();
+		      delete this->getRight();
+		      this->setLeft(0);
+		      this->setRight(0);
 		      
 		    }
 		    
@@ -1574,23 +1811,23 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 
     } else{
       if (!strcmp(this->getOperator(),"log")){
-	if (this->left && this->right)
-	  if (!this->left->empty() && !this->right->empty())
-	    if (this->left->checkSyntaxAndOptimize() && this->right->checkSyntaxAndOptimize())
+	if (this->getLeft() && this->getRight())
+	  if (!this->getLeft()->empty() && !this->getRight()->empty())
+	    if (this->getLeft()->checkSyntaxAndOptimize() && this->getRight()->checkSyntaxAndOptimize())
 	      return(true);
 	throw ParseException(abs_pos, "invalid syntax in function log!");
       } else if (!strcmp(this->getOperator(),SUM)
 		 || !strcmp(this->getOperator(),PROD)){
-	if (this->left && this->right)
-	  if (!this->left->empty() && !this->right->empty())
-	    if (this->left->oprtr[0]==';')
-	      if (this->left->left && this->left->right)
-		if (!this->left->left->empty() && !this->left->right->empty())
-		  if (this->left->left->oprtr[0]=='='){
+	if (this->getLeft() && this->getRight())
+	  if (!this->getLeft()->empty() && !this->getRight()->empty())
+	    if (this->getLeft()->oprtr[0]==';')
+	      if (this->getLeft()->getLeft() && this->getLeft()->getRight())
+		if (!this->getLeft()->getLeft()->empty() && !this->getLeft()->getRight()->empty())
+		  if (this->getLeft()->getLeft()->oprtr[0]=='='){
 		    try{
-		      if (this->left->left->checkSyntaxAndOptimize())
-			if (this->left->right->checkSyntaxAndOptimize())
-			  if (this->right->checkSyntaxAndOptimize())
+		      if (this->getLeft()->getLeft()->checkSyntaxAndOptimize())
+			if (this->getLeft()->getRight()->checkSyntaxAndOptimize())
+			  if (this->getRight()->checkSyntaxAndOptimize())
 			    return(true);
 		    } catch (ParseException pe){
 		      throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
@@ -1598,15 +1835,15 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		  }
 	throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
       } else if (isBuiltinFunction(this->getOperator())){
-	if (!this->left && this->right)
-	  if (this->right->empty()==false)
-	    if (this->right->checkSyntaxAndOptimize())
+	if (!this->getLeft() && this->getRight())
+	  if (this->getRight()->empty()==false)
+	    if (this->getRight()->checkSyntaxAndOptimize())
 	      return(true);
 	throw ParseException(abs_pos, "invalid syntax!");
       } else if (functionlist->isMember(this->getOperator())){
-	if (!this->left && this->right)
-	  if (this->right->checkSyntaxAndOptimize())
-	    if (this->right->countArgs() ==
+	if (!this->getLeft() && this->getRight())
+	  if (this->getRight()->checkSyntaxAndOptimize())
+	    if (this->getRight()->countArgs() ==
 		functionlist->get(this->getOperator())->getParameterList()->countArgs())
 	      return(true);
 	throw ParseException(abs_pos, "invalid syntax!");
@@ -1630,8 +1867,8 @@ string MathExpression::toString(streamsize precision) const throw (Exception<Mat
     if (this->isOperator()){
       if (this->oprtr[0]=='!'){
 
-	if (this->right)
-	  exp << this->right->toString(precision);
+	if (this->getRight())
+	  exp << this->getRight()->toString(precision);
 
 	exp << this->getOperator();
 
@@ -1641,19 +1878,19 @@ string MathExpression::toString(streamsize precision) const throw (Exception<Mat
 
 	exp << this->getOperator();
 	exp << "[";
-	exp << this->left->toString(precision);
+	exp << this->getLeft()->toString(precision);
 	exp << "]";
-	exp << this->right->toString(precision);
+	exp << this->getRight()->toString(precision);
 
       } else{
 
-	if (this->left)
-	  exp << this->left->toString(precision);
+	if (this->getLeft())
+	  exp << this->getLeft()->toString(precision);
 
 	exp << this->getOperator();
 
-	if (this->right)
-	  exp << this->right->toString(precision);
+	if (this->getRight())
+	  exp << this->getRight()->toString(precision);
 
       }
     } else if (this->isVariable())
@@ -1695,47 +1932,47 @@ Value *MathExpression::eval() throw (ExceptionBase){
   if ( isOperator() ){
     switch ( oprtr[0] ){
     case '+':
-      this->setValue(left->eval()->operator+(right->eval()));
+      this->setValue(getLeft()->eval()->operator+(getRight()->eval()));
       break;
     case '-':
-      this->setValue(left->eval()->operator-(right->eval()));
+      this->setValue(getLeft()->eval()->operator-(getRight()->eval()));
       break;
     case '*':
-      this->setValue(left->eval()->operator*(right->eval()));
+      this->setValue(getLeft()->eval()->operator*(getRight()->eval()));
       break;
     case '/':
-      this->setValue(left->eval()->operator/(right->eval()));
+      this->setValue(getLeft()->eval()->operator/(getRight()->eval()));
       break;
     case '\\':
-      this->setValue(left->eval()->integerDivision(right->eval()));
+      this->setValue(getLeft()->eval()->integerDivision(getRight()->eval()));
       break;
     case '%':
-      this->setValue(left->eval()->operator%(right->eval()));
+      this->setValue(getLeft()->eval()->operator%(getRight()->eval()));
       break;
     case '^':
       /*
-	if (left->eval()<=0 && (result/(int)result)){
+	if (getLeft()->eval()<=0 && (result/(int)result)){
 	fprintf(stderr,"negative root!\n");
 	exit(1);
 	}
 	else*/
-      this->setValue(left->eval()->pow(right->eval()));
+      this->setValue(getLeft()->eval()->pow(getRight()->eval()));
       break;
     case '!':
-      this->setValue(right->eval()->faculty());
+      this->setValue(getRight()->eval()->faculty());
       break;
     case '@':
-      //       return (faculty(left->eval())/(faculty(right->eval())
-      // 				     *faculty(left->eval() - right->eval())));
-      this->setValue(left->eval()->choose(right->eval()));
+      //       return (faculty(getLeft()->eval())/(faculty(getRight()->eval())
+      // 				     *faculty(getLeft()->eval() - getRight()->eval())));
+      this->setValue(getLeft()->eval()->choose(getRight()->eval()));
       break;
     case '=':
-      if (left->isVariable()){
+      if (getLeft()->isVariable()){
 
 	this->setValue(assignValue());
 	break;
 
-      } else if (left->isOperator()){
+      } else if (getLeft()->isOperator()){
 
 	defineFunction();
 	this->setValue(new Complex(0));
@@ -1748,48 +1985,48 @@ Value *MathExpression::eval() throw (ExceptionBase){
 
     default:
       if (!strcmp("sin",getOperator()))
-        this->setValue(right->eval()->sin());
+        this->setValue(getRight()->eval()->sin());
       else if (!strcmp("cos",getOperator()))
-	this->setValue(right->eval()->cos());
+	this->setValue(getRight()->eval()->cos());
       else if (!strcmp("tan",getOperator()))
-	this->setValue(right->eval()->tan());
+	this->setValue(getRight()->eval()->tan());
       else if (!strcmp("asin",getOperator()))
-	this->setValue(right->eval()->asin());
+	this->setValue(getRight()->eval()->asin());
       else if (!strcmp("acos",getOperator()))
-	this->setValue(right->eval()->acos());
+	this->setValue(getRight()->eval()->acos());
       else if (!strcmp("atan",getOperator()))
-	this->setValue(right->eval()->atan());
+	this->setValue(getRight()->eval()->atan());
       else if (!strcmp("sinh",getOperator()))
-	this->setValue(right->eval()->sinh());
+	this->setValue(getRight()->eval()->sinh());
       else if (!strcmp("cosh",getOperator()))
-	this->setValue(right->eval()->cosh());
+	this->setValue(getRight()->eval()->cosh());
       else if (!strcmp("tanh",getOperator()))
-	this->setValue(right->eval()->tanh());
+	this->setValue(getRight()->eval()->tanh());
       else if (!strcmp("asinh",getOperator()))
-	this->setValue(right->eval()->asinh());
+	this->setValue(getRight()->eval()->asinh());
       else if (!strcmp("acosh",getOperator()))
-	this->setValue(right->eval()->acosh());
+	this->setValue(getRight()->eval()->acosh());
       else if (!strcmp("atanh",getOperator()))
-	this->setValue(right->eval()->atanh());
+	this->setValue(getRight()->eval()->atanh());
       else if (!strcmp("ln",getOperator())){
-	// 	if ((result=right->eval())<=0)
+	// 	if ((result=getRight()->eval())<=0)
 	// 	  throw EvalException("argument of ln negative!");
 	// 	else
-	this->setValue(right->eval()->ln());
+	this->setValue(getRight()->eval()->ln());
       } else if (!strcmp("ld",getOperator())){
-	// 	if ((result=right->eval())<=0)
+	// 	if ((result=getRight()->eval())<=0)
 	// 	  throw EvalException("argument of ld negative!");
 	// 	else
-	// 	  return(log(right->eval())/log(2.0));
-	this->setValue(right->eval()->ld());
+	// 	  return(log(getRight()->eval())/log(2.0));
+	this->setValue(getRight()->eval()->ld());
       } else if (!strcmp("log",getOperator())){
-	// 	if ((result=right->eval())<=0)
+	// 	if ((result=getRight()->eval())<=0)
 	// 	  throw EvalException("argument of log negative!");
 	// 	else
-	// 	  return(log(right->eval())/log(left->eval()));
-	this->setValue(right->eval()->log(left->eval()));
+	// 	  return(log(getRight()->eval())/log(getLeft()->eval()));
+	this->setValue(getRight()->eval()->log(getLeft()->eval()));
       } else if (!strcmp("exp",getOperator()))
-	this->setValue(right->eval()->exp());
+	this->setValue(getRight()->eval()->exp());
       else if (!strcmp(SUM,getOperator()) || !strcmp(PROD,getOperator())){
 	
 	//TODO
@@ -1799,11 +2036,11 @@ Value *MathExpression::eval() throw (ExceptionBase){
 
       } else if (!strcmp("sgn",getOperator())){
 
-	this->setValue(right->eval()->sgn());
+	this->setValue(getRight()->eval()->sgn());
 
       } else if (!strcmp("tst",getOperator())){
 
-	this->setValue(right->eval()->tst());
+	this->setValue(getRight()->eval()->tst());
 
       } else{  // user defined function
 
@@ -1957,17 +2194,17 @@ Value *MathExpression::assignValue(void) throw (ExceptionBase){
 
   Value *result;
 
-  result = right->eval()->clone();
+  result = getRight()->eval()->clone();
 
   if ( functionlist )
-    if ( functionlist->isMember(left->getOperator()) )
+    if ( functionlist->isMember(getLeft()->getOperator()) )
       throw EvalException ("variable already defined as function");
 
   if ( varlist ){
 
     try{
 
-      varlist->insert(left->getVariable(),result);
+      varlist->insert(getLeft()->getVariable(),result);
 
     }catch ( OutOfMemException &oome ){
 
@@ -1993,7 +2230,7 @@ Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
   vl.unprotect();  // remove protection-status for all variables
 
-  args = this->right;
+  args = this->getRight();
   params = f_template->getParameterList();
 
   // eval args and insert them in varlist
@@ -2001,9 +2238,9 @@ Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
     while (args->oprtr[0] == ','){
 
-      vl.insert(params->right->getVariable(),args->right->eval()->clone());
-      args = args->left;
-      params = params->left;
+      vl.insert(params->getRight()->getVariable(),args->getRight()->eval()->clone());
+      args = args->getLeft();
+      params = params->getLeft();
 
     }
 
@@ -2011,6 +2248,7 @@ Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
   }
 
+  // build an instance of the function-template
   MathExpression function(f_template->getBody(),&vl,functionlist,abs_pos);
 
   return function.eval()->clone();
@@ -2024,7 +2262,7 @@ void MathExpression::defineFunction(void) throw (ParseException){
   Function *fe=0;
   VariableList locals;
 
-  functionname = this->left->getOperator();
+  functionname = this->getLeft()->getOperator();
   
   // already declared as variable? (impossible to happen)
   if (varlist->isMember(functionname))
@@ -2044,19 +2282,19 @@ void MathExpression::defineFunction(void) throw (ParseException){
 			 + " first undefine it!");
 
   // build parameterlist
-  paramlist = new MathExpression(this->left->right,varlist,functionlist,abs_pos);
+  paramlist = new MathExpression(this->getLeft()->getRight(),varlist,functionlist,abs_pos);
 
   // must be a variabletree
   if (paramlist->checkForVariableTree()==false){
 
     delete paramlist;
     throw ParseException(abs_pos, string("only letters and non-built-in functionnames allowed,")
-			 + " variables must be seperated by commas!");
+			 + " variables must be separated by commas!");
 
   }
   
   // build functionbody
-  body = new MathExpression(this->right,varlist,functionlist,abs_pos);
+  body = new MathExpression(this->getRight(),varlist,functionlist,abs_pos);
   
   // body must only contain defined variables/functions/operators
   if (!checkBody(body,paramlist,&locals)){
@@ -2122,8 +2360,8 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
 
 bool MathExpression::checkForVariableTree(){
 
-  if (this->left){
-    if (this->left->checkForVariableTree()==false){
+  if (this->getLeft()){
+    if (this->getLeft()->checkForVariableTree()==false){
       return false;
     }
     if (this->oprtr[0]!=',')
@@ -2133,8 +2371,8 @@ bool MathExpression::checkForVariableTree(){
       return false;
     }
   }
-  if (this->right){
-    if (this->right->checkForVariableTree()==false){
+  if (this->getRight()){
+    if (this->getRight()->checkForVariableTree()==false){
       return false;
     }
   }
@@ -2147,9 +2385,9 @@ bool MathExpression::isVariableInTree(const char *name){
     return false;
 
   if (strcmp(name,this->getVariable())){
-    if (this->left->isVariableInTree(name))
+    if (this->getLeft()->isVariableInTree(name))
       return true;
-    else if (this->right->isVariableInTree(name))
+    else if (this->getRight()->isVariableInTree(name))
       return true;
     else
       return false;
@@ -2166,7 +2404,7 @@ unsigned int MathExpression::countArgs(void){
     return 0;
 
   if (this->oprtr[0]==',')
-    return (1+this->left->countArgs());
+    return (1+this->getLeft()->countArgs());
   else
     return 0;
 }

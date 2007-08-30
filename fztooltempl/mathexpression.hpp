@@ -40,6 +40,7 @@
 #include <string>
 #include <list>
 #include <exception.hpp>
+#include <datastructures.hpp>
 
 /**
    @brief for evaluating easy-to-write mathematical expressions
@@ -251,9 +252,8 @@ namespace mexp{
   public:
     
     // constants:
-    static const int OP_LEN=24;
-    static const int VARLEN=24;
-    static const int BR_LEN=256;
+
+    static const int BUFSIZE=256;
     static const int KOMMA_PRI=0;
     static const int EQUAL_PRI=5;
     static const int ADDSUB_PRI=10;
@@ -269,19 +269,20 @@ namespace mexp{
     
   private:
     
+    // ###################################################
+    // # instantiated with defaults in constructor-calls #
+    // ###################################################
+    //                                                   #
+    //                                                   #
+    
     VariableList *varlist;
     FunctionList *functionlist;
-
+    
     // for unary and binary operators
     // unary operators will store the argument in the 'right'-pointer
     MathExpression *left;
     MathExpression *right;
-
-    // for n-ary operators (like ',')
-    std::list<MathExpression *> elements;
     MathExpression *pred;
-    char oprtr[OP_LEN];
-    char variable[VARLEN];
     Value *value;
     char type;
 
@@ -289,6 +290,25 @@ namespace mexp{
     int abs_pos;
 
     char imaginary_unit;
+
+    // important for n-ary operators:
+    // during parsing of a portion of an expression the expression is not locked and can store further
+    // arguments. After completion of parsing-procedure it will be locked to prevent further
+    // parameter-accumulation
+    bool locked;
+
+    // if set no pointer will be destroyed on destructor-call
+    bool delete_flat;
+
+    //                                                    #
+    //                                                    #
+    // ####################################################
+
+    std::string oprtr;
+    std::string variable;
+
+    // for n-ary operators (like ',')
+    std::list<MathExpression *> elements;
     
     MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,ExceptionBase);
     
@@ -313,8 +333,8 @@ namespace mexp{
     bool isOperator(void) const { return ( getType() == OP ); }
     bool isValue(void) const { return ( getType() == VAL ); }
     void setValue(Value *value);
-    const char *getOperator(void) const { return oprtr; }
-    const char *getVariable(void) const { return variable; }
+    const char *getOperator(void) const { return oprtr.c_str(); }
+    const char *getVariable(void) const { return variable.c_str(); }
 
     /**
        @brief returns a pointer to the value
@@ -324,12 +344,14 @@ namespace mexp{
     char getType() const { return type; }
 
     //TODO
-    MathExpression *getLeft(void) { return left; }
-    MathExpression *getRight(void) { return right; }
-    MathExpression *getPred(void) { return pred; }
+    MathExpression *getLeft(void) const { return left; }
+    MathExpression *getRight(void) const { return right; }
+    MathExpression *getPred(void) const { return pred; }
 
-    void setRight(MathExpression *right){}
-    void setLeft(MathExpression *left){}
+    void initLeftRight();
+
+    void setRight(MathExpression *right);
+    void setLeft(MathExpression *left);
     
     // addVariablesToList adds all occuring variables in tree to varlist
     void addVariablesToList(VariableList *varlist);
@@ -429,10 +451,13 @@ namespace mexp{
     static std::string skipTrailingZeros(std::string value);
 
     static int skipBlanks(const char *expr, int indx);
+
+    static bool isOpenBrace(char c);
+    static bool isCloseBrace(char c);
    
     /**
        copyBracketContent copies all from "arg" into "exprstring" between "open" and 
-       "close"; is "open"=0 all to "close" will be copied
+       "close"; is "open"=0 all upto "close" will be copied
        @brief for copying arguments
        @param exprstring pointer to the memory-area for the copy-operation
        @param arg pointer to the data to be copied
@@ -440,7 +465,7 @@ namespace mexp{
        @param close the sign for the close-bracket
        @return number of copied signs
     */
-    int copyBracketContent(char *exprstring, const char *arg, char open, char close);
+    int copyBracketContent(char * & exprstring, const char *arg, char open, char close);
     
     /**
        copyFloatContent copies the numeric part from "arg" into "exprstring"
@@ -449,7 +474,7 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    int copyFloatContent(char *exprstring, const char *arg);
+    int copyFloatContent(char * & exprstring, const char *arg);
     
     /**
        copyOperatorContent copies the operatorpart (also functionnames) from "arg" into "exprstring"
@@ -458,7 +483,9 @@ namespace mexp{
        @param arg pointer to the data to be copied
        @return number of copied signs
     */
-    int copyOperatorContent(char *exprstring, const char *arg);
+    int copyOperatorContent(char * & exprstring, const char *arg);
+
+    int copyCommaContent(char * & exprstring, const char *arg);
     
     /**
        @brief clears a Null-terminated char-Array
