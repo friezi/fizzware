@@ -248,6 +248,11 @@ int main(int argc, char **argv, char **envp){
 	Value *value = mathexpression.eval();
 	cout << value->toString(precision) << endl;
 
+      } catch (FunctionDefinition &fd){
+
+	if ( interactive == true )
+	  cout << "function defined: '" << fd.getName() << "'" << endl;
+
       } catch ( ParseException &pe ){
 
 	if ( interactive == true )
@@ -447,6 +452,10 @@ void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive
 
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
+      
+    } catch (FunctionDefinition &fd){ 
+
+      // nop
 
     } catch (ParseException &pe){
 

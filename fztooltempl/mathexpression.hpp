@@ -39,6 +39,8 @@
 #include <math.h>
 #include <string>
 #include <list>
+#include <set>
+#include <functional>
 #include <exception.hpp>
 #include <datastructures.hpp>
 
@@ -55,6 +57,20 @@ namespace mexp{
   class Value;
   class Tuple;
   class Complex;
+
+  class FunctionDefinition {
+
+  private:
+
+    std::string name;
+
+  public:
+
+    FunctionDefinition(std::string name) : name(name){}
+
+    std::string getName(){ return name; }
+
+  };
  
   class ParseException : public Exception<MathExpression> {
     
@@ -184,6 +200,8 @@ namespace mexp{
 
     std::string toString(std::streamsize precision) const { return ""; }
 
+    void addElement(Value * value){ elements.push_back(value); }
+
   };
 
   class Complex : public Value{
@@ -253,15 +271,20 @@ namespace mexp{
     
     // constants:
 
+    // minimal size of buffer for dynamical memory of unknown size
     static const int BUFSIZE=256;
-    static const int KOMMA_PRI=0;
-    static const int EQUAL_PRI=5;
+
+    // operator-priorities
+    static const int EQUAL_PRI=2;
+    static const int KOMMA_PRI=5;
     static const int ADDSUB_PRI=10;
     static const int MULTDIV_PRI=15;
     static const int SIN_PRI=20;
     static const int POT_PRI=30;
     static const int BINOM_PRI=40;
     static const int FAC_PRI=50;
+ 
+    // expression-types
     static const char EMPTY=0;
     static const char OP=1;
     static const char VAR=2;
@@ -322,8 +345,8 @@ namespace mexp{
     double sumProd(void) throw (ExceptionBase);
     Value *assignValue(void) throw (ExceptionBase);
     Value *evalFunction(void) throw (ExceptionBase);
-    void defineFunction(void) throw (ParseException);
-    bool checkBody(MathExpression *body, MathExpression *pl, VariableList *lvl);
+    void defineFunction(void) throw (EvalException,ParseException);
+    void checkBody(MathExpression *body, MathExpression *pl, VariableList *lvl) const throw(EvalException);
     bool empty(void) const { return (getType()==EMPTY); }
     void setOperatorType(const char *name);
     void setVariableType(const char *name);
@@ -348,10 +371,11 @@ namespace mexp{
     MathExpression *getRight(void) const { return right; }
     MathExpression *getPred(void) const { return pred; }
 
-    void initLeftRight();
+//     void initLeftRight();
 
     void setRight(MathExpression *right);
     void setLeft(MathExpression *left);
+    void addElement(MathExpression *element);
     
     // addVariablesToList adds all occuring variables in tree to varlist
     void addVariablesToList(VariableList *varlist);
@@ -359,10 +383,12 @@ namespace mexp{
     // checkForVars checks, if leaf-elements of expression are only variables
     // and operators are only ","'s. No variable must have childtrees.
     // return: true, false
-    bool checkForVariableTree();
+    bool checkForVariableTree() const;
+
+    bool checkForVariableTree(std::set< std::string,std::less<std::string> > & variableset) const;
     
     // isVariableInTree checks, if a given variable-name is defined as variable in tree
-    bool isVariableInTree(const char *name);
+    bool isVariableInTree(const char *name) const;
     
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
@@ -428,7 +454,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    Value *eval() throw (ExceptionBase);
+    Value *eval() throw (ExceptionBase,FunctionDefinition);
 
     /**
        @brief returns the signum of the value

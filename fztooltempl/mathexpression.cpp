@@ -497,6 +497,7 @@ MathExpression::MathExpression(const char *expression, VariableList *vl,
   
   top = this->parse(expression,locals);
 
+
   if ( top ){
 
     this->setLeft(top->getLeft());
@@ -574,16 +575,23 @@ MathExpression::MathExpression(MathExpression *me, VariableList *vl, FunctionLis
     this->setType(EMPTY);
     break;
   }
-
-  for ( list<MathExpression *>::iterator it = me->elements.begin(); it != me->elements.end(); it++ ){
-
-    elements.push_back(new MathExpression(*it,vl,fl,abs_pos));
-    elements.back()->pred = this;
-
-  }
-
-  initLeftRight();
-
+  
+  // functions mostly don't have a left parameter. In this case we must not add the elements to the
+  // element-list otherwise the left-pointer will be set which will result in a malformed tree.
+  if ( me->getLeft() ){
+    // a left-argument exists: we can safely add all arguments to element-list
+    
+    for ( list<MathExpression *>::iterator it = me->elements.begin(); it != me->elements.end(); it++ ){
+      
+      addElement(new MathExpression(*it,vl,fl,abs_pos));
+      elements.back()->pred = this;
+      
+    }
+    
+  } else if ( me->getRight() )
+    // a left-argument doesn't exist: we must only set the right-pointer
+    this->setRight(new MathExpression(me->getRight(),vl,fl,abs_pos));
+  
   locked = me->locked;
 
 }
@@ -600,21 +608,32 @@ MathExpression::~MathExpression(){
   
 }
 
-void MathExpression::initLeftRight(){
-
-  left = 0;
-  right = 0;
-
-  if ( !elements.empty() ){
-
-    left = elements.front();
-
-    if ( elements.size() > 1 )
-      right = elements.back();
-
-  }
-
+void MathExpression::addElement(MathExpression *element){
+  
+  if ( elements.empty() )
+    left = element;
+  else
+    right = element;
+  
+  elements.push_back(element);
+  
 }
+
+// void MathExpression::initLeftRight(){
+
+//   left = 0;
+//   right = 0;
+
+//   if ( !elements.empty() ){
+
+//     left = elements.front();
+
+//     if ( elements.size() > 1 )
+//       right = elements.back();
+
+//   }
+
+// }
 
 void MathExpression::setRight(MathExpression *right){
 
@@ -652,7 +671,7 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
   throw (ParseException,ExceptionBase){
 
   int e_indx, priority, offset;
-  char *exprstring=0, commastring[BUFSIZE]={0}, *bracketstring=0;
+  char *exprstring=0, *commastring=0, *bracketstring=0;
   MathExpression *TopNode=0, *ActualNode=0, *PrevNode=0, *actn, *prevn;
 
   if ( !expr[0] )
@@ -1100,42 +1119,6 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		  PrevNode->pred=actn;
 		  continue;
 		  
-// 	      } else if ( expr[e_indx] == ',' ){
-// 		// Tuple-Operator
-
-// 		if ( strcmp(PrevNode->getOperator(),",") || PrevNode->locked == true ){
-		    
-// 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
-		    
-// 		    delete TopNode;
-// 		    throw OutOfMemException();
-		    
-// 		  }
-		  
-// 		  actn->locked = false;
-		  
-// 		  TopNode = actn;
-// 		  PrevNode->pred = actn;
-// 		  setLeft(PrevNode);
-		  
-// 		}
-
-// 		++e_indx,++abs_pos;
-// 		offset = copyCommaContent(commastring,&expr[e_indx]);
-// 		cout << commastring << " ";
-
-// 		if ( offset == 0 )
-// 		  throw ParseException(abs_pos,"missing operand for comma-operator!");
-
-// 		abs_pos-=offset-1;
-
-// 		setRight(parse(commastring,locals));
-
-// 		clearString(commastring);
-
-// 		continue;
-
-				
 		} else if ( expr[e_indx] == '=' ){
 		  
 		  // it's a functiondefinition
@@ -1167,18 +1150,18 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 	    } else{ /* der Vorgaenger ist kein Operator, also "normale"
 		       Verhaeltnisse */
 	      if ( expr[e_indx] == '!' ){
-
+		
 		if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
-
+		  
 		  delete TopNode;
 		  throw OutOfMemException();
-
+		  
 		}
 
 		actn->setOperatorType("!");
 		e_indx++;
 		abs_pos++;
-
+		
 		if ( PrevNode->pred ){
 
 		  PrevNode->pred->setRight(actn);
@@ -1191,41 +1174,63 @@ MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
 		PrevNode->pred=actn;
 		continue;
 		  
-// 	      } else if ( expr[e_indx] == ',' ){
-// 		// Tuple-Operator
+	      } else if ( expr[e_indx] == ',' ){
+		// Tuple-Operator
 
-// 		if ( strcmp(PrevNode->getOperator(),",") || PrevNode->locked == true ){
-		    
-// 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
-		    
-// 		    delete TopNode;
-// 		    throw OutOfMemException();
-		    
-// 		  }
+		ActualNode->setOperatorType(",");
+
+		if (PrevNode->pred  ){
 		  
-// 		  actn->locked = false;
+		  actn = ActualNode, prevn=PrevNode->pred;
 		  
-// 		  TopNode = actn;
-// 		  PrevNode->pred = actn;
-// 		  setLeft(PrevNode);
+		  // search for node with lower priority in hierarchy
+		  while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
+			  && prevn->pred )
+		    prevn = prevn->pred;
 		  
-// 		}
+		  if ( priority <= 0 ){  /* hier muss prevn Top sein */
+		    
+		    actn->setLeft(prevn);
+		    prevn->pred = actn;
+		    TopNode = actn;
+		    
+		  } else{               /* actn hat hoehere Prioritaet */
+		    
+		    actn->setLeft(prevn->getRight());
+		    actn->pred=prevn;
+		    prevn->setRight(actn);
+		    
+		  }
+		} else{    /* Prev ist Top */
+		  
+		  ActualNode->setLeft(PrevNode);
+		  PrevNode->pred=ActualNode;
+		  TopNode=ActualNode;
+		  
+		}
+		
+		// add all further elements of comma to its list
+		while ( expr[e_indx] == ',' ){
+		  
+		  ++e_indx,++abs_pos;
+		  offset = copyCommaContent(commastring,&expr[e_indx]);
+		  
+		  if ( offset == 0 )
+		    throw ParseException(abs_pos,"missing operand for comma-operator!");
+		  
+		  abs_pos-=offset;
+		  e_indx+=offset;
+		  
+		  ActualNode->addElement(parse(commastring,locals));
+		  ActualNode->elements.back()->pred = ActualNode;
 
-// 		++e_indx,++abs_pos;
-// 		offset = copyCommaContent(commastring,&expr[e_indx]);
-// 		cout << commastring << " ";
-
-// 		if ( offset == 0 )
-// 		  throw ParseException(abs_pos,"missing operand for comma-operator!");
-
-// 		abs_pos-=offset-1;
-
-// 		setRight(parse(commastring,locals));
-
-// 		clearString(commastring);
-
-// 		continue;
-
+		  if ( commastring )
+		    free(commastring);
+		  
+		}
+		
+		continue;
+		
 	      } else if ( expr[e_indx] == '=' ){
 
 		// it's a functiondefinition
@@ -1773,13 +1778,15 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	  if (!this->getRight()->empty())
 	    return (true);
       } else if (this->getLeft() && this->getRight()){
+
 	if (!this->getLeft()->empty() && !this->getRight()->empty())
 	  if (this->getLeft()->checkSyntaxAndOptimize() && this->getRight()->checkSyntaxAndOptimize()){
 
 	    // optimization: reduction  of "({-,+}1)*({-,+}1)" to "{-,+}1"
 	    if ( this->oprtr[0] == '*' )
 	      if ( this->getLeft()->isValue() == true && this->getRight()->isValue() == true )
-		if ( this->getLeft()->getValue()->getType() == Value::COMPLEX && this->getRight()->getValue()->getType() == Value::COMPLEX){
+		if ( this->getLeft()->getValue()->getType() == Value::COMPLEX
+		     && this->getRight()->getValue()->getType() == Value::COMPLEX){
 		  
 		  Complex *left = (Complex *)this->getLeft()->getValue();
 		  Complex *right = (Complex *)this->getRight()->getValue();
@@ -1863,23 +1870,26 @@ string MathExpression::toString(streamsize precision) const throw (Exception<Mat
   ostringstream exp;
 
   exp << "(";
-  if (!this->empty()){
-    if (this->isOperator()){
-      if (this->oprtr[0]=='!'){
+  if ( !this->empty() ){
+    if ( this->isOperator() ){
+      if ( this->oprtr[0] == '!' ){
 
 	if (this->getRight())
 	  exp << this->getRight()->toString(precision);
 
 	exp << this->getOperator();
 
+      } else if ( this->oprtr[0] == ',' ){
+
+	for ( list<MathExpression *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+	  exp << ( it == elements.begin() ? "" : this->getOperator() ) << (*it)->toString(precision);
+
       } else if (!strcmp(this->getOperator(),"log")
 		 || !strcmp(this->getOperator(),SUM)
 		 || !strcmp(this->getOperator(),PROD)){
 
 	exp << this->getOperator();
-	exp << "[";
-	exp << this->getLeft()->toString(precision);
-	exp << "]";
+	exp << "[" << this->getLeft()->toString(precision) << "]";
 	exp << this->getRight()->toString(precision);
 
       } else{
@@ -1926,7 +1936,7 @@ string MathExpression::builtinsToString(){
 }
 
 
-Value *MathExpression::eval() throw (ExceptionBase){
+Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 
   //   double result;
   if ( isOperator() ){
@@ -1975,7 +1985,7 @@ Value *MathExpression::eval() throw (ExceptionBase){
       } else if (getLeft()->isOperator()){
 
 	defineFunction();
-	this->setValue(new Complex(0));
+	throw FunctionDefinition(getLeft()->getOperator());
 	break;
 
       }
@@ -2255,7 +2265,7 @@ Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
 }
 
-void MathExpression::defineFunction(void) throw (ParseException){
+void MathExpression::defineFunction(void) throw (EvalException,ParseException){
 
   const char *functionname;
   MathExpression *paramlist=0, *body=0;
@@ -2265,18 +2275,18 @@ void MathExpression::defineFunction(void) throw (ParseException){
   functionname = this->getLeft()->getOperator();
   
   // already declared as variable? (impossible to happen)
-  if (varlist->isMember(functionname))
+  if ( varlist->isMember(functionname) )
     throw ParseException(abs_pos, string(functionname)
 			 + " already declared as variable, definition "
 			 + "not possible!");
   
   // built-in function?
-  if (isBuiltinFunction(functionname))
+  if ( isBuiltinFunction(functionname) )
     throw ParseException(abs_pos, string(functionname)
 			 + " is built-in function and can't be replaced!");
   
   // already declared as function?
-  if (functionlist->isMember(functionname))
+  if ( functionlist->isMember(functionname) )
     throw ParseException(abs_pos, string(functionname)
 			 + " already declared as function, to redefine it"
 			 + " first undefine it!");
@@ -2285,38 +2295,41 @@ void MathExpression::defineFunction(void) throw (ParseException){
   paramlist = new MathExpression(this->getLeft()->getRight(),varlist,functionlist,abs_pos);
 
   // must be a variabletree
-  if (paramlist->checkForVariableTree()==false){
+  if ( paramlist->checkForVariableTree() == false ){
 
     delete paramlist;
     throw ParseException(abs_pos, string("only letters and non-built-in functionnames allowed,")
-			 + " variables must be separated by commas!");
+			 + " variables must be separated by commas and may not occur more then once!");
 
   }
   
   // build functionbody
   body = new MathExpression(this->getRight(),varlist,functionlist,abs_pos);
-  
-  // body must only contain defined variables/functions/operators
-  if (!checkBody(body,paramlist,&locals)){
 
+  try{
+    
+    // body must only contain defined variables/functions/operators
+    checkBody(body,paramlist,&locals);
+    
+  } catch (EvalException e){
+    
     delete body;
     delete paramlist;
-    throw ParseException(abs_pos, string("undefined variables/functions/operators used, ")
-			 + "no definition possible!");
-
+    throw e;
+    
   }
   
   // build functionelement
   fe = new Function(functionname,paramlist,body);
   
-  this->functionlist->insert(fe); // insert in functionlist;
+  functionlist->insert(fe); // insert in functionlist;
 
   functionlist->setModified(true);
   
 }
 
-bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
-			       VariableList *lvl){
+void MathExpression::checkBody(MathExpression *body, MathExpression *pl,
+			       VariableList *lvl) const throw(EvalException){
 
   // pl: parameterTree
   // lvl: local VariableList
@@ -2324,13 +2337,13 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
   bool inparam=false;
   
   if (!body)
-    return true;
+    return;
 
   if (*(body->getOperator())){
     if (!(isBuiltinOperator(*(body->getOperator()))))
       if (!(isBuiltinFunction(body->getOperator())))
 	if (!(functionlist->isMember(body->getOperator())))
-	  return false;
+	  throw EvalException("undefined operator:",body->getOperator());
   } else if (*(body->getVariable())){
     if (pl)
       if (pl->isVariableInTree(body->getVariable()))
@@ -2339,10 +2352,10 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
       if (!varlist->isMember(body->getVariable())){
 	if (!lvl->isMember(body->getVariable())){
 	  if (!body->getPred())
-	    return false;
+	    throw EvalException("variable undefined:",body->getVariable());
 	  else{
-	    if ((body->getPred()->getOperator())[0]!='=')
-	      return false;
+	    if ( (body->getPred()->getOperator())[0] != '=' )
+	      throw EvalException("variable undefined:",body->getVariable());
 	    else
 	      lvl->insert(body->getVariable(),new Complex(0));
 	  }
@@ -2350,61 +2363,67 @@ bool MathExpression::checkBody(MathExpression *body, MathExpression *pl,
       }
     }
   }
-  if (!checkBody(body->getLeft(),pl,lvl))
+
+  for ( list<MathExpression *>::const_iterator it = body->elements.begin(); it != body->elements.end(); it++ )
+    checkBody(*it,pl,lvl);
+  
+  return;
+  
+}
+
+bool MathExpression::checkForVariableTree() const {
+
+  set< string,less<string> > variableset;
+
+  return checkForVariableTree(variableset);
+
+}
+
+bool MathExpression::checkForVariableTree(set< string,less<string> > & variableset) const {
+  
+  if ( !elements.empty() ){
+    
+    if ( this->oprtr[0] != ',' )
+      return false;
+    
+    for ( list<MathExpression *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+      if ( (*it)->checkForVariableTree(variableset) == false )
+	return false;
+    
+  } else if ( !this->isVariable() ) {
     return false;
-  if (!checkBody(body->getRight(),pl,lvl))
-    return false;
+  } else if ( (variableset.find(getVariable())) != variableset.end() )
+    return false; // variable already occured somewhere
+  
+  variableset.insert(getVariable());
+  
   return true;
   
 }
 
-bool MathExpression::checkForVariableTree(){
-
-  if (this->getLeft()){
-    if (this->getLeft()->checkForVariableTree()==false){
-      return false;
-    }
-    if (this->oprtr[0]!=',')
-      return false;
-  } else{
-    if (!this->isVariable()){
-      return false;
-    }
-  }
-  if (this->getRight()){
-    if (this->getRight()->checkForVariableTree()==false){
-      return false;
-    }
-  }
-  return true;
-}
-
-bool MathExpression::isVariableInTree(const char *name){
-
-  if (!this)
+bool MathExpression::isVariableInTree(const char *name) const {
+  
+  if ( this->getVariable() != string(name) ){
+    
+    for ( list<MathExpression *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+      if ( (*it)->isVariableInTree(name) )
+	return true;
+    
     return false;
 
-  if (strcmp(name,this->getVariable())){
-    if (this->getLeft()->isVariableInTree(name))
-      return true;
-    else if (this->getRight()->isVariableInTree(name))
-      return true;
-    else
-      return false;
   }
+
   return true;
+
 }
     
 unsigned int MathExpression::countArgs(void){
-  
-  if (!this)
+
+  if ( this->empty() )
     return 0;
 
-  if (this->empty())
-    return 0;
-
-  if (this->oprtr[0]==',')
-    return (1+this->getLeft()->countArgs());
+  if ( this->oprtr[0] == ',' )
+    return elements.size();
   else
     return 0;
 }
