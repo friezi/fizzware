@@ -120,6 +120,10 @@ namespace mexp{
 
     }
     
+    EvalException(std::string errormsg) : Exception<MathExpression>(errormsg){
+      this->objname = "";
+    }
+    
     EvalException(const std::string &id, const std::string &errormsg)
       : Exception<MathExpression>(id,errormsg){
       this->objname = "";
@@ -137,6 +141,8 @@ namespace mexp{
     static const int TUPLE = 1;
     static const int COMPLEX = 2;
 
+    static const std::streamsize DFLT_PRECISION = 6;
+
   protected:
 
     int type;
@@ -149,9 +155,10 @@ namespace mexp{
 
     virtual ~Value(){}
 
-    int getType(){ return type; }
+    int getType() const { return type; }
 
     virtual std::string toString(std::streamsize precision) const = 0;
+    std::string toString() const { return toString(DFLT_PRECISION); }
 
     virtual Value *clone() const { return notSupported(); }
 
@@ -188,19 +195,24 @@ namespace mexp{
 
   class Tuple : public Value{
 
-  private:
+  public:
 
     std::list<Value *> elements;
 
-  public:
-
     Tuple() : Value(Value::TUPLE){}
 
-    ~Tuple(){}
+    ~Tuple();
 
-    std::string toString(std::streamsize precision) const { return ""; }
+    static Tuple *assertTuple(const Value *value) throw(EvalException);
+    static void assertKind(const Tuple *t1, const Tuple *t2) throw(EvalException);
 
-    void addElement(Value * value){ elements.push_back(value); }
+    std::string toString(std::streamsize precision) const;
+
+    void addElement(Value *value){ elements.push_back(value); }
+
+    Value *clone() const;
+
+    Value *operator+(Value *right) throw (ExceptionBase);
 
   };
 
@@ -211,8 +223,8 @@ namespace mexp{
     double re;
     double im;
 
-    static Complex *assertComplex(Value *value);
-    static Complex *assertReal(Value *value);
+    static Complex *assertComplex(Value *value) throw(EvalException);
+    static Complex *assertReal(Value *value) throw(EvalException);
     
   public:
 
@@ -272,23 +284,23 @@ namespace mexp{
     // constants:
 
     // minimal size of buffer for dynamical memory of unknown size
-    static const int BUFSIZE=256;
+    static const int BUFSIZE = 256;
 
     // operator-priorities
-    static const int EQUAL_PRI=2;
-    static const int KOMMA_PRI=5;
-    static const int ADDSUB_PRI=10;
-    static const int MULTDIV_PRI=15;
-    static const int SIN_PRI=20;
-    static const int POT_PRI=30;
-    static const int BINOM_PRI=40;
-    static const int FAC_PRI=50;
+    static const int EQUAL_PRI = 2;
+    static const int KOMMA_PRI = 5;
+    static const int ADDSUB_PRI = 10;
+    static const int MULTDIV_PRI = 15;
+    static const int SIN_PRI = 20;
+    static const int POT_PRI = 30;
+    static const int BINOM_PRI = 40;
+    static const int FAC_PRI = 50;
  
     // expression-types
-    static const char EMPTY=0;
-    static const char OP=1;
-    static const char VAR=2;
-    static const char VAL=3;
+    static const char EMPTY = 0;
+    static const char OP = 1;
+    static const char VAR = 2;
+    static const char VAL = 3;
     
   private:
     
@@ -415,6 +427,8 @@ namespace mexp{
 
     MathExpression(MathExpression *me, VariableList *vl, FunctionList *fl, int abs_pos)
       throw (ParseException,ExceptionBase);
+
+    Value * assignTupleExpression();
 
   public:
     

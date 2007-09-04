@@ -1,7 +1,7 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = foc
+TARGET = fizzcal
 
 MAIN_MODULE = main
 LOCAL_MODULES = linescanner filescanner

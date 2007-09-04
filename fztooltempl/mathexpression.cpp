@@ -348,7 +348,70 @@ string FunctionList::toString(streamsize precision) const{
 
 }
 
-string Complex::toString(std::streamsize precision) const{
+Tuple::~Tuple(){
+
+  for ( list<Value *>::iterator it = elements.begin(); it != elements.end(); it++ )
+    delete (*it);
+
+}
+
+string Tuple::toString(std::streamsize precision) const {
+
+  ostringstream value;
+
+  value << "(";
+
+  for ( list<Value *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+    value << ( it == elements.begin() ? (*it)->toString(precision) : string(",") + (*it)->toString(precision) );
+
+  value << ")";
+
+  return value.str();
+
+}
+
+Value *Tuple::clone() const {
+
+  Tuple *value = new Tuple();
+
+  for ( list<Value *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+    value->addElement((*it)->clone());
+
+  return value;
+
+}
+
+Tuple *Tuple::assertTuple(const Value *value) throw(EvalException){
+
+  if ( value->getType() != Value::TUPLE )
+    throw EvalException(string("operand to tuple is no tuple-type: ") + value->toString() + string(" !"));
+
+  return (Tuple *)value;
+
+}
+void Tuple::assertKind(const Tuple *t1, const Tuple *t2) throw(EvalException){
+
+  if ( t1->elements.size() != t2->elements.size() )
+    throw EvalException(string("tuples are not of same kind: ") + t1->Value::toString() + string(" <-> ") + t2->Value::toString() + string(" !"));
+
+}
+
+Value *Tuple::operator+(Value *right) throw (ExceptionBase){
+
+  Tuple *rt = assertTuple(right);
+
+  assertKind(this,rt);
+
+  Tuple *value = new Tuple();
+
+  for ( list<Value *>::iterator lit = elements.begin(), rit = rt->elements.begin(); lit != elements.end(); lit++, rit++ )
+    value->addElement((*lit)->operator+((*rit)));
+
+  return value;
+
+}
+
+string Complex::toString(std::streamsize precision) const {
   
   ostringstream value;
   ostringstream re;
@@ -389,20 +452,20 @@ string Complex::toString(std::streamsize precision) const{
   
 }
 
-Complex *Complex::assertComplex(Value *value){
+Complex *Complex::assertComplex(Value *value) throw(EvalException){
   
   if ( value->getType() != Value::COMPLEX )
-    throw EvalException("operand to complex must be complex-type!");
+    throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
   
   return (Complex *)value;
   
 }
 
-Complex *Complex::assertReal(Value *value){
+Complex *Complex::assertReal(Value *value) throw(EvalException){
   
   if ( value->getType() != Value::COMPLEX )
-    throw EvalException("operand to complex must be complex-type!");
-
+    throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
+  
   if ( ((Complex *)value)->getIm() != 0 )
     throw EvalException("operation only allowed for real-numbers!");
   
@@ -412,7 +475,7 @@ Complex *Complex::assertReal(Value *value){
 
 Value *Complex::operator+(Value *right) throw (ExceptionBase){
 
-  Complex *rc = assertComplex(right);;
+  Complex *rc = assertComplex(right);
   return new Complex(this->getRe()+rc->getRe(),this->getIm()+rc->getIm());
       
 }
@@ -425,9 +488,24 @@ Value *Complex::operator-(Value *right) throw (ExceptionBase){
 }
 Value *Complex::operator*(Value *right) throw (ExceptionBase){ 
       
-  Complex *rc = assertComplex(right);
-  return new Complex(getRe()*rc->getRe()-getIm()*rc->getIm(),getRe()*rc->getIm()+getIm()*rc->getRe());
-      
+  if ( right->getType() == Value::COMPLEX ){
+
+    Complex *rc = (Complex *)right;
+    return new Complex(getRe()*rc->getRe()-getIm()*rc->getIm(),getRe()*rc->getIm()+getIm()*rc->getRe());
+
+  } else if ( right->getType() == Value::TUPLE ){
+
+    Tuple *rt = (Tuple *)right;
+    Tuple *value = new Tuple();
+
+    for ( list<Value *>::iterator it = rt->elements.begin(); it != rt->elements.end(); it++ )
+      value->addElement(this->operator*(*it));
+
+    return value;
+
+  } else
+    throw EvalException(string("unsupported type for '*': ") + right->toString() + string(" !"));
+    
 }
 Value *Complex::operator/(Value *right) throw (ExceptionBase){
 
@@ -1993,6 +2071,10 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
       throw EvalException("invalid use of assignment!");
       break;
 
+    case ',':
+      this->setValue(assignTupleExpression());
+      break;
+
     default:
       if (!strcmp("sin",getOperator()))
         this->setValue(getRight()->eval()->sin());
@@ -2078,6 +2160,17 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
     else
       throw EvalException("unauthorized use of variables!");
   }
+
+  return value;
+
+}
+
+Value * MathExpression::assignTupleExpression(){
+
+  Tuple *value = new Tuple();
+
+  for ( list<MathExpression *>::const_iterator it = elements.begin(); it != elements.end(); it++ )
+    value->addElement((*it)->eval()->clone());
 
   return value;
 
@@ -2246,15 +2339,14 @@ Value *MathExpression::evalFunction(void) throw (ExceptionBase){
   // eval args and insert them in varlist
   if (!args->empty()){
 
-    while (args->oprtr[0] == ','){
+    if (args->oprtr[0] == ','){
 
-      vl.insert(params->getRight()->getVariable(),args->getRight()->eval()->clone());
-      args = args->getLeft();
-      params = params->getLeft();
-
-    }
-
-    vl.insert(params->getVariable(),args->eval()->clone());
+      for ( list<MathExpression *>::iterator ait = args->elements.begin(), pit = params->elements.begin();
+	    ait != args->elements.end(); ait++, pit++ )
+	vl.insert((*pit)->getVariable(),(*ait)->eval()->clone());
+      
+    } else
+      vl.insert(params->getVariable(),args->eval()->clone());
 
   }
 
