@@ -273,6 +273,25 @@ namespace mexp{
     Value *tst() throw (ExceptionBase){ return notSupported(); }
 
   };
+
+  /**
+     @brief For defining the context a MathExpression occurs in
+  */
+  class Context {
+
+  private:
+
+    bool withinBrackets;
+
+  public:
+
+    Context() : withinBrackets(false){}
+
+    bool getWithinBrackets() const { return withinBrackets; }
+    void setWithinBrackets(bool value){ this->withinBrackets = value; }
+    bool isWithinBrackets() const { return ( getWithinBrackets() == true ); }
+
+  };
  
   /**
      @brief for evaluating easy-to-write mathematical expressions
@@ -297,10 +316,17 @@ namespace mexp{
     static const int FAC_PRI = 50;
  
     // expression-types
-    static const char EMPTY = 0;
-    static const char OP = 1;
-    static const char VAR = 2;
-    static const char VAL = 3;
+    static const char ET_EMPTY = 0;
+    static const char ET_OP = 1;
+    static const char ET_VAR = 2;
+    static const char ET_VAL = 3;
+
+    // operator-types
+    static const unsigned char OT_EMPTY = 0;
+    static const unsigned char OT_FUNCTION = 1;
+    static const unsigned char OT_OPERATION = 2;
+    static const unsigned char OT_PARAMETER = 3;
+    static const unsigned char OT_TUPLE = 4;
     
   private:
     
@@ -319,18 +345,22 @@ namespace mexp{
     MathExpression *right;
     MathExpression *pred;
     Value *value;
+    
+    /**
+       type can be: operator, variable or value
+       @brief the type of expression
+    */
     char type;
+
+    /**
+       @brief type of operator (if expression is an operator)
+    */
+    unsigned char operator_type;
 
     // absolute position in expression-string
     int abs_pos;
 
     char imaginary_unit;
-
-    // important for n-ary operators:
-    // during parsing of a portion of an expression the expression is not locked and can store further
-    // arguments. After completion of parsing-procedure it will be locked to prevent further
-    // parameter-accumulation
-    bool locked;
 
     // if set no pointer will be destroyed on destructor-call
     bool delete_flat;
@@ -345,7 +375,7 @@ namespace mexp{
     // for n-ary operators (like ',')
     std::list<MathExpression *> elements;
     
-    MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,ExceptionBase);
+    MathExpression *parse(const char *expr, const Context & context, VariableList& locals) throw (ParseException,ExceptionBase);
     
     // erases the elements of a n-ary operator
     void eraseElements();
@@ -359,14 +389,42 @@ namespace mexp{
     Value *evalFunction(void) throw (ExceptionBase);
     void defineFunction(void) throw (EvalException,ParseException);
     void checkBody(MathExpression *body, MathExpression *pl, VariableList *lvl) const throw(EvalException);
-    bool empty(void) const { return (getType()==EMPTY); }
-    void setOperatorType(const char *name);
-    void setVariableType(const char *name);
-    void setValueType(Value *value);
-    void setType(char type) { this->type=type; }
-    bool isVariable(void) const { return ( getType() == VAR ); }
-    bool isOperator(void) const { return ( getType() == OP ); }
-    bool isValue(void) const { return ( getType() == VAL ); }
+    bool isEmpty(void) const { return ( getEType() == ET_EMPTY ); }
+    void setETOperator(const char *name);
+    void setETVariable(const char *name);
+    void setETValue(Value *value);
+    
+    /**
+       @brief sets the operator-type
+       @param type the type to be set
+    */
+    void setOType(unsigned char type){ operator_type = type; }
+    void setOTFunction(){ setOType(OT_FUNCTION); }
+    void setOTOperation(){ setOType(OT_OPERATION); }
+    void setOTParameter(){ setOType(OT_PARAMETER); }
+    void setOTTuple(){ setOType(OT_TUPLE); }
+    /**
+       @brief returns the operator-type
+       @return the operator-type
+    */
+    unsigned char getOType() const { return operator_type; }
+
+    /**
+       @brief sets the expression-type
+    */
+    void setEType(char type) { this->type=type; }
+
+    // checks the expression-type
+    bool isVariable(void) const { return ( getEType() == ET_VAR ); }
+    bool isOperator(void) const { return ( getEType() == ET_OP ); }
+    bool isValue(void) const { return ( getEType() == ET_VAL ); }
+
+    // checks the operator-type
+    bool isOTFunction(){ return ( getOType() == OT_FUNCTION ); }
+    bool isOTOperation(){ return ( getOType() == OT_OPERATION ); }
+    bool isOTParameter(){ return ( getOType() == OT_PARAMETER ); }
+    bool isOTTuple(){ return ( getOType() == OT_TUPLE ); }
+
     void setValue(Value *value);
     const char *getOperator(void) const { return oprtr.c_str(); }
     const char *getVariable(void) const { return variable.c_str(); }
@@ -376,7 +434,7 @@ namespace mexp{
        @return pointer to value
     */
     Value *getValue(void) const { return value; }
-    char getType() const { return type; }
+    char getEType() const { return type; }
 
     //TODO
     MathExpression *getLeft(void) const { return left; }
