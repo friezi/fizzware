@@ -732,8 +732,8 @@ void MathExpression::eraseElements(){
 MathExpression *MathExpression::parse(const char *expr, const Context & context, VariableList& locals)
   throw (ParseException,ExceptionBase){
 
-  int e_indx, priority, offset;
-  char *exprstring=0, *commastring=0, *bracketstring=0;
+  int e_indx, offset;
+  char *exprstring=0, *bracketstring=0;
   MathExpression *TopNode=0, *ActualNode=0, *PrevNode=0, *actn, *prevn;
   Context new_context;
 
@@ -1016,67 +1016,70 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  ActualNode->setOTOperation();
 
 		} else{      /* Prev hat kein ->right */
+		  // results in malloc<->free problem
+		  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-
+  
 		  bool is_builtin = false;
 		  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-		    
+    
 		    ActualNode->setETOperator(exprstring);
-		    
+    
 		    if ( is_builtin == true )
 		      ActualNode->setOTFunction();
 		    else
 		      ActualNode->setOTOperation();
-
+    
 		  } else if ( functionlist ){
-
+    
 		    if ( functionlist->isMember(exprstring) ){
-
+      
 		      ActualNode->setETOperator(exprstring);
 		      ActualNode->setOTFunction();
-		      
+      
 		    } else
 		      ActualNode->setETVariable(exprstring);
-
+    
 		  } else
 		    ActualNode->setETVariable(exprstring);
-
+  
 		  if ( exprstring )
 		    free(exprstring);
 
-// 		  // parse arguments to function if it's followed by function-brackets
-// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		    if ( expr[e_indx] == '(' ){
+		  // 		  // parse arguments to function if it's followed by function-brackets
+		  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
+		  // 		    if ( expr[e_indx] == '(' ){
+
+		  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
 			
-// 			delete TopNode;
-// 			throw ParseException(abs_pos, "missing bracket!");
+		  // 			delete TopNode;
+		  // 			throw ParseException(abs_pos, "missing bracket!");
 			
-// 		      }
+		  // 		      }
 		      
-// 		      e_indx+=offset;
-// 		      abs_pos-=offset-1;
+		  // 		      e_indx+=offset;
+		  // 		      abs_pos-=offset-1;
 		      
-// 		      Context subsequent_context;
+		  // 		      Context subsequent_context;
 
-// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-// 			actn = new MathExpression(abs_pos,varlist,functionlist);
+		  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
+		  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
 		      
-// 		      abs_pos++;
+		  // 		      abs_pos++;
 		      
-// 		      if ( bracketstring )
-// 			free(bracketstring);
+		  // 		      if ( bracketstring )
+		  // 			free(bracketstring);
 		      
-// 		      actn->setOTParameter();
-// 		      ActualNode->setRight(actn);
-// 		      actn->pred = ActualNode;
+		  // 		      actn->setOTParameter();
+		  // 		      ActualNode->setRight(actn);
+		  // 		      actn->pred = ActualNode;
 		      
-// 		    }
-// 		  }
+		  // 		    }
+		  // 		  }
 		  
 		}
 	      } else{          /* Prev hat kein ->pred */
@@ -1087,67 +1090,69 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  ActualNode->setOTOperation();
 
 		} else{      /* Prev hat kein ->right */
+		  // results in malloc<->free problem
+		  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		  e_indx+=offset;
-
+  
 		  bool is_builtin = false;
 		  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-
+    
 		    ActualNode->setETOperator(exprstring);
-
+    
 		    if ( is_builtin == true )
 		      ActualNode->setOTFunction();
 		    else
 		      ActualNode->setOTOperation();
-		    
+    
 		  } else if ( functionlist ){
-
+    
 		    if ( functionlist->isMember(exprstring) ){
-
+      
 		      ActualNode->setETOperator(exprstring);
 		      ActualNode->setOTFunction();
-		      
+      
 		    } else
 		      ActualNode->setETVariable(exprstring);
-
+    
 		  } else
 		    ActualNode->setETVariable(exprstring);
-
-		  if ( exprstring )		    
+  
+		  if ( exprstring )
 		    free(exprstring);
 
-// 		  // parse arguments to function if it's followed by function-brackets
-// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
+		  // 		  // parse arguments to function if it's followed by function-brackets
+		  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		    if ( expr[e_indx] == '(' ){
+		  // 		    if ( expr[e_indx] == '(' ){
 
-// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
+		  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
 			
-// 			delete TopNode;
-// 			throw ParseException(abs_pos, "missing bracket!");
+		  // 			delete TopNode;
+		  // 			throw ParseException(abs_pos, "missing bracket!");
 			
-// 		      }
+		  // 		      }
 		      
-// 		      e_indx+=offset;
-// 		      abs_pos-=offset-1;
+		  // 		      e_indx+=offset;
+		  // 		      abs_pos-=offset-1;
 		      
-// 		      Context subsequent_context;
+		  // 		      Context subsequent_context;
 
-// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-// 			actn = new MathExpression(abs_pos,varlist,functionlist);
+		  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
+		  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
 		      
-// 		      abs_pos++;
+		  // 		      abs_pos++;
 		      
-// 		      if ( bracketstring )
-// 			free(bracketstring);
+		  // 		      if ( bracketstring )
+		  // 			free(bracketstring);
 		      
-// 		      actn->setOTParameter();
-// 		      ActualNode->setRight(actn);
-// 		      actn->pred = ActualNode;
+		  // 		      actn->setOTParameter();
+		  // 		      ActualNode->setRight(actn);
+		  // 		      actn->pred = ActualNode;
 		      
-// 		    }
-// 		  }
+		  // 		    }
+		  // 		  }
 
 		}
 	      }
@@ -1294,6 +1299,13 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  PrevNode->pred=actn;
 		  continue;
 		  
+		} else if ( expr[e_indx] == ',' ){
+		  // Tuple-Operator
+
+		  e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,context,new_context,locals);
+		  
+		  continue;
+		  
 		} else if ( expr[e_indx] == '=' ){
 		  
 		  // it's a functiondefinition
@@ -1302,67 +1314,69 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		    PrevNode->addVariablesToList(&locals);
 		  
 		}
+		// results in malloc<->free problem
+		// 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 		
 		offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 		e_indx+=offset;
-		
+  
 		bool is_builtin = false;
 		if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-
+    
 		  ActualNode->setETOperator(exprstring);
-		  
+    
 		  if ( is_builtin == true )
 		    ActualNode->setOTFunction();
 		  else
 		    ActualNode->setOTOperation();
-		  
+    
 		} else if ( functionlist ){
-		  
+    
 		  if ( functionlist->isMember(exprstring) ){
-
+      
 		    ActualNode->setETOperator(exprstring);
 		    ActualNode->setOTFunction();
-		  
+      
 		  } else
 		    ActualNode->setETVariable(exprstring);
-		  
+    
 		} else
 		  ActualNode->setETVariable(exprstring);
+  
+		if ( exprstring )
+		  free(exprstring);
 
-		  if ( exprstring )		
-		    free(exprstring);
+		// 		  // parse arguments to function if it's followed by function-brackets
+		// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		  // parse arguments to function if it's followed by function-brackets
-// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
+		// 		    if ( expr[e_indx] == '(' ){
 
-// 		    if ( expr[e_indx] == '(' ){
-
-// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
+		// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
 			
-// 			delete TopNode;
-// 			throw ParseException(abs_pos, "missing bracket!");
+		// 			delete TopNode;
+		// 			throw ParseException(abs_pos, "missing bracket!");
 			
-// 		      }
+		// 		      }
 		      
-// 		      e_indx+=offset;
-// 		      abs_pos-=offset-1;
+		// 		      e_indx+=offset;
+		// 		      abs_pos-=offset-1;
 		      
-// 		      Context subsequent_context;
+		// 		      Context subsequent_context;
 
-// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-// 			actn = new MathExpression(abs_pos,varlist,functionlist);
+		// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
+		// 			actn = new MathExpression(abs_pos,varlist,functionlist);
 		      
-// 		      abs_pos++;
+		// 		      abs_pos++;
 		      
-// 		      if ( bracketstring )
-// 			free(bracketstring);
+		// 		      if ( bracketstring )
+		// 			free(bracketstring);
 		      
-// 		      actn->setOTParameter();
-// 		      ActualNode->setRight(actn);
-// 		      actn->pred = ActualNode;
+		// 		      actn->setOTParameter();
+		// 		      ActualNode->setRight(actn);
+		// 		      actn->pred = ActualNode;
 		      
-// 		    }
-// 		  }
+		// 		    }
+		// 		  }
 		
 	      }
 	    } else{ /* der Vorgaenger ist kein Operator, also "normale"
@@ -1396,62 +1410,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	      } else if ( expr[e_indx] == ',' ){
 		// Tuple-Operator
 
-		ActualNode->setETOperator(",");
-
-		if ( context.isWithinBrackets() == true )
-		  ActualNode->setOTTuple();
-		else
-		  ActualNode->setOTParameter();
-
-		if (PrevNode->pred  ){
-		  
-		  actn = ActualNode, prevn=PrevNode->pred;
-		  
-		  // search for node with lower priority in hierarchy
-		  while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
-			  && prevn->pred )
-		    prevn = prevn->pred;
-		  
-		  if ( priority <= 0 ){  /* hier muss prevn Top sein */
-		    
-		    actn->setLeft(prevn);
-		    prevn->pred = actn;
-		    TopNode = actn;
-		    
-		  } else{               /* actn hat hoehere Prioritaet */
-		    
-		    actn->setLeft(prevn->getRight());
-		    actn->pred=prevn;
-		    prevn->setRight(actn);
-		    
-		  }
-		} else{    /* Prev ist Top */
-		  
-		  ActualNode->setLeft(PrevNode);
-		  PrevNode->pred=ActualNode;
-		  TopNode=ActualNode;
-		  
-		}
-		
-		// add all further elements of comma to its list
-		while ( expr[e_indx] == ',' ){
-		  
-		  ++e_indx,++abs_pos;
-		  offset = copyCommaContent(commastring,&expr[e_indx]);
-		  
-		  if ( offset == 0 )
-		    throw ParseException(abs_pos,"missing operand for comma-operator!");
-		  
-		  abs_pos-=offset;
-		  e_indx+=offset;
-		  
-		  ActualNode->addElement(parse(commastring,new_context,locals));
-		  ActualNode->elements.back()->pred = ActualNode;
-
-		  if ( commastring )
-		    free(commastring);
-		  
-		}
+		e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,context,new_context,locals);
 		
 		continue;
 		
@@ -1463,73 +1422,77 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  PrevNode->addVariablesToList(&locals);
 
 	      }
+	      // results in malloc<->free problem
+	      // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 	      offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	      e_indx+=offset;
-
+  
 	      bool is_builtin = false;
 	      if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-
+    
 		ActualNode->setETOperator(exprstring);
-		
+    
 		if ( is_builtin == true )
 		  ActualNode->setOTFunction();
 		else
 		  ActualNode->setOTOperation();
-
-	      } else if (functionlist){
-
+    
+	      } else if ( functionlist ){
+    
 		if ( functionlist->isMember(exprstring) ){
-
+      
 		  ActualNode->setETOperator(exprstring);
 		  ActualNode->setOTFunction();
-
+      
 		} else
 		  ActualNode->setETVariable(exprstring);
-
-	      }
-	      else
+    
+	      } else
 		ActualNode->setETVariable(exprstring);
-
+  
 	      if ( exprstring )
 		free(exprstring);
 
-// 		  // parse arguments to function if it's followed by function-brackets
-// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
+	      // 		  // parse arguments to function if it's followed by function-brackets
+	      // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		    if ( expr[e_indx] == '(' ){
+	      // 		    if ( expr[e_indx] == '(' ){
 
-// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
+	      // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
 			
-// 			delete TopNode;
-// 			throw ParseException(abs_pos, "missing bracket!");
+	      // 			delete TopNode;
+	      // 			throw ParseException(abs_pos, "missing bracket!");
 			
-// 		      }
+	      // 		      }
 		      
-// 		      e_indx+=offset;
-// 		      abs_pos-=offset-1;
+	      // 		      e_indx+=offset;
+	      // 		      abs_pos-=offset-1;
 		      
-// 		      Context subsequent_context;
+	      // 		      Context subsequent_context;
 
-// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-// 			actn = new MathExpression(abs_pos,varlist,functionlist);
+	      // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
+	      // 			actn = new MathExpression(abs_pos,varlist,functionlist);
 		      
-// 		      abs_pos++;
+	      // 		      abs_pos++;
 		      
-// 		      if ( bracketstring )
-// 			free(bracketstring);
+	      // 		      if ( bracketstring )
+	      // 			free(bracketstring);
 		      
-// 		      actn->setOTParameter();
-// 		      ActualNode->setRight(actn);
-// 		      actn->pred = ActualNode;
+	      // 		      actn->setOTParameter();
+	      // 		      ActualNode->setRight(actn);
+	      // 		      actn->pred = ActualNode;
 		      
-// 		    }
-// 		  }
+	      // 		    }
+	      // 		  }
 
 	    }
 	  }
 	} else{ /* kein PrevNode */
 
+	  // if I use this function here, it will result in a malloc<->free problem
+	  // that's why I have to use the original code below
+	  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 	  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
 	  e_indx+=offset;
 	  bool is_builtin = false;
@@ -1558,50 +1521,50 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	  if ( exprstring )
 	    free(exprstring);
 
-// 		  // parse arguments to function if it's followed by function-brackets
-// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
+	  // 		  // parse arguments to function if it's followed by function-brackets
+	  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
 
-// 		    if ( expr[e_indx] == '(' ){
+	  // 		    if ( expr[e_indx] == '(' ){
 
-// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
+	  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
 			
-// 			delete TopNode;
-// 			throw ParseException(abs_pos, "missing bracket!");
+	  // 			delete TopNode;
+	  // 			throw ParseException(abs_pos, "missing bracket!");
 			
-// 		      }
+	  // 		      }
 		      
-// 		      e_indx+=offset;
-// 		      abs_pos-=offset-1;
+	  // 		      e_indx+=offset;
+	  // 		      abs_pos-=offset-1;
 		      
-// 		      Context subsequent_context;
+	  // 		      Context subsequent_context;
 
-// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-// 			actn = new MathExpression(abs_pos,varlist,functionlist);
+	  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
+	  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
 		      
-// 		      abs_pos++;
+	  // 		      abs_pos++;
 		      
-// 		      if ( bracketstring )
-// 			free(bracketstring);
+	  // 		      if ( bracketstring )
+	  // 			free(bracketstring);
 
-// 		      MathExpression *parameter = actn;
+	  // 		      MathExpression *parameter = actn;
 
-// 		      if ( !actn->isOperator() && !actn->isOTParameter() ){
+	  // 		      if ( !actn->isOperator() && !actn->isOTParameter() ){
 
-// 			parameter = new MathExpression(abs_pos,varlist,functionlist);
-// 			parameter->setETOperator(",");
-// 			parameter->setOTParameter();
-// 			parameter->addElement(actn);
-// 			actn->pred = parameter;
+	  // 			parameter = new MathExpression(abs_pos,varlist,functionlist);
+	  // 			parameter->setETOperator(",");
+	  // 			parameter->setOTParameter();
+	  // 			parameter->addElement(actn);
+	  // 			actn->pred = parameter;
 
-// 		      }
+	  // 		      }
 			
-// 		      cout << parameter->toString(20) << endl;
+	  // 		      cout << parameter->toString(20) << endl;
 		      
-// 		      ActualNode->setRight(parameter);
-// 		      parameter->pred = ActualNode;
+	  // 		      ActualNode->setRight(parameter);
+	  // 		      parameter->pred = ActualNode;
 		      
-// 		    }
-// 		  }
+	  // 		    }
+	  // 		  }
 
 	}
       }
@@ -1639,35 +1602,9 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	    ActualNode->pred = PrevNode;
 
 	  } else if ( PrevNode->getRight() ){
-	    if ( PrevNode->pred ){ /* Da Prev pred hat, muss prioritaet des
-				      operators gecheckt werden */
-	      actn=ActualNode, prevn=PrevNode->pred;
 
-	      while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
-		      && prevn->pred )
-		prevn=prevn->pred;
+	    searchAndSetLowerPriNode(ActualNode,PrevNode,TopNode);
 
-	      if ( priority <= 0 ){  /* hier muss prevn Top sein */
-
-		actn->setLeft(prevn);
-		prevn->pred=actn;
-		TopNode=actn;
-
-	      }
-	      else{               /* actn hat hoehere Prioritaet */
-
-		actn->setLeft(prevn->getRight());
-		actn->pred = prevn;
-		prevn->setRight(actn);
-
-	      }
-	    } else{
-
-	      ActualNode->setLeft(PrevNode);
-	      PrevNode->pred = ActualNode;
-	      TopNode = ActualNode;
-
-	    }
 	  } else{   /* Prev hat keinen rechten Unterbaum, also wird hier neuer
 		       Ast angefuegt */
 	    // z.B "3+sin2"
@@ -1678,34 +1615,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	  }
 	} else{      /* Prev ist Zahl */
 
-	  if (PrevNode->pred  ){
+	  searchAndSetLowerPriNode(ActualNode,PrevNode,TopNode);
 
-	    actn = ActualNode, prevn=PrevNode->pred;
-
-	    while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
-		    && prevn->pred )
-	      prevn = prevn->pred;
-
-	    if ( priority <= 0 ){  /* hier muss prevn Top sein */
-
-	      actn->setLeft(prevn);
-	      prevn->pred = actn;
-	      TopNode = actn;
-
-	    } else{               /* actn hat hoehere Prioritaet */
-
-	      actn->setLeft(prevn->getRight());
-	      actn->pred=prevn;
-	      prevn->setRight(actn);
-
-	    }
-	  } else{    /* Prev ist Top */
-
-	    ActualNode->setLeft(PrevNode);
-	    PrevNode->pred=ActualNode;
-	    TopNode=ActualNode;
-
-	  }
 	}
       } else{        /* Act ist Zahl */
 
@@ -1753,21 +1664,135 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
   return TopNode;
 }
 
+int MathExpression::parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode,
+				       const Context & context, const Context & new_context, VariableList & locals) throw (ParseException, ExceptionBase){
+
+  int offset;
+  char *commastring=0;
+		  
+  ActualNode->setETOperator(",");
+  
+  if ( context.isWithinBrackets() == true )
+    ActualNode->setOTTuple();
+  else
+    ActualNode->setOTParameter();
+
+  searchAndSetLowerPriNode(ActualNode,PrevNode,TopNode);
+  
+  // add all further elements of comma to its list
+  while ( expr[e_indx] == ',' ){
+    
+    ++e_indx,++abs_pos;
+    offset = copyCommaContent(commastring,&expr[e_indx]);
+    
+    if ( offset == 0 )
+      throw ParseException(abs_pos,"missing operand for comma-operator!");
+    
+    abs_pos-=offset;
+    e_indx+=offset;
+    
+    ActualNode->addElement(parse(commastring,new_context,locals));
+    ActualNode->elements.back()->pred = ActualNode;
+    
+    if ( commastring )
+      free(commastring);
+    
+  }
+  
+  return e_indx;
+  
+}
+
+void MathExpression::searchAndSetLowerPriNode(MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode){
+
+  MathExpression *actn=0, *prevn=0;
+  int priority;
+  
+  if (PrevNode->pred  ){
+  
+    actn = ActualNode, prevn=PrevNode->pred;
+    
+    // search for node with lower priority in hierarchy
+    while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
+	    && prevn->pred )
+      prevn = prevn->pred;
+    
+    if ( priority <= 0 ){  /* hier muss prevn Top sein */
+      
+      actn->setLeft(prevn);
+      prevn->pred = actn;
+      TopNode = actn;
+      
+    } else{               /* actn hat hoehere Prioritaet */
+      
+      actn->setLeft(prevn->getRight());
+      actn->pred = prevn;
+      prevn->setRight(actn);
+      
+    }
+  } else{    /* Prev ist Top */
+    
+    ActualNode->setLeft(PrevNode);
+    PrevNode->pred = ActualNode;
+    TopNode = ActualNode;
+  }
+  
+}
+
+int MathExpression::determineAndSetOperatorOrVariable(const char *expr, int e_indx, MathExpression * & ActualNode, const FunctionList *functionlist){
+
+  int offset;
+  char *exprstring = 0;
+  
+  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
+  e_indx+=offset;
+  
+  bool is_builtin = false;
+  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
+    
+    ActualNode->setETOperator(exprstring);
+    
+    if ( is_builtin == true )
+      ActualNode->setOTFunction();
+    else
+      ActualNode->setOTOperation();
+    
+  } else if ( functionlist ){
+    
+    if ( functionlist->isMember(exprstring) ){
+      
+      ActualNode->setETOperator(exprstring);
+      ActualNode->setOTFunction();
+      
+    } else
+      ActualNode->setETVariable(exprstring);
+    
+  } else
+    ActualNode->setETVariable(exprstring);
+  
+  if ( exprstring )
+    free(exprstring);
+  
+  return e_indx;
+
+}
+
 inline bool MathExpression::checkOperator(char x){ 
-  return (((unsigned char)(x)>=1 && (unsigned char)(x)<='/')
-	  || ((unsigned char)(x)>=':' && (unsigned char)(x)<='@')
-	  || ((unsigned char)(x)>='[' && (unsigned char)(x)<='`')
-	  || ((unsigned char)(x)>='{') );
+  return (((unsigned char)(x) >= 1 && (unsigned char)(x) <= '/')
+	  || ((unsigned char)(x) >= ':' && (unsigned char)(x) <= '@')
+	  || ((unsigned char)(x) >= '[' && (unsigned char)(x) <= '`')
+	  || ((unsigned char)(x) >= '{') );
 }
 
 inline bool MathExpression::checkDigit(char x){
-  return (((unsigned char)(x)>='0' && (unsigned char)(x)<='9')
-	  || (unsigned char)(x)=='.');
+  return (((unsigned char)(x) >= '0' && (unsigned char)(x) <= '9')
+	  || (unsigned char)(x) == '.');
 }
  
 inline bool MathExpression::checkLetter(char x){
-  return (((unsigned char)(x)>='A' && (unsigned char)(x)<='Z')
-	  || ((unsigned char)(x)>='a' && (unsigned char)(x)<='z'));
+  return (((unsigned char)(x) >= 'A' && (unsigned char)(x) <= 'Z')
+	  || ((unsigned char)(x) >= 'a' && (unsigned char)(x) <= 'z')
+	  || ((unsigned char)(x) == '_'));
 }
 
 bool MathExpression::isBuiltinFunction(const char *strname){
@@ -1910,7 +1935,7 @@ int MathExpression::copyCommaContent(char * & exprstring, const char *arg){
 }
 
 int MathExpression::copyBracketContent( char * & exprstring, const char *arg, char open,
-				       char close){
+					char close){
 
   int br_cnt=0, indx=0;
   MemPointer<char> mempointer;
@@ -1989,6 +2014,7 @@ int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
 
   MemPointer<char> mempointer;
   Buffer<char> buffer(BUFSIZE);
+  bool concat_mode = false;
 
   int indx=0;
 
@@ -2009,7 +2035,10 @@ int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
 
       while ( arg[indx] ){ 
 
-	if ( !(checkLetter(arg[indx])) )
+	if ( arg[indx] == '_' )
+	  concat_mode = true;
+
+	if ( !(checkLetter(arg[indx]) || (concat_mode && checkDigit(arg[indx]))) )
 	  break;
 
 	buffer.put(arg[indx]);
@@ -2101,9 +2130,9 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	    } else if (this->getLeft()->isOperator()){
 	      if (!this->getLeft()->getLeft() && this->getLeft()->getRight()){
 		
-		// we have a function-defintion and we have to set the operator-type of the
-		// parameter-list as  "OT_PARAMETER"
-		this->getLeft()->getRight()->setOTParameter();
+		// 		// we have a function-defintion and we have to set the operator-type of the
+		// 		// parameter-list as  "OT_PARAMETER"
+		// 		this->getLeft()->getRight()->setOTParameter();
 
 		if (this->getRight()->checkSyntaxAndOptimize())
 		  return true;
@@ -2120,7 +2149,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
       } else if ( this->oprtr[0] == ',' ){
 
 	if ( !this->elements.size() )
-	    throw ParseException(abs_pos, "invalid syntax: comma-operator has no arguments!");
+	  throw ParseException(abs_pos, "invalid syntax: comma-operator has no arguments!");
 	for ( list<MathExpression *>::iterator it = this->elements.begin(); it != this->elements.end(); it++ )
 	  if ( (*it)->checkSyntaxAndOptimize() == false )
 	    throw ParseException(abs_pos,"invalid syntax in parameter-list!");
@@ -2169,8 +2198,8 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 
       // so far, it was difficult to determine if a (...)-expression is a tuple or a parameterlist;
       // that's why we decide and set it here properly
-//       if ( this->getRight() )
-// 	this->getRight()->setOTParameter();
+      //       if ( this->getRight() )
+      // 	this->getRight()->setOTParameter();
 
       if (!strcmp(this->getOperator(),"log")){
 	if (this->getLeft() && this->getRight())
@@ -2365,8 +2394,10 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 
       if ( this->isOTTuple() == true )
 	this->setValue(assignTupleExpression());
-      else
+      else if ( this->isOTParameter() == true )
 	throw EvalException("parameterlist can't be evaluated!");
+      else
+	throw EvalException("internal error: getOType() == OT_EMPTY!");
 	
       break;
 

@@ -376,6 +376,11 @@ namespace mexp{
     std::list<MathExpression *> elements;
     
     MathExpression *parse(const char *expr, const Context & context, VariableList& locals) throw (ParseException,ExceptionBase);
+
+    int parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode,
+			   const Context & context, const Context & new_context, VariableList & locals) throw (ParseException, ExceptionBase);
+    void searchAndSetLowerPriNode(MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode);
+    int determineAndSetOperatorOrVariable(const char *expr, int e_indx, MathExpression * & ActualNode, const FunctionList *functionlist);
     
     // erases the elements of a n-ary operator
     void eraseElements();
