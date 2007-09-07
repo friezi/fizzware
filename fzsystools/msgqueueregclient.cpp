@@ -269,7 +269,7 @@ MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Excepti
   }
   
   input = buffer.merge();
-  count = buffer.elements();
+  count = buffer.getElements();
  
   return new Token(input.get(),count);
 }

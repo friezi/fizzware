@@ -1017,36 +1017,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 
 		} else{      /* Prev hat kein ->right */
 		  // results in malloc<->free problem
-		  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-
-		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
-		  e_indx+=offset;
-  
-		  bool is_builtin = false;
-		  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-    
-		    ActualNode->setETOperator(exprstring);
-    
-		    if ( is_builtin == true )
-		      ActualNode->setOTFunction();
-		    else
-		      ActualNode->setOTOperation();
-    
-		  } else if ( functionlist ){
-    
-		    if ( functionlist->isMember(exprstring) ){
-      
-		      ActualNode->setETOperator(exprstring);
-		      ActualNode->setOTFunction();
-      
-		    } else
-		      ActualNode->setETVariable(exprstring);
-    
-		  } else
-		    ActualNode->setETVariable(exprstring);
-  
-		  if ( exprstring )
-		    free(exprstring);
+		  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 
 		  // 		  // parse arguments to function if it's followed by function-brackets
@@ -1091,36 +1062,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 
 		} else{      /* Prev hat kein ->right */
 		  // results in malloc<->free problem
-		  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
+		  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
-		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
-		  e_indx+=offset;
-  
-		  bool is_builtin = false;
-		  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-    
-		    ActualNode->setETOperator(exprstring);
-    
-		    if ( is_builtin == true )
-		      ActualNode->setOTFunction();
-		    else
-		      ActualNode->setOTOperation();
-    
-		  } else if ( functionlist ){
-    
-		    if ( functionlist->isMember(exprstring) ){
-      
-		      ActualNode->setETOperator(exprstring);
-		      ActualNode->setOTFunction();
-      
-		    } else
-		      ActualNode->setETVariable(exprstring);
-    
-		  } else
-		    ActualNode->setETVariable(exprstring);
-  
-		  if ( exprstring )
-		    free(exprstring);
 
 		  // 		  // parse arguments to function if it's followed by function-brackets
 		  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
@@ -1315,36 +1258,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  
 		}
 		// results in malloc<->free problem
-		// 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
+		e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 		
-		offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
-		e_indx+=offset;
-  
-		bool is_builtin = false;
-		if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-    
-		  ActualNode->setETOperator(exprstring);
-    
-		  if ( is_builtin == true )
-		    ActualNode->setOTFunction();
-		  else
-		    ActualNode->setOTOperation();
-    
-		} else if ( functionlist ){
-    
-		  if ( functionlist->isMember(exprstring) ){
-      
-		    ActualNode->setETOperator(exprstring);
-		    ActualNode->setOTFunction();
-      
-		  } else
-		    ActualNode->setETVariable(exprstring);
-    
-		} else
-		  ActualNode->setETVariable(exprstring);
-  
-		if ( exprstring )
-		  free(exprstring);
 
 		// 		  // parse arguments to function if it's followed by function-brackets
 		// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
@@ -1423,36 +1338,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 
 	      }
 	      // results in malloc<->free problem
-	      // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
+	      e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
-	      offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
-	      e_indx+=offset;
-  
-	      bool is_builtin = false;
-	      if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-    
-		ActualNode->setETOperator(exprstring);
-    
-		if ( is_builtin == true )
-		  ActualNode->setOTFunction();
-		else
-		  ActualNode->setOTOperation();
-    
-	      } else if ( functionlist ){
-    
-		if ( functionlist->isMember(exprstring) ){
-      
-		  ActualNode->setETOperator(exprstring);
-		  ActualNode->setOTFunction();
-      
-		} else
-		  ActualNode->setETVariable(exprstring);
-    
-	      } else
-		ActualNode->setETVariable(exprstring);
-  
-	      if ( exprstring )
-		free(exprstring);
 
 	      // 		  // parse arguments to function if it's followed by function-brackets
 	      // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
@@ -1492,34 +1379,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 
 	  // if I use this function here, it will result in a malloc<->free problem
 	  // that's why I have to use the original code below
-	  // 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-	  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
-	  e_indx+=offset;
-	  bool is_builtin = false;
-	  if ( (is_builtin = isBuiltinFunction(exprstring)) || checkOperator(exprstring[0]) ){
-
-	    ActualNode->setETOperator(exprstring);
-
-	    if ( is_builtin == true )
-	      ActualNode->setOTFunction();
-	    else
-	      ActualNode->setOTOperation();
-
-	  } else if ( functionlist){
-
-	    if ( functionlist->isMember(exprstring) ){
-
-	      ActualNode->setETOperator(exprstring);
-	      ActualNode->setOTFunction();
-
-	    } else
-	      ActualNode->setETVariable(exprstring);
-
-	  } else
-	    ActualNode->setETVariable(exprstring);
-
-	  if ( exprstring )
-	    free(exprstring);
+	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 	  // 		  // parse arguments to function if it's followed by function-brackets
 	  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
@@ -1906,7 +1766,6 @@ bool MathExpression::isCloseBrace(char c){
 int MathExpression::copyCommaContent(char * & exprstring, const char *arg){
 
   int br_cnt = 0, indx=0;
-  MemPointer<char> mempointer;
   Buffer<char> buffer(BUFSIZE);
 
   exprstring = 0;
@@ -1925,10 +1784,7 @@ int MathExpression::copyCommaContent(char * & exprstring, const char *arg){
 
   buffer.put('\0');
 
-  mempointer = buffer.merge();
-  mempointer.setClearflag(false);
-
-  exprstring = mempointer.get();
+  exprstring = buffer.merge();
 
   return indx;
 
@@ -1938,7 +1794,6 @@ int MathExpression::copyBracketContent( char * & exprstring, const char *arg, ch
 					char close){
 
   int br_cnt=0, indx=0;
-  MemPointer<char> mempointer;
   Buffer<char> buffer(BUFSIZE);
 
   exprstring = 0;
@@ -1977,10 +1832,7 @@ int MathExpression::copyBracketContent( char * & exprstring, const char *arg, ch
   if ( br_cnt )
     return (-1);
 
-  mempointer = buffer.merge();
-  mempointer.setClearflag(false);
-
-  exprstring = mempointer.get();
+  exprstring = buffer.merge();
 
   return(indx);
 
@@ -1988,7 +1840,6 @@ int MathExpression::copyBracketContent( char * & exprstring, const char *arg, ch
   
 int MathExpression::copyFloatContent(char * & exprstring, const char *arg){
 
-  MemPointer<char> mempointer;
   Buffer<char> buffer(BUFSIZE);
 
   int indx=0;
@@ -2002,17 +1853,13 @@ int MathExpression::copyFloatContent(char * & exprstring, const char *arg){
 
   buffer.put('\0');
 
-  mempointer = buffer.merge();
-  mempointer.setClearflag(false);
-
-  exprstring = mempointer.get();
+  exprstring = buffer.merge();
 
   return(indx);
 }
 
 int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
 
-  MemPointer<char> mempointer;
   Buffer<char> buffer(BUFSIZE);
   bool concat_mode = false;
 
@@ -2053,10 +1900,7 @@ int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
 
   buffer.put('\0');
 
-  mempointer = buffer.merge();
-  mempointer.setClearflag(false);
-
-  exprstring = mempointer.get();
+  exprstring = buffer.merge();
 
   return(indx);
 }

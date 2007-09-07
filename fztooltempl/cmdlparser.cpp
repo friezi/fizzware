@@ -447,7 +447,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
     }
   }
   
-  // to few of the mandatory parameters
+  // too few of the mandatory parameters
   for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ )
     if ( (*it).second.mandatory == true && (*it).second.found == false ){
 
@@ -456,7 +456,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 
     }
   
-  // to few of the mandatory arguments are given
+  // too few of the mandatory arguments are given
   if ( argumentcounter < exp_mand_arguments.size() ){
 
     errors << "Too few mandatory arguments!\n";
@@ -537,7 +537,7 @@ string CmdlParser::synonymUsage(string representative){
 
   SynonymDict::iterator rit = synonymdict.find(representative);
 
-  // it's simply to much and actually unnecessary to print all the synonyms
+  // it's simply too much and actually unnecessary to print all the synonyms
   //   if ( rit != synonymdict.end() ){
   //     if ( (*rit).second->empty() == false ){
   //       usg << "{" << representative;
@@ -565,7 +565,7 @@ string CmdlParser::usage(){
     usg << "[-";
     for ( AShortoptions::iterator it = allowedshortoptions.begin(); it != allowedshortoptions.end(); it++ )
       usg << (*it).first;
-    // it's simply to much and actually unnecessary to print all the synonyms
+    // it's simply too much and actually unnecessary to print all the synonyms
     //     for ( ShortSynonymDict::iterator syn_it = shortsynonymdict.begin(); syn_it != shortsynonymdict.end(); syn_it++ )
     //       for ( set<char>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); s_it++ )
     // 	usg << *s_it;

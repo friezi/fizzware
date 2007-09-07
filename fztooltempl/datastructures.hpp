@@ -80,6 +80,8 @@ namespace ds{
     */
     MemPointer( bool clear_on_exit = true ) : ptr((T *)0), clearflag(clear_on_exit) {}
     
+    // attention: probably due to a bug in g++ (occured with V4.0.1) sometimes the ptr will be freed during copy-construction despite
+    // setting clearflag to false!!!
     MemPointer(const MemPointer &mempointer) { this->ptr = mempointer.ptr; }
     
     /**
@@ -175,11 +177,11 @@ namespace ds{
     
   private:
     
-    MemBlock<T> *memblock;
+    MemBlock<T> *memblock_first;
     unsigned long blksize;
     unsigned long offs;
-    unsigned long nmb;
-    unsigned long count;
+    unsigned long blocks;
+    unsigned long elements;
     
   public:
     
@@ -187,7 +189,7 @@ namespace ds{
     /**
        @param blksize size of a block in the buffer
     */
-    Buffer(unsigned long blksize) : memblock(NULL), blksize(blksize), offs(0), nmb(0), count(0){}
+    Buffer(unsigned long blksize) : memblock_first(NULL), blksize(blksize), offs(0), blocks(0), elements(0){}
     
     // Destruktor:
     /**
@@ -206,26 +208,32 @@ namespace ds{
     // Bloecke zu einem Block zusammenfuegen (NULL terminiert)
     /**
        @brief return a MemPointer of a continuous memory-block, filled with the merged buffer-blocks.
-       @return the MemPointer for the memory
+       @return the pointer for the memory
        @remark The block might be bigger than the filled area. No '\\0' will be added, so take care of this by yourself if you want
        to convert it to a string, e.g. use put(0);
        @exception Exception< Buffer<T> >
     */
-    MemPointer<T> merge() throw (ExceptionBase);
+    T *merge() throw (ExceptionBase);
+
+    /**
+       @brief returns a certain element
+       @return the element
+    */
+    T get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase);
     
     // Anzahl der Bloecke
     /**
        @brief Get the number of blocks in the buffer
        @return number of blocks
     */
-    unsigned long blocks(){ return nmb; }
+    unsigned long getBlocks(){ return blocks; }
     
     // Anzahl der geschriebenen Elemente (Ohne NULL-Byte am Ende)
     /**
        @brief Get the total number of elements of type T in the buffer
        @return number of elements
     */
-    unsigned long elements() { return count; }
+    unsigned long getElements() { return elements; }
     
     /**
        @brief Clears the buffer and resets all variables
@@ -598,10 +606,10 @@ ds::Buffer<T>::
   
   ds::MemBlock<T> *curr,*next;
   
-  if( !memblock )
+  if( !memblock_first )
     return;
   
-  curr = memblock;
+  curr = memblock_first;
   
   while (curr){
     
@@ -619,21 +627,21 @@ put(const T &c) throw (ExceptionBase){
   ds::MemBlock<T> *curr;
   
   /* bis zum letzten Block vorarbeiten */
-  if ( memblock ){
-    curr = memblock;
+  if ( memblock_first ){
+    curr = memblock_first;
     while (curr->next)
       curr = curr->next;
   }
   else{
-    memblock = new ds::MemBlock<T>(blksize);
-    curr = memblock;
-    nmb++;
+    memblock_first = new ds::MemBlock<T>(blksize);
+    curr = memblock_first;
+    blocks++;
   }
   
   /* eventuell neuen Block allokieren */
   if ( offs == blksize ){
     curr->next = new ds::MemBlock<T>(blksize);
-    nmb++;
+    blocks++;
     
     curr = curr->next;
     offs=0;
@@ -641,29 +649,63 @@ put(const T &c) throw (ExceptionBase){
   
   /* Zeichen schreiben */
   curr->buf[offs]=c;
-  count++;
+  elements++;
   
   offs++;
 }
 
+template< typename T >
+T
+ds::Buffer<T>::
+get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase){
+
+  ds::MemBlock<T> *curr = 0;
+  unsigned long blocknumber;
+  unsigned long position;
+
+  if ( number < 1 || number > getElements() )
+    throw Exception< Buffer<T> >("get(): index out of bounds!");
+
+  blocknumber = (unsigned long)((int)(number/blksize)) + 1;
+  position = (number-1)%blksize;
+
+  curr = memblock_first;
+  
+  unsigned long i = 1;
+
+  while ( i < blocknumber){
+
+    if ( curr == 0 )
+      throw Exception< Buffer<T> >("get(): internal error: curr = 0!");
+    curr = curr->next;
+    i++;
+
+  }
+
+  if ( curr == 0 )
+    throw Exception< Buffer<T> >("get(): internal error: curr = 0!");
+
+  return curr->buf[position];
+
+}
+
 template<typename T>
-ds::MemPointer<T>
+T *
 ds::Buffer<T>::
 merge() throw (ExceptionBase){
   
   unsigned long units=0, pos=0;
   ds::MemBlock<T> *curr;
-  ds::MemPointer<T> mempointer(false);
   T *block;
   
-  if ( !memblock )
+  if ( !memblock_first )
     return 0;
   
-  curr = memblock;
+  curr = memblock_first;
   
-  units = nmb*blksize;
+  units = blocks*blksize;
   
-  if ( nmb > 1 ){
+  if ( blocks > 1 ){
     
     if ( !(block = (T *)calloc(1,units*sizeof(T)+1)) )
       throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
@@ -691,9 +733,8 @@ merge() throw (ExceptionBase){
 
   }
   
-  mempointer = block;
-  
-  return mempointer;
+  return block;
+
 }
 
 template< typename T >
@@ -703,9 +744,9 @@ clear(){
   
   ds::MemBlock<T> *curr,*next;
   
-  if ( memblock ){
+  if ( memblock_first ){
     
-    curr = memblock;
+    curr = memblock_first;
     
     while (curr){
       
@@ -715,8 +756,8 @@ clear(){
     }
   }
 
-  memblock = NULL;
-  offs = count = 0;
+  memblock_first = NULL;
+  offs = elements = 0;
 
 }
 

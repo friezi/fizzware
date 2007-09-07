@@ -84,7 +84,7 @@ Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,Except
   }
   
   input = buffer.merge();
-  count = buffer.elements();
+  count = buffer.getElements();
   
   return new Token(input.get(),count);
 }

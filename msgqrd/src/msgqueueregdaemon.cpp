@@ -369,7 +369,7 @@ Token *CommandMsgScanner::nextToken(){
   }
   
   input = buffer.merge();
-  sz = buffer.elements();
+  sz = buffer.getElements();
 
   return new Token(input.get(),sz);
 }

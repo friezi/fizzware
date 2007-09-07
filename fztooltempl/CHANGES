@@ -46,3 +46,11 @@ v1.99:
 - MathExpression:
   - more sophisticated error-output
   - added class ParserException, removed SubExcepion<SyntaxErr,MathExpression> and SubException<DefinitionError,MathExpression>
+
+v2.0:
+- Buffer<T>:
+  - changed methodnames:
+    blocks() -> getBlocks()
+    elements() -> getElements()
+  - returntype of merge() changed from MemPointer<T> to T * .
+  - added function get()
