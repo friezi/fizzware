@@ -209,11 +209,11 @@ namespace ds{
     
     // Bloecke zu einem Block zusammenfuegen (NULL terminiert)
     /**
-       @brief return a MemPointer of a continuous memory-block, filled with the merged buffer-blocks.
+       @brief return a pointer to a continuous memory-block, filled with the merged buffer-blocks.
        @return the pointer for the memory
        @remark If the buffer is empty, zero will be returned. The block might be bigger than the filled area.
        No '\\0' will be added, so take care of this by yourself if you want
-       to convert it to a string, e.g. use put(0). After merging the buffer will be cleared and reset to initial state.
+       to convert it into a string, e.g. use put(0). After merging the buffer will be cleared and reset to initial state.
        @exception Exception< Buffer<T> >
     */
     T *merge() throw (ExceptionBase);
