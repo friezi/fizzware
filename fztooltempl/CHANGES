@@ -54,3 +54,4 @@ v2.0:
     elements() -> getElements()
   - returntype of merge() changed from MemPointer<T> to T * .
   - added function get()
+  - merge() will clear the buffer so it will go to initial state

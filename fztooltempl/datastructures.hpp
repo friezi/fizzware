@@ -170,7 +170,9 @@ namespace ds{
   };
   
   /**
-     @brief An extensible Buffer of unspecified size
+     The buffer will constist of several blocks of user-defined size which will be allocated
+     dynamically.
+     @brief A dynamically growing buffer.
   */
   template<typename T>
   class Buffer{
@@ -209,8 +211,9 @@ namespace ds{
     /**
        @brief return a MemPointer of a continuous memory-block, filled with the merged buffer-blocks.
        @return the pointer for the memory
-       @remark The block might be bigger than the filled area. No '\\0' will be added, so take care of this by yourself if you want
-       to convert it to a string, e.g. use put(0);
+       @remark If the buffer is empty, zero will be returned. The block might be bigger than the filled area.
+       No '\\0' will be added, so take care of this by yourself if you want
+       to convert it to a string, e.g. use put(0). After merging the buffer will be cleared and reset to initial state.
        @exception Exception< Buffer<T> >
     */
     T *merge() throw (ExceptionBase);
@@ -603,20 +606,7 @@ ds::MemBlock<T>::
 template<typename T>
 ds::Buffer<T>::
 ~Buffer() throw (ExceptionBase){
-  
-  ds::MemBlock<T> *curr,*next;
-  
-  if( !memblock_first )
-    return;
-  
-  curr = memblock_first;
-  
-  while (curr){
-    
-    next = curr->next;
-    delete curr;
-    curr = next;
-  }
+  clear();
 }
 
 template<typename T>
@@ -732,6 +722,8 @@ merge() throw (ExceptionBase){
     curr->buf = 0;
 
   }
+
+  clear();
   
   return block;
 
@@ -754,10 +746,12 @@ clear(){
       delete curr;
       curr = next;
     }
+
+    memblock_first = NULL;
+
   }
 
-  memblock_first = NULL;
-  offs = elements = 0;
+  offs = elements = blocks = 0;
 
 }
 
