@@ -3,7 +3,7 @@
    This page documents the static-library 'Friedemann-Zintel`s-Tools`n-Templates'
    @author Friedemann Zintel
    
-   Copyright (C) 1999-2004 Friedemann Zintel
+   Copyright (C) 1999-2007 Friedemann Zintel
 
    Compilation is successfully tested with g++ v.2.95, v.3.3 and v.4.0 .
    
