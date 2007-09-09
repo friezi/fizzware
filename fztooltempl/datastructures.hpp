@@ -32,6 +32,7 @@
 #define DATASTRUCTURES_HPP
 #include <utility>
 #include <map>
+#include <list>
 #include <string>
 #include <sstream>
 #include <exception.hpp>
@@ -42,26 +43,6 @@
 */
 
 namespace ds{
-  
-  /**
-     @brief to administer memory-blocks
-     @internal
-  */
-  template<typename T>
-  class MemBlock{
-    
-  public:
-    
-    MemBlock<T> *next;
-    T *buf;
-    
-    // Konstruktor:
-    MemBlock(unsigned long blksize) throw (ExceptionBase);
-    
-    // Destruktor:
-    ~MemBlock() throw (ExceptionBase);
-    
-  };
   
   /**
      @brief for holding pointers
@@ -76,9 +57,16 @@ namespace ds{
   public:
     
     /**
-       @param clear_on_exit if true, free() will be called for internal pointer
+       @param clear_on_exit if true, free() will be called for internal pointer on destruction of object
     */
     MemPointer( bool clear_on_exit = true ) : ptr((T *)0), clearflag(clear_on_exit) {}
+    
+    /**
+       @brief Will allocate a clear memory-area of blksize-bytes
+       @param blksize the size of memory to be allocated
+       @param clear_on_exit if true, free() will be called for internal pointer on destruction of object
+    */
+    MemPointer(unsigned long blksize, bool clear_on_exit ) throw (ExceptionBase);
     
     // attention: probably due to a bug in g++ (occured with V4.0.1) sometimes the ptr will be freed during copy-construction despite
     // setting clearflag to false!!!
@@ -116,7 +104,8 @@ namespace ds{
     void clear ( bool freemem = false ) {
 
       if ( freemem == true )
-	free(ptr);
+	if ( ptr )
+	  free(ptr);
 
       ptr = (T *)0;
 
@@ -179,19 +168,28 @@ namespace ds{
     
   private:
     
-    MemBlock<T> *memblock_first;
+    std::list< MemPointer<T> *> blocklist;
     unsigned long blksize;
     unsigned long offs;
     unsigned long blocks;
     unsigned long elements;
     
+  private:
+    
+    MemPointer<T> * newBlock();
+
   public:
     
     // Konstruktor:
     /**
        @param blksize size of a block in the buffer
     */
-    Buffer(unsigned long blksize) : memblock_first(NULL), blksize(blksize), offs(0), blocks(0), elements(0){}
+    Buffer(unsigned long blksize) throw (Exception< Buffer<T> >) : blksize(blksize), offs(0), blocks(0), elements(0){
+      
+      if ( !blksize )
+	throw Exception< Buffer<T> >("Buffer(): blksize is zero!");
+      
+    }
     
     // Destruktor:
     /**
@@ -587,20 +585,14 @@ operator--(){
 }
 
 template<typename T>
-ds::MemBlock<T>::
-MemBlock(unsigned long blksize) throw (ExceptionBase) : next(0){
-  
-  if (!(buf = (T *)calloc(blksize,sizeof(T))))
-    throw Exception< ds::MemBlock<T> >("MemBlock(): calloc() failed!");
-}
+ds::MemPointer<T>::
+MemPointer(unsigned long blksize,bool clear_on_exit ) throw (ExceptionBase) : clearflag(clear_on_exit){
 
-template<typename T>
-ds::MemBlock<T>::
-~MemBlock() throw (ExceptionBase){
+  if ( blksize == 0 )
+    throw Exception< ds::MemPointer<T> >("MemPointer(): blksize is zero!");
   
-  if (buf)
-    free(buf);
-  
+  if ( !(ptr = (T *)calloc(blksize,sizeof(T))) )
+    throw Exception< ds::MemPointer<T> >("MemPointer(): calloc() failed!");
 }
 
 template<typename T>
@@ -610,35 +602,44 @@ ds::Buffer<T>::
 }
 
 template<typename T>
+ds::MemPointer<T> *
+ds::Buffer<T>::
+newBlock(){
+      
+  ds::MemPointer<T> *block;
+  
+  block = new ds::MemPointer<T>(blksize,true);
+  blocklist.push_back(block);
+  blocks++;
+  
+  return block;
+
+}
+
+template<typename T>
 void
 ds::Buffer<T>::
 put(const T &c) throw (ExceptionBase){
   
-  ds::MemBlock<T> *curr;
+  ds::MemPointer<T> *curr;
   
   /* bis zum letzten Block vorarbeiten */
-  if ( memblock_first ){
-    curr = memblock_first;
-    while (curr->next)
-      curr = curr->next;
-  }
-  else{
-    memblock_first = new ds::MemBlock<T>(blksize);
-    curr = memblock_first;
-    blocks++;
-  }
-  
-  /* eventuell neuen Block allokieren */
-  if ( offs == blksize ){
-    curr->next = new ds::MemBlock<T>(blksize);
-    blocks++;
+  if ( !blocklist.empty() ){
     
-    curr = curr->next;
-    offs=0;
-  }
+    /* eventuell neuen Block allokieren */
+    if ( offs == blksize ){
+
+      curr = newBlock();
+      offs=0;
+      
+    } else
+      curr = blocklist.back();
+
+  } else
+    curr = newBlock();
   
-  /* Zeichen schreiben */
-  curr->buf[offs]=c;
+  /* insert element */
+  curr->get()[offs]=c;
   elements++;
   
   offs++;
@@ -649,33 +650,25 @@ T
 ds::Buffer<T>::
 get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase){
 
-  ds::MemBlock<T> *curr = 0;
   unsigned long blocknumber;
   unsigned long position;
 
   if ( number < 1 || number > getElements() )
-    throw Exception< Buffer<T> >("get(): index out of bounds!");
+    throw Exception< ds::Buffer<T> >("get(): index out of bounds!");
 
-  blocknumber = (unsigned long)((int)(number/blksize)) + 1;
+  blocknumber = ((unsigned long)(number/blksize)) + 1;
   position = (number-1)%blksize;
-
-  curr = memblock_first;
   
-  unsigned long i = 1;
+  typename std::list< ds::MemPointer<T> >::iterator it = blocklist.begin();
 
-  while ( i < blocknumber){
+  for ( unsigned long i = 0; i < blocknumber; it++, i++ )
+    if ( it == blocklist.end() )
+      break;
 
-    if ( curr == 0 )
-      throw Exception< Buffer<T> >("get(): internal error: curr = 0!");
-    curr = curr->next;
-    i++;
+  if ( it == blocklist.end() )
+    throw Exception< ds::Buffer<T> >("get(): internal error: blocklist at end!");
 
-  }
-
-  if ( curr == 0 )
-    throw Exception< Buffer<T> >("get(): internal error: curr = 0!");
-
-  return curr->buf[position];
+  return (*it)->get()[position];
 
 }
 
@@ -684,73 +677,67 @@ T *
 ds::Buffer<T>::
 merge() throw (ExceptionBase){
   
-  unsigned long units=0, pos=0;
-  ds::MemBlock<T> *curr;
+  unsigned long pos=0, full_blocks;
   T *block;
   
-  if ( !memblock_first )
+  if ( blocklist.empty() == true )
     return 0;
   
-  curr = memblock_first;
-  
-  units = blocks*blksize;
+  full_blocks = (unsigned long)((getElements()-1)/blksize);
   
   if ( blocks > 1 ){
     
-    if ( !(block = (T *)calloc(1,units*sizeof(T)+1)) )
+    if ( !(block = (T *)calloc(getElements(),sizeof(T))) )
       throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
     
-    /* copy all blocks */
-    while ( curr ){
+    unsigned long blocknumber = 0;
+
+    for ( typename std::list < ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++, blocknumber++ ){
       
-      if ( !curr->buf )
-	throw Exception< ds::Buffer<T> >("merge(): curr->buf==NULL!");
+      if ( !(*it)->get() )
+	throw Exception< ds::Buffer<T> >("merge(): ptr == NULL!");
       
-      memcpy(&block[pos],curr->buf,blksize*sizeof(T));
-      pos += blksize*sizeof(T);
-      curr = curr->next;
-      
+      if ( blocknumber < full_blocks ){
+	
+	memcpy(&block[pos],(*it)->get(),blksize*sizeof(T));
+	pos += blksize*sizeof(T);
+	
+      } else{
+	
+	memcpy(&block[pos],(*it)->get(),offs);
+	pos += offs;
+
+      }	
+
     }
     
   } else{
     // only one block is filled
     // we can safely return the already filled memory-area
-
-    block = curr->buf;
+    
+    block = blocklist.front()->get();
     
     // make sure that the memory will not be erased twice
-    curr->buf = 0;
-
+    blocklist.front()->setClearflag(false);;
+    
   }
-
+  
   clear();
   
   return block;
-
+  
 }
 
 template< typename T >
 void
 ds::Buffer<T>::
 clear(){
+
+  for ( typename std::list< ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++ )
+    delete (*it);
+
+  blocklist.clear();
   
-  ds::MemBlock<T> *curr,*next;
-  
-  if ( memblock_first ){
-    
-    curr = memblock_first;
-    
-    while (curr){
-      
-      next = curr->next;
-      delete curr;
-      curr = next;
-    }
-
-    memblock_first = NULL;
-
-  }
-
   offs = elements = blocks = 0;
 
 }
