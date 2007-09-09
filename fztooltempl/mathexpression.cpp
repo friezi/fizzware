@@ -2237,7 +2237,7 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
     case ',':
 
       if ( this->isOTTuple() == true )
-	this->setValue(assignTupleExpression());
+	this->setValue(evalTupleExpression());
       else if ( this->isOTParameter() == true )
 	throw EvalException("parameterlist can't be evaluated!");
       else
@@ -2335,7 +2335,7 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 
 }
 
-Value * MathExpression::assignTupleExpression(){
+Value * MathExpression::evalTupleExpression(){
 
   Tuple *value = new Tuple();
 
@@ -2498,32 +2498,46 @@ Value *MathExpression::assignValue(void) throw (ExceptionBase){
 Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
   VariableList vl = *this->varlist; // local scope
-  MathExpression *args =  0,*params = 0;
   Function *f_template = functionlist->get(this->getOperator());
 
   vl.unprotect();  // remove protection-status for all variables
 
-  args = this->getRight();
-  params = f_template->getParameterList();
-
-  // eval args and insert them in varlist
-  if (!args->isEmpty()){
-
-    if (args->oprtr[0] == ','){
-
-      for ( list<MathExpression *>::iterator ait = args->elements.begin(), pit = params->elements.begin();
-	    ait != args->elements.end(); ait++, pit++ )
-	vl.insert((*pit)->getVariable(),(*ait)->eval()->clone());
-      
-    } else
-      vl.insert(params->getVariable(),args->eval()->clone());
-
-  }
+  // assign values to all variables occuring in function-head and add them to local scope
+  assignVariablesInFunctionhead(vl,f_template->getParameterList(),this->getRight());
 
   // build an instance of the function-template
   MathExpression function(f_template->getBody(),&vl,functionlist,abs_pos);
 
+  // eval the function
   return function.eval()->clone();
+
+}
+
+void MathExpression::assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, MathExpression * argument) throw (ExceptionBase){
+
+  // if it's a variable it can be assigned directly
+  if ( parameter->isVariable() )
+    vl.insert(parameter->getVariable(), argument->eval()->clone());
+  else{
+    // a tuple of variables
+    
+    list<MathExpression *>::iterator pit, ait;
+
+    for ( pit = parameter->elements.begin(), ait = argument->elements.begin();
+	  pit != parameter->elements.end();
+	  pit++, ait++ ){
+      
+      if ( ait == argument->elements.end() )
+	throw EvalException(string("no matching argument to parameter: ") + (*pit)->toString(Value::DFLT_PRECISION) + "!");
+
+      // recursive assigment
+      assignVariablesInFunctionhead(vl,(*pit),(*ait));
+
+    }
+
+    if ( ait != argument->elements.end() )
+      throw EvalException("too many arguments for function!");
+  }
 
 }
 

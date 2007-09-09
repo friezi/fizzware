@@ -446,8 +446,6 @@ namespace mexp{
     MathExpression *getRight(void) const { return right; }
     MathExpression *getPred(void) const { return pred; }
 
-//     void initLeftRight();
-
     void setRight(MathExpression *right);
     void setLeft(MathExpression *left);
     void addElement(MathExpression *element);
@@ -467,6 +465,8 @@ namespace mexp{
     
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
+
+    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, MathExpression * argument) throw (ExceptionBase);
     
     // private constructor:
     MathExpression(int abs_pos, VariableList *vl = 0, FunctionList *fl = 0);
@@ -491,7 +491,7 @@ namespace mexp{
     MathExpression(MathExpression *me, VariableList *vl, FunctionList *fl, int abs_pos)
       throw (ParseException,ExceptionBase);
 
-    Value * assignTupleExpression();
+    Value * evalTupleExpression();
 
   public:
     
