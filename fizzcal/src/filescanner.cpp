@@ -52,6 +52,7 @@ string FileScanner::nextLine(){
     
   }
   
+  return "";
 
 }
 
