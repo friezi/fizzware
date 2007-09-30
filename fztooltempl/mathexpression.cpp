@@ -486,6 +486,7 @@ Value *Complex::operator-(Value *right) throw (ExceptionBase){
   return new Complex(getRe()-rc->getRe(),getIm()-rc->getIm());
 
 }
+
 Value *Complex::operator*(Value *right) throw (ExceptionBase){ 
       
   if ( right->getType() == Value::COMPLEX ){
@@ -507,19 +508,32 @@ Value *Complex::operator*(Value *right) throw (ExceptionBase){
     throw EvalException(string("unsupported type for '*': ") + right->toString() + string(" !"));
     
 }
+
 Value *Complex::operator/(Value *right) throw (ExceptionBase){
 
   Complex *rc = assertComplex(right);
-  return new Complex((getRe()*rc->getRe()+getIm()*rc->getIm())/(::pow(rc->getRe(),2)+::pow(rc->getIm(),2)),
-		     (getIm()*rc->getRe()-getRe()*rc->getIm())/(::pow(rc->getRe(),2)+::pow(rc->getIm(),2)));
+
+  double divisor = (::pow(rc->getRe(),2)+::pow(rc->getIm(),2));
+  
+  if ( divisor == 0 )
+    throw EvalException("division by zero!");
+  
+  return new Complex((getRe()*rc->getRe()+getIm()*rc->getIm())/divisor,
+		     (getIm()*rc->getRe()-getRe()*rc->getIm())/divisor);
       
 }
 
 Value *Complex::integerDivision(Value *right) throw (ExceptionBase){
   
   Complex *rc = assertComplex(right);
-  return new Complex((double)((int)((getRe()*rc->getRe()+getIm()*rc->getIm())/(::pow(rc->getRe(),2)+::pow(rc->getIm(),2)))),
-		     (double)((int)((getIm()*rc->getRe()-getRe()*rc->getIm())/(::pow(rc->getRe(),2)+::pow(rc->getIm(),2)))));
+
+  double divisor = (::pow(rc->getRe(),2)+::pow(rc->getIm(),2));
+  
+  if ( divisor == 0 )
+    throw EvalException("division by zero!");
+
+  return new Complex((double)((int)((getRe()*rc->getRe()+getIm()*rc->getIm())/divisor)),
+		     (double)((int)((getIm()*rc->getRe()-getRe()*rc->getIm())/divisor)));
       
 }
 

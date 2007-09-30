@@ -47,6 +47,7 @@
 #define FON "fon"   // show formula
 #define FOFF "foff" // hide formula
 #define HELP "help"
+#define INFO "info"
 #define GPL "gpl"
 #define VARS "vars"    // show variables
 #define REMVAR "undefvar" // remove variable
@@ -61,7 +62,7 @@
 #define SHOWHELP2 "more" // program to show help
 
 std::string setupParser(cmdl::CmdlParser& parser);
-void header(const char *appname);
+void info(const char *appname);
 void show(const char *pname, void (*what)(const char *));
 void printHelp(const char *pname);
 void gpl(const char *nix);

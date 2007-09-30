@@ -89,9 +89,9 @@ int main(int argc, char **argv, char **envp){
     if ( cmdlparser.checkParameter(formula).first == true )
       interactive = false;
     
-    // header-output in interactive-mode
+    // info-output in interactive-mode
     if ( interactive == true )
-      header(programname);
+      info(programname);
     
     // setup predefined variables
     varlist = new VariableList();
@@ -168,6 +168,11 @@ int main(int argc, char **argv, char **envp){
 	} else if (!strcmp(input.get(),HELP)){
 
 	  show(programname,printHelp);
+	  continue;
+
+	} else if (!strcmp(input.get(),INFO)){
+
+	  show(programname,info);
 	  continue;
 
 	} else if (!strcmp(input.get(),GPL)){
@@ -518,7 +523,7 @@ void printErrorArrow(int pos){
 
 }
 
-void header(const char *appname){
+void info(const char *appname){
 
   cout << "\n" << appname << " version " << version
        << ", Copyright (C) 1999-2007  Friedemann Zintel\n";
@@ -577,8 +582,9 @@ void printHelp(const char *pname){
   cout << "help:\n\n"
        << "the following commands are accessible:" << endl << endl
        << HELP << "\t\tdisplay this helpfile" << endl
+       << INFO << "\t\tdisplay application-information" << endl
        << GPL << "\t\tdisplays the GPL" << endl
-       << QUIT << "\t\tends the program" << endl
+       << QUIT << "\t\tends the program (same as Ctrl-D)" << endl
        << VARS << "\t\tdisplays all variables with values" << endl
        << REMVAR << " [var1 [...]]" << "\t\tundefines the variables" << endl
        << UNDEF << " [fun1 [...]]" << "\t\tundefines the functions" << endl
@@ -726,7 +732,7 @@ void gpl(const char *nix){
        << "\n"
        << "  The precise terms and conditions for copying, distribution and\n"
        << "modification follow.\n"
-       << "\n"
+       << "\n"
        << "		    GNU GENERAL PUBLIC LICENSE\n"
        << "   TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION\n"
        << "\n"
@@ -781,7 +787,7 @@ void gpl(const char *nix){
        << "    License.  (Exception: if the Program itself is interactive but\n"
        << "    does not normally print such an announcement, your work based on\n"
        << "    the Program is not required to print an announcement.)\n"
-       << "\n"
+       << "\n"
        << "These requirements apply to the modified work as a whole.  If\n"
        << "identifiable sections of that work are not derived from the Program,\n"
        << "and can be reasonably considered independent and separate works in\n"
@@ -839,7 +845,7 @@ void gpl(const char *nix){
        << "access to copy the source code from the same place counts as\n"
        << "distribution of the source code, even though third parties are not\n"
        << "compelled to copy the source along with the object code.\n"
-       << "\n"
+       << "\n"
        << "  4. You may not copy, modify, sublicense, or distribute the Program\n"
        << "except as expressly provided under this License.  Any attempt\n"
        << "otherwise to copy, modify, sublicense or distribute the Program is\n"
@@ -896,7 +902,7 @@ void gpl(const char *nix){
        << "\n"
        << "This section is intended to make thoroughly clear what is believed to\n"
        << "be a consequence of the rest of this License.\n"
-       << "\n"
+       << "\n"
        << "  8. If the distribution and/or use of the Program is restricted in\n"
        << "certain countries either by patents or by copyrighted interfaces, the\n"
        << "original copyright holder who places the Program under this License\n"
@@ -949,7 +955,7 @@ void gpl(const char *nix){
        << "POSSIBILITY OF SUCH DAMAGES.\n"
        << "\n"
        << "		     END OF TERMS AND CONDITIONS\n"
-       << "\n"
+       << "\n"
        << "	    How to Apply These Terms to Your New Programs\n"
        << "\n"
        << "  If you develop a new program, and you want it to be of the greatest\n"
