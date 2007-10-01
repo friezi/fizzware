@@ -1030,42 +1030,9 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  ActualNode->setOTOperation();
 
 		} else{      /* Prev hat kein ->right */
-		  // results in malloc<->free problem
+
 		  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
-
-		  // 		  // parse arguments to function if it's followed by function-brackets
-		  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
-
-		  // 		    if ( expr[e_indx] == '(' ){
-
-		  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
-			
-		  // 			delete TopNode;
-		  // 			throw ParseException(abs_pos, "missing bracket!");
-			
-		  // 		      }
-		      
-		  // 		      e_indx+=offset;
-		  // 		      abs_pos-=offset-1;
-		      
-		  // 		      Context subsequent_context;
-
-		  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-		  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
-		      
-		  // 		      abs_pos++;
-		      
-		  // 		      if ( bracketstring )
-		  // 			free(bracketstring);
-		      
-		  // 		      actn->setOTParameter();
-		  // 		      ActualNode->setRight(actn);
-		  // 		      actn->pred = ActualNode;
-		      
-		  // 		    }
-		  // 		  }
-		  
 		}
 	      } else{          /* Prev hat kein ->pred */
 
@@ -1075,41 +1042,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  ActualNode->setOTOperation();
 
 		} else{      /* Prev hat kein ->right */
-		  // results in malloc<->free problem
+
 		  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-
-
-		  // 		  // parse arguments to function if it's followed by function-brackets
-		  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
-
-		  // 		    if ( expr[e_indx] == '(' ){
-
-		  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
-			
-		  // 			delete TopNode;
-		  // 			throw ParseException(abs_pos, "missing bracket!");
-			
-		  // 		      }
-		      
-		  // 		      e_indx+=offset;
-		  // 		      abs_pos-=offset-1;
-		      
-		  // 		      Context subsequent_context;
-
-		  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-		  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
-		      
-		  // 		      abs_pos++;
-		      
-		  // 		      if ( bracketstring )
-		  // 			free(bracketstring);
-		      
-		  // 		      actn->setOTParameter();
-		  // 		      ActualNode->setRight(actn);
-		  // 		      actn->pred = ActualNode;
-		      
-		  // 		    }
-		  // 		  }
 
 		}
 	      }
@@ -1119,6 +1053,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	      ActualNode->setOTOperation();
 
 	    }
+
 	  } else{ /* Arithmetischer Operator */
 
 	    if ( PrevNode->isOperator() ){
@@ -1271,41 +1206,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		    PrevNode->addVariablesToList(&locals);
 		  
 		}
-		// results in malloc<->free problem
+
 		e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-		
-
-		// 		  // parse arguments to function if it's followed by function-brackets
-		// 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
-
-		// 		    if ( expr[e_indx] == '(' ){
-
-		// 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
-			
-		// 			delete TopNode;
-		// 			throw ParseException(abs_pos, "missing bracket!");
-			
-		// 		      }
-		      
-		// 		      e_indx+=offset;
-		// 		      abs_pos-=offset-1;
-		      
-		// 		      Context subsequent_context;
-
-		// 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-		// 			actn = new MathExpression(abs_pos,varlist,functionlist);
-		      
-		// 		      abs_pos++;
-		      
-		// 		      if ( bracketstring )
-		// 			free(bracketstring);
-		      
-		// 		      actn->setOTParameter();
-		// 		      ActualNode->setRight(actn);
-		// 		      actn->pred = ActualNode;
-		      
-		// 		    }
-		// 		  }
 		
 	      }
 	    } else{ /* der Vorgaenger ist kein Operator, also "normale"
@@ -1351,94 +1253,14 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  PrevNode->addVariablesToList(&locals);
 
 	      }
-	      // results in malloc<->free problem
+
 	      e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-
-
-	      // 		  // parse arguments to function if it's followed by function-brackets
-	      // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
-
-	      // 		    if ( expr[e_indx] == '(' ){
-
-	      // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
-			
-	      // 			delete TopNode;
-	      // 			throw ParseException(abs_pos, "missing bracket!");
-			
-	      // 		      }
-		      
-	      // 		      e_indx+=offset;
-	      // 		      abs_pos-=offset-1;
-		      
-	      // 		      Context subsequent_context;
-
-	      // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-	      // 			actn = new MathExpression(abs_pos,varlist,functionlist);
-		      
-	      // 		      abs_pos++;
-		      
-	      // 		      if ( bracketstring )
-	      // 			free(bracketstring);
-		      
-	      // 		      actn->setOTParameter();
-	      // 		      ActualNode->setRight(actn);
-	      // 		      actn->pred = ActualNode;
-		      
-	      // 		    }
-	      // 		  }
 
 	    }
 	  }
 	} else{ /* kein PrevNode */
 
-	  // if I use this function here, it will result in a malloc<->free problem
-	  // that's why I have to use the original code below
 	  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
-
-	  // 		  // parse arguments to function if it's followed by function-brackets
-	  // 		  if ( ActualNode->isOperator() && ActualNode->isOTFunction() ){
-
-	  // 		    if ( expr[e_indx] == '(' ){
-
-	  // 		      if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],'(',')')) == -1 ){
-			
-	  // 			delete TopNode;
-	  // 			throw ParseException(abs_pos, "missing bracket!");
-			
-	  // 		      }
-		      
-	  // 		      e_indx+=offset;
-	  // 		      abs_pos-=offset-1;
-		      
-	  // 		      Context subsequent_context;
-
-	  // 		      if ( !(actn = this->parse(bracketstring,subsequent_context,locals)) )
-	  // 			actn = new MathExpression(abs_pos,varlist,functionlist);
-		      
-	  // 		      abs_pos++;
-		      
-	  // 		      if ( bracketstring )
-	  // 			free(bracketstring);
-
-	  // 		      MathExpression *parameter = actn;
-
-	  // 		      if ( !actn->isOperator() && !actn->isOTParameter() ){
-
-	  // 			parameter = new MathExpression(abs_pos,varlist,functionlist);
-	  // 			parameter->setETOperator(",");
-	  // 			parameter->setOTParameter();
-	  // 			parameter->addElement(actn);
-	  // 			actn->pred = parameter;
-
-	  // 		      }
-			
-	  // 		      cout << parameter->toString(20) << endl;
-		      
-	  // 		      ActualNode->setRight(parameter);
-	  // 		      parameter->pred = ActualNode;
-		      
-	  // 		    }
-	  // 		  }
 
 	}
       }
@@ -2308,7 +2130,7 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 	//TODO
 	throw EvalException("SumProd not supported yet!");
 
-	// 	this->setValue(sumProd());
+	//this->setValue(sumProd());
 
       } else if (!strcmp("sgn",getOperator())){
 
@@ -2399,11 +2221,15 @@ double MathExpression::faculty(double fac) throw (ExceptionBase){
   if (fac!=(double)((int)(fac)) || fac<0)
     throw EvalException
       ("Argument of Faculty not a natural number or negative!");
+
   if (fac==0)
     return(1);
+
   for (int i=(int)fac-1;i>0;i--)
     fac*=i;
+
   return(fac);
+
 }
 
 #ifdef NO_COMPILE
@@ -2416,11 +2242,11 @@ double MathExpression::sumProd(void)
   Value *c_from,*c_to;
   double from, to;
   Complex *value, res;
-  char p=0;
+  char p = 0;
   
   if (!strcmp(PROD,this->getOperator())){
-    res=1;
-    p=1;
+    res = 1;
+    p = 1;
   }
   
   // Indexvariable zum lokalen Scope hinzufuegen
@@ -2428,8 +2254,8 @@ double MathExpression::sumProd(void)
 	    this->left->left->right->eval()->clone());
 
   //Zaehlbereich
-  cfrom=vl.getValue(me.left->left->left->getVariable());
-  cto=me.left->right->eval()->clone();
+  c_from = vl.getValue(me.left->left->left->getVariable());
+  c_to = me.left->right->eval()->clone();
 
   Complex::assertReal(c_from);
   Complex::assertReal(c_to);
@@ -2437,15 +2263,15 @@ double MathExpression::sumProd(void)
   from = ((Complex *)c_from)->getRe();
   to = ((Complex *)c_to)->getRe();
 
-  if ( from!=(int)from || from<0 || to!=(int)to )
+  if ( from != (int)from || from < 0 || to != (int)to )
     throw EvalException("indices in Sum/Prod not natural or negative!");
 
-  if ( to<from )
+  if ( to < from )
     return 0;
 
   value = me.right->eval()->clone();
 
-  for ( int i=(int)from;i<=(int)to; ){
+  for ( int i = (int)from; i <= (int)to; ){
 
     if (!p)
       res += me.right->eval();  // Summe
