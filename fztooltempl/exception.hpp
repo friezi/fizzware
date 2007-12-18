@@ -101,6 +101,18 @@ public:
   */
   virtual const std::string &getIdMsg() const { return id_errormsg; }
 
+  /** @brief prepends a message-text to the existing message-text
+      @return the exception itself
+      @since V2.1
+  */
+  ExceptionBase & prependMsg(std::string msg);
+
+  /** @brief appends a message-text to the existing message-text
+      @return the exception itself
+      @since V2.1
+  */
+  ExceptionBase & appendMsg(std::string msg);
+
 };
 
 /** 

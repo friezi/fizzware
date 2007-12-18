@@ -28,7 +28,7 @@
 using namespace std;
 using namespace cmdl;
 
-Synonyms & Synonyms::operator<<(std::string synonym){
+Synonyms & Synonyms::operator<<(string synonym){
   
   this->insert(synonym);
   return *this;
@@ -42,7 +42,7 @@ ShortSynonyms & ShortSynonyms::operator<<(char synonym){
 
 }
 
-Aliases & Aliases::operator<<(std::string entry){
+Aliases & Aliases::operator<<(string entry){
   
   this->insert(entry);
   return *this;
@@ -53,7 +53,27 @@ ShortAliases & ShortAliases::operator<<(char entry){
   
   this->insert(entry);
   return *this;
+  
+}
 
+Supervisors & Supervisors::operator<<(string supervisor) throw(Exception<CmdlParser>){
+  
+  if ( synonymdict->find(supervisor) == synonymdict->end() )
+    throw Exception<CmdlParser>("supervisor \"" + supervisor + "\" no representative!");
+  
+  this->insert(supervisor);
+  return *this;
+  
+}
+
+ShortSupervisors & ShortSupervisors::operator<<(char shortsupervisor) throw(Exception<CmdlParser>){
+  
+  if ( shortsynonymdict->find(shortsupervisor) == shortsynonymdict->end() )
+    throw Exception<CmdlParser>("shortsupervisor \"" + (string("") += shortsupervisor) + "\" no shortrepresentative!");
+  
+  this->insert(shortsupervisor);
+  return *this;
+  
 }
 
 CmdlParser::MultiParameters::~MultiParameters(){
@@ -155,6 +175,14 @@ ShortAliases & CmdlParser::shortalias(char aliasname){
   return *shortaliasdict[aliasname];
 }
 
+Supervisors & CmdlParser::supervisor(){
+  return *supervisors;
+}
+
+ShortSupervisors & CmdlParser::shortsupervisor(){
+  return *shortsupervisors;
+}
+
 string CmdlParser::getRepresentative(string synonym){
 
   string representative;
@@ -183,21 +211,37 @@ char CmdlParser::getShortRepresentative(char synonym){
   }
 
   return synonym;
+
 }
 
 CmdlParser::CmdlParser(int argc, char **argv) throw(Exception<CmdlParser>) :
   argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),finalargument("",""){
 
+  supervisors = 0;
+  shortsupervisors = 0;
+
   if (argc < 1)
     throw Exception<CmdlParser>("fatal error: argc < 1!");
 
   programname = argv[0];
+
+  supervisors = new Supervisors(&synonymdict);
+  shortsupervisors = new ShortSupervisors(&shortsynonymdict);
+
+}
+
+CmdlParser::~CmdlParser(){
+
+  delete shortsupervisors;
+  delete supervisors;
+
 }
 
 void CmdlParser::setInfiniteArguments(string id){
 
   infinite_args = true;
   infinite_args_id = id;
+
 }
 
 string CmdlParser::getFinalArgumentId() throw (Exception<CmdlParser>){
@@ -206,6 +250,7 @@ string CmdlParser::getFinalArgumentId() throw (Exception<CmdlParser>){
     throw Exception<CmdlParser>("No final argument defined!");
   else
     return finalargument.first;
+
 }
 
 string CmdlParser::getFinalArgumentValue() throw (Exception<CmdlParser>){
@@ -214,12 +259,14 @@ string CmdlParser::getFinalArgumentValue() throw (Exception<CmdlParser>){
     throw Exception<CmdlParser>("No final argument defined!");
   else
     return finalargument.second;
+
 }
 
 void CmdlParser::parse() throw(Exception<CmdlParser>){
 
   int length;
   bool end_of_options = false;
+  bool supervised = false;
   unsigned int argumentcounter = 0;
 
   errors << endl;
@@ -269,7 +316,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	    for ( ShortAliases::iterator sa_it = (*sad_it).second->begin(); sa_it != (*sad_it).second->end(); sa_it++ )
 	      shortoptions.insert(*sa_it);
 		
-	  } else{  // no alias
+	  } else {  // no alias
 	    
 	    // invalid option:
 	    if ( allowedshortoptions.find(shortoption) == allowedshortoptions.end() ){
@@ -277,8 +324,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	      errors << "invalid option: " << string(1,shortoption) << endl;
 	      parseerror = true;
 
-	    } else
+	    } else {
+	      
 	      shortoptions.insert(shortoption); // insert
+
+	      // is it a supervisor?
+	      if ( shortsupervisors->find(shortoption) != shortsupervisors->end() )
+		supervised = true;
+	      
+	    }
 	  }
 	}
       } else{  // maybe normal option
@@ -331,8 +385,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 		errors << "invalid option: " << option << endl;
 		parseerror = true;
 
-	      } else
+	      } else{
+
 		options.insert(option);
+
+		// is it a supervisor?
+		if ( supervisors->find(option) != supervisors->end() )
+		  supervised = true;
+
+	      }
 	      
 	    }
 	  } else if ( multiparam == true ){  // a multi-parameter with value
@@ -472,12 +533,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
     parseerror = true;
 
   }
-  
+
+  // do not throw exception if a supervisor-option occured
+  if ( supervised == true )
+    return;
  
   // Parseerror occured
-  if ( parseerror == true ){
+  if ( parseerror == true )
     throw Exception<CmdlParser>(errors.str());
-  }
+  
 }
 
 pair<bool,string> CmdlParser::checkParameter(string parameter){
@@ -618,7 +682,7 @@ string CmdlParser::usage(){
   return usg.str();
 }
 
-std::string CmdlParser::infoUsage(){
+string CmdlParser::infoUsage(){
   
   ostringstream usg;
   
@@ -659,7 +723,7 @@ std::string CmdlParser::infoUsage(){
       usg << "--" << (*it).first;
       SynonymDict::iterator syn_it;
       if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
-	for ( set<std::string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
+	for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
 	  usg << ", --" << *s_it;
       usg << "\n  " << (*it).second.description << endl << endl;
     }
@@ -667,7 +731,7 @@ std::string CmdlParser::infoUsage(){
     for ( AliasDict::iterator it = aliasdict.begin(); it != aliasdict.end(); ++it ){
       usg << "--" << (*it).first << endl;
       usg << "  an alias for the combination of the following options:" << endl << "  ";
-      for ( set<std::string>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); ++a_it )
+      for ( set<string>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); ++a_it )
 	usg << " --" << *a_it;
       usg << endl << endl;
     }
@@ -677,7 +741,7 @@ std::string CmdlParser::infoUsage(){
 	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
-	  for ( set<std::string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
+	  for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
 	    usg << ", --" << *s_it << "=<" << (*it).second.valueid << ">";
 	usg << "\n  " << (*it).second.description << endl << endl;
       }
@@ -687,7 +751,7 @@ std::string CmdlParser::infoUsage(){
       usg << "--" << (*it).first << ":<" << (*it).second.valueid << ">";
       SynonymDict::iterator syn_it;
       if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
-	for ( set<std::string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
+	for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
 	  usg << ", --" << *s_it << ":<" << (*it).second.valueid << ">";
       usg << "\n  " << (*it).second.description << endl << endl;
     }
@@ -703,7 +767,7 @@ std::string CmdlParser::infoUsage(){
 	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
-	  for ( set<std::string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
+	  for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
 	    usg << ", --" << *s_it << "=<" << (*it).second.valueid << ">";
 	usg << "\n  " << (*it).second.description << endl << endl;
       }

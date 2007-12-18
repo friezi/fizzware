@@ -50,6 +50,8 @@
 namespace cmdl{
 
   class CmdlParser;
+  class Supervisors;
+  class ShortSupervisors;
 
   /**
      @brief For storing Synonyms
@@ -158,6 +160,8 @@ namespace cmdl{
   */
   class CmdlParser{
 
+    friend class Supervisors;
+    friend class ShortSupervisors;
 
   private:
 
@@ -190,7 +194,7 @@ namespace cmdl{
  
   protected:
     typedef std::map< std::string,std::string,std::less<std::string> > MandatoryArguments; // for mandatory arguments
-    typedef std::list<Info>ExpMandArguments; // for expected mandatory arguments
+    typedef std::list<Info> ExpMandArguments; // for expected mandatory arguments
     typedef std::map< std::string,APInfo,std::less<std::string> > AParameters;  // allowed parameters
     typedef std::map< std::string,Info,std::less<std::string> > AMParameters; // allowed multi-parameters
     typedef std::set< std::string,std::less<std::string> > Options;
@@ -292,6 +296,14 @@ namespace cmdl{
     // stores all shortaliases
     ShortAliasDict shortaliasdict;
 
+    // stores all supervisors
+    // for technical reasons this MUST be a pointer (unfortunately)
+    Supervisors *supervisors;
+
+    // stores all shortsupervisors
+    // for technical reasons this MUST be a pointer (unfortunately)
+    ShortSupervisors *shortsupervisors;
+
   protected:
 
     /**
@@ -310,7 +322,7 @@ namespace cmdl{
     CmdlParser(int argc, char **argv) throw(Exception<CmdlParser>);
 
     // the default-destructor
-    ~CmdlParser(){}
+    ~CmdlParser();
 
     /**
        Shortoptions are single characters which can be compined with one optioncall, on the
@@ -384,7 +396,7 @@ namespace cmdl{
     }
 
     /**
-       Actuall, this method returns all synonyms belonging to representative.
+       Actually, this method returns all synonyms belonging to representative.
        This method's purpose is to define synonyms for the representative. Example:\n
        synonym("representative") << "s1" << "s2";
        @brief to define synonyms
@@ -398,7 +410,7 @@ namespace cmdl{
 
     /**
        Method for short-options\n
-       Actuall, this method returns all synonyms belonging to representative.
+       Actually, this method returns all synonyms belonging to representative.
        This method's purpose is to define synonyms for the representative. Example:\n
        synonym("representative") << "s1" << "s2";
        @brief to define shortsynonyms
@@ -432,6 +444,40 @@ namespace cmdl{
        @note shortaliases can't be mixed with normal aliases
     */
     ShortAliases & shortalias(char aliasname);
+
+    /**
+       Actually, this method returns all supervisors.
+       This method's purpose is to define supervisors. A supervisor is an option which suppresses
+       raise of exceptions in case of a malformed commandline. For instance if you want the program to react
+       on a "help"-option properly in absence of all mandatory options, the parser must not complain about the missing
+       mandatory options/parameters.
+       So you define the "help"-option (must be defined already) as a supervisor.\n
+       Example:\n
+       supervisor() << "s1" << "s2";
+       @brief to define supervisors
+       @return the supervisors
+       @see very useful in combination with Supervisors::operator<<()
+       @note the supervisors must be representatives. The representative exists if you defined it as a option.
+       @since V2.1
+    */
+    Supervisors & supervisor();
+
+    /**
+       Actually, this method returns all shortsupervisors.
+       This method's purpose is to define shortsupervisors. A shortsupervisor is an option which suppresses
+       raise of exceptions in case of a malformed commandline. For instance if you want the program to react
+       on a "h"-shortoption (for help) properly in absence of all mandatory options, the parser must not complain about the missing
+       mandatory options/parameters.
+       So you define the "h"-shortoption (must be defined already) as a shortsupervisor.\n
+       Example:\n
+       shortsupervisor() << "s1" << "s2";
+       @brief to define shortsupervisors
+       @return the shortsupervisors
+       @see very useful in combination with SShortupervisors::operator<<()
+       @note the shortsupervisors must be shortrepresentatives. The shortrepresentative exists if you defined it as a shortoption.
+       @since V2.1
+    */
+    ShortSupervisors & shortsupervisor();
 
     /**
        @brief get the representative for a synonym
@@ -599,6 +645,66 @@ namespace cmdl{
   protected:
 
     std::string synonymUsage(std::string representative);
+
+  };
+
+  /**
+     @brief For storing Supervisors
+     @since V2.1
+  */
+  class Supervisors : private std::set< std::string,std::less<std::string> >{
+
+    friend class CmdlParser;
+
+  private:
+
+    CmdlParser::SynonymDict * synonymdict;
+
+    Supervisors(){}
+
+    Supervisors(CmdlParser::SynonymDict * synonymdict) : synonymdict(synonymdict) {}
+    Supervisors(Supervisors &){}
+
+  public:
+    
+    /**
+       @brief adds the supervisor to the list of supervisors
+       @return reference to supervisors
+       @exception Exception<CmdlParser>
+       @see CmdlParser::supervisor()
+
+    */
+    Supervisors & operator<<(std::string supervisor) throw(Exception<CmdlParser>);
+
+  };
+
+  /**
+     @brief For storing ShortSupervisors
+     @since V2.1
+  */
+  class ShortSupervisors : private std::set< char,std::less<char> >{
+
+    friend class CmdlParser;
+
+  private:
+
+    CmdlParser::ShortSynonymDict * shortsynonymdict;
+
+    ShortSupervisors(){}
+
+    ShortSupervisors(CmdlParser::ShortSynonymDict * shortsynonymdict) : shortsynonymdict(shortsynonymdict) {}
+    ShortSupervisors(ShortSupervisors &){}
+
+  public:
+    
+    /**
+       @brief adds the shortsupervisor to the list of shortsupervisors
+       @return reference to shortsupervisors
+       @exception Exception<CmdlParser>
+       @see CmdlParser::shortsupervisor()
+
+    */
+    ShortSupervisors & operator<<(char shortsupervisor) throw(Exception<CmdlParser>);
 
   };
 

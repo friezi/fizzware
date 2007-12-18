@@ -2130,7 +2130,7 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 	//TODO
 	throw EvalException("SumProd not supported yet!");
 
-	//this->setValue(sumProd());
+// 	this->setValue(sumProd());
 
       } else if (!strcmp("sgn",getOperator())){
 
@@ -2233,8 +2233,7 @@ double MathExpression::faculty(double fac) throw (ExceptionBase){
 }
 
 #ifdef NO_COMPILE
-double MathExpression::sumProd(void)
-  throw (ExceptionBase){
+MathExpression::Value *MathExpression::sumProd(void) throw (ExceptionBase){
 
   VariableList vl = *this->varlist;  // lokaler Scope: Kopie der globalen Varlist
   MathExpression me(this,&vl,this->functionlist,abs_pos);

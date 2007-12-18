@@ -58,3 +58,9 @@ v2.0:
   - merge() will clear the buffer so it will go to initial state
 - MemPointer<T>:
   new Constructor which will allocate a memory-area
+
+v2.1:
+- class ExceptionBase:
+  - added method prependMsg()
+- class CmdlParser
+  - added supervisors

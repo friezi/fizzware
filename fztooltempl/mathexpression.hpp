@@ -187,7 +187,6 @@ namespace mexp{
     virtual Value *ld() throw (ExceptionBase){ return notSupported(); }
     virtual Value *log(Value *base) throw (ExceptionBase){ return notSupported(); }
     virtual Value *exp() throw (ExceptionBase){ return notSupported(); }
-    virtual Value *sumProd() throw (ExceptionBase){ return notSupported(); }
     virtual Value *sgn() throw (ExceptionBase){ return notSupported(); }
     virtual Value *tst() throw (ExceptionBase){ return notSupported(); }
 
@@ -268,7 +267,6 @@ namespace mexp{
     Value *ld() throw (ExceptionBase){ return notSupported(); }
     Value *log(Value *base) throw (ExceptionBase){ return notSupported(); }
     Value *exp() throw (ExceptionBase){ return notSupported(); }
-    Value *sumProd() throw (ExceptionBase){ return notSupported(); }
     Value *sgn() throw (ExceptionBase){ return notSupported(); }
     Value *tst() throw (ExceptionBase){ return notSupported(); }
 
@@ -389,7 +387,7 @@ namespace mexp{
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int pri(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (ParseException);
-    double sumProd(void) throw (ExceptionBase);
+    Value *sumProd(void) throw (ExceptionBase);
     Value *assignValue(void) throw (ExceptionBase);
     Value *evalFunction(void) throw (ExceptionBase);
     void defineFunction(void) throw (EvalException,ParseException);

@@ -29,40 +29,42 @@
 */
 
 #include <exception.hpp>
+
+using namespace std;
   
-ExceptionBase::ExceptionBase(const std::string &id){
+ExceptionBase::ExceptionBase(const string &id){
     this->errormsg = "";
     this->spc_id = id;
     this->id_errormsg = this->spc_id;
   }
   
-ExceptionBase::ExceptionBase(const std::string &id, const std::string &errormsg){
+ExceptionBase::ExceptionBase(const string &id, const string &errormsg){
     this->errormsg = errormsg;
     this->spc_id = id;
     this->id_errormsg = this->spc_id + ": " + this->errormsg;
   }
 
-std::string ExceptionBase::skipDigits(const std::string &s){
+string ExceptionBase::skipDigits(const string &s){
 
   const char *sptr = s.c_str();
 
   while (isdigit(*sptr))
     sptr++;
 
-  return std::string(sptr);
+  return string(sptr);
 }
 
-std::string ExceptionBase::skipLetters(const std::string &s){
+string ExceptionBase::skipLetters(const string &s){
 
   const char *sptr = s.c_str();
 
   while (isalpha(*sptr))
     sptr++;
 
-  return std::string(sptr);
+  return string(sptr);
 }
 
-std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e){
+ostream& operator<<(ostream& ostr, const ExceptionBase& e){
 
   ostr << e.getIdMsg();
   return ostr;
@@ -70,5 +72,23 @@ std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e){
 
 void ExceptionBase::show() const{
 
-  std::cerr << *this << std::endl;
+  cerr << *this << endl;
+}
+
+ExceptionBase & ExceptionBase::prependMsg(string msg){
+
+  this->errormsg = msg + this->errormsg;
+  this->id_errormsg = this->spc_id + ": " + this->errormsg;
+
+  return *this;
+
+}
+
+ExceptionBase & ExceptionBase::appendMsg(string msg){
+
+  this->errormsg = this->errormsg + msg;
+  this->id_errormsg = this->spc_id + ": " + this->errormsg;
+
+  return *this;
+
 }
