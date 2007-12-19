@@ -251,6 +251,9 @@ namespace cmdl{
     /// tuple for the final-argument: identifier and value
     std::pair<std::string,std::string> finalargument;
 
+    // will be set to true if any mandatory parameter was defined
+    bool mandatory_parameters;
+
     /// for parse-errors
     std::ostringstream errors;
   
@@ -537,6 +540,13 @@ namespace cmdl{
        @return value of parameter or "" if not contained
     */
     std::string getParameter(std::string parameter);
+
+    /**
+       @brief checks if mandatory parameters are declared
+       @return true if mandatory parameters are declared
+       @since V2.1
+    */
+    bool isMandatoryParameters(){ return mandatory_parameters; }
     
 
     /**
@@ -561,7 +571,6 @@ namespace cmdl{
        (should not happen if you use everything correctly) the empty-string is returned.
     */
     std::string getMandatoryArgument(std::string argument);
-
  
     /**
        @brief check if a parse-error has occured
@@ -571,6 +580,14 @@ namespace cmdl{
       return parseerror;
     }
 
+    /**
+       @brief get all occured errors
+       @return the errors
+       @since V2.1
+    */
+    std::string getErrors(){
+      return errors.str();
+    }
  
     /**
        @brief get the program-name

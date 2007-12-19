@@ -126,6 +126,9 @@ void CmdlParser::addParameter(string parameter, string valueid, string descripti
 
   allowedparameters[parameter] = APInfo(valueid,description,mandatory,false);
 
+  if ( mandatory == true )
+    mandatory_parameters = true;
+
   if ( synonymdict.find(parameter) == synonymdict.end() )
     synonymdict[parameter] = new Synonyms(); 
 }
@@ -215,7 +218,7 @@ char CmdlParser::getShortRepresentative(char synonym){
 }
 
 CmdlParser::CmdlParser(int argc, char **argv) throw(Exception<CmdlParser>) :
-  argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),finalargument("",""){
+  argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),finalargument("",""), mandatory_parameters(false){
 
   supervisors = 0;
   shortsupervisors = 0;
@@ -509,13 +512,14 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
   }
   
   // too few of the mandatory parameters
-  for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ )
+  for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ ){
     if ( (*it).second.mandatory == true && (*it).second.found == false ){
 
       errors << "Too few parameters: mandatory parameter missing: " << "--" << (*it).first << endl;
       parseerror = true;
 
     }
+  }
   
   // too few of the mandatory arguments are given
   if ( argumentcounter < exp_mand_arguments.size() ){
@@ -692,7 +696,7 @@ string CmdlParser::infoUsage(){
        || !allowedparameters.empty() || !allowedmultiparameters.empty() )
     usg << "[Options1] ";
 
-  if ( !exp_mand_arguments.empty() )
+  if ( !exp_mand_arguments.empty() || isMandatoryParameters() == true )
     usg << "Options2 ";
   
   usg << endl;
@@ -758,7 +762,7 @@ string CmdlParser::infoUsage(){
 
   }
 
-  if ( !exp_mand_arguments.empty() ){
+  if ( !exp_mand_arguments.empty() || isMandatoryParameters() == true ){
 
     usg << "Options2:" << endl;
  
