@@ -34,6 +34,8 @@
 #include <string>
 #include <exception.hpp>
 
+#define UTILS_LU_BIT 5
+
 /**
    @brief Contains templates for several utilities
    @ingroup utilities
@@ -42,7 +44,8 @@
 namespace util{
 
   /**
-     Unfortunately the string-class of the STL doesn't include some more usefull strings-operations (like trunc() for cutting off
+     This class is directly derived from the STL string class.\n
+     Unfortunately the string class of the STL doesn't include some more usefull string-operations (like trunc() for cutting off
      leading and trailing blanks). The String-class enhances the STL-string-class with usefull functions.
      @brief An extended string-class
      @since v1.96
@@ -53,20 +56,77 @@ namespace util{
 
     static char blanks[2];
 
-    bool isABlank(char c);
-
   public:
+
+    /**
+       @brief the standard-constructor
+    */
+    String(){}
 
     /**
        @brief The cast-constructor
     */
     String(const std::string & s){ (*(std::string *)this) = s; }
+
+    /**
+       @brief The cast-constructor
+    */
+    String(const char * s){ (*(std::string *)this) = s; }
     
     /**
        @brief cuts off leading and trailing blanks;
        @return an truncated string
     */
-    std::string trunc();
+    String trunc() const ;
+
+    /**
+       @brief converts all latin-characters to lower-case
+       @return the converted string
+       @since V2.1
+   */
+    String toLower() const ;
+
+    /**
+       @brief converts all latin-characters to upper-case
+       @return the converted string
+       @since V2.1
+   */
+    String toUpper() const ;
+
+    /**
+       @brief checks if a char is a lower latin-character
+       @return true if char is a lower latin-character
+       @since V2.1
+    */
+    static bool isLower(char c){ return ( c >= 'a' && c<= 'z' ); }
+
+    /**
+       @brief checks if a char is a upper latin-character
+       @return true if char is a upper latin-character
+       @since V2.1
+    */
+    static bool isUpper(char c){ return ( c >= 'A' && c <= 'Z' ); }
+
+    /**
+       @brief converts a latin-char to lower case
+       @return char converted to lower case
+       @since V2.1
+    */
+    static char latinToLower(char c){ return ( isUpper(c) ? c | 1L<<UTILS_LU_BIT : c ); }
+
+    /**
+       @brief converts a latin-char to upper case
+       @return char converted to upper case
+       @since V2.1
+    */
+    static char latinToUpper(char c){ return ( isLower(c) ? c & ~(1L<<UTILS_LU_BIT) : c ); }
+
+    /**
+       @brief tests if a char is a blank-character
+       @return true if char is a blank-character
+       @since V2.1
+    */
+    static bool isABlank(char c);
 
   };
 }

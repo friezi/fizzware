@@ -128,6 +128,8 @@ namespace mexp{
       : Exception<MathExpression>(id,errormsg){
       this->objname = "";
     }
+
+    ~EvalException() throw () {}
     
     std::string getObjName() const{
       return this->objname;

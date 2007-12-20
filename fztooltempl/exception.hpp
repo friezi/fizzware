@@ -37,17 +37,19 @@
 #ifndef EXCEPTION_HPP
 #define EXCEPTION_HPP
 
+#include <exception>
 #include <iostream>
 #include <string>
 #include <typeinfo>
 
 // Not for direct use!!!
 /**
+   derived from the standard-class exception.
    @class ExceptionBase
    @internal Use Exception< T > instead
    @brief The baseclass for all exceptions
 */
-class ExceptionBase{
+class ExceptionBase : public std::exception{
 
 private:
 
@@ -79,7 +81,12 @@ protected:
 
 public:
   
-  virtual ~ExceptionBase(){}
+  virtual ~ExceptionBase() throw () {}
+
+  /**
+     @see exception::what()
+  */
+  virtual const char* what() const throw() { return id_errormsg.c_str(); }
 
   /** For using like: \n cout << e;
       @brief to pass it to an output-stream
@@ -148,7 +155,7 @@ public:
   */
   Exception(const std::string &id, const std::string &errormsg) : ExceptionBase(id,errormsg){}
 
-  virtual ~Exception(){}
+  virtual ~Exception() throw () {}
 
 protected:
 
@@ -191,7 +198,7 @@ public:
 
   SubException(const std::string &id, const std::string &errormsg) : Exception<TBase>(id,errormsg){}
 
-  virtual ~SubException(){}
+  virtual ~SubException() throw () {}
 
 protected:
 

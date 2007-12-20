@@ -37,26 +37,56 @@ bool String::isABlank(char c){
       return true;
 
   return false;
+
 }
     
-string String::trunc(){
+String String::trunc() const {
 
-  unsigned int leftend;
-  signed int rightstart;
-  string truncstring;
+  size_t leftend, rightstart;
+  String truncstring = *this;
 
-  for ( leftend=0; leftend<this->length(); leftend++ )
-    if ( !isABlank((*this)[leftend]) )
+  for ( leftend = 0; leftend < this->length(); leftend++ )
+    if ( !isABlank(truncstring[leftend]) )
       break;
 
-  truncstring = this->erase(0,leftend);
+  truncstring.erase(0,leftend);
 
-  for ( rightstart=(unsigned int)truncstring.length()-1; rightstart>=0; rightstart-- )
-    if ( !isABlank((*this)[rightstart]) )
-      break;
+  if ( truncstring.empty() == false ){
+    
+    for ( rightstart = truncstring.length()-1; rightstart >= 0; rightstart-- )
+      if ( !isABlank(truncstring[rightstart]) )
+	break;
+    
+    rightstart++;
+    
+    truncstring.erase(rightstart,truncstring.length());
+    
+  }
+  
+  return truncstring;
+  
+}
 
-  rightstart++;
+String String::toLower() const {
 
-  return truncstring.erase(rightstart,truncstring.length());
+  String lower = *this;
+  size_t pos = 0;
 
+  for ( String::const_iterator it = this->begin(); it != this->end(); it++, pos++ )
+    lower[pos] = latinToLower(*it);
+  
+  return lower;
+
+}
+
+String String::toUpper() const {
+
+  String upper = *this;
+  size_t pos = 0;
+
+  for ( String::const_iterator it = this->begin(); it != this->end(); it++, pos++ )
+    upper[pos] = latinToUpper(*it);
+  
+  return upper;
+  
 }

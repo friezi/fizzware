@@ -92,3 +92,5 @@ ExceptionBase & ExceptionBase::appendMsg(string msg){
   return *this;
 
 }
+
+  
