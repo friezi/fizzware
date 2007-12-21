@@ -16,8 +16,9 @@ HEADERS_ONLY = functions datastructures
 
 EDITOR ?= vi
 
+LIB_DIR = ../lib
 DIST_DIR = ../dist
-DT_DIR = $(DIST_DIR)/classes
+DT_DIR = $(DIST_DIR)/fztooltempl
 
 ################################################################################
 
@@ -31,7 +32,7 @@ OBJECTNAMES = $(OBJECTS:%=%.o)
 
 IMPORTANT_HEADERS = $(HEADERS_ONLY:%=%.hpp)
 
-LIB_NAME = lib$(LIBRARY).a
+LIB_NAME = $(LIB_DIR)/lib$(LIBRARY).a
 
 MAKEFILE_CALLS = $(OBJECTS:%=%_makefile)
 

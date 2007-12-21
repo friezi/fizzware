@@ -8,10 +8,10 @@ LOCAL_MODULES = linescanner filescanner
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY_PATH = ../lib/
 CLASSLIBRARY = fztooltempl
 CLASS_MODULES = mathexpression exception cmdlparser
-CM_PATH = $(CLASSLIBRARY_PATH)
+CM_PATH = ../fztooltempl/
 
 IMPORTANT_HEADERS = $(CM_PATH)/datastructures
 
@@ -65,7 +65,7 @@ INC_CL_PATH = $(CLASSLIBRARY_PATH:%=-L%)
 INC_EM_PATH = $(EM_PATH:%=-I%)
 INC_CM_PATH = $(CM_PATH:%=-I%)
 LIB_NAME = $(CLASSLIBRARY:%=$(CLASSLIBRARY_PATH)/lib%.a)
-MAKE_CL_LIB = $(CLASSLIBRARY_PATH:%=$(MAKE) -k -C $(CLASSLIBRARY_PATH) -f %/Makefile)
+MAKE_CL_LIB = $(CM_PATH:%=$(MAKE) -k -C $(CM_PATH) -f %/Makefile)
 
 #bei systemspezifischer Programmierung "-ansi" ausschalten
 CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)

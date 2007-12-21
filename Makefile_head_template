@@ -10,6 +10,7 @@ EM_PATH = <Pfad der fuer die Module <EXTERN_MODULES>>
 
 CLASSLIBRARY_PATH = < alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliothek (statisch) >
 CLASSLIBRARY = < Name der Klassenbibliothek (ohne lib und .a) >
+CLASS_MODULE_PATH = < Pfad fuer die Klassenmodulsourcen >
 CLASS_MODULES = < Module der Bibliothek, bei deren Aenderung auch das TARGET-file neu compiliert werden muss >
 CM_PATH = <Pfad fuer die Klassenmodule>
 

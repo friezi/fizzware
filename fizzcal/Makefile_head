@@ -8,10 +8,10 @@ LOCAL_MODULES = linescanner filescanner
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../classes
+CLASSLIBRARY_PATH = ../lib/
 CLASSLIBRARY = fztooltempl
 CLASS_MODULES = mathexpression exception cmdlparser
-CM_PATH = $(CLASSLIBRARY_PATH)
+CM_PATH = ../fztooltempl/
 
 IMPORTANT_HEADERS = $(CM_PATH)/datastructures
 
