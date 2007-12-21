@@ -17,7 +17,7 @@ INCLUDE_PATH = ./
 
 EDITOR ?= vi
 
-CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I $(INCLUDE_PATH)
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I$(INCLUDE_PATH)
 
 DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
 
