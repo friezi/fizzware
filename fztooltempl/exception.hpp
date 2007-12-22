@@ -1,6 +1,6 @@
 /**
    @mainpage
-   This page documents the static-library 'Friedemann-Zintel`s-Tools`n-Templates'
+   This page documents the static-library 'Friedemann-Zintel`s-Tools`n-Templates'.
    @author Friedemann Zintel
    
    Copyright (C) 1999-2007 Friedemann Zintel

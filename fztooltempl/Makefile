@@ -6,9 +6,7 @@ LIBRARY = fztooltempl
 
 VERSION_NUMBER = 2.1
 
-OBJECTS = exception messagequeue socket tcpserver tcpclient msgqueueregclient primlist \
-	semaphor mathexpression signalhandler stdmessageserver cmdlparser propertyreader \
-	utils graph
+OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph
 
 #old: 
 
@@ -18,7 +16,7 @@ EDITOR ?= vi
 
 LIB_DIR = ../lib
 DIST_DIR = ../dist
-DT_DIR = $(DIST_DIR)/fztooltempl
+DT_DIR = $(DIST_DIR)/$(LIBRARY)
 
 ################################################################################
 

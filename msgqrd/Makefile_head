@@ -9,11 +9,12 @@ EXTERN_MODULES =
 EM_PATH =
 
 TT = ../fztooltempl
+ST = ../fzsystools
 
 CLASSLIBRARY_PATH = ../lib
-CLASSLIBRARIES = fztooltempl
-CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception $(TT)/socket $(TT)/tcpserver $(TT)/signalhandler $(TT)/messagequeue $(TT)/stdmessageserver $(TT)/cmdlparser
+CLASSLIBRARIES = fztooltempl fzsystools
+CLASS_MODULES_PATHS = $(TT) $(ST)
+CLASS_MODULES = $(TT)/exception $(ST)/socket $(ST)/tcpserver $(ST)/signalhandler $(ST)/messagequeue $(ST)/stdmessageserver $(TT)/cmdlparser
 
 IMPORTANT_HEADERS = $(TT)/datastructures $(TT)/functions
 

@@ -8,16 +8,20 @@
 
 OBJECT = tcpserver
 
-DEPENDS_ON = exception socket
+TT = ../fztooltempl
+
+DEPENDS_ON = $(TT)/exception socket
+
+INCLUDE_PATHS = ./ $(TT)
 
 ############### check the CC Variable ###########################
 #################################################################
 
-INCLUDE_PATH = ./
-
 EDITOR ?= vi
 
-CC = g++ -Wall -Wconversion -pedantic -O3 -c -I$(INCLUDE_PATH)
+I_P = $(INCLUDE_PATHS:%=-I%)
+
+CC = g++ -Wall -Wconversion -pedantic -O3 -c $(I_P)
 
 DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
 

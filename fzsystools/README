@@ -1,4 +1,4 @@
-Brief documentation for compiling the static library libfztooltempl.a
+Brief documentation for compiling the static library libfzsystools.a
 GNU-Make-Utility is needed.
 Environment-variable EDITOR should contain the preferred editor.
 For generating the documentation doxygen must be installed.
@@ -30,5 +30,3 @@ you can redistribute it and/or modify it under the terms of the GNU General Publ
 either version 2 of the License, or (at your option) any later version.
 
 For any questions, contact me at friezi@cs.tu-berlin.de
-
-
