@@ -8,12 +8,14 @@ LOCAL_MODULES = linescanner filescanner
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = mathexpression exception cmdlparser
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
 
-IMPORTANT_HEADERS = $(CM_PATH)/datastructures
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/mathexpression $(TT)/exception $(TT)/cmdlparser
+
+IMPORTANT_HEADERS = $(TT)/datastructures
 
 ifeq ($(UNIX),true)
 	READLINEDIR = /usr/gnu/include/readline

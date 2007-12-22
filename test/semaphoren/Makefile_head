@@ -8,16 +8,20 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = semaphor exception
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
+
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/semaphor $(TT)/exception
 
 IMPORTANT_HEADERS =
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
 LIBRARY_PATHS =
+
+ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 NOANSI = true

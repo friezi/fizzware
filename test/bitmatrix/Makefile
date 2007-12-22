@@ -8,12 +8,14 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
 
-IMPORTANT_HEADERS = $(CM_PATH)/datastructures
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS= $(TT)
+CLASS_MODULES = $(TT)/exception
+
+IMPORTANT_HEADERS = $(TT)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
@@ -48,29 +50,27 @@ LM_OBJECTS = $(LOCAL_MODULES:=.o)
 EM_SOURCES = $(EXTERN_MODULES:%=$(EM_PATH)/%.cpp)
 EM_HEADERS = $(EXTERN_MODULES:%=$(EM_PATH)/%.hpp)
 EM_OBJECTS = $(EXTERN_MODULES:%=$(EM_PATH)/%.o)
-CM_HEADERS = $(CLASS_MODULES:%=$(CM_PATH)/%.hpp)
-CM_MAKEFILES = $(CLASS_MODULES:%=-f $(CM_PATH)/%/Makefile)
+CM_HEADERS = $(CLASS_MODULES:%=%.hpp)
 IM_HEADERS = $(IMPORTANT_HEADERS:%=%.hpp)
 INC_LI_PATHS = $(LIBRARY_INCLUDE_PATHS:%=-I%)
 LIBS = $(LIBRARIES:%=-l%)
 INC_L_PATHS = $(LIBRARY_PATHS:%=-L%)
-CL_LIB = $(CLASSLIBRARY:%=-l%)
+CL_LIB = $(CLASSLIBRARIES:%=-l%)
 INC_CL_PATH = $(CLASSLIBRARY_PATH:%=-L%)
 INC_EM_PATH = $(EM_PATH:%=-I%)
-INC_CM_PATH = $(CM_PATH:%=-I%)
-LIB_NAME = $(CLASSLIBRARY:%=$(CLASSLIBRARY_PATH)/lib%.a)
-MAKE_CL_LIB = $(CM_PATH:%=$(MAKE) -k -C $(CM_PATH) -f %/Makefile)
+INC_CM_PATHS = $(CLASS_MODULES_PATHS:%=-I%)
+LIB_NAMES = $(CLASSLIBRARIES:%=$(CLASSLIBRARY_PATH)/lib%.a)
 
 #bei systemspezifischer Programmierung "-ansi" ausschalten
-CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
+CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATHS) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
 
-.PHONY: all clean $(LIB_NAME)_all ed dist
+.PHONY: all clean all_libraries ed dist
 
 # falls von lokaler Bibliothek abhaengig, soll diese erst generiert werden
-all: $(LIB_NAME)_all $(TARGET)
+all: all_libraries $(TARGET)
 
 # <TARGET> compilieren
-$(TARGET): $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAME)
+$(TARGET): $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAMES)
 	$(CC) $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) -o $(TARGET) $(LIBS) $(CL_LIB)
 	strip $(TARGET)
 
@@ -88,11 +88,10 @@ $(MM_OBJECT): $(LM_HEADERS) $(EM_HEADERS) $(CM_HEADERS) $(IM_HEADERS)
 
 
 # Generierung der lokalen Bibliothek (ist so eingestellt, dass sie nur bei Aenderungen generiert wird)
-$(LIB_NAME)_all:
-	$(MAKE_CL_LIB)
+all_libraries:
+	$(foreach mklib,$(CLASS_MODULES_PATHS),$(MAKE) -k -C $(mklib) -f Makefile;)
 
-$(LIB_NAME):
-# hier braucht nichts zu passieren, da die Library sowieso im Feld $(TARGET) generiert wird
+$(LIB_NAMES):
 
 # alle Module loeschen
 clean:
@@ -100,7 +99,7 @@ clean:
 
 # Editor aufrufen
 ed:
-	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=$(CM_PATH)/%.?pp) $(IM_HEADERS) &
+	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) &
 
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
 Makefile: Makefile_head

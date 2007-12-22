@@ -8,10 +8,12 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception tcpclient msgqueueregclient socket
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
+
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/exception $(TT)/tcpclient $(TT)/msgqueueregclient $(TT)/socket
 
 IMPORTANT_HEADERS =
 
@@ -24,6 +26,8 @@ endif
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES = $(NETWORKLIBS)
 LIBRARY_PATHS = /usr/lib
+
+ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 # NOANSI = true

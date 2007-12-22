@@ -8,12 +8,14 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
 
-IMPORTANT_HEADERS = $(CM_PATH)/datastructures
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS= $(TT)
+CLASS_MODULES = $(TT)/exception
+
+IMPORTANT_HEADERS = $(TT)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

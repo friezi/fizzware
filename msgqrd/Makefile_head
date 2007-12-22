@@ -8,12 +8,14 @@ LOCAL_MODULES = msgqueueregdaemon scanner msgqueuelist
 EXTERN_MODULES =
 EM_PATH =
 
-CLASSLIBRARY_PATH = ../lib/
-CLASSLIBRARY = fztooltempl
-CLASS_MODULES = exception socket tcpserver signalhandler messagequeue stdmessageserver cmdlparser
-CM_PATH = ../fztooltempl/
+TT = ../fztooltempl
 
-IMPORTANT_HEADERS = $(CM_PATH)/datastructures $(CM_PATH)/functions
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/exception $(TT)/socket $(TT)/tcpserver $(TT)/signalhandler $(TT)/messagequeue $(TT)/stdmessageserver $(TT)/cmdlparser
+
+IMPORTANT_HEADERS = $(TT)/datastructures $(TT)/functions
 
 ifeq ($(UNIX),true)
 	NETWORKLIBS = socket nsl resolv
@@ -24,6 +26,8 @@ endif
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES = $(NETWORKLIBS)
 LIBRARY_PATHS = /usr/lib
+
+ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 # NOANSI = true
