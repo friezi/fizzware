@@ -288,6 +288,7 @@ namespace lex{
     /**
        @brief returns the next resp. rest of line
        @return next resp. rest of line
+       @todo implementation!!!
     */
     utils::String nextLine();
 
@@ -325,6 +326,12 @@ namespace lex{
     void lowerCaseMode();
 
     /**
+       @brief returns state of lower-case mode
+       @ true, if lower-case mode is switched on, false otherwise
+    */
+    bool isLowerCaseMode(){ return lower_case_mode; }
+
+    /**
        @brief EOL will be reported as a token
     */
     void reportEOL(){ report_return = true; }
@@ -334,12 +341,6 @@ namespace lex{
        @return true if EOL will be reported as a token
     */
     bool isReportEOL() { return report_return; }
-
-    /**
-       @brief returns state of lower-case mode
-       @ true, if lower-case mode is switched on, false otherwise
-    */
-    bool isLowerCaseMode(){ return lower_case_mode; }
 
     /**
        Only the following characters introduces a word:\n

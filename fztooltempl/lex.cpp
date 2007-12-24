@@ -257,6 +257,9 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
     input->get(c);
 
+    if ( isLowerCaseMode() )
+      c = String::latinToLower(c);
+
     if ( ttype == TT_WORD ){
 
       if ( quote_mode == true ){
@@ -319,6 +322,9 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	}
 
 	input->get(c);
+
+	if ( isLowerCaseMode() )
+	  c = String::latinToLower(c);
 	
       }
 
@@ -334,6 +340,9 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	}
     
 	input->get(c);
+
+	if ( isLowerCaseMode() )
+	  c = String::latinToLower(c);
     
       }
   
