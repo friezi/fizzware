@@ -41,7 +41,7 @@
    @ingroup utilities
    @since V1.96
 */
-namespace util{
+namespace utils{
 
   /**
      This class is directly derived from the STL string class.\n
@@ -127,6 +127,13 @@ namespace util{
        @since V2.1
     */
     static bool isABlank(char c);
+
+    /**
+       @brief checks, if a character is contained in a String
+       @param c the character ro be checked
+       @return true if c is conatined in String
+    */
+    bool containsChar(const char & c) const;
 
   };
 }

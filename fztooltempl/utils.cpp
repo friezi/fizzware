@@ -26,7 +26,7 @@
 #include "utils.hpp"
 
 using namespace std;
-using namespace util;
+using namespace utils;
 
 char String::blanks[] = {' ','\t'};
 
@@ -89,4 +89,13 @@ String String::toUpper() const {
   
   return upper;
   
+}
+
+bool String::containsChar(const char & c) const {
+
+  if ( this->find(c) != string::npos )
+    return true;
+
+  return false;
+
 }

@@ -68,3 +68,4 @@ v2.1:
 - class String
   - changed returntype of trunc() from string to String
   - new methods: toLower(), toUpper() etc.
+- renamed namespace util to utils

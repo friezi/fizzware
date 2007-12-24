@@ -4,9 +4,12 @@
 
 LIBRARY = fztooltempl
 
-VERSION_NUMBER = 2.1
+MAJOR_VERSION = 2
+MINOR_VERSION = 1
 
-OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph
+VERSION_NUMBER = $(MAJOR_VERSION).$(MINOR_VERSION)
+
+OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph lex
 
 #old: 
 
@@ -30,16 +33,31 @@ OBJECTNAMES = $(OBJECTS:%=%.o)
 
 IMPORTANT_HEADERS = $(HEADERS_ONLY:%=%.hpp)
 
-LIB_NAME = $(LIB_DIR)/lib$(LIBRARY).a
+DYN_SUFFIX = dylib
+DYN_OBJECT_SUFFIX = dyn.o
+DYN_OBJECTNAMES = $(OBJECTS:%=%.$(DYN_OBJECT_SUFFIX))
+
+STATIC_LIB_NAME = $(LIB_DIR)/lib$(LIBRARY).a
+
+#linux
+DYNLIB_SONAME = $(LIB_DIR)/lib$(LIBRARY).$(DYN_SUFFIX).$(MAJOR_VERSION)
+DYNAMIC_LIB_NAME = $(DYNLIB_SONAME).$(MINOR_VERSION)
+
+#linux
+#DYN_GCC = g++ -Wall -ansi -pedantic -shared -Wl,-soname,$(DYNLIB_SONAME) -o $(DYNAMIC_LIB_NAME)
+
+#mac
+LINKER_OPTIONS =  -Wl,-dylib -Wl,-dylib_compatibility_version,$(MAJOR_VERSION) -Wl,-dylib_current_version,$(MINOR_VERSION) -lc
+DYN_GCC = g++ -Wall -ansi -pedantic -dynamic -fPIC -o $(LIBRARY)
 
 MAKEFILE_CALLS = $(OBJECTS:%=%_makefile)
 
 OBJ_START = true
 OBJ_END = false
 
-.PHONY: all clean ed cleandoc dist
+.PHONY: all clean ed cleandoc dist dynamic
 
-all:	$(LIB_NAME) $(DOC)
+all:	$(STATIC_LIB_NAME) $(DOC)
 
 $(DOC):
 
@@ -71,22 +89,24 @@ $(DOC):
 cleandoc:
 	rm -r $(DOC)
 
-$(LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
+$(STATIC_LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo
-	@echo '****************' generating the static-library $(LIB_NAME) '****************'
+	@echo '****************' generating the static-library $(STATIC_LIB_NAME) '****************'
 	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk);)
-	$(AR) rs $(LIB_NAME) $(OBJECTNAMES)
-	@echo '****************' generation of $(LIB_NAME) finished '***********************'
+	$(AR) rs $(STATIC_LIB_NAME) $(OBJECTNAMES)
+	@echo '****************' generation of $(STATIC_LIB_NAME) finished '***********************'
 	@echo
 
 %.o:%.cpp %.hpp
-	@echo '***' compiling module $(@) for static-library  $(LIB_NAME) '***'
+	@echo '***' compiling module $(@) for library  $(LIBRARY) '***'
 	$(MAKE) -f $(@:%.o=%_makefile)
 	@echo '*********************' finished '******************************'
 
+$(DYN_OBJECTNAMES):
+
 clean:	
 	rm -f $(OBJECTNAMES)
-	rm -f $(LIB_NAME)
+	rm -f $(STATIC_LIB_NAME)
 	rm -r -f $(DOC)
 
 ed:
@@ -101,3 +121,13 @@ dist:
 
 	[[ -d $(DT_DIR)/$(EXAMPLES) ]] || mkdir $(DT_DIR)/$(EXAMPLES)
 	cp --target-directory=$(DT_DIR)/$(EXAMPLES) $(EXAMPLES)/*[!~]
+
+dynamic: $(DYNAMIC_LIB_NAME)
+
+$(DYNAMIC_LIB_NAME): $(DYN_OBJECTNAMES) $(IMPORTANT_HEADERS)
+	@echo
+	@echo '****************' generating the dynamic-library $(DYNAMIC_LIB_NAME) '****************'
+	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk) dynamic;)
+	$(DYN_GCC) $(DYN_OBJECTNAMES) $(LINKER_OPTIONS)
+	@echo '****************' generation of $(DYNAMIC_LIB_NAME) finished '***********************'
+	@echo

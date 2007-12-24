@@ -33,7 +33,7 @@
 using namespace std;
 using namespace ds;
 using namespace cmdl;
-using namespace util;
+using namespace utils;
 
 string PropertyReader::NO_SECTION = "NO_SECTION";
 
