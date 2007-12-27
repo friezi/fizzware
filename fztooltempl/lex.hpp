@@ -44,9 +44,9 @@ namespace lex{
   /**
      @brief A struct to store all relevant delimitor-charakters, comment-signs, whitespaces, etc. for lexical analysis
   */
-  struct LexCharClasses{
+  class LexCharClasses{
 
-  public:
+  protected:
   
     /**
        @brief the start string of a block-comment
@@ -86,7 +86,51 @@ namespace lex{
     /**
        @brief the return characters
     */
-    static const utils::String return_chars;
+    static const utils::String eol_chars;
+
+  public:
+
+    /**
+       @brief sets the introducing-word for a block comment
+       @param word the word which defines the block comment introducing-word
+    */
+    void setBlockCommentStart(std::string word) { block_comment_start = word; }
+
+    /**
+       @brief sets the terminating-word for a block comment
+       @param word the word which defines the block comment terminating-word
+    */
+    void setBlockCommentStop(std::string word) { block_comment_stop = word; }
+
+    /**
+       @brief sets the word for a line comment
+       @param word the word which defines the block comment terminating-word
+    */
+    void setLineComment(std::string word) { line_comment = word; }
+
+    /**
+       @brief gets the introducing-word for a block comment
+       @return the word which defines the block comment introducing-word
+    */
+    utils::String getBlockCommentStart() { return block_comment_start; }
+
+    /**
+       @brief gets the terminating-word for a block comment
+       @return the word which defines the block comment terminating-word
+    */
+    utils::String getBlockCommentStop() { return block_comment_stop; }
+
+    /**
+       @brief sets the word for a line comment
+       @param word the word which defines the block comment terminating-word
+    */
+    utils::String getLineComment() { return line_comment; }
+
+    /**
+       @brief all characters in the word will be word-constituents
+       @param word the word which defines characters to be word-constituents
+    */
+    void setWordConstituents(std::string word){ word_constituents = word; }
     
     /**
        @brief sets default-values
@@ -106,6 +150,89 @@ namespace lex{
        @return true if c is carriage-return
     */
     static bool isCR(const char & c){ return ( c == '\r' ); }
+
+    /**
+       @brief checks whether a character is the quote_start character
+       @param c the character to be checked
+       @return true if c is quote_start character
+    */
+    bool isQuoteStart(const char & c) const { return ( c == quote_start ); }
+
+    /**
+       @brief checks whether a character is the quote_stop character
+       @param c the character to be checked
+       @return true if c is quote_stop character
+    */
+    bool isQuoteStop(const char & c) const { return ( c == quote_stop ); }
+
+    /**
+       @brief checks if the character is constituent of a word
+       @param c character to be checked
+       @return true if c is constituent of a word
+    */
+    bool isWordConstituent(const char & c) const { return word_constituents.containsChar(c); }
+
+    /**
+       @brief checks if the given char is a whitespace
+       @param c the character to be checked
+       @return true, is c is a whitespace
+       @todo check for uninitialised pointer!!!
+    */
+    bool isWhitespace(const char & c) const { return white_spaces.containsChar(c); }
+
+    /**
+       @brief checks if the given char is a return character
+       @param c the character to be checked
+       @return true, is c is a return character
+       @todo check for uninitialised pointer!!!
+    */
+    bool isEOL(const char & c) const { return eol_chars.containsChar(c); }
+
+    /**
+       Only the following characters introduces a word:\n
+       "A-Z", "a-z", "_" (underscore)
+       @brief checks if the character introduces a word
+       @param c character to be checked
+       @return true if c introduces a word
+       @todo doku
+    */
+    bool isIntroducingWord(const char & c) const { return ( ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || (c == '_') ); }
+
+    /**
+       @brief checks if the character introduces a number
+       @param c character to be checked
+       @return true if c introduces a number
+       @todo doku
+    */
+    bool isIntroducingNumber(const char & c) const { return ( '0' <= c && c <= '9' ); }
+
+    /**
+       @brief checks whether a character is a positive or negative sign
+       @param c the character to be checked
+       @return true if c is a sign
+    */
+    bool isSign(const char & c) const { return ( c == '+' || c == '-' ); }
+
+    /**
+       @brief checks if the character introduces a block comment
+       @param c character to be checked
+       @return true if c introduces block comment
+    */
+    bool isIntroducingBlockComment(const char & c) const { return ( block_comment_start.empty() ? false : c == block_comment_start[0] ); }
+
+    /**
+       @brief checks if the character introduces a line comment
+       @param c character to be checked
+       @return true if c introduces line comment
+    */
+    bool isIntroducingLineComment(const char & c) const { return ( line_comment.empty() ? false : c == line_comment[0] ); }
+
+    /**
+       @brief checks if the given char is the ASCII-0 character
+       @param c the character to be checked
+       @return true, is c ASCII-0 character
+    */
+    bool isNull(const char & c) const { return ( c == '\0' ); }
     
   };
   
@@ -123,14 +250,16 @@ namespace lex{
     bool nested_comments;
     
     bool lower_case_mode;
+
+    unsigned long skipped_lines; 
     
   public:
     
-    LexScreener(std::istream * input) : input(input), char_classes(0), nested_comments(false), lower_case_mode(false){}
+    LexScreener(std::istream * input) : input(input), char_classes(0), nested_comments(false), lower_case_mode(false), skipped_lines(0){}
     
     /**
        @brief sets a reference to the lexical character classes
-       @params char_classes the reference
+       @param char_classes the reference
        @note on destruction of the LexScreener the lexical character classes won't be destroyed. You have to take care for the destruction.
     */
     void setLexCharClasses(LexCharClasses * char_classes){ this->char_classes = char_classes; }
@@ -142,10 +271,10 @@ namespace lex{
     LexCharClasses * getLexCharClasses(){ return char_classes; }
     
     /**
-       @brief enables of disables use of nested comments
-       @params true for using nested comments, false otherwise
+       @brief determines whether nested comments should be supported
+       @param flag true if nested commments should be supported
     */
-    void setNestedComments(bool nested_comments){ this->nested_comments = nested_comments; }
+    void setNestedComments(bool flag){ this->nested_comments = flag; }
 
     /**
        @brief returns the state of nested comments
@@ -155,9 +284,9 @@ namespace lex{
 
     /**
        @brief read characters will be lower-cased if true
-       @param lower_case_mode true,false
+       @param flag true,false
     */
-    void setLowerCaseMode(bool lower_case_mode){ this->lower_case_mode = lower_case_mode; }
+    void setLowerCaseMode(bool flag){ this->lower_case_mode = flag; }
     
     /**
        @brief returns the state of lower-case mode
@@ -166,14 +295,22 @@ namespace lex{
     bool isLowerCaseMode(){ return lower_case_mode; }
 
     /**
+       It reads the next character from the input stream.\n
        If the first character is a whitespace the stream position will be set to the first non-whitespace charakter. Included comments
        will be overread.\n
        If the first character  is introducing a comment the stream position will be set to the position right behind the comment-stop.\n
        In all other cases the screen() will return immediately.
        @brief screens the input
        @return number of skipped lines
+       @todo doku!!!
     */
-    unsigned long screen();
+    bool screen();
+
+    /**
+       @brief returns the number of skipped lines
+       @return te skipped lines
+    */
+    unsigned long getSkippedLines(){ return skipped_lines; }
 
     /**
        @brief checks if the given char is a whitespace
@@ -181,7 +318,7 @@ namespace lex{
        @return true, is c is a whitespace
        @todo check for uninitialised pointer!!!
     */
-    bool isWhitespace(const char & c) const { return char_classes->white_spaces.containsChar(c); }
+    bool isWhitespace(const char & c) const { return char_classes->isWhitespace(c); }
 
     /**
        @brief checks if the given char is a return character
@@ -189,7 +326,7 @@ namespace lex{
        @return true, is c is a return character
        @todo check for uninitialised pointer!!!
     */
-    bool isReturn(const char & c) const { return char_classes->return_chars.containsChar(c); }
+    bool isEOL(const char & c) const { return char_classes->isEOL(c); }
 
     /**
        A return is a CR of LF. A CR followed directly by an LF counts as one return.
@@ -203,49 +340,37 @@ namespace lex{
   protected:
 
     bool skipIfMatchingWord(char c, const utils::String & word);
-    bool skipIfIntroducingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->block_comment_start); }
-    bool skipIfTerminatingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->block_comment_stop); }
-    bool skipIfIntroducingLineComment(char c){ return skipIfMatchingWord(c,char_classes->line_comment); }
+    bool skipIfIntroducingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->getBlockCommentStart()); }
+    bool skipIfTerminatingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->getBlockCommentStop()); }
+    bool skipIfIntroducingLineComment(char c){ return skipIfMatchingWord(c,char_classes->getLineComment()); }
 
   };
+
   /**
-     @brief A class for performing lexical analysis
+     @brief A class for storing all token-relevant attributes
+     @see LexScanner
   */
-  class LexScanner{
+  struct LexToken{
 
-  protected:
-
-    std::istream * input;
-
-    unsigned long line_number;
-    
-    unsigned long token_line_number;
-
-    bool lower_case_mode;
-
-    bool report_return;
-
-  public:
-
+    /**
+       @brief will store the characters of the string if type == TT_WORD
+    */
     utils::String sval;
 
+    /**
+       @brief will strore the numeric value if type == TT_NUMBER
+    */
     long double nval;
 
-    int ttype;
-
-  protected:
-
-    utils::String saved_sval;
-
-    long double saved_nval;
-
-    int saved_ttype;
-
-    LexScreener * screener;
-
-    LexCharClasses char_classes;
-
-  public:
+    /**
+       @brief the token type
+    */
+    int type;
+    
+    /**
+       @brief the linenumber the token occured in
+    */
+    unsigned long token_line_number;
 
   /** @name Token types */
   //@{
@@ -261,9 +386,67 @@ namespace lex{
     /** @brief Word */
     static const int TT_WORD;
 
+    /** @brief Whitespace */
+    static const int TT_WHITE;
+
     /** @brief None */
     static const int TT_NONE;
     //@}
+
+    LexToken() : sval(""), nval(0), type(TT_NONE), token_line_number(0){}
+
+    /**
+       String representation is of the following form:\n
+       [\<token\>,\<token type\>,\<line number\>]
+       @brief returns a string representation of the current token
+       @return the string representation
+    */
+    utils::String toString() const;
+
+    /**
+       @brief returns a string representation of the current token type
+       @return the string representation
+    */
+    utils::String typeToString() const;
+
+  };
+
+  /**
+     @brief A class for performing lexical analysis
+  */
+  class LexScanner{
+
+  protected:
+
+    std::istream * input;
+
+    unsigned long line_number;
+
+    bool lower_case_mode;
+
+    bool report_eol;
+
+    bool report_white;
+
+    bool token_putback;
+
+    bool parse_numbers;
+
+    bool signed_numbers;
+
+    bool floating_points;
+    
+  public:
+
+    LexToken token;
+
+  protected:
+
+    LexToken saved_token;
+
+    LexScreener * screener;
+
+    LexCharClasses char_classes;
 
   private:
 
@@ -286,17 +469,24 @@ namespace lex{
     int nextToken() throw (Exception<LexScanner>);
 
     /**
-       @brief returns the next resp. rest of line
-       @return next resp. rest of line
-       @todo implementation!!!
+       Causes the scanner to put back this token which will be given in next turn of nextToken().
+       The internal status will be set to the previous token.
+       @brief causes the scanner to put back this token
     */
-    utils::String nextLine();
+    void putback();
+
+    /**
+       @brief stores the complete the next resp. rest of line in the token
+       @return the token type
+       @note The line is untruncted. Use String::trunc() to trunc leading and trailing blanks.
+    */
+    int nextLine() throw (Exception<LexScanner>);
 
     /**
        @brief returns the current line number
        @return the line number
     */
-    unsigned long getLineNumber() { return token_line_number; }
+    unsigned long getLineNumber() { return token.token_line_number; }
 
     /**
        @brief reference to the lexical character classes
@@ -305,14 +495,10 @@ namespace lex{
     LexCharClasses & getLexCharClasses(){ return char_classes; }
 
     /**
-       @brief enables use of nested comments
+       @brief determines whether nested comments should be supported
+       @param flag true if nested comments should be supported
     */
-    void enableNestedComments(){ screener->setNestedComments(true); }
-
-    /**
-       @brief disables use of nested comments
-    */
-    void disableNestedComments(){ screener->setNestedComments(false); }
+    void supportNestedComments(bool flag){ screener->setNestedComments(flag); }
 
     /**
        @brief returns state of using nested comments
@@ -321,7 +507,7 @@ namespace lex{
     bool isNestedComments(){ return screener->isNestedComments(); }
 
     /**
-       @brief sets lower-case mode: all input-chars will be lower-cased before comparison
+       @brief specifies lower-case mode: all input-chars will be lower-cased before comparison
     */
     void lowerCaseMode();
 
@@ -332,81 +518,132 @@ namespace lex{
     bool isLowerCaseMode(){ return lower_case_mode; }
 
     /**
-       @brief EOL will be reported as a token
+       The number will be stored in the nval-field of LexToken
+       @brief specifies that numbers should not be treated as plain words but as real-numbers
     */
-    void reportEOL(){ report_return = true; }
+    void parseNumbers(){ parse_numbers = true; }
+
+    /**
+       @brief returns status of the parse-numbers-flag
+       @return true if parse-numbers is set
+    */
+    bool isParseNumbers(){ return parse_numbers; }
+
+    /**
+       @brief determines whether or not EOL will be reported as a token
+       @param flag true if EOL should be reported as a token
+    */
+    void reportEOL(bool flag){ report_eol = flag; }
 
     /**
        @brief returns the status of "report EOL"
        @return true if EOL will be reported as a token
     */
-    bool isReportEOL() { return report_return; }
+    bool isReportEOL() { return report_eol; }
+
+    /**
+       If set to true and if an arbitrary number of whitespaces occur between two tokens they will be reported
+       as one single token of type TT_WHITE
+       @brief determines whether or not whitespaces will be reported as a token
+       @param flag true if whitespaces should be reported as a token
+    */
+    void reportWhite(bool flag){ report_white = flag; }
+
+    /**
+       @brief returns the status of "report white"
+       @return true if whitespaces will be reported as a token
+    */
+    bool isReportWhite() { return report_white; }
 
     /**
        Only the following characters introduces a word:\n
-       "A-Z", "a-z", "_"
+       "A-Z", "a-z", "_" (underscore)
        @brief checks if the character introduces a word
        @param c character to be checked
        @return true if c introduces a word
+       @todo doku
     */
-    static bool isIntroducingWord(const char & c) { return ( ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || (c == '_') ); }
+    bool isIntroducingWord(const char & c) const { return char_classes.isIntroducingWord(c); }
 
     /**
        @brief checks if the character introduces a number
        @param c character to be checked
        @return true if c introduces a number
+       @todo doku
     */
-    static bool isIntroducingNumber(const char & c) { return ( '0' <= c && c <= '9' ); }
+    bool isIntroducingNumber(const char & c) { return char_classes.isIntroducingNumber(c); }
 
     /**
        @brief checks if the character is a number constituent
        @param c character to be checked
        @return true if c is a number constituent
+       @todo doku
     */
-    static bool isNumberConstituent(const char & c) { return ( c == '.' ); }
+    bool isNumberConstituent(const char & c) { return ( ( '0' <= c && c <= '9' ) || ( floating_points == true ? ( c == '.' ) : false ) ); }
+
+    /**
+       @brief checks whether a character is a positive or negative sign
+       @param c the character to be checked
+       @return true if c is a sign
+    */
+    bool isSign(const char & c){ return char_classes.isSign(c); }
+
+    /**
+       @brief a sign preceding a number will be interpreted as belonging to the number
+    */
+    void useSignedNumbers(){ signed_numbers = true; }
+
+    /**
+       @brief returns the status of "use signed numbers"
+       @return true if signes will be treated as preceding numbers
+    */
+    bool isUseSignedNumbers() { return signed_numbers; }
+
+    /**
+       @brief a numbers seperated by a point will be interpreted as floatingpoints
+    */
+    void useFloatingpoints(){ floating_points = true; }
+
+    /**
+       @brief returns the status of "use floating points"
+       @return true if floating points will be recognized
+    */
+    bool isUseFloatingpoints() { return floating_points; }
 
     /**
        @brief checks if the character introduces a word-quote
        @param c character to be checked
        @return true if c introduces a word-quote
     */
-    bool isIntroducingQuote(const char & c) const { return ( c == char_classes.quote_start ); }
+    bool isIntroducingQuote(const char & c) const { return char_classes.isQuoteStart(c); }
 
     /**
        @brief checks if the character terminates a word-quote
        @param c character to be checked
        @return true if c terminates a word-quote
     */
-    bool isTerminatingQuote(const char & c) const { return ( c == char_classes.quote_stop ); }
+    bool isTerminatingQuote(const char & c) const { return char_classes.isQuoteStop(c); }
 
     /**
        @brief checks if the character introduces a block comment
        @param c character to be checked
        @return true if c introduces block comment
     */
-    bool isIntroducingBlockComment(const char & c) const {
-      
-      return ( char_classes.block_comment_start.empty() ? false : c == char_classes.block_comment_start[0] );
-
-    }
+    bool isIntroducingBlockComment(const char & c) const { return char_classes.isIntroducingBlockComment(c); }
 
     /**
        @brief checks if the character introduces a line comment
        @param c character to be checked
        @return true if c introduces line comment
     */
-    bool isIntroducingLineComment(const char & c) const {
-
-      return ( char_classes.line_comment.empty() ? false : c == char_classes.line_comment[0] );
-
-    }
+    bool isIntroducingLineComment(const char & c) const { return char_classes.isIntroducingLineComment(c); }
 
     /**
        @brief checks if the character is constituent of a word
        @param c character to be checked
        @return true if c is constituent of a word
     */
-    bool isWordConstituent(const char & c) const { return char_classes.word_constituents.containsChar(c); }
+    bool isWordConstituent(const char & c) const { return char_classes.isWordConstituent(c); }
 
     /**
        @brief checks if the given char is a whitespace
@@ -414,7 +651,7 @@ namespace lex{
        @return true, is c is a whitespace
        @todo check for uninitialised pointer!!!
     */
-    bool isWhitespace(const char & c) const { return char_classes.white_spaces.containsChar(c); }
+    bool isWhitespace(const char & c) const { return char_classes.isWhitespace(c); }
 
     /**
        @brief checks if the given char is a return character
@@ -422,7 +659,14 @@ namespace lex{
        @return true, is c is a return character
        @todo check for uninitialised pointer!!!
     */
-    bool isReturn(const char & c) const { return char_classes.return_chars.containsChar(c); }
+    bool isEOL(const char & c) const { return char_classes.isEOL(c); }
+
+    /**
+       @brief checks if the given char is the ASCII-0 character
+       @param c the character to be checked
+       @return true, is c ASCII-0 character
+    */
+    bool isNull(const char & c) const { return char_classes.isNull(c); }
 
     /**
        String representation is of the following form:\n
@@ -430,13 +674,13 @@ namespace lex{
        @brief returns a string representation of the current token
        @return the string representation
     */
-    utils::String tokenToString() const;
+    utils::String tokenToString() const { return token.toString(); }
 
     /**
        @brief returns a string representation of the current token type
        @return the string representation
     */
-    utils::String ttypeToString() const;
+    utils::String typeToString() const { return token.typeToString(); }
 
   };
 
