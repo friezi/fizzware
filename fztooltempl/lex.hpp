@@ -36,18 +36,33 @@
 #include <exception.hpp>
 #include <utils.hpp>
 
+#define LEX_AT_SIZE 256
+
 /**
    @brief necessary stuff for lexical analysis
+   @since V2.1
 */
 namespace lex{
 
   /**
      @brief A struct to store all relevant delimitor-charakters, comment-signs, whitespaces, etc. for lexical analysis
+     @since V2.1
   */
   class LexCharClasses{
 
   protected:
-  
+
+    static const unsigned char FL_EOL;
+    static const unsigned char FL_WHITESPACE;
+    static const unsigned char FL_INTRODUCING_WORD;
+    static const unsigned char FL_WORD_CONSTITUENT;
+    static const unsigned char FL_INTRODUCING_NUMBER;
+    static const unsigned char FL_NUMBER_CONSTITUENT;
+    static const unsigned char FL_SIGN;
+    static const unsigned char FL_ESCAPE;
+
+    static const utils::String eol_chars;
+      
     /**
        @brief the start string of a block-comment
     */
@@ -78,17 +93,26 @@ namespace lex{
     */
     char quote_stop;
 
-    /**
-       @brief the characters in this string will be treated as word-constituents (not at beginning of word)
-    */
-    utils::String word_constituents;
+//     /**
+//        @brief the characters in this string will be treated as word-constituents (not at beginning of word)
+//     */
+//     utils::String word_constituents;
 
-    /**
-       @brief the return characters
-    */
-    static const utils::String eol_chars;
+//     /**
+//        @brief the return characters
+//     */
+//     static const utils::String eol_chars;
+
+    unsigned char ascii_table[LEX_AT_SIZE];
 
   public:
+
+    LexCharClasses();
+
+    /**
+       @brief resets the syntaxtable
+    */
+    void resetSyntax();
 
     /**
        @brief sets the introducing-word for a block comment
@@ -128,14 +152,28 @@ namespace lex{
 
     /**
        @brief all characters in the word will be word-constituents
-       @param word the word which defines characters to be word-constituents
+       @param constituents the word which defines characters being word-constituents
     */
-    void setWordConstituents(std::string word){ word_constituents = word; }
+    void setWordConstituents(const std::string constituents);
+
+    /**
+       @brief all characters in the range [from,to] will be word-constituents
+       @param from the character which defines the lower bound for word-constituents
+       @param to the character which defines the upper bound for word-constituents
+    */
+    void setWordConstituents(const char from, const char to);
+
+    /**
+       EOL-characters, whitespaces, signs and
+       @brief sets initial values for the syntax-table
+    */
+
+    void setBaseSyntax();
     
     /**
        @brief sets default-values
     */
-    void setDefaults();
+    void setDefaultSyntax();
 
     /**
        @brief checks if character is a linefeed
@@ -170,15 +208,27 @@ namespace lex{
        @param c character to be checked
        @return true if c is constituent of a word
     */
-    bool isWordConstituent(const char & c) const { return word_constituents.containsChar(c); }
+    bool isWordConstituent(const char & c) const { return getFlag(c,FL_WORD_CONSTITUENT); }
 
+    /**
+       @brief Sets all characters occuring in given word as whitespaces
+       @param whitespaces the word containing the whitespace-characters
+    */
+    void setWhitespaces(const std::string whitespaces);
+    
     /**
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
        @todo check for uninitialised pointer!!!
     */
-    bool isWhitespace(const char & c) const { return white_spaces.containsChar(c); }
+    bool isWhitespace(const char & c) const { return getFlag(c,FL_WHITESPACE); }
+
+    /**
+       @brief Sets all characters occuring in given word as end-of-line characters
+       @param eols the word containing the eol-characters
+    */
+    void setEOLs(const std::string eols);
 
     /**
        @brief checks if the given char is a return character
@@ -186,7 +236,20 @@ namespace lex{
        @return true, is c is a return character
        @todo check for uninitialised pointer!!!
     */
-    bool isEOL(const char & c) const { return eol_chars.containsChar(c); }
+    bool isEOL(const char & c) const { return getFlag(c,FL_EOL); }
+
+    /**
+       @brief all characters in the word will introduce a word
+       @param word the word which defines characters introducing a word
+    */
+    void setIntroducingWord(const std::string intro);
+
+    /**
+       @brief all characters in the range [from,to] will introduce a word
+       @param from the character which defines the lower bound for introducing word
+       @param to the character which defines the upper bound for introducing word
+    */
+    void setIntroducingWord(const char from, const char to);
 
     /**
        Only the following characters introduces a word:\n
@@ -196,7 +259,13 @@ namespace lex{
        @return true if c introduces a word
        @todo doku
     */
-    bool isIntroducingWord(const char & c) const { return ( ('A' <= c && c <= 'Z') || ('a' <= c && c <= 'z') || (c == '_') ); }
+    bool isIntroducingWord(const char & c) const { return getFlag(c,FL_INTRODUCING_WORD); }
+
+    /**
+       @brief all characters in the word will introduce a number
+       @param word the word which defines characters introducing a number
+    */
+    void setIntroducingNumber(const std::string intro);
 
     /**
        @brief checks if the character introduces a number
@@ -204,14 +273,34 @@ namespace lex{
        @return true if c introduces a number
        @todo doku
     */
-    bool isIntroducingNumber(const char & c) const { return ( '0' <= c && c <= '9' ); }
+    bool isIntroducingNumber(const char & c) const { return getFlag(c,FL_INTRODUCING_NUMBER); }
+
+    /**
+       @brief all characters in the word will be number constituents
+       @param constituents the word which defines characters being number constituents
+    */
+    void setNumberConstituents(const std::string contituents);
+
+    /**
+       @brief checks if the character is a number constituent
+       @param c character to be checked
+       @return true if c is a number constituent
+       @todo doku
+    */
+    bool isNumberConstituent(const char & c) { return getFlag(c,FL_NUMBER_CONSTITUENT); }
+
+    /**
+       @brief all characters in the word willdefines number-signs
+       @param word the word which consists of all sign-characters
+    */
+    void setSigns(const std::string signs);
 
     /**
        @brief checks whether a character is a positive or negative sign
        @param c the character to be checked
        @return true if c is a sign
     */
-    bool isSign(const char & c) const { return ( c == '+' || c == '-' ); }
+    bool isSign(const char & c) const { return getFlag(c,FL_SIGN); }
 
     /**
        @brief checks if the character introduces a block comment
@@ -233,11 +322,20 @@ namespace lex{
        @return true, is c ASCII-0 character
     */
     bool isNull(const char & c) const { return ( c == '\0' ); }
+
+  protected:
+
+    bool getFlag(const char & c, const unsigned char & flag) const { return ( ascii_table[(unsigned char)c] & 1L<<flag ); }
+
+    void setFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] |= 1L<<flag; }
+
+    void cleaFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] &= ~(1L<<flag); }
     
   };
   
   /**
      @brief A class for screening the input, i.e. removing comments and whitespaces
+     @since V2.1
   */
   class LexScreener{
     
@@ -354,6 +452,7 @@ namespace lex{
 
     /**
        @brief will store the characters of the string if type == TT_WORD
+       @since V2.1
     */
     utils::String sval;
 
@@ -413,6 +512,7 @@ namespace lex{
 
   /**
      @brief A class for performing lexical analysis
+     @since V2.1
   */
   class LexScanner{
 
@@ -579,7 +679,7 @@ namespace lex{
        @return true if c is a number constituent
        @todo doku
     */
-    bool isNumberConstituent(const char & c) { return ( ( '0' <= c && c <= '9' ) || ( floating_points == true ? ( c == '.' ) : false ) ); }
+    bool isNumberConstituent(const char & c) { return char_classes.isNumberConstituent(c); }
 
     /**
        @brief checks whether a character is a positive or negative sign
@@ -602,7 +702,7 @@ namespace lex{
     /**
        @brief a numbers seperated by a point will be interpreted as floatingpoints
     */
-    void useFloatingpoints(){ floating_points = true; }
+    void useFloatingpoints();
 
     /**
        @brief returns the status of "use floating points"

@@ -29,6 +29,15 @@ using namespace std;
 using namespace lex;
 using namespace utils;
 
+const unsigned char LexCharClasses::FL_EOL = 0;
+const unsigned char LexCharClasses::FL_WHITESPACE = 1;
+const unsigned char LexCharClasses::FL_INTRODUCING_WORD = 2;
+const unsigned char LexCharClasses::FL_WORD_CONSTITUENT = 3;
+const unsigned char LexCharClasses::FL_INTRODUCING_NUMBER = 4;
+const unsigned char LexCharClasses::FL_NUMBER_CONSTITUENT = 5;
+const unsigned char LexCharClasses::FL_SIGN = 6;
+const unsigned char LexCharClasses::FL_ESCAPE = 7;
+
 const String LexCharClasses::eol_chars = "\n\r";
 
 const int LexToken::TT_EOL = 10;
@@ -38,15 +47,109 @@ const int LexToken::TT_NUMBER = -3;
 const int LexToken::TT_WORD = -4;
 const int LexToken::TT_WHITE = -5;
 
-void LexCharClasses::setDefaults(){
+LexCharClasses::LexCharClasses(){
+
+  resetSyntax();
+  setDefaultSyntax();
+
+}
+
+void LexCharClasses::resetSyntax(){
+
+  for ( int i = 0; i < LEX_AT_SIZE; i++ )
+    ascii_table[i] = 0;
+
+}
+
+void LexCharClasses::setBaseSyntax(){
+
+   setWhitespaces(" \t");
+   setEOLs(eol_chars);
+   setSigns("+-");
+   setWordConstituents('a','z');
+   setWordConstituents('A','Z');
+   setWordConstituents('_','_');
+   setIntroducingWord('a','z');
+   setIntroducingWord('A','Z');
+   setIntroducingWord('_','_');
+   setNumberConstituents("1234567890");
+   setIntroducingNumber("1234567890");
+
+}
+
+void LexCharClasses::setDefaultSyntax(){
+
+  setBaseSyntax();
 
   block_comment_start = "/*";
   block_comment_stop = "*/";
   line_comment = "//";
-  white_spaces = " \t";
   quote_start = '"';
   quote_stop = '"';
-  word_constituents = "1234567890";
+  setWordConstituents("1234567890");
+
+}
+
+void LexCharClasses::setWordConstituents(const string constituents){
+
+  for ( String::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
+    setFlag(*it,FL_WORD_CONSTITUENT);
+
+}
+
+void LexCharClasses::setWordConstituents(const char from, const char to){
+
+  for ( unsigned char i = (unsigned char)from; i <= (unsigned char)to ; i++ )
+    setFlag(i,FL_WORD_CONSTITUENT);
+
+}
+
+void LexCharClasses::setIntroducingWord(const string intro){
+
+  for ( String::const_iterator it = intro.begin(); it != intro.end(); it++ )
+    setFlag(*it,FL_INTRODUCING_WORD);
+
+}
+
+void LexCharClasses::setIntroducingWord(const char from, const char to){
+
+  for ( unsigned char i = (unsigned char)from; i <= (unsigned char)to ; i++ )
+    setFlag(i,FL_INTRODUCING_WORD);
+
+}
+
+void LexCharClasses::setIntroducingNumber(const string intro){
+
+  for ( String::const_iterator it = intro.begin(); it != intro.end(); it++ )
+    setFlag(*it,FL_INTRODUCING_NUMBER);
+
+}
+
+void LexCharClasses::setNumberConstituents(const string constituents){
+
+  for ( String::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
+    setFlag(*it,FL_NUMBER_CONSTITUENT);
+
+}
+
+void LexCharClasses::setWhitespaces(const string whitespaces){
+
+  for ( String::const_iterator it = whitespaces.begin(); it != whitespaces.end(); it++ )
+    setFlag(*it,FL_WHITESPACE);
+
+}
+
+void LexCharClasses::setSigns(const string signs){
+
+  for ( String::const_iterator it = signs.begin(); it != signs.end(); it++ )
+    setFlag(*it,FL_SIGN);
+
+}
+
+void LexCharClasses::setEOLs(const string eols){
+
+  for ( String::const_iterator it = eols.begin(); it != eols.end(); it++ )
+    setFlag(*it,FL_EOL);
 
 }
 
@@ -232,7 +335,7 @@ LexScanner::LexScanner(std::istream * input) : input(input), line_number(1), low
 
   screener->setLexCharClasses(&char_classes);
   
-  char_classes.setDefaults();
+  char_classes.setDefaultSyntax();
 
 }
 
@@ -247,6 +350,12 @@ void LexScanner::lowerCaseMode(){
   lower_case_mode = true;
   screener->setLowerCaseMode(true);
 
+}
+void LexScanner::useFloatingpoints(){
+  
+  floating_points = true;
+  char_classes.setNumberConstituents(".");
+  
 }
 
 void LexScanner::putback(){
