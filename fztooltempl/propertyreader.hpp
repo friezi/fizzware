@@ -422,7 +422,7 @@ public:
 
   /**
      @brief iterator pointing to beginning of properties of a specific section
-     @param section-iterator of section
+     @param s_it iterator of section
      @return the iterator pointing to the first element
   */
   properties_iterator begin(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){
@@ -446,7 +446,7 @@ public:
 
   /**
      @brief iterator pointing to end of properties
-     @param section-iterator of section
+     @param s_it section-iterator of section
      @return the iterator pointing beyond last element
   */
   properties_iterator end(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){

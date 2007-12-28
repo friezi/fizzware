@@ -36,7 +36,6 @@ const unsigned char LexCharClasses::FL_WORD_CONSTITUENT = 3;
 const unsigned char LexCharClasses::FL_INTRODUCING_NUMBER = 4;
 const unsigned char LexCharClasses::FL_NUMBER_CONSTITUENT = 5;
 const unsigned char LexCharClasses::FL_SIGN = 6;
-const unsigned char LexCharClasses::FL_ESCAPE = 7;
 
 const String LexCharClasses::eol_chars = "\n\r";
 
@@ -143,6 +142,20 @@ void LexCharClasses::setSigns(const string signs){
 
   for ( String::const_iterator it = signs.begin(); it != signs.end(); it++ )
     setFlag(*it,FL_SIGN);
+
+}
+
+void LexCharClasses::setOrdinaries(const string ordinaries){
+
+  for ( String::const_iterator it = ordinaries.begin(); it != ordinaries.end(); it++ )
+    ascii_table[(unsigned char)(*it)] = 0;
+
+}
+
+void LexCharClasses::setOrdinaries(const char from, const char to){
+
+  for ( unsigned char i = (unsigned char)from; i <= (unsigned char)to ; i++ )
+    ascii_table[i] = 0;
 
 }
 
@@ -380,6 +393,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
   // specifies if a character that matches treated
   // as a normal character although it matches the beginning of a comment
   bool treat_normal = false;
+  bool escape_next = false;
 
   char c = 0;
   string number = "";
@@ -413,17 +427,47 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
     if ( input->eof() == true )
       break;
 
+    if ( escape_next == true ){
+
+      escape_next = false;
+      treat_normal = true;
+
+    }
+
     if ( isLowerCaseMode() )
       c = String::latinToLower(c);
+
+    if ( isEscape(c) && treat_normal == false ){
+
+      escape_next = true;
+      continue;
+
+    }
 
     if ( token.type == LexToken::TT_WORD ){
 
       if ( quote_mode == true ){
 
-	if ( isTerminatingQuote(c) )
+	if ( isTerminatingQuote(c) && treat_normal == false )
 	  return token.type;
-	else
+	else if ( isEOL(c) and treat_normal == false ){
+
+	  input->putback(c);
+	  break;
+
+	} else{
+
+	  if ( isEOL(c) ){
+
+	    treat_normal = false;
+	    continue;
+
+	  }
+	  
+	  treat_normal = false;
 	  token.sval += c;
+
+	}
 
       } else if ( !isIntroducingWord(c) && !isWordConstituent(c) ){
 
@@ -567,6 +611,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
       } else {
 	
+	treat_normal = false;
 	token.type = c;
 	return token.type;
     
@@ -607,6 +652,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 int LexScanner::nextLine() throw (Exception<LexScanner>){
 
   char c = 0;
+  bool escape_next = false;
 
   // specifies if a character that matches treated
   // as a normal character although it matches the beginning of a comment
@@ -639,6 +685,13 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
 
     if ( input->eof() == true )
       break;
+
+    if ( escape_next == true ){
+
+      escape_next = false;
+      treat_normal = true;
+
+    }
   
     if ( token.type == LexToken::TT_NONE ){
 
@@ -687,18 +740,32 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
     } else {
       // found an unscreenable character
       
+      if ( isEscape(c) && treat_normal == false ){
+
+	escape_next = true;
+	continue;
+	
+      }
+      
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
 	treat_normal = ~screener->screen();
 	line_number += screener->getSkippedLines();
 	
-      } else if ( isEOL(c) ){
+      } else if ( isEOL(c) && treat_normal == false ){
 	
 	input->putback(c);
 	break;
       
       } else {
+
+	if ( isEOL(c) ){
+
+	  treat_normal = false;
+	  continue;
+
+	}
 
 	if ( isLowerCaseMode() )
 	  c = String::latinToLower(c);

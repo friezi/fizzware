@@ -382,7 +382,7 @@ namespace graph{
 
     /**
        @brief Default-constructor
-       @param a numerical id identifing the component
+       @param id a number identifing the component
     */
     SCCGraphComponent(unsigned int id) : id(id){}
 

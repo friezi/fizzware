@@ -59,7 +59,6 @@ namespace lex{
     static const unsigned char FL_INTRODUCING_NUMBER;
     static const unsigned char FL_NUMBER_CONSTITUENT;
     static const unsigned char FL_SIGN;
-    static const unsigned char FL_ESCAPE;
 
     static const utils::String eol_chars;
       
@@ -93,15 +92,10 @@ namespace lex{
     */
     char quote_stop;
 
-//     /**
-//        @brief the characters in this string will be treated as word-constituents (not at beginning of word)
-//     */
-//     utils::String word_constituents;
-
-//     /**
-//        @brief the return characters
-//     */
-//     static const utils::String eol_chars;
+    /**
+       @brief the escape character to remove any special meaning of the following character
+    */
+    char escape;
 
     unsigned char ascii_table[LEX_AT_SIZE];
 
@@ -110,9 +104,24 @@ namespace lex{
     LexCharClasses();
 
     /**
-       @brief resets the syntaxtable
+       @brief resets the syntaxtable and clears all special meaning of any symbol
     */
     void resetSyntax();
+
+    /**
+       Sets values for the syntax-table which are at least necessary to provide the minimum
+       basis of syntax-checking. Theses are:\n
+       EOL-characters, whitespaces, signs and
+       @brief sets initial values for the syntax-table
+       @todo doku
+    */
+
+    void setBaseSyntax();
+    
+    /**
+       @brief sets default-values
+    */
+    void setDefaultSyntax();
 
     /**
        @brief sets the introducing-word for a block comment
@@ -145,49 +154,10 @@ namespace lex{
     utils::String getBlockCommentStop() { return block_comment_stop; }
 
     /**
-       @brief sets the word for a line comment
-       @param word the word which defines the block comment terminating-word
+       @brief gives the word for a line comment
+       @return the word which defines the line-comment word
     */
     utils::String getLineComment() { return line_comment; }
-
-    /**
-       @brief all characters in the word will be word-constituents
-       @param constituents the word which defines characters being word-constituents
-    */
-    void setWordConstituents(const std::string constituents);
-
-    /**
-       @brief all characters in the range [from,to] will be word-constituents
-       @param from the character which defines the lower bound for word-constituents
-       @param to the character which defines the upper bound for word-constituents
-    */
-    void setWordConstituents(const char from, const char to);
-
-    /**
-       EOL-characters, whitespaces, signs and
-       @brief sets initial values for the syntax-table
-    */
-
-    void setBaseSyntax();
-    
-    /**
-       @brief sets default-values
-    */
-    void setDefaultSyntax();
-
-    /**
-       @brief checks if character is a linefeed
-       @param c character to be checked
-       @return true if c is linefeed
-    */
-    static bool isLF(const char & c){ return ( c == '\n' ); }
-
-    /**
-       @brief checks if character is a carriage-return
-       @param c character to be checked
-       @return true if c is carriage-return
-    */
-    static bool isCR(const char & c){ return ( c == '\r' ); }
 
     /**
        @brief checks whether a character is the quote_start character
@@ -202,6 +172,35 @@ namespace lex{
        @return true if c is quote_stop character
     */
     bool isQuoteStop(const char & c) const { return ( c == quote_stop ); }
+
+    /**
+       Removes special meaning of quote, escape (and newline in method nextLine(); in nextToken() online newlines within words
+       are escaped) for the next character.
+       @brief sets the escape character
+       @param c the escape character
+       @todo implementation!!!
+    */
+    void setEscape(const char & c){ escape = c; }
+
+    /**
+       @brief checks whether a character is the escape character
+       @param c the character to be checked
+       @return true if c is the escape character
+    */
+    bool isEscape(const char & c){ return ( c == escape ); }
+
+    /**
+       @brief all characters in the word will be word-constituents
+       @param constituents the word which defines characters being word-constituents
+    */
+    void setWordConstituents(const std::string constituents);
+
+    /**
+       @brief all characters in the range [from,to] will be word-constituents
+       @param from the character which defines the lower bound for word-constituents
+       @param to the character which defines the upper bound for word-constituents
+    */
+    void setWordConstituents(const char from, const char to);
 
     /**
        @brief checks if the character is constituent of a word
@@ -240,7 +239,7 @@ namespace lex{
 
     /**
        @brief all characters in the word will introduce a word
-       @param word the word which defines characters introducing a word
+       @param intro the word which defines characters introducing a word
     */
     void setIntroducingWord(const std::string intro);
 
@@ -263,7 +262,7 @@ namespace lex{
 
     /**
        @brief all characters in the word will introduce a number
-       @param word the word which defines characters introducing a number
+       @param intro the word which defines characters introducing a number
     */
     void setIntroducingNumber(const std::string intro);
 
@@ -279,7 +278,7 @@ namespace lex{
        @brief all characters in the word will be number constituents
        @param constituents the word which defines characters being number constituents
     */
-    void setNumberConstituents(const std::string contituents);
+    void setNumberConstituents(const std::string constituents);
 
     /**
        @brief checks if the character is a number constituent
@@ -291,7 +290,7 @@ namespace lex{
 
     /**
        @brief all characters in the word willdefines number-signs
-       @param word the word which consists of all sign-characters
+       @param signs the word which consists of all sign-characters
     */
     void setSigns(const std::string signs);
 
@@ -317,11 +316,45 @@ namespace lex{
     bool isIntroducingLineComment(const char & c) const { return ( line_comment.empty() ? false : c == line_comment[0] ); }
 
     /**
+       @brief all characters in the word will lose any special meaning
+       @param ordinary the word which defines characters having no special meaning
+    */
+    void setOrdinaries(const std::string ordinary);
+
+    /**
+       @brief all characters in the range [from,to] will lose any special meaning
+       @param from the character which defines the lower bound for characters without special meaning
+       @param to the character which defines the upper bound for characters without special meaning
+    */
+    void setOrdinaries(const char from, const char to);
+
+    /**
+       @brief checks if the character is ordinary
+       @param c character to be checked
+       @return true if c is ordinary
+    */
+    bool isOrdinary(const char & c) const { return ( ascii_table[(unsigned char)c] == 0 ); }
+
+    /**
+       @brief checks if character is a linefeed
+       @param c character to be checked
+       @return true if c is linefeed
+    */
+    static bool isLF(const char & c){ return ( c == '\n' ); }
+
+    /**
+       @brief checks if character is a carriage-return
+       @param c character to be checked
+       @return true if c is carriage-return
+    */
+    static bool isCR(const char & c){ return ( c == '\r' ); }
+
+    /**
        @brief checks if the given char is the ASCII-0 character
        @param c the character to be checked
        @return true, is c ASCII-0 character
     */
-    bool isNull(const char & c) const { return ( c == '\0' ); }
+    static bool isNull(const char & c){ return ( c == '\0' ); }
 
   protected:
 
@@ -753,6 +786,13 @@ namespace lex{
     */
     bool isWhitespace(const char & c) const { return char_classes.isWhitespace(c); }
 
+    /**
+       @brief checks whether a character is the escape character
+       @param c the character to be checked
+       @return true if c is the escape character
+    */
+    bool isEscape(const char & c){ return char_classes.isEscape(c); }
+    
     /**
        @brief checks if the given char is a return character
        @param c the character to be checked
