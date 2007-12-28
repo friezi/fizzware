@@ -443,173 +443,67 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
       continue;
 
     }
-
-    if ( token.type == LexToken::TT_WORD ){
-
-      if ( quote_mode == true ){
-
-	if ( isTerminatingQuote(c) && treat_normal == false ){
-
-	  quote_mode = false;
-	  continue;
-
-	} else if ( isEOL(c) and treat_normal == false ){
-
-	  input->putback(c);
-	  break;
-
-	} else{
-
-	  if ( isEOL(c) ){
-
-	    treat_normal = false;
-	    line_number += LexScreener::skipIfReturn(input,c);
-	    continue;
-
-	  }
-	  
-	  treat_normal = false;
-	  token.sval += c;
-
-	}
-
-      } else if ( !isIntroducingWord(c) && !isWordConstituent(c) ){
-
-	if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
-
-	  input->putback(c);
-	  treat_normal = !screener->screen();
-	  line_number += screener->getSkippedLines();
-	  
-	  
-	} else {
-
-	  if ( isEOL(c) && treat_normal == true ){
-
-	    treat_normal = false;
-	    line_number += LexScreener::skipIfReturn(input,c);
-	    continue;
-
-	  }
-	  
-	  treat_normal = false;
-	  input->putback(c);
-	  return token.type;
-
-	}
-	
-      } else 
-	// belonging to word
-	token.sval += c;
       
-    } else if ( token.type == LexToken::TT_NUMBER ){
-
-      if ( isNumberConstituent(c) )
-	number += c;
+    if ( token.type == LexToken::TT_NONE ){
       
-      else if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
-	
-	input->putback(c);
-	treat_normal = !screener->screen();
-	line_number += screener->getSkippedLines();
-	token.token_line_number = line_number;
-	
-      } else {
-	
-	treat_normal = false;
-	input->putback(c);
-	
-	if ( isParseNumbers() )
-	  token.nval = atof(number.c_str());
-	
-	else {
-	  
-	  token.type = LexToken::TT_WORD;
-	  token.sval = number;
-
-	}
-
-	return token.type;
-	
-      }
-
-    } else if ( token.type == LexToken::TT_NONE ){
-
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
-
+	
 	input->putback(c);
-	treat_normal = !screener->screen();
+	escape_next = !screener->screen();
 	line_number += screener->getSkippedLines();
 	token.token_line_number = line_number;
-
-	input->get(c);
 	
-	if ( input->eof() == true ){
-	  
-	  token.type = LexToken::TT_EOF;
-	  return token.type;
-	  
-	}
-
-	if ( isLowerCaseMode() )
-	  c = String::latinToLower(c);
+      } else if ( screener->isWhitespace(c) ){
 	
-      } else
-	treat_normal = false;
-
-      if ( screener->isWhitespace(c) ){
-    
-	treat_normal = !screener->screen();
+	input->putback(c);
+	escape_next = !screener->screen();
 	line_number += screener->getSkippedLines();
-
+	
 	if ( isReportWhite() ){
 
 	  token.type = LexToken::TT_WHITE;
 	  return token.type;
-
+	  
 	}
-
+	
 	token.token_line_number = line_number;
 	
-	if ( input->eof() == true )
-	  break;
-    
       } else if ( isIntroducingWord(c) ){
-
+	
 	token.sval += c;
 	token.type = LexToken::TT_WORD;
-
+	
       } else if ( isIntroducingNumber(c) ){
-
+	
 	number += c;
 	token.type = LexToken::TT_NUMBER;
-
+	
       } else if ( isUseSignedNumbers() && isSign(c) &&input->eof() == false ){
 	// check for sign
-
+	
 	char next;
 	input->get(next);
 	input->putback(next);
-
+	
 	if ( isIntroducingNumber(next) ){
-
+	  
 	  number += c;
 	  token.type = LexToken::TT_NUMBER;
-
+	  
 	} else{
-
+	  
 	  token.type = c;
 	  return token.type;
-
+	  
 	}
-
+	
       } else if ( isIntroducingQuote(c) ){
 	
 	quote_mode = true;
 	token.type = LexToken::TT_WORD;      
 	
       } else if ( isEOL(c) and treat_normal == false ){
-	  
+	
 	line_number += LexScreener::skipIfReturn(input,c);
 	
 	if ( isReportEOL() ){
@@ -621,35 +515,115 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
 	token.token_line_number = line_number;
 	
-
+	
       } else if ( isEscape(c) && treat_normal == false ){
 
 	escape_next = true;
-	continue;
 	
       } else {
 	
 	if ( isEOL(c) && treat_normal == true ){
-	  
-	  treat_normal = false;
+
 	  line_number += LexScreener::skipIfReturn(input,c);
-	  continue;
+	
+	} else {
+	  
+	  token.type = c;
+	  return token.type;
+	  
+	}
+      }
+
+    } else if ( token.type == LexToken::TT_WORD ){
+      
+      if ( quote_mode == true ){
+	
+	if ( isTerminatingQuote(c) && treat_normal == false ) {
+
+	  quote_mode = false;
+	
+	} else if ( isEOL(c) and treat_normal == false ){
+	  
+	  input->putback(c);
+	  break;
+	  
+	} else{
+	  
+	  if ( isEOL(c) )
+	    line_number += LexScreener::skipIfReturn(input,c);
+
+	  else
+	      token.sval += c;
+
+	}
+
+      } else if ( !isIntroducingWord(c) && !isWordConstituent(c) ){
+
+	if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
+
+	  input->putback(c);
+	  escape_next = !screener->screen();
+	  line_number += screener->getSkippedLines();
+	  
+	  
+	} else {
+
+	  if ( isEOL(c) && treat_normal == true ){
+
+	    line_number += LexScreener::skipIfReturn(input,c);
+
+	  } else {
+	    
+	    input->putback(c);
+	    return token.type;
+	    
+	  }
+
+	}
+	  
+      } else 
+	// belonging to word
+	token.sval += c;
+      
+    } else if ( token.type == LexToken::TT_NUMBER ){
+      
+      if ( isNumberConstituent(c) )
+	number += c;
+      
+      else if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
+	
+	input->putback(c);
+	escape_next = !screener->screen();
+	line_number += screener->getSkippedLines();
+	token.token_line_number = line_number;
+	
+      } else {
+	
+	input->putback(c);
+	
+	if ( isParseNumbers() ){
+
+	  token.nval = atof(number.c_str());
+	
+	} else {
+	  
+	  token.type = LexToken::TT_WORD;
+	  token.sval = number;
 	  
 	}
 	
-	treat_normal = false;
-	token.type = c;
 	return token.type;
-    
+	
       }
-
     }
-
+    
+    treat_normal = false;
+    
   }
   // EOF
-
+  
   if ( quote_mode == true ){
-
+    
     ostringstream liness;
     liness << line_number;
     throw Exception<LexScanner>(thisMethod + ": unterminated quote in line " + liness.str() + "!");
@@ -658,10 +632,11 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
   if ( token.type == LexToken::TT_NUMBER ){
 
-    if ( isParseNumbers() )
+    if ( isParseNumbers() ){
+
       token.nval = atof(number.c_str());
 
-    else {
+    } else {
 
       token.type = LexToken::TT_WORD;
       token.sval = number;
@@ -718,33 +693,23 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
       treat_normal = true;
 
     }
+
+    if ( isLowerCaseMode() )
+      c = String::latinToLower(c);
   
     if ( token.type == LexToken::TT_NONE ){
 
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
-	treat_normal = !screener->screen();
+	escape_next = !screener->screen();
 	line_number += screener->getSkippedLines();
-
-	input->get(c);
 	
-	if ( input->eof() == true )
-	  break;
-	  
-	if ( isLowerCaseMode() )
-	  c = String::latinToLower(c);
-	
-      }
-
-      if ( screener->isWhitespace(c) ){
+      } else if ( screener->isWhitespace(c) ){
     
-	treat_normal = !screener->screen();
+	input->putback(c);
+	escape_next = !screener->screen();
 	line_number += screener->getSkippedLines();
-    
-	if ( input->eof() == true )
-	  break;
-
     
       } else if ( isEOL(c) ){
 
@@ -754,12 +719,7 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
       } else {
 
 	token.type = LexToken::TT_WORD;
-
-	if ( isLowerCaseMode() )
-	  c = String::latinToLower(c);
-
 	token.sval += c;
-	treat_normal = false;
       
       }
 
@@ -769,14 +729,11 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
       if ( isEscape(c) && treat_normal == false ){
 
 	escape_next = true;
-	continue;
 	
-      }
-      
-      if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
+      } else if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
-	treat_normal = !screener->screen();
+	escape_next = !screener->screen();
 	line_number += screener->getSkippedLines();
 	
       } else if ( isEOL(c) && treat_normal == false ){
@@ -788,22 +745,21 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
 
 	if ( isEOL(c) ){
 
-	  treat_normal = false;
 	  line_number += LexScreener::skipIfReturn(input,c);
-	  continue;
 
-	}
-
-	if ( isLowerCaseMode() )
-	  c = String::latinToLower(c);
+	} else {
 
 	token.sval += c;
 	treat_normal = false;
+
+	}
 	
       }
-
-    }
       
+    }
+  
+    treat_normal = false;
+    
   }
   
   if ( token.type == LexToken::TT_NONE )
