@@ -335,7 +335,7 @@ bool LexScreener::screen(){
     }
     
   }
-  
+
   return skipped;
   
 }
@@ -450,6 +450,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
 	if ( isTerminatingQuote(c) && treat_normal == false )
 	  return token.type;
+
 	else if ( isEOL(c) and treat_normal == false ){
 
 	  input->putback(c);
@@ -460,6 +461,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  if ( isEOL(c) ){
 
 	    treat_normal = false;
+	    line_number += LexScreener::skipIfReturn(input,c);
 	    continue;
 
 	  }
@@ -474,7 +476,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	  input->putback(c);
-	  treat_normal = ~screener->screen();
+	  treat_normal = !screener->screen();
 	  line_number += screener->getSkippedLines();
 	  
 	  
@@ -498,7 +500,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
       else if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 	
 	input->putback(c);
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
 	token.token_line_number = line_number;
 	
@@ -526,7 +528,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
 	token.token_line_number = line_number;
 
@@ -547,7 +549,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
       if ( screener->isWhitespace(c) ){
     
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
 
 	if ( isReportWhite() ){
@@ -698,7 +700,7 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
 
 	input->get(c);
@@ -713,7 +715,7 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
 
       if ( screener->isWhitespace(c) ){
     
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
     
 	if ( input->eof() == true )
@@ -750,11 +752,11 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
       if ( (isIntroducingBlockComment(c) || isIntroducingLineComment(c)) && treat_normal == false ){
 
 	input->putback(c);
-	treat_normal = ~screener->screen();
+	treat_normal = !screener->screen();
 	line_number += screener->getSkippedLines();
 	
       } else if ( isEOL(c) && treat_normal == false ){
-	
+
 	input->putback(c);
 	break;
       
@@ -763,6 +765,7 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
 	if ( isEOL(c) ){
 
 	  treat_normal = false;
+	  line_number += LexScreener::skipIfReturn(input,c);
 	  continue;
 
 	}
