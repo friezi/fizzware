@@ -448,10 +448,12 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
       if ( quote_mode == true ){
 
-	if ( isTerminatingQuote(c) && treat_normal == false )
-	  return token.type;
+	if ( isTerminatingQuote(c) && treat_normal == false ){
 
-	else if ( isEOL(c) and treat_normal == false ){
+	  quote_mode = false;
+	  continue;
+
+	} else if ( isEOL(c) and treat_normal == false ){
 
 	  input->putback(c);
 	  break;
@@ -481,6 +483,14 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  
 	  
 	} else {
+
+	  if ( isEOL(c) && treat_normal == true ){
+
+	    treat_normal = false;
+	    line_number += LexScreener::skipIfReturn(input,c);
+	    continue;
+
+	  }
 	  
 	  treat_normal = false;
 	  input->putback(c);
@@ -598,7 +608,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	quote_mode = true;
 	token.type = LexToken::TT_WORD;      
 	
-      } else if ( isEOL(c) ){
+      } else if ( isEOL(c) and treat_normal == false ){
 	  
 	line_number += LexScreener::skipIfReturn(input,c);
 	
@@ -611,7 +621,21 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
 	token.token_line_number = line_number;
 	
+
+      } else if ( isEscape(c) && treat_normal == false ){
+
+	escape_next = true;
+	continue;
+	
       } else {
+	
+	if ( isEOL(c) && treat_normal == true ){
+	  
+	  treat_normal = false;
+	  line_number += LexScreener::skipIfReturn(input,c);
+	  continue;
+	  
+	}
 	
 	treat_normal = false;
 	token.type = c;
