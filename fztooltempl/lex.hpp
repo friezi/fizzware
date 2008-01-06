@@ -568,7 +568,6 @@ namespace lex{
   /**
      @brief A class for performing lexical analysis
      @since V2.1
-     @todo if whitespaces should be reported but only whitespaces occur in a line suppress reporting
   */
   class LexScanner{
 
@@ -679,7 +678,7 @@ namespace lex{
 
     /**
        If set to true and if an arbitrary number of whitespaces occur between two tokens they will be reported
-       as one single token of type TT_WHITE
+       as one single token of type TT_WHITE. Only whitespaces which are not followed by EOL or EOF will be reported.
        @brief determines whether or not whitespaces will be reported as a token
        @param flag true if whitespaces should be reported as a token
     */

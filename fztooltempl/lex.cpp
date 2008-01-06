@@ -461,9 +461,24 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
 	if ( isReportWhite() ){
 
-	  token.type = LexToken::TT_WHITE;
-	  previous_token_type = token.type;
-	  return token.type;
+	  char next;
+
+	  input->get(next);
+
+	  // whitespaces should only be reported if not at end of line
+	  if ( !input->eof() ){
+	    
+	    if ( !isEOL(next) ){
+	      
+	      input->putback(next);
+	      token.type = LexToken::TT_WHITE;
+	      previous_token_type = token.type;
+	      return token.type;
+	      
+	    } else
+	      input->putback(next);
+	    
+	  }
 	  
 	}
 	
