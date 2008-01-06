@@ -103,11 +103,14 @@ namespace lex{
 
     LexCharClasses();
 
+    /** @name configuring setters */
+    //@{
+
     /**
        @brief resets the syntaxtable and clears all special meaning of any symbol
     */
     void resetSyntax();
-
+    
     /**
        Sets values for the syntax-table which are at least necessary to provide the minimum
        basis of syntax-checking. Theses are:\n
@@ -142,6 +145,101 @@ namespace lex{
     void setLineComment(std::string word) { line_comment = word; }
 
     /**
+       @brief all characters in the range [from,to] will be word-constituents
+       @param from the character which defines the lower bound for word-constituents
+       @param to the character which defines the upper bound for word-constituents
+    */
+    void setWordConstituents(const char from, const char to);
+
+    /**
+       @brief all characters in the word will be word-constituents
+       @param constituents the word which defines characters being word-constituents
+    */
+    void setWordConstituents(const std::string constituents);
+
+    /**
+       @brief sets the start character for a quoted word
+       @param c the character to be set
+    */
+    void setQuoteStart(const char & c){ quote_start = c; }
+
+    /**
+       @brief sets the stop character for a quoted word
+       @param c the character to be set
+    */
+    void setQuoteStop(const char & c){ quote_stop = c; }
+
+    /**
+       @brief Sets all characters occuring in given word as whitespaces
+       @param whitespaces the word containing the whitespace-characters
+    */
+    void setWhitespaces(const std::string whitespaces);
+
+    /**
+       Removes special meaning of quote, escape (and newline in method nextLine(); in nextToken() online newlines within words
+       are escaped) for the next character.
+       @brief sets the escape character
+       @param c the escape character
+       @todo implementation!!!
+    */
+    void setEscape(const char & c){ escape = c; }
+
+    /**
+       @brief all characters in the word will introduce a word
+       @param intro the word which defines characters introducing a word
+    */
+    void setIntroducingWord(const std::string intro);
+
+    /**
+       @brief all characters in the range [from,to] will introduce a word
+       @param from the character which defines the lower bound for introducing word
+       @param to the character which defines the upper bound for introducing word
+    */
+    void setIntroducingWord(const char from, const char to);
+
+    /**
+       @brief all characters in the word will introduce a number
+       @param intro the word which defines characters introducing a number
+    */
+    void setIntroducingNumber(const std::string intro);
+
+    /**
+       @brief all characters in the word will be number constituents
+       @param constituents the word which defines characters being number constituents
+    */
+    void setNumberConstituents(const std::string constituents);
+
+    /**
+       @brief all characters in the word will lose any special meaning
+       @param ordinary the word which defines characters having no special meaning
+    */
+    void setOrdinaries(const std::string ordinary);
+
+    /**
+       @brief all characters in the range [from,to] will lose any special meaning
+       @param from the character which defines the lower bound for characters without special meaning
+       @param to the character which defines the upper bound for characters without special meaning
+    */
+    void setOrdinaries(const char from, const char to);
+
+    /**
+       @brief all characters in the word will define number-signs
+       @param signs the word which consists of all sign-characters
+    */
+    void setSigns(const std::string signs);
+
+    /**
+       @brief Sets all characters occuring in given word as end-of-line characters
+       @param eols the word containing the eol-characters
+    */
+    void setEOLs(const std::string eols);
+
+    //@}
+
+    /** @name getters and checkers */
+    //@{
+
+    /**
        @brief gets the introducing-word for a block comment
        @return the word which defines the block comment introducing-word
     */
@@ -174,15 +272,6 @@ namespace lex{
     bool isQuoteStop(const char & c) const { return ( c == quote_stop ); }
 
     /**
-       Removes special meaning of quote, escape (and newline in method nextLine(); in nextToken() online newlines within words
-       are escaped) for the next character.
-       @brief sets the escape character
-       @param c the escape character
-       @todo implementation!!!
-    */
-    void setEscape(const char & c){ escape = c; }
-
-    /**
        @brief checks whether a character is the escape character
        @param c the character to be checked
        @return true if c is the escape character
@@ -190,30 +279,11 @@ namespace lex{
     bool isEscape(const char & c){ return ( c == escape ); }
 
     /**
-       @brief all characters in the word will be word-constituents
-       @param constituents the word which defines characters being word-constituents
-    */
-    void setWordConstituents(const std::string constituents);
-
-    /**
-       @brief all characters in the range [from,to] will be word-constituents
-       @param from the character which defines the lower bound for word-constituents
-       @param to the character which defines the upper bound for word-constituents
-    */
-    void setWordConstituents(const char from, const char to);
-
-    /**
        @brief checks if the character is constituent of a word
        @param c character to be checked
        @return true if c is constituent of a word
     */
     bool isWordConstituent(const char & c) const { return getFlag(c,FL_WORD_CONSTITUENT); }
-
-    /**
-       @brief Sets all characters occuring in given word as whitespaces
-       @param whitespaces the word containing the whitespace-characters
-    */
-    void setWhitespaces(const std::string whitespaces);
     
     /**
        @brief checks if the given char is a whitespace
@@ -224,31 +294,12 @@ namespace lex{
     bool isWhitespace(const char & c) const { return getFlag(c,FL_WHITESPACE); }
 
     /**
-       @brief Sets all characters occuring in given word as end-of-line characters
-       @param eols the word containing the eol-characters
-    */
-    void setEOLs(const std::string eols);
-
-    /**
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
        @todo check for uninitialised pointer!!!
     */
     bool isEOL(const char & c) const { return getFlag(c,FL_EOL); }
-
-    /**
-       @brief all characters in the word will introduce a word
-       @param intro the word which defines characters introducing a word
-    */
-    void setIntroducingWord(const std::string intro);
-
-    /**
-       @brief all characters in the range [from,to] will introduce a word
-       @param from the character which defines the lower bound for introducing word
-       @param to the character which defines the upper bound for introducing word
-    */
-    void setIntroducingWord(const char from, const char to);
 
     /**
        Only the following characters introduces a word:\n
@@ -261,12 +312,6 @@ namespace lex{
     bool isIntroducingWord(const char & c) const { return getFlag(c,FL_INTRODUCING_WORD); }
 
     /**
-       @brief all characters in the word will introduce a number
-       @param intro the word which defines characters introducing a number
-    */
-    void setIntroducingNumber(const std::string intro);
-
-    /**
        @brief checks if the character introduces a number
        @param c character to be checked
        @return true if c introduces a number
@@ -275,24 +320,12 @@ namespace lex{
     bool isIntroducingNumber(const char & c) const { return getFlag(c,FL_INTRODUCING_NUMBER); }
 
     /**
-       @brief all characters in the word will be number constituents
-       @param constituents the word which defines characters being number constituents
-    */
-    void setNumberConstituents(const std::string constituents);
-
-    /**
        @brief checks if the character is a number constituent
        @param c character to be checked
        @return true if c is a number constituent
        @todo doku
     */
     bool isNumberConstituent(const char & c) { return getFlag(c,FL_NUMBER_CONSTITUENT); }
-
-    /**
-       @brief all characters in the word willdefines number-signs
-       @param signs the word which consists of all sign-characters
-    */
-    void setSigns(const std::string signs);
 
     /**
        @brief checks whether a character is a positive or negative sign
@@ -316,24 +349,13 @@ namespace lex{
     bool isIntroducingLineComment(const char & c) const { return ( line_comment.empty() ? false : c == line_comment[0] ); }
 
     /**
-       @brief all characters in the word will lose any special meaning
-       @param ordinary the word which defines characters having no special meaning
-    */
-    void setOrdinaries(const std::string ordinary);
-
-    /**
-       @brief all characters in the range [from,to] will lose any special meaning
-       @param from the character which defines the lower bound for characters without special meaning
-       @param to the character which defines the upper bound for characters without special meaning
-    */
-    void setOrdinaries(const char from, const char to);
-
-    /**
        @brief checks if the character is ordinary
        @param c character to be checked
        @return true if c is ordinary
     */
     bool isOrdinary(const char & c) const { return ( ascii_table[(unsigned char)c] == 0 ); }
+
+    //@}
 
     /**
        @brief checks if character is a linefeed
@@ -502,7 +524,7 @@ namespace lex{
     /**
        @brief the linenumber the token occured in
     */
-    unsigned long token_line_number;
+    unsigned long line_number;
 
   /** @name Token types */
   //@{
@@ -525,7 +547,7 @@ namespace lex{
     static const int TT_NONE;
     //@}
 
-    LexToken() : sval(""), nval(0), type(TT_NONE), token_line_number(0){}
+    LexToken() : sval(""), nval(0), type(TT_NONE), line_number(0){}
 
     /**
        String representation is of the following form:\n
@@ -554,6 +576,8 @@ namespace lex{
     std::istream * input;
 
     unsigned long line_number;
+
+    unsigned long last_token_line;
 
     bool lower_case_mode;
 
@@ -595,6 +619,9 @@ namespace lex{
 
     ~LexScanner();
 
+    /** @name scanning-functions */
+    //@{
+
     /**
        @brief gives the next token
        @return the token-type resp. token-value
@@ -616,16 +643,15 @@ namespace lex{
     int nextLine() throw (Exception<LexScanner>);
 
     /**
-       @brief returns the current line number
+       @brief returns the current line number the token occured in
        @return the line number
     */
-    unsigned long getLineNumber() { return token.token_line_number; }
+    unsigned long getLineNumber() { return token.line_number; }
 
-    /**
-       @brief reference to the lexical character classes
-       @return lexical character classes
-    */
-    LexCharClasses & getLexCharClasses(){ return char_classes; }
+    //@}
+
+    /** @name configuring functions */
+    //@{
 
     /**
        @brief determines whether nested comments should be supported
@@ -634,21 +660,9 @@ namespace lex{
     void supportNestedComments(bool flag){ screener->setNestedComments(flag); }
 
     /**
-       @brief returns state of using nested comments
-       @return state of using nested comments
-    */
-    bool isNestedComments(){ return screener->isNestedComments(); }
-
-    /**
        @brief specifies lower-case mode: all input-chars will be lower-cased before comparison
     */
     void lowerCaseMode();
-
-    /**
-       @brief returns state of lower-case mode
-       @ true, if lower-case mode is switched on, false otherwise
-    */
-    bool isLowerCaseMode(){ return lower_case_mode; }
 
     /**
        The number will be stored in the nval-field of LexToken
@@ -657,22 +671,10 @@ namespace lex{
     void parseNumbers(){ parse_numbers = true; }
 
     /**
-       @brief returns status of the parse-numbers-flag
-       @return true if parse-numbers is set
-    */
-    bool isParseNumbers(){ return parse_numbers; }
-
-    /**
        @brief determines whether or not EOL will be reported as a token
        @param flag true if EOL should be reported as a token
     */
     void reportEOL(bool flag){ report_eol = flag; }
-
-    /**
-       @brief returns the status of "report EOL"
-       @return true if EOL will be reported as a token
-    */
-    bool isReportEOL() { return report_eol; }
 
     /**
        If set to true and if an arbitrary number of whitespaces occur between two tokens they will be reported
@@ -683,10 +685,74 @@ namespace lex{
     void reportWhite(bool flag){ report_white = flag; }
 
     /**
+       @brief a sign preceding a number will be interpreted as belonging to the number
+    */
+    void useSignedNumbers(){ signed_numbers = true; }
+
+    /**
+       @brief a numbers seperated by a point will be interpreted as floatingpoints
+    */
+    void useFloatingpoints();
+
+    //@}
+
+    /** @name string-representations */
+    //@{
+
+    /**
+       String representation is of the following form:\n
+       [<token>,<token type>,<line number>]
+       @brief returns a string representation of the current token
+       @return the string representation
+    */
+    utils::String tokenToString() const { return token.toString(); }
+
+    /**
+       @brief returns a string representation of the current token type
+       @return the string representation
+    */
+    utils::String typeToString() const { return token.typeToString(); }
+
+    //@}
+
+    /** @name checkers */
+    //@{
+
+    /**
+       @brief returns status of the parse-numbers-flag
+       @return true if parse-numbers is set
+    */
+    bool isParseNumbers(){ return parse_numbers; }
+
+    /**
+       @brief returns the status of "report EOL"
+       @return true if EOL will be reported as a token
+    */
+    bool isReportEOL() { return report_eol; }
+
+    /**
        @brief returns the status of "report white"
        @return true if whitespaces will be reported as a token
     */
     bool isReportWhite() { return report_white; }
+
+    /**
+       @brief returns state of using nested comments
+       @return state of using nested comments
+    */
+    bool isNestedComments(){ return screener->isNestedComments(); }
+
+    /**
+       @brief returns state of lower-case mode
+       @ true, if lower-case mode is switched on, false otherwise
+    */
+    bool isLowerCaseMode(){ return lower_case_mode; }
+
+    /**
+       @brief returns the status of "use signed numbers"
+       @return true if signes will be treated as preceding numbers
+    */
+    bool isUseSignedNumbers() { return signed_numbers; }
 
     /**
        Only the following characters introduces a word:\n
@@ -720,22 +786,6 @@ namespace lex{
        @return true if c is a sign
     */
     bool isSign(const char & c){ return char_classes.isSign(c); }
-
-    /**
-       @brief a sign preceding a number will be interpreted as belonging to the number
-    */
-    void useSignedNumbers(){ signed_numbers = true; }
-
-    /**
-       @brief returns the status of "use signed numbers"
-       @return true if signes will be treated as preceding numbers
-    */
-    bool isUseSignedNumbers() { return signed_numbers; }
-
-    /**
-       @brief a numbers seperated by a point will be interpreted as floatingpoints
-    */
-    void useFloatingpoints();
 
     /**
        @brief returns the status of "use floating points"
@@ -808,19 +858,18 @@ namespace lex{
     */
     bool isNull(const char & c) const { return char_classes.isNull(c); }
 
-    /**
-       String representation is of the following form:\n
-       [<token>,<token type>,<line number>]
-       @brief returns a string representation of the current token
-       @return the string representation
-    */
-    utils::String tokenToString() const { return token.toString(); }
+    //@}
+
+    /** @name others */
+    //@{
 
     /**
-       @brief returns a string representation of the current token type
-       @return the string representation
+       @brief reference to the lexical character classes
+       @return lexical character classes
     */
-    utils::String typeToString() const { return token.typeToString(); }
+    LexCharClasses & getLexCharClasses(){ return char_classes; }
+
+    //@}
 
   };
 
