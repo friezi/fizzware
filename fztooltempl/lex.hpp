@@ -578,7 +578,7 @@ namespace lex{
 
     unsigned long line_number;
 
-    unsigned long last_token_line;
+    int previous_token_type;
 
     bool lower_case_mode;
 

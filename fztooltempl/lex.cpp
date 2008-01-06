@@ -340,8 +340,8 @@ bool LexScreener::screen(){
   
 }
 
-LexScanner::LexScanner(std::istream * input) : input(input), line_number(1), last_token_line(0), lower_case_mode(false), report_eol(false),
-					       report_white(false), token_putback(false), parse_numbers(false),
+LexScanner::LexScanner(std::istream * input) : input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
+					       report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
 					       signed_numbers(false), floating_points(false){
 
   screener = new LexScreener(input);
@@ -462,7 +462,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	if ( isReportWhite() ){
 
 	  token.type = LexToken::TT_WHITE;
-	  last_token_line = token.line_number;
+	  previous_token_type = token.type;
 	  return token.type;
 	  
 	}
@@ -494,7 +494,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	} else{
 	  
 	  token.type = c;
-	  last_token_line = token.line_number;
+	  previous_token_type = token.type;
 	  return token.type;
 	  
 	}
@@ -511,11 +511,10 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  
 	  line_number += LexScreener::skipIfReturn(input,c);
 	  
-	  if ( isReportEOL() and token.line_number == last_token_line ){
-	    // last_token_line: EOL should only reported if line is non empty
+	  if ( isReportEOL() and previous_token_type != LexToken::TT_EOL ){
 	    
 	    token.type = LexToken::TT_EOL;
-	    last_token_line = token.line_number;
+	    previous_token_type = token.type;
 	    return token.type;
 	    
 	  }
@@ -533,7 +532,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
 	token.type = c;
 	token.line_number = line_number;
-	last_token_line = token.line_number;
+	previous_token_type = token.type;
 	return token.type;
 	
       }
@@ -569,7 +568,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  input->putback(c);
 	  escape_next = !screener->screen();
 	  line_number += screener->getSkippedLines();
-	  
+	  token.line_number = line_number;
 	  
 	} else {
 
@@ -580,7 +579,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  } else {
 	    
 	    input->putback(c);
-	    last_token_line = token.line_number;
+	    previous_token_type = token.type;
 	    return token.type;
 	    
 	  }
@@ -618,7 +617,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	  
 	}
 	
-	last_token_line = token.line_number;
+	previous_token_type = token.type;
 	return token.type;
 	
       }
@@ -653,7 +652,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
   } else if ( token.type == LexToken::TT_NONE )
     token.type = LexToken::TT_EOF;
   
-  last_token_line = token.line_number;
+  previous_token_type = token.type;
   return token.type;
   
 }
