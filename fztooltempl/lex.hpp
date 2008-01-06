@@ -568,6 +568,7 @@ namespace lex{
   /**
      @brief A class for performing lexical analysis
      @since V2.1
+     @todo if whitespaces should be reported but only whitespaces occur in a line suppress reporting
   */
   class LexScanner{
 
