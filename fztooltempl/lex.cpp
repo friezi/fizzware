@@ -80,11 +80,11 @@ void LexCharClasses::setDefaultSyntax(){
 
   setBaseSyntax();
 
-  block_comment_start = "/*";
-  block_comment_stop = "*/";
-  line_comment = "//";
-  quote_start = '"';
-  quote_stop = '"';
+  setBlockCommentStart("/*");
+  setBlockCommentStop("*/");
+  setLineComment("//");
+  setQuoteStart('"');
+  setQuoteStop('"');
   setWordConstituents("1234567890");
 
 }
@@ -342,7 +342,7 @@ bool LexScreener::screen(){
 
 LexScanner::LexScanner(std::istream * input) : input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
 					       report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
-					       signed_numbers(false), floating_points(false){
+					       signed_numbers(false), floating_points(false), raw_quoting(false){
 
   screener = new LexScreener(input);
 
@@ -439,6 +439,9 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
     if ( isEscape(c) and treat_normal == false ){
 
+      if ( token.type == LexToken::TT_WORD and isUseRawQuoting() )
+	token.sval += c;
+
       escape_next = true;
       continue;
 
@@ -517,7 +520,10 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
       } else if ( isIntroducingQuote(c) ){
 	
 	quote_mode = true;
-	token.type = LexToken::TT_WORD;      
+	token.type = LexToken::TT_WORD;  
+
+	if ( isUseRawQuoting() )
+	  token.sval += c;
 	
       } else if ( isEOL(c) ){
 	
@@ -560,6 +566,9 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
 	  quote_mode = false;
 	  token.line_number = line_number;
+
+	  if ( isUseRawQuoting() )
+	    token.sval += c;
 	
 	} else if ( isEOL(c) and treat_normal == false ){
 	  

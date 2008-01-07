@@ -384,7 +384,7 @@ namespace lex{
 
     void setFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] |= 1L<<flag; }
 
-    void cleaFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] &= ~(1L<<flag); }
+    void clearFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] &= ~(1L<<flag); }
     
   };
   
@@ -592,6 +592,8 @@ namespace lex{
     bool signed_numbers;
 
     bool floating_points;
+
+    bool raw_quoting;
     
   public:
 
@@ -694,6 +696,13 @@ namespace lex{
     */
     void useFloatingpoints();
 
+    /**
+       Without raw-quoting (depending on defined quotes etc.) a word/string <"a \"string\""> will be saved as <a "string">. With raw-quoting
+       the saved value is <"a \"string\"">. The special characters will thus be included.
+       @brief prevent special characters from being erased in quoted words
+    */
+    void useRawQuoting(){ raw_quoting = true; }
+
     //@}
 
     /** @name string-representations */
@@ -792,6 +801,12 @@ namespace lex{
        @return true if floating points will be recognized
     */
     bool isUseFloatingpoints() { return floating_points; }
+
+    /**
+       @brief returns the status of "use raw quoting"
+       @return true if raw quoting is used
+    */
+    bool isUseRawQuoting(){ return raw_quoting; }
 
     /**
        @brief checks if the character introduces a word-quote
