@@ -217,7 +217,7 @@ char CmdlParser::getShortRepresentative(char synonym){
 
 }
 
-CmdlParser::CmdlParser(int argc, char **argv) throw(Exception<CmdlParser>) :
+CmdlParser::CmdlParser(int argc, char **argv) throw (Exception<CmdlParser>) :
   argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),finalargument("",""), mandatory_parameters(false){
 
   supervisors = 0;

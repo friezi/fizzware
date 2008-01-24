@@ -49,7 +49,7 @@ const int LexToken::TT_WHITE = -5;
 LexCharClasses::LexCharClasses(){
 
   resetSyntax();
-  setDefaultSyntax();
+  setCommonSyntax();
 
 }
 
@@ -76,7 +76,7 @@ void LexCharClasses::setBaseSyntax(){
 
 }
 
-void LexCharClasses::setDefaultSyntax(){
+void LexCharClasses::setCommonSyntax(){
 
   setBaseSyntax();
 
@@ -163,6 +163,19 @@ void LexCharClasses::setEOLs(const string eols){
 
   for ( String::const_iterator it = eols.begin(); it != eols.end(); it++ )
     setFlag(*it,FL_EOL);
+
+}
+    
+LexScreener::LexScreener(std::istream * input, LexCharClasses * char_classes) throw (Exception<LexScreener>) :
+  input(input), char_classes(0), nested_comments(false),
+  lower_case_mode(false), skipped_lines(0){
+
+  string thisMethod = "LexScreener()";
+
+  if ( char_classes == 0 )
+    throw Exception<LexScreener>(thisMethod + ": char_classes is 0");
+
+  this->char_classes = char_classes;
 
 }
 
@@ -340,15 +353,14 @@ bool LexScreener::screen(){
   
 }
 
-LexScanner::LexScanner(std::istream * input) : input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
-					       report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
-					       signed_numbers(false), floating_points(false), raw_quoting(false){
+LexScanner::LexScanner(std::istream * input) throw (Exception<LexScreener>, ExceptionBase) :
+  input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
+  report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
+  signed_numbers(false), floating_points(false), raw_quoting(false){
 
-  screener = new LexScreener(input);
-
-  screener->setLexCharClasses(&char_classes);
+  screener = new LexScreener(input,&char_classes);
   
-  char_classes.setDefaultSyntax();
+  char_classes.setCommonSyntax();
 
 }
 

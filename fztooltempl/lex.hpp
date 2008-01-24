@@ -114,17 +114,24 @@ namespace lex{
     /**
        Sets values for the syntax-table which are at least necessary to provide the minimum
        basis of syntax-checking. Theses are:\n
-       EOL-characters, whitespaces, signs and
+       - EOL-characters: \\r and \\n\n
+       - whitespaces: \\t and space\n
+       - signs: + and -\n
+       - words can consist of 'A-Z', 'a-z' and '_'
+       - numbers '0-9'
        @brief sets initial values for the syntax-table
-       @todo doku
     */
-
     void setBaseSyntax();
     
     /**
+       Additionally to the base-syntax (setBaseSyntax()) it sets common C-like syntax\n
+       - C-like block-comment-strings\n
+       - C-like line-comment\n
+       - quoting-characters for strings: "\n
+       - numbers can be word-constituents
        @brief sets default-values
     */
-    void setDefaultSyntax();
+    void setCommonSyntax();
 
     /**
        @brief sets the introducing-word for a block comment
@@ -180,7 +187,6 @@ namespace lex{
        are escaped) for the next character.
        @brief sets the escape character
        @param c the escape character
-       @todo implementation!!!
     */
     void setEscape(const char & c){ escape = c; }
 
@@ -289,7 +295,6 @@ namespace lex{
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
-       @todo check for uninitialised pointer!!!
     */
     bool isWhitespace(const char & c) const { return getFlag(c,FL_WHITESPACE); }
 
@@ -297,7 +302,6 @@ namespace lex{
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
-       @todo check for uninitialised pointer!!!
     */
     bool isEOL(const char & c) const { return getFlag(c,FL_EOL); }
 
@@ -408,14 +412,14 @@ namespace lex{
     
   public:
     
-    LexScreener(std::istream * input) : input(input), char_classes(0), nested_comments(false), lower_case_mode(false), skipped_lines(0){}
+    LexScreener(std::istream * input, LexCharClasses * char_classes) throw (Exception<LexScreener>);
     
-    /**
-       @brief sets a reference to the lexical character classes
-       @param char_classes the reference
-       @note on destruction of the LexScreener the lexical character classes won't be destroyed. You have to take care for the destruction.
-    */
-    void setLexCharClasses(LexCharClasses * char_classes){ this->char_classes = char_classes; }
+//     /**
+//        @brief sets a reference to the lexical character classes
+//        @param char_classes the reference
+//        @note on destruction of the LexScreener the lexical character classes won't be destroyed. You have to take care for the destruction.
+//     */
+//     void setLexCharClasses(LexCharClasses * char_classes){ this->char_classes = char_classes; }
     
     /**
        @brief reference to the lexical character classes
@@ -469,7 +473,6 @@ namespace lex{
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
-       @todo check for uninitialised pointer!!!
     */
     bool isWhitespace(const char & c) const { return char_classes->isWhitespace(c); }
 
@@ -477,7 +480,6 @@ namespace lex{
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
-       @todo check for uninitialised pointer!!!
     */
     bool isEOL(const char & c) const { return char_classes->isEOL(c); }
 
@@ -617,7 +619,7 @@ namespace lex{
     /**
        @param input the input-stream to be scanned
     */
-    LexScanner(std::istream * input);
+    LexScanner(std::istream * input) throw (Exception<LexScreener>, ExceptionBase);
 
     ~LexScanner();
 
@@ -847,7 +849,6 @@ namespace lex{
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
-       @todo check for uninitialised pointer!!!
     */
     bool isWhitespace(const char & c) const { return char_classes.isWhitespace(c); }
 
@@ -862,7 +863,6 @@ namespace lex{
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
-       @todo check for uninitialised pointer!!!
     */
     bool isEOL(const char & c) const { return char_classes.isEOL(c); }
 
