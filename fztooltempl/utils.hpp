@@ -32,6 +32,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include <string>
+#include <sstream>
 #include <exception.hpp>
 
 #define UTILS_LU_BIT 5
@@ -134,6 +135,86 @@ namespace utils{
        @return true if c is conatined in String
     */
     bool containsChar(const char & c) const;
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const bool & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const unsigned char & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const char & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const unsigned int & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const int & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const unsigned long & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const long & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const double & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const std::string & value);
+
+    /**
+       @brief concatenates value with the string
+       @param value the value to concatenate
+       @return a reference to the string
+       @since V21.
+    */
+    String & operator+(const char *value);
 
   };
 }

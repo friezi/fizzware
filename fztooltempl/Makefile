@@ -25,6 +25,8 @@ DT_DIR = $(DIST_DIR)/$(LIBRARY)
 
 DOC = doc
 
+CP = gcp
+
 EXAMPLES = codeexamples
 
 DOXY = $(DOC)/$(LIBRARY).doxyfile
@@ -117,10 +119,10 @@ ed:
 dist:
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
 	[[ -d $(DT_DIR) ]] || mkdir $(DT_DIR)
-	cp --target-directory=$(DT_DIR) $(OBJECTS:=.?pp) $(OBJECTS:=_makefile) $(HEADERS_ONLY:=.hpp) Makefile README CHANGES LGPL*
+	$(CP) --target-directory=$(DT_DIR) $(OBJECTS:=.?pp) $(OBJECTS:=_makefile) $(HEADERS_ONLY:=.hpp) Makefile README CHANGES LGPL*
 
 	[[ -d $(DT_DIR)/$(EXAMPLES) ]] || mkdir $(DT_DIR)/$(EXAMPLES)
-	cp --target-directory=$(DT_DIR)/$(EXAMPLES) $(EXAMPLES)/*[!~]
+	$(CP) --target-directory=$(DT_DIR)/$(EXAMPLES) $(EXAMPLES)/*[!~]
 
 dynamic: $(DYNAMIC_LIB_NAME)
 

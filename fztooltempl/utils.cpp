@@ -99,3 +99,115 @@ bool String::containsChar(const char & c) const {
   return false;
 
 }
+
+String & String::operator+(const bool & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const unsigned char & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const char & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const unsigned int & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const int & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const unsigned long & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const long & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const double & value){
+
+  ostringstream stream;
+
+  stream << value;
+
+  (*this) += stream.str();
+
+  return *this;
+
+}
+
+String & String::operator+(const string & value){
+
+  (*this) += value;
+
+  return *this;
+
+}
+
+String & String::operator+(const char *value){
+
+  (*this) += value;
+
+  return *this;
+
+}
