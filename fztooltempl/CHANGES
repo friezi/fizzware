@@ -65,8 +65,10 @@ v2.1:
   - added method prependMsg()
 - class CmdlParser
   - added supervisors
+  - added setArgumentsLimit()
 - class String
   - changed returntype of trunc() from string to String
   - new methods: toLower(), toUpper() etc.
   - +-operator overloaded for concatenating the basic types
 - renamed namespace util to utils
+- added classes: Observer, Observable, ChangeNotifier

@@ -32,6 +32,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 #include <string>
+#include <set>
 #include <sstream>
 #include <exception.hpp>
 
@@ -140,7 +141,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const bool & value);
 
@@ -148,7 +149,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const unsigned char & value);
 
@@ -156,7 +157,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const char & value);
 
@@ -164,7 +165,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const unsigned int & value);
 
@@ -172,7 +173,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const int & value);
 
@@ -180,7 +181,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const unsigned long & value);
 
@@ -188,7 +189,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const long & value);
 
@@ -196,7 +197,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const double & value);
 
@@ -204,7 +205,7 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const std::string & value);
 
@@ -212,11 +213,165 @@ namespace utils{
        @brief concatenates value with the string
        @param value the value to concatenate
        @return a reference to the string
-       @since V21.
+       @since V2.1
     */
     String & operator+(const char *value);
 
   };
+
+  template <typename T> class Observable;
+
+  /**
+     An observer can be used to observe the state of an object. If an observer has registered at an observable-object its
+     update()-method will be called whenever a state-change of the observed object has occured. The decision if a state has changed
+     lies with the observable-object.
+     Its method update() will be called
+     @brief Represents the design-pattern Observer.
+     @see Observable
+     @since V2.1
+  **/
+  template <typename T> class Observer{
+
+  public:
+    
+    /**
+       On state-change of the observed object the method update() will be called.
+       @brief For updating on state-change.
+       @param observable the observable-object which called update()
+       @param object the observed object resp. its value
+    */
+    virtual void update(Observable<T> &observable, T object) = 0;
+
+    virtual ~Observer(){}
+
+  };
+
+  /**
+     An observable-object can be used to notify observers on a state-change of the observed object. Observers have to register
+     at the observable-object to be notified. If state-change occurs the observable-object calls the observers Observer::update()-method.
+     @brief Represents the design-pattern Observable.
+     @see Observer
+     @since V2.1
+  **/
+  template <typename T> class Observable{
+    
+  private:
+    
+    bool changed;
+
+    std::set<Observer<T> *> observers;
+
+  public:
+
+    Observable() : changed(false){}
+
+    virtual ~Observable(){}
+
+    /**
+       @brief adds an observer to be notified on state-change.
+       @param observer the observer to be added.
+    */
+    void addObserver(Observer<T> *observer){ observers.insert(observer); }
+
+    /**
+       @brief removes an observer and prevents its notification.
+       @param observer the observer to be removed.
+    */
+    void removeObserver(Observer<T> *observer){ observers.erase(observer); }
+
+    /**
+       @brief removes all observer and prevents their notification.
+    */
+    void removeObservers(){ observers.clear(); }
+
+    /**
+       @brief number of observers
+       @return number of observers
+    **/
+    size_t countObservers(){ return observers.size(); }
+
+    /**
+       On state-change (hasChanged() == true) of the observed object all observers will be notified by calling their
+       Observer::update()-method.
+       @brief notifies observers
+       @param object the object which's state has changed
+    **/
+    virtual void notifyObservers(T object){
+
+      if ( changed == true ){
+
+	for ( typename std::set<Observer<T> *>::iterator oit = observers.begin(); oit != observers.end(); oit++)
+	  (*oit)->update(*this,object);
+
+	changed = false;
+
+      }
+
+    }
+
+    /**
+       @brief marks the observed object to have changed.
+    **/
+    void setChanged(){ changed = true; }
+
+    /**
+       @brief marks the observed object to have not changed.
+    **/
+    void clearChanged(){ changed = false; }
+
+    /**
+       @brief returns the changed-state of the notified object.
+       @return change-state
+    **/
+    bool hasChanged(){ return changed; }
+      
+  };
+  
+  /**
+     This class is a special Derivate of an Observable-class. It stores a value. If the value changes on
+     call of setValue() all observers will be notified, and they will be passed a copy of the stored value.
+     @brief Notifier which notifies on change of a value
+  **/
+  template <typename T> class ChangeNotifier : public utils::Observable<T>{
+    
+    T value;
+    
+  public:
+
+    /**
+       Its unavoidable if T is a pointer or a class-type.
+       @brief Initialises the observed value whithout notifying the observers.
+       @param value the value
+    **/
+    void initValue(T value){ this->value = value; }
+    
+    /**
+       If the value is different from the previous value all observers will be notified.
+       @brief sets a new value
+       @param value the new value
+    **/
+    void setValue(T value){
+      
+      if ( this->value != value ){
+	
+	this->value = value;
+	
+	Observable<T>::setChanged();
+	
+	notifyObservers(value);
+	
+      }    
+      
+    }
+    
+    /**
+       @brief returns the stored value.
+       @return the value
+    **/
+    T getValue(){ return value; }
+    
+  };
+  
 }
 
 #endif

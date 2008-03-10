@@ -218,7 +218,8 @@ char CmdlParser::getShortRepresentative(char synonym){
 }
 
 CmdlParser::CmdlParser(int argc, char **argv) throw (Exception<CmdlParser>) :
-  argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),finalargument("",""), mandatory_parameters(false){
+  argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),
+  args_limited(false),args_max(0),finalargument("",""), mandatory_parameters(false){
 
   supervisors = 0;
   shortsupervisors = 0;
@@ -244,6 +245,15 @@ void CmdlParser::setInfiniteArguments(string id){
 
   infinite_args = true;
   infinite_args_id = id;
+  args_limited = false;
+
+}
+
+void CmdlParser::setArgumentsLimit(unsigned long max){
+
+  args_limited = true;
+  args_max = max;
+  infinite_args = false;
 
 }
 
@@ -529,6 +539,15 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 
   }
 
+  if ( args_limited == true ){
+    if ( argumentcounter > args_max ){
+      
+      errors << "Too many arguments!\n";
+      parseerror = true;
+      
+    }
+  }
+  
   // got arguments, but none is allowed
   if ( (arguments.empty() == false) && (exp_mand_arguments.empty() == true)
        && (infinite_args == false) && (finalargument.first == "") ){

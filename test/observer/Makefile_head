@@ -1,0 +1,31 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = observer
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+TT = ../fztooltempl
+
+CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/utils
+
+IMPORTANT_HEADERS =
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+ADDITIONAL_DISTFILES =
+
+# in case that ansi is not allowed
+# NOANSI = true
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

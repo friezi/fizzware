@@ -248,6 +248,12 @@ namespace cmdl{
     /// the identifier for the purpose of the arguments
     std::string infinite_args_id;
 
+    // range of args bounded?
+    bool args_limited;
+
+    // maximum number of args if args_range == true
+    unsigned long args_max;
+
     /// tuple for the final-argument: identifier and value
     std::pair<std::string,std::string> finalargument;
 
@@ -262,28 +268,34 @@ namespace cmdl{
 
     /// stores the normal arguments
     Arguments arguments;
+
     /// stores mandatory arguments
     MandatoryArguments mandatoryarguments;
+
     /// for allowed mandatory arguments
     ExpMandArguments exp_mand_arguments;
 
     /// stores parameters, like: --color=blue
     Parameters parameters;
+
     /// for allowed parameters
     AParameters allowedparameters;
 
     /// stores multi-parameters, like --L:clib
     MultiParameters multiparameters;
+
     /// for allowed multi-parameters
     AMParameters allowedmultiparameters;
 
     /// stores options like: --help
     Options options;
+
     /// allowed options
     AOptions allowedoptions;
 
     /// stores short options like: -lsa, where l, s, a are single combinable options
     Shortoptions shortoptions;
+
     /// allowed shortoptions
     AShortoptions allowedshortoptions;
 
@@ -385,8 +397,19 @@ namespace cmdl{
        It will be shown as "[\<id\>] [...] at the end of the usage-string".
        @brief for infinite arguments
        @param id the identification-string for which more arguments for the same purpose can be given
+       @note disables setting of setArgumentsLimit()
     */
     void setInfiniteArguments(std::string id);
+
+    /**
+       Limits the maximum number of arguments passed to the program. The minimum number will be specified
+       by the specified mandatory arguments.
+       @brief number of arguments will be limitet
+       @param max at most max-number of args may be present
+       @since v2.1
+       @note disables setting of setInfiniteArguments()
+    */
+    void setArgumentsLimit(unsigned long max);
 
     /**
        @brief For an mandatory final argument
