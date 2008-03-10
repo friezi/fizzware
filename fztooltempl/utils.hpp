@@ -270,15 +270,23 @@ namespace utils{
     /**
        @brief adds an observer to be notified on state-change.
        @param observer the observer to be added.
+       @throws Exception< Observer<T> >
     */
-    void addObserver(Observer<T> *observer){ observers.insert(observer); }
-
+    void addObserver(Observer<T> *observer) throw (Exception< Observer<T> >){ 
+      
+      if ( observer == 0 )
+	throw Exception< Observer<T> >("observer is nullpointer!");
+      
+      observers.insert(observer);
+      
+    }
+    
     /**
        @brief removes an observer and prevents its notification.
        @param observer the observer to be removed.
     */
     void removeObserver(Observer<T> *observer){ observers.erase(observer); }
-
+    
     /**
        @brief removes all observer and prevents their notification.
     */
