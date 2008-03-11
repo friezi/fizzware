@@ -271,10 +271,10 @@ namespace utils{
 
     /**
        @brief adds an observer to be notified on state-change.
-       @param observer the observer to be added.
+       @param observer the observer to be added
        @throws Exception< Observable<T> >
     */
-    void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
+    virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
       
       if ( observer == 0 )
 	throw Exception< Observable<T> >("observer is nullpointer!");
@@ -349,13 +349,35 @@ namespace utils{
     
   public:
 
+    ChangeNotifier(){}
+
+    /**
+       @brief Initialization on construction
+       @param value the value
+    **/
+    ChangeNotifier(T value){ initValue(value); }
+
     /**
        Its unavoidable if T is a pointer or a class-type.
        @brief Initialises the observed value whithout notifying the observers.
        @param value the value
     **/
     void initValue(T value){ this->value = value; }
-    
+
+    /**
+       After adding, the observer will automatically be notified about the current value
+       @brief adds an observer to be notified on state-change
+       @param observer the observer to be added
+       @throws Exception< Observable<T> >
+    */
+    virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
+
+      Observable<T>::addObserver(observer);
+
+      observer->update(this,value);
+
+    }
+
     /**
        If the value is different from the previous value all observers will be notified.
        @brief sets a new value
@@ -423,10 +445,10 @@ namespace utils{
        @brief removes itself from a notifier
        @param notifier the notifier to be removed from
     **/
-    void removeFromNotifiers(Observable<T> *notifier){
+    void removeFromNotifier(Observable<T> *notifier){
 
-      notifiers->erase(notifier);
-      notifier.removeObserver(this);
+      notifiers.erase(notifier);
+      notifier->removeObserver(this);
 
     }
     

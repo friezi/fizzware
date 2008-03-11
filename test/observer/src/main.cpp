@@ -11,7 +11,7 @@ void ValueObserver::update(Observable<int> *observable, int value){
 
 int main(int argc, char **argv){
 
-  ChangeNotifier<int> notifier;
+  ChangeNotifier<int> notifier(0);
   ValueObserver o1, o2, o3;
 
   try {
@@ -22,7 +22,7 @@ int main(int argc, char **argv){
 
     notifier.setValue(4);
 
-    notifier.removeObserver(&o2);
+    o2.removeFromNotifier(&notifier);
 
     notifier.setValue(5);
     notifier.setValue(5);
