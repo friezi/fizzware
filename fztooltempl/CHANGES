@@ -71,4 +71,4 @@ v2.1:
   - new methods: toLower(), toUpper() etc.
   - +-operator overloaded for concatenating the basic types
 - renamed namespace util to utils
-- added classes: Observer, Observable, ChangeNotifier
+- added classes: Observer, Observable, ChangeNotifier, SmartObserver

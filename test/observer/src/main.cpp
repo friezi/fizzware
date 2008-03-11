@@ -3,7 +3,7 @@
 using namespace std;
 using namespace utils;
 
-void ValueObserver::update(Observable<int> &observable, int value){
+void ValueObserver::update(Observable<int> *observable, int value){
 
   cout << this << ": " << value << endl;
 
@@ -11,14 +11,14 @@ void ValueObserver::update(Observable<int> &observable, int value){
 
 int main(int argc, char **argv){
 
-  ValueObserver o1, o2, o3;
   ChangeNotifier<int> notifier;
+  ValueObserver o1, o2, o3;
 
   try {
 
-    notifier.addObserver(&o1);
-    notifier.addObserver(&o2);
-    notifier.addObserver(&o3);
+    o1.addToNotifier(&notifier);
+    o2.addToNotifier(&notifier);
+    o3.addToNotifier(&notifier);
 
     notifier.setValue(4);
 

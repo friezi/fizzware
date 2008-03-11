@@ -239,8 +239,10 @@ namespace utils{
        @brief For updating on state-change.
        @param observable the observable-object which called update()
        @param object the observed object resp. its value
+       @see Observable
+       @since V2.1
     */
-    virtual void update(Observable<T> &observable, T object) = 0;
+    virtual void update(Observable<T> *observable, T object) = 0;
 
     virtual ~Observer(){}
 
@@ -270,12 +272,12 @@ namespace utils{
     /**
        @brief adds an observer to be notified on state-change.
        @param observer the observer to be added.
-       @throws Exception< Observer<T> >
+       @throws Exception< Observable<T> >
     */
-    void addObserver(Observer<T> *observer) throw (Exception< Observer<T> >){ 
+    void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
       
       if ( observer == 0 )
-	throw Exception< Observer<T> >("observer is nullpointer!");
+	throw Exception< Observable<T> >("observer is nullpointer!");
       
       observers.insert(observer);
       
@@ -309,7 +311,7 @@ namespace utils{
       if ( changed == true ){
 
 	for ( typename std::set<Observer<T> *>::iterator oit = observers.begin(); oit != observers.end(); oit++)
-	  (*oit)->update(*this,object);
+	  (*oit)->update(this,object);
 
 	changed = false;
 
@@ -339,6 +341,7 @@ namespace utils{
      This class is a special Derivate of an Observable-class. It stores a value. If the value changes on
      call of setValue() all observers will be notified, and they will be passed a copy of the stored value.
      @brief Notifier which notifies on change of a value
+     @since V2.1
   **/
   template <typename T> class ChangeNotifier : public utils::Observable<T>{
     
@@ -377,6 +380,55 @@ namespace utils{
        @return the value
     **/
     T getValue(){ return value; }
+    
+  };
+
+  /**
+     @brief A SmartObserver automatically removes itself on destruction from all notifiers i.e. Observables it has registered to.
+     @remark An instance of SmartObserver must be defined after the notifiers have been defined it registers to. Otherwise the notifiers
+     may not exist anymore on destructor-call.
+     @note Remember to overwrite Observer::update()
+     @since V2.1
+  */
+  template <typename T> class SmartObserver : public Observer<T>{
+
+    std::set<Observable<T> *> notifiers;
+    
+  public:
+
+    /**
+       @brief removes itself from all notifiers
+    **/
+    ~SmartObserver(){
+
+      for ( typename std::set<Observable<T> *>::iterator oit = notifiers.begin(); oit != notifiers.end(); oit++ )
+	(*oit)->removeObserver(this);
+
+    }
+
+    /**
+       @brief adds itself to a notifier
+       @param notifier the notifier to be added to
+       @exception Exception< Observable<T> >
+    **/
+    void addToNotifier(Observable<T> *notifier) throw (Exception< Observable<T> >,ExceptionBase){
+
+      notifier->addObserver(this);
+      notifiers.insert(notifier);
+
+    }
+
+
+    /**
+       @brief removes itself from a notifier
+       @param notifier the notifier to be removed from
+    **/
+    void removeFromNotifiers(Observable<T> *notifier){
+
+      notifiers->erase(notifier);
+      notifier.removeObserver(this);
+
+    }
     
   };
   

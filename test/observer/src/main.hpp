@@ -4,11 +4,11 @@
 #include <iostream>
 #include <utils.hpp>
 
-class ValueObserver : public utils::Observer<int>{
+class ValueObserver : public utils::SmartObserver<int>{
 
 public:
 
-  void update(utils::Observable<int> &observable, int value);
+  void update(utils::Observable<int> *observable, int value);
 
 };
 
