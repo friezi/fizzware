@@ -1,8 +1,8 @@
-DIRS = cliparser fizzcal funtest matchit msgqrd msgqrclient prim primfak process properties semaphoren graph tree bitmatrix
+DIRS = fizzcal matchit msgqrd msgqrclient prim primfak process
 
 EDITOR ?= vi
 
-all:
+all:	test
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; pushd $(dir); \
 		echo \*\*\* generating Makefile \*\*\*; \
 		cat Makefile_head ../Makefile_body > Makefile; \
@@ -10,10 +10,18 @@ all:
 		$(MAKE) -k; popd ; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ; \
 	)
 
-.PHONY:	all clean ed dist
+.PHONY:	all clean ed dist test
+
+test:
+	cd test/; \
+	$(MAKE) -k; \
+	cd ../;
 
 clean:
-	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; cd $(dir); $(MAKE) -k clean; cd ../; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
+	cd test/;\
+	$(MAKE) -k clean; \
+	cd ../;
+	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; pushd $(dir); $(MAKE) -k clean; popd; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
 
 ed:
 	$(EDITOR) Makefile&

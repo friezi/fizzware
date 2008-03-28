@@ -8,10 +8,10 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../fztooltempl
-ST = ../fzsystools
+TT = ../../fztooltempl
+ST = ../../fzsystools
 
-CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARY_PATH = ../../lib
 CLASSLIBRARIES = fztooltempl fzsystools
 CLASS_MODULES_PATHS = $(TT) $(ST)
 CLASS_MODULES = $(ST)/semaphor $(TT)/exception

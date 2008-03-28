@@ -8,9 +8,9 @@ LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../fztooltempl
+TT = ../../fztooltempl
 
-CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARY_PATH = ../../lib
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
 CLASS_MODULES = $(TT)/utils
