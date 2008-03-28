@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef PROPERTYREADER_HPP
-#define PROPERTYREADER_HPP
+#ifndef _FZTT_PROPERTYREADER_HPP_
+#define _FZTT_PROPERTYREADER_HPP_
 
 #include <errno.h>
 #include <map>

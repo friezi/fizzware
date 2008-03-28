@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef PRIMLIST_HPP
-#define PRIMLIST_HPP
+#ifndef _FZTT_PRIMLIST_HPP_
+#define _FZTT_PRIMLIST_HPP_
 
 #include <iostream>
 #include <string>

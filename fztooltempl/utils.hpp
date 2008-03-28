@@ -29,8 +29,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#ifndef _FZTT_UTILS_HPP_
+#define _FZTT_UTILS_HPP_
 #include <string>
 #include <set>
 #include <sstream>
@@ -277,7 +277,7 @@ namespace utils{
     virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
       
       if ( observer == 0 )
-	throw Exception< Observable<T> >("observer is nullpointer!");
+	throw Exception< Observable<T> >("observer is a nullpointer!");
       
       observers.insert(observer);
       

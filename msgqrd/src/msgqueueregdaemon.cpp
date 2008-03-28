@@ -352,7 +352,7 @@ size_t CommandMsgScanner::shiftTokenSize(){
 
 Token *CommandMsgScanner::nextToken(){
   
-  Buffer<char> buffer(TOKENSIZE);
+  DynamicBuffer<char> buffer(TOKENSIZE);
   MemPointer<char> input(false);
   unsigned int sz;
   // Grössenangabe shiften und Grösse zurückliefern

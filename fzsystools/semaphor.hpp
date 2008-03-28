@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef SEMAPHOR_HPP
-#define SEMAPHOR_HPP
+#ifndef _FZST_SEMAPHOR_HPP_
+#define _FZST_SEMAPHOR_HPP_
 
 #include <stdio.h>
 #include <string>

@@ -424,7 +424,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 													SubException<NoIDErr,Parser>,
 													SubException<NoValErr,Parser>){
 
-  Buffer<char> buffer(BLKSIZE);
+  DynamicBuffer<char> buffer(BLKSIZE);
   MemPointer<char> propptr,valueptr;
   bool eol = false; //End-Of-Line
   bool id,val;

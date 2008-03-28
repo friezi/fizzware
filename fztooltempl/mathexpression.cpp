@@ -1602,7 +1602,7 @@ bool MathExpression::isCloseBrace(char c){
 int MathExpression::copyCommaContent(char * & exprstring, const char *arg){
 
   int br_cnt = 0, indx=0;
-  Buffer<char> buffer(BUFSIZE);
+  DynamicBuffer<char> buffer(BUFSIZE);
 
   exprstring = 0;
 
@@ -1630,7 +1630,7 @@ int MathExpression::copyBracketContent( char * & exprstring, const char *arg, ch
 					char close){
 
   int br_cnt=0, indx=0;
-  Buffer<char> buffer(BUFSIZE);
+  DynamicBuffer<char> buffer(BUFSIZE);
 
   exprstring = 0;
 
@@ -1676,7 +1676,7 @@ int MathExpression::copyBracketContent( char * & exprstring, const char *arg, ch
   
 int MathExpression::copyFloatContent(char * & exprstring, const char *arg){
 
-  Buffer<char> buffer(BUFSIZE);
+  DynamicBuffer<char> buffer(BUFSIZE);
 
   int indx=0;
   while (checkDigit(arg[indx])){ 
@@ -1696,7 +1696,7 @@ int MathExpression::copyFloatContent(char * & exprstring, const char *arg){
 
 int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
 
-  Buffer<char> buffer(BUFSIZE);
+  DynamicBuffer<char> buffer(BUFSIZE);
   bool concat_mode = false;
 
   int indx=0;

@@ -34,8 +34,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef EXCEPTION_HPP
-#define EXCEPTION_HPP
+#ifndef _FZTT_EXCEPTION_HPP_
+#define _FZTT_EXCEPTION_HPP_
 
 #include <exception>
 #include <iostream>

@@ -49,7 +49,7 @@ int Scanner::isblank(char c){
 
 Token *Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
 
-  Buffer<char> buffer(BLKSIZE);
+  DynamicBuffer<char> buffer(BLKSIZE);
   MemPointer<char> input(false);
   unsigned int count;
   char tmp;

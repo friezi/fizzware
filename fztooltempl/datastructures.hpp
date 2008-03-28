@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef DATASTRUCTURES_HPP
-#define DATASTRUCTURES_HPP
+#ifndef _FZTT_DATASTRUCTURES_HPP_
+#define _FZTT_DATASTRUCTURES_HPP_
 #include <utility>
 #include <map>
 #include <list>
@@ -159,12 +159,12 @@ namespace ds{
   };
   
   /**
-     The buffer will constist of several blocks of user-defined size which will be allocated
+     The buffer will consist of several blocks of user-defined size which will be allocated
      dynamically.
      @brief A dynamically growing buffer.
   */
   template<typename T>
-  class Buffer{
+  class DynamicBuffer{
     
   private:
     
@@ -184,10 +184,10 @@ namespace ds{
     /**
        @param blksize size of a block in the buffer
     */
-    Buffer(unsigned long blksize) throw (Exception< Buffer<T> >) : blksize(blksize), offs(0), blocks(0), elements(0){
+    DynamicBuffer(unsigned long blksize) throw (Exception< DynamicBuffer<T> >) : blksize(blksize), offs(0), blocks(0), elements(0){
       
       if ( !blksize )
-	throw Exception< Buffer<T> >("Buffer(): blksize is zero!");
+	throw Exception< DynamicBuffer<T> >("DynamicBuffer(): blksize is zero!");
       
     }
     
@@ -195,7 +195,7 @@ namespace ds{
     /**
        @exception ExceptionBase
     */
-    ~Buffer() throw (ExceptionBase);
+    ~DynamicBuffer() throw (ExceptionBase);
     
     // Element in den Puffer schreiben
     /**
@@ -212,7 +212,7 @@ namespace ds{
        @remark If the buffer is empty, zero will be returned. The block might be bigger than the filled area.
        No '\\0' will be added, so take care of this by yourself if you want
        to convert it into a string, e.g. use put(0). After merging the buffer will be cleared and reset to initial state.
-       @exception Exception< Buffer<T> >
+       @exception Exception< DynamicBuffer<T> >
     */
     T *merge() throw (ExceptionBase);
 
@@ -220,7 +220,7 @@ namespace ds{
        @brief returns a certain element
        @return the element
     */
-    T get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase);
+    T get(unsigned long number) throw (Exception< ds::DynamicBuffer<T> >,ExceptionBase);
     
     // Anzahl der Bloecke
     /**
@@ -596,14 +596,14 @@ MemPointer(unsigned long blksize,bool clear_on_exit ) throw (ExceptionBase) : cl
 }
 
 template<typename T>
-ds::Buffer<T>::
-~Buffer() throw (ExceptionBase){
+ds::DynamicBuffer<T>::
+~DynamicBuffer() throw (ExceptionBase){
   clear();
 }
 
 template<typename T>
 ds::MemPointer<T> *
-ds::Buffer<T>::
+ds::DynamicBuffer<T>::
 newBlock(){
       
   ds::MemPointer<T> *block;
@@ -618,7 +618,7 @@ newBlock(){
 
 template<typename T>
 void
-ds::Buffer<T>::
+ds::DynamicBuffer<T>::
 put(const T &c) throw (ExceptionBase){
   
   ds::MemPointer<T> *curr;
@@ -647,14 +647,14 @@ put(const T &c) throw (ExceptionBase){
 
 template< typename T >
 T
-ds::Buffer<T>::
-get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase){
+ds::DynamicBuffer<T>::
+get(unsigned long number) throw (Exception< ds::DynamicBuffer<T> >,ExceptionBase){
 
   unsigned long blocknumber;
   unsigned long position;
 
   if ( number < 1 || number > getElements() )
-    throw Exception< ds::Buffer<T> >("get(): index out of bounds!");
+    throw Exception< ds::DynamicBuffer<T> >("get(): index out of bounds!");
 
   blocknumber = ((unsigned long)(number/blksize)) + 1;
   position = (number-1)%blksize;
@@ -666,7 +666,7 @@ get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase){
       break;
 
   if ( it == blocklist.end() )
-    throw Exception< ds::Buffer<T> >("get(): internal error: blocklist at end!");
+    throw Exception< ds::DynamicBuffer<T> >("get(): internal error: blocklist at end!");
 
   return (*it)->get()[position];
 
@@ -674,7 +674,7 @@ get(unsigned long number) throw (Exception< ds::Buffer<T> >,ExceptionBase){
 
 template<typename T>
 T *
-ds::Buffer<T>::
+ds::DynamicBuffer<T>::
 merge() throw (ExceptionBase){
   
   unsigned long pos=0, full_blocks;
@@ -688,14 +688,14 @@ merge() throw (ExceptionBase){
   if ( blocks > 1 ){
     
     if ( !(block = (T *)calloc(getElements(),sizeof(T))) )
-      throw Exception< ds::Buffer<T> >("merge(): calloc failed!");
+      throw Exception< ds::DynamicBuffer<T> >("merge(): calloc failed!");
     
     unsigned long blocknumber = 0;
 
     for ( typename std::list < ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++, blocknumber++ ){
       
       if ( !(*it)->get() )
-	throw Exception< ds::Buffer<T> >("merge(): ptr == NULL!");
+	throw Exception< ds::DynamicBuffer<T> >("merge(): ptr == NULL!");
       
       if ( blocknumber < full_blocks ){
 	
@@ -730,7 +730,7 @@ merge() throw (ExceptionBase){
 
 template< typename T >
 void
-ds::Buffer<T>::
+ds::DynamicBuffer<T>::
 clear(){
 
   for ( typename std::list< ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++ )

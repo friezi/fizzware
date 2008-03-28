@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef MSGQUEUEREGCLIENT_HPP
-#define MSGQUEUEREGCLIENT_HPP
+#ifndef _FZST_MSGQUEUEREGCLIENT_HPP_
+#define _FZST_MSGQUEUEREGCLIENT_HPP_
 
 #include <stdio.h>
 #include <errno.h>

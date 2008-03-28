@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef TCPCLIENT_HPP
-#define TCPCLIENT_HPP
+#ifndef _FZST_TCPCLIENT_HPP_
+#define _FZST_TCPCLIENT_HPP_
 
 #include <string.h>
 #include <string>

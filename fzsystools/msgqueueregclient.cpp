@@ -234,7 +234,7 @@ int MsgQueueRegClient::Scanner::isBlank(char c){
 
 MsgQueueRegClient::Token *MsgQueueRegClient::Scanner::nextToken() throw (Exception<Scanner>,Exception<BadToken>,ExceptionBase){
 
-  Buffer<char> buffer(BLKSIZE);
+  DynamicBuffer<char> buffer(BLKSIZE);
   MemPointer<char> input(false);
   unsigned int count;
   char tmp;

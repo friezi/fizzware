@@ -27,8 +27,8 @@
    @file lex.hpp
    @author Friedemann Zintel
 */
-#ifndef LEX_HPP
-#define LEX_HPP
+#ifndef _FZTT_LEX_HPP_
+#define _FZTT_LEX_HPP_
 
 #include <istream>
 #include <sstream>

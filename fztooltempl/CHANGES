@@ -72,3 +72,4 @@ v2.1:
   - +-operator overloaded for concatenating the basic types
 - renamed namespace util to utils
 - added classes: Observer, Observable, ChangeNotifier, SmartObserver
+- renamed class Buffer<T> to class DynamicBuffer<T>
