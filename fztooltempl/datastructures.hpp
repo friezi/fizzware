@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1999-2004 Friedemann Zintel
+  Copyright (C) 1999-2008 Friedemann Zintel
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -36,6 +36,7 @@
 #include <string>
 #include <sstream>
 #include <exception.hpp>
+#include <utils.hpp>
 
 /**
    @brief Contains templates for datastructures
@@ -242,6 +243,106 @@ namespace ds{
     void clear();
     
   };
+
+  /**
+     @brief For storing a fixed number of elements
+     @since v2.1
+  */
+  template <typename T>
+  class RingBuffer{
+
+  protected:
+
+    size_t size;
+
+    size_t elements;
+
+    size_t first;
+
+    size_t last;
+
+    unsigned int overwriting_mode;
+
+    T *buffer;
+
+  public:
+
+    /**
+       @brief In this mode an exception will be raised if a new element should be
+       added to a full buffer. The buffer won't change.
+    */
+    static const unsigned int ALERT_OVERWRITING = 0;
+
+    /**
+       @brief In this mode no exception will be raised if a new element will be
+       added to a full buffer. The first element of the buffer will be skipped.
+    */
+    static const unsigned int QUIET_OVERWRITING = 1;
+
+  protected:
+
+    void assertInBounds(size_t index) throw (Exception<RingBuffer>);
+
+    void next(size_t & reference);
+
+    void forward(size_t & reference, size_t number);
+
+    void reset();
+
+    size_t getIndex(size_t position);
+
+  public:
+
+    /**
+       
+       @param size the size of the buffer i.e. number of elements the buffer can store simultaneously
+    */
+    RingBuffer(size_t size, unsigned int overwriting_mode = ALERT_OVERWRITING);
+
+    ~RingBuffer();
+
+    /**
+       @brief stores the element at the end of the queue
+       @param element the element to be stored
+       @throw Exception<RingBuffer>
+    */
+    void enqueue(T element) throw (Exception<RingBuffer>);
+
+    /**
+       @brief removes and returns the first element of the queue
+       @return the first element
+       @throw Exception<RingBuffer>
+    */
+    T & dequeue() throw (Exception<RingBuffer>);
+
+    /**
+       @brief returns the element at a position of the buffer
+       @param position the position of the element
+       @return reference to the element at position
+       @throw Exception<RingBuffer>
+    */
+    T & operator[](size_t position) throw (Exception<RingBuffer>);
+
+    /**
+       @brief skips the first number elements of the buffer
+       @param number the number of elements to be skipped
+       @throw Exception<RingBuffer>
+    */
+    void skip(size_t number) throw (Exception<RingBuffer>);
+
+    /**
+       @brief returns the number of stored elements
+       @return number of elements
+    */
+    size_t getElements(){ return elements; }
+
+    /**
+       @brief checks if the buffer is empty
+       @return true if buffer is empty
+    */
+    bool isEmpty(){ return getElements() == 0; }
+
+  };  
   
   /**
      @brief The base-node class
@@ -739,6 +840,162 @@ clear(){
   blocklist.clear();
   
   offs = elements = blocks = 0;
+
+}
+
+template <typename T>
+ds::RingBuffer<T>::
+RingBuffer(size_t size, unsigned int overwriting_mode) : size(size), elements(0), first(0), last(-1), overwriting_mode(overwriting_mode){
+
+  buffer = new T[size];
+
+}
+
+template <typename T>
+ds::RingBuffer<T>::
+~RingBuffer(){
+
+  delete [] buffer;
+
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+assertInBounds(size_t index) throw (Exception<RingBuffer>){
+
+  utils::String thisMethod = "assertInBounds()";
+
+  if ( index >= elements || index < 0 )
+    throw Exception<RingBuffer>(thisMethod + ": object " + this + ": index " + index + " out of bounds!");
+
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+next(size_t & reference){
+
+  if ( reference == size - 1 )
+    reference = 0;
+
+  else
+    reference++;
+
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+forward(size_t & reference, size_t number){
+
+  if ( (size - 1) - number >= reference )
+    reference += number;
+
+  else
+    reference = (number - (size - reference));
+
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+reset(){
+
+  first = 0;
+  last = -1;
+
+}
+
+template <typename T>
+size_t
+ds::RingBuffer<T>::
+getIndex(size_t position){
+
+  if ( (size - 1) - position >= first )
+    return first + position;
+  else
+    return position - (size - first);
+  
+ 
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+enqueue(T element) throw (Exception<RingBuffer>){
+
+  utils::String thisMethod = "enqueue()";
+
+  if ( elements < size )
+    elements++;
+
+  else {
+    
+    if ( overwriting_mode != QUIET_OVERWRITING )
+      throw Exception<RingBuffer>(thisMethod + " buffer is full!");
+
+    next(first);
+
+  }
+
+  next(last);
+
+  buffer[last] = element;
+
+}
+
+template <typename T>
+T &
+ds::RingBuffer<T>::
+dequeue() throw (Exception<RingBuffer>){
+
+  utils::String thisMethod = "dequeue()";
+
+  if ( isEmpty() == true )
+    throw Exception<RingBuffer>(thisMethod + ": buffer is empty!");
+
+  T & element = buffer[first];
+
+  elements--;
+
+  if ( isEmpty() == true )
+    reset();
+  else
+    next(first);
+
+  return element;
+
+}
+
+template <typename T>
+T &
+ds::RingBuffer<T>::
+operator[](size_t position) throw (Exception<RingBuffer>){
+
+  assertInBounds(position);
+
+  return buffer[getIndex(position)];
+
+}
+
+template <typename T>
+void
+ds::RingBuffer<T>::
+skip(size_t number) throw (Exception<RingBuffer>){
+
+  if ( number == 0 )
+    return;
+
+  assertInBounds(number-1);
+
+  if ( number == elements )
+    reset();
+  
+  else
+    forward(first,number);
+  
+  elements -= number;
 
 }
 
