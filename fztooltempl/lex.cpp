@@ -26,7 +26,7 @@
 #include <lex.hpp>
 
 using namespace std;
-using namespace lex;
+using namespace parse;
 using namespace utils;
 
 const unsigned char LexCharClasses::FL_EOL = 0;

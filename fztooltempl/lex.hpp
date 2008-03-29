@@ -39,10 +39,10 @@
 #define LEX_AT_SIZE 256
 
 /**
-   @brief necessary stuff for lexical analysis
+   @brief necessary stuff for text-parsing
    @since V2.1
 */
-namespace lex{
+namespace parse{
 
   /**
      @brief A struct to store all relevant delimitor-charakters, comment-signs, whitespaces, etc. for lexical analysis

@@ -1,6 +1,6 @@
 #include "main.hpp"
 
-using namespace lex;
+using namespace parse;
 using namespace cmdl;
 using namespace std;
 using namespace utils;
