@@ -402,6 +402,20 @@ namespace utils{
        @return the value
     **/
     T getValue(){ return value; }
+
+    /**
+       @brief same like setValue()
+       @param value the new value
+       @see setValue()
+    */
+    void operator=(T value){ setValue(value); }
+
+    /**
+       @brief sets the value to the value stored in notifier
+       @param notifier the notifier string the new value
+       @see setValue()
+    */
+    void operator=(ChangeNotifier<T> & notifier){ setValue(notifier.getValue()); }
     
   };
 
