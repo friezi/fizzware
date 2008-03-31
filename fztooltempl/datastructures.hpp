@@ -44,8 +44,9 @@
 */
 
 namespace ds{
-  
+
   /**
+     Actually very similar to auto_pointer<T>, except that you can prevent auto-delettion later on.
      @brief for holding pointers
   */
   template<typename T>
@@ -158,7 +159,7 @@ namespace ds{
     bool operator!(){ return ( this->get() == (T *)0 ); }
     
   };
-  
+
   /**
      The buffer will consist of several blocks of user-defined size which will be allocated
      dynamically.
@@ -793,7 +794,7 @@ merge() throw (ExceptionBase){
     
     unsigned long blocknumber = 0;
 
-    for ( typename std::list < ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++, blocknumber++ ){
+    for ( typename std::list< ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++, blocknumber++ ){
       
       if ( !(*it)->get() )
 	throw Exception< ds::DynamicBuffer<T> >("merge(): ptr == NULL!");

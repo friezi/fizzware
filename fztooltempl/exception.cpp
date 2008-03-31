@@ -75,22 +75,34 @@ void ExceptionBase::show() const{
   cerr << *this << endl;
 }
 
-ExceptionBase & ExceptionBase::prependMsg(string msg){
 
-  this->errormsg = msg + this->errormsg;
+void ExceptionBase::setMsgs(const string &s){
+
+  this->errormsg = s;
   this->id_errormsg = this->spc_id + ": " + this->errormsg;
+
+}
+
+ExceptionBase & ExceptionBase::prependMsg(const string &msg){
+
+  setMsgs(msg + this->errormsg);
 
   return *this;
 
 }
 
-ExceptionBase & ExceptionBase::appendMsg(string msg){
+ExceptionBase & ExceptionBase::appendMsg(const string &msg){
 
-  this->errormsg = this->errormsg + msg;
-  this->id_errormsg = this->spc_id + ": " + this->errormsg;
+  setMsgs(this->errormsg + msg);
 
   return *this;
 
 }
 
-  
+ExceptionBase & ExceptionBase::exchangeMsg(const string &msg){
+
+  setMsgs(msg);
+
+  return *this;
+
+}

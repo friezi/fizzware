@@ -41,6 +41,7 @@
 #include <list>
 #include <set>
 #include <functional>
+#include <complex>
 #include <exception.hpp>
 #include <datastructures.hpp>
 
@@ -204,7 +205,7 @@ namespace mexp{
 
     ~Tuple();
 
-    static Tuple *assertTuple(const Value *value) throw(EvalException);
+    static Tuple *assertTuple(Value *value) throw(EvalException);
     static void assertKind(const Tuple *t1, const Tuple *t2) throw(EvalException);
 
     std::string toString(std::streamsize precision) const;
@@ -217,22 +218,24 @@ namespace mexp{
 
   };
 
-  class Complex : public Value{
+  typedef double cmplx_tp;
+
+  class Complex : public Value, public std::complex<cmplx_tp>{
 
   private:
 
-    double re;
-    double im;
-
-    static Complex *assertComplex(Value *value) throw(EvalException);
-    static Complex *assertReal(Value *value) throw(EvalException);
+    static Complex *assertComplex(Value *value) throw(EvalException,ExceptionBase);
+    static Complex *assertReal(Value *value) throw(EvalException,ExceptionBase);
+    static Complex *assertInteger(Value *value) throw(EvalException,ExceptionBase);
+    static Complex *assertNatural(Value *value) throw(EvalException,ExceptionBase);
     
   public:
 
     
-    Complex(): Value(Value::COMPLEX), re(0), im(0){}
-    Complex(double re) : Value(Value::COMPLEX), re(re), im(0){}
-    Complex(double re, double im) : Value(Value::COMPLEX), re(re), im(im){}
+    Complex(): Value(Value::COMPLEX), std::complex<cmplx_tp>(0,0){}
+    Complex(cmplx_tp re) : Value(Value::COMPLEX), std::complex<cmplx_tp>(re){}
+    Complex(cmplx_tp re, cmplx_tp im) : Value(Value::COMPLEX),  std::complex<cmplx_tp>(re,im){}
+    Complex(const std::complex<cmplx_tp> number) : Value(Value::COMPLEX), std::complex<cmplx_tp>(number){}
 
     ~Complex(){}
 
@@ -240,8 +243,8 @@ namespace mexp{
 
     Value *clone() const { return new Complex(getRe(), getIm()); }
 
-    double getRe() const { return re; }
-    double getIm() const { return im; }
+    cmplx_tp getRe() const { return std::complex<cmplx_tp>::real(); }
+    cmplx_tp getIm() const { return std::complex<cmplx_tp>::imag(); }
     bool isReal() const { return ( getIm() == 0 ); }
 
     Value *operator+(Value *right) throw (ExceptionBase);
@@ -250,27 +253,27 @@ namespace mexp{
     Value *operator/(Value *right) throw (ExceptionBase);
     Value *integerDivision(Value *right) throw (ExceptionBase);
     Value *operator%(Value *right) throw (ExceptionBase);
-    Value *pow(Value *right) throw (ExceptionBase){ return notSupported(); }
+    Value *pow(Value *right) throw (ExceptionBase);
     Value *faculty() throw (ExceptionBase);
-    Value *choose(Value *right) throw (ExceptionBase){ return notSupported(); }
-    Value *sin() throw (ExceptionBase){ return notSupported(); }
-    Value *cos() throw (ExceptionBase){ return notSupported(); }
-    Value *tan() throw (ExceptionBase){ return notSupported(); }
-    Value *asin() throw (ExceptionBase){ return notSupported(); }
-    Value *acos() throw (ExceptionBase){ return notSupported(); }
-    Value *atan() throw (ExceptionBase){ return notSupported(); }
-    Value *sinh() throw (ExceptionBase){ return notSupported(); }
-    Value *cosh() throw (ExceptionBase){ return notSupported(); }
-    Value *tanh() throw (ExceptionBase){ return notSupported(); }
-    Value *asinh() throw (ExceptionBase){ return notSupported(); }
-    Value *acosh() throw (ExceptionBase){ return notSupported(); }
-    Value *atanh() throw (ExceptionBase){ return notSupported(); }
-    Value *ln() throw (ExceptionBase){ return notSupported(); }
-    Value *ld() throw (ExceptionBase){ return notSupported(); }
-    Value *log(Value *base) throw (ExceptionBase){ return notSupported(); }
-    Value *exp() throw (ExceptionBase){ return notSupported(); }
-    Value *sgn() throw (ExceptionBase){ return notSupported(); }
-    Value *tst() throw (ExceptionBase){ return notSupported(); }
+    Value *choose(Value *right) throw (ExceptionBase);
+    Value *sin() throw (ExceptionBase);
+    Value *cos() throw (ExceptionBase);
+    Value *tan() throw (ExceptionBase);
+    Value *asin() throw (ExceptionBase);
+    Value *acos() throw (ExceptionBase);
+    Value *atan() throw (ExceptionBase);
+    Value *sinh() throw (ExceptionBase);
+    Value *cosh() throw (ExceptionBase);
+    Value *tanh() throw (ExceptionBase);
+    Value *asinh() throw (ExceptionBase);
+    Value *acosh() throw (ExceptionBase);
+    Value *atanh() throw (ExceptionBase);
+    Value *ln() throw (ExceptionBase);
+    Value *ld() throw (ExceptionBase);
+    Value *log(Value *base) throw (ExceptionBase);
+    Value *exp() throw (ExceptionBase);
+    Value *sgn() throw (ExceptionBase);
+    Value *tst() throw (ExceptionBase);
 
   };
 

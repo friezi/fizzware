@@ -79,6 +79,8 @@ protected:
   */
   static std::string skipLetters(const std::string &s);
 
+  void setMsgs(const std::string &s);
+
 public:
   
   virtual ~ExceptionBase() throw () {}
@@ -112,13 +114,19 @@ public:
       @return the exception itself
       @since V2.1
   */
-  ExceptionBase & prependMsg(std::string msg);
+  ExceptionBase & prependMsg(const std::string &msg);
 
   /** @brief appends a message-text to the existing message-text
       @return the exception itself
       @since V2.1
   */
-  ExceptionBase & appendMsg(std::string msg);
+  ExceptionBase & appendMsg(const std::string &msg);
+
+  /** @brief exchanges a message-text
+      @return the exception itself
+      @since V2.1
+  */
+  ExceptionBase & exchangeMsg(const std::string &msg);
 
 };
 

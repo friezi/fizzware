@@ -31,7 +31,7 @@
     "asinh","acosh","atanh","ln","ld","log","exp","sgn","tst",SUM,PROD
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
    
-using namespace std;
+  using namespace std;
 using namespace mexp;
 using namespace ds;
 
@@ -381,12 +381,12 @@ Value *Tuple::clone() const {
 
 }
 
-Tuple *Tuple::assertTuple(const Value *value) throw(EvalException){
+Tuple *Tuple::assertTuple(Value *value) throw(EvalException){
 
   if ( value->getType() != Value::TUPLE )
     throw EvalException(string("operand to tuple is no tuple-type: ") + value->toString() + string(" !"));
 
-  return (Tuple *)value;
+  return dynamic_cast<Tuple *>(value);
 
 }
 void Tuple::assertKind(const Tuple *t1, const Tuple *t2) throw(EvalException){
@@ -452,25 +452,72 @@ string Complex::toString(std::streamsize precision) const {
   
 }
 
-Complex *Complex::assertComplex(Value *value) throw(EvalException){
+Complex *Complex::assertComplex(Value *value) throw(EvalException,ExceptionBase){
   
   if ( value->getType() != Value::COMPLEX )
     throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
   
-  return (Complex *)value;
+  return dynamic_cast<Complex *>(value);
   
 }
 
-Complex *Complex::assertReal(Value *value) throw(EvalException){
+Complex *Complex::assertReal(Value *value) throw(EvalException,ExceptionBase){
+
+  try{
   
-  if ( value->getType() != Value::COMPLEX )
-    throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
+    Complex *cmplx = assertComplex(value);
   
-  if ( ((Complex *)value)->getIm() != 0 )
-    throw EvalException("operation only allowed for real-numbers!");
+    if ( cmplx->getIm() != 0 )
+      throw EvalException("");
   
-  return (Complex *)value;
+    return cmplx;
+
+  } catch (EvalException &e){
+
+    throw EvalException("operation only allowed for real-numbers! ");
+
+  }
   
+}
+
+Complex *Complex::assertInteger(Value *value) throw(EvalException,ExceptionBase){
+
+  try{
+
+    Complex *cmplx = assertReal(value);
+
+    if ( cmplx->getRe() != (double)((int)(cmplx->getRe())) )
+      throw EvalException("");
+
+    return cmplx;
+
+  } catch (EvalException &e){
+
+    throw EvalException("operation only allowed for integer-numbers! ");
+
+  }
+
+
+}
+
+Complex *Complex::assertNatural(Value *value) throw(EvalException,ExceptionBase){
+
+  try{
+
+    Complex *cmplx = assertInteger(value);
+
+    if ( cmplx->getRe() < 0 )
+      throw EvalException("");
+
+    return cmplx;
+
+  } catch (EvalException &e){
+
+    throw EvalException("operation only allowed for natural-numbers! ");
+
+  }
+
+
 }
 
 Value *Complex::operator+(Value *right) throw (ExceptionBase){
@@ -491,12 +538,12 @@ Value *Complex::operator*(Value *right) throw (ExceptionBase){
       
   if ( right->getType() == Value::COMPLEX ){
 
-    Complex *rc = (Complex *)right;
+    Complex *rc = dynamic_cast<Complex *>(right);
     return new Complex(getRe()*rc->getRe()-getIm()*rc->getIm(),getRe()*rc->getIm()+getIm()*rc->getRe());
 
   } else if ( right->getType() == Value::TUPLE ){
 
-    Tuple *rt = (Tuple *)right;
+    Tuple *rt = dynamic_cast<Tuple *>(right);
     Tuple *value = new Tuple();
 
     for ( list<Value *>::iterator it = rt->elements.begin(); it != rt->elements.end(); it++ )
@@ -560,10 +607,153 @@ Value *Complex::operator%(Value *right) throw (ExceptionBase){
 
 Value *Complex::faculty() throw (ExceptionBase){
   
+  assertNatural(this);
+
+  if ( this->getRe() == 0 )
+    return new Complex(1);
+
+  cmplx_tp fac = this->getRe();
+
+  for ( unsigned long i = (unsigned long)fac-1; i > 0; i-- )
+    fac *= i;
+
+  return new Complex(fac);
+      
+}
+
+Value *Complex::choose(Value *right) throw (ExceptionBase){
+
+  assertNatural(this);
+  Complex *cr = assertNatural(right);
+
+  return new Complex( MathExpression::faculty(getRe()) / ( MathExpression::faculty(cr->getRe()) * MathExpression::faculty(getRe() - cr->getRe())));
+
+}
+
+Value *Complex::pow(Value *right) throw (ExceptionBase){
+  
+  Complex *rc = assertComplex(right);
+
+  return new Complex(std::pow(static_cast< complex<cmplx_tp> >(*this),static_cast< complex<cmplx_tp> >(*rc)));
+      
+}
+
+Value *Complex::sin() throw (ExceptionBase){
+
+  return new Complex(std::sin(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::cos() throw (ExceptionBase){
+
+  return new Complex(std::cos(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::tan() throw (ExceptionBase){
+
+  return new Complex(std::tan(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::asin() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::asin(this->getRe()));
+      
+}
+
+Value *Complex::acos() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::acos(this->getRe()));
+      
+}
+
+Value *Complex::atan() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::atan(this->getRe()));
+      
+}
+
+Value *Complex::sinh() throw (ExceptionBase){
+
+  return new Complex(std::sinh(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::cosh() throw (ExceptionBase){
+
+  return new Complex(std::cosh(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::tanh() throw (ExceptionBase){
+
+  return new Complex(std::tanh(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::asinh() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::asinh(this->getRe()));
+      
+}
+
+Value *Complex::acosh() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::acosh(this->getRe()));
+      
+}
+
+Value *Complex::atanh() throw (ExceptionBase){
+
+  assertReal(this);
+  return new Complex(::atanh(this->getRe()));
+      
+}
+
+Value *Complex::ln() throw (ExceptionBase){
+
+  return new Complex(std::log(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::ld() throw (ExceptionBase){
+
+  return new Complex(std::log(static_cast< complex<cmplx_tp> >(*this))/std::log((cmplx_tp)2.0));
+      
+}
+
+Value *Complex::log(Value *base) throw (ExceptionBase){
+
+  Complex *cmplx = assertComplex(base);
+
+  return new Complex(std::log(static_cast< complex<cmplx_tp> >(*this))/std::log(static_cast< complex<cmplx_tp> >(*cmplx)));
+
+}
+
+Value *Complex::exp() throw (ExceptionBase){
+
+  return new Complex(std::exp(static_cast< complex<cmplx_tp> >(*this)));
+      
+}
+
+Value *Complex::sgn() throw (ExceptionBase){
+
   assertReal(this);
 
-  return new Complex(MathExpression::faculty(getRe()),0);
-      
+  return new Complex(this->getRe() < 0 ? -1 : 1);
+
+}
+
+Value *Complex::tst() throw (ExceptionBase){
+
+  return new Complex(this->getRe() != 0 or this->getIm() != 0);
+
 }
 
 MathExpression::MathExpression(int abs_pos, VariableList *vl, FunctionList *fl) :
@@ -1749,57 +1939,57 @@ void MathExpression::clearString(char *exprstring){
 int MathExpression::pri(const char *c0, const char *c1){
 
   int p[2],i;
-  const char *c[2]={&c0[0],&c1[0]};
+  const char *c[2]={ &c0[0], &c1[0] };
 
-  for (i=0;i<2;i++){
-    switch(*c[i]){
+  for ( i = 0; i < 2; i++ ){
+    switch( *c[i] ){
     case ',':
     case ';':
-      p[i]=KOMMA_PRI;
+      p[i] = KOMMA_PRI;
       break;
     case '=':
-      p[i]=EQUAL_PRI;
+      p[i] = EQUAL_PRI;
       break;
     case '+':
     case '-':
-      p[i]=ADDSUB_PRI;
+      p[i] = ADDSUB_PRI;
       break;
     case '*':
     case '/':
     case '\\':
     case '%':
-      p[i]=MULTDIV_PRI;
+      p[i] = MULTDIV_PRI;
       break;
     case '^':
-      p[i]=POT_PRI;
+      p[i] = POT_PRI;
       break;
     case '!':
-      p[i]=FAC_PRI;
+      p[i] = FAC_PRI;
       break;
     case '@':
-      p[i]=BINOM_PRI;
+      p[i] = BINOM_PRI;
       break;
     default :
-      if (!strcmp(c[i],SUM)){
-	p[i]=ADDSUB_PRI;
+      if ( !strcmp(c[i],SUM) ){
+	p[i] = ADDSUB_PRI;
 	break;
-      } else if (!strcmp(c[i],PROD)){
-	p[i]=MULTDIV_PRI;
+      } else if ( !strcmp(c[i],PROD) ){
+	p[i] = MULTDIV_PRI;
 	break;
       } else{
-	p[i]=SIN_PRI;
+	p[i] = SIN_PRI;
 	break;
       }
     }
   }
-  return(p[0]-p[1]);
+  return ( p[0] - p[1] );
 }
 
 bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 
   if (this->isOperator()){
     if (checkOperator(this->oprtr[0])){
-      if (this->oprtr[0]=='='){
+      if (this->oprtr[0] == '='){
 	
 	if (this->getLeft() && this->getRight())
 	  if (!this->getLeft()->isEmpty() && !this->getRight()->isEmpty()){
@@ -1822,7 +2012,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	    throw ParseException(abs_pos, "invalid syntax for assignment!");
 	  }
       
-      } else if (this->oprtr[0]=='!'){
+      } else if (this->oprtr[0] == '!'){
 	if (!this->getLeft() && this->getRight())
 	  if (!this->getRight()->isEmpty())
 	    return (true);
@@ -1891,10 +2081,10 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		 || !strcmp(this->getOperator(),PROD)){
 	if (this->getLeft() && this->getRight())
 	  if (!this->getLeft()->isEmpty() && !this->getRight()->isEmpty())
-	    if (this->getLeft()->oprtr[0]==';')
+	    if (this->getLeft()->oprtr[0] == ';')
 	      if (this->getLeft()->getLeft() && this->getLeft()->getRight())
 		if (!this->getLeft()->getLeft()->isEmpty() && !this->getLeft()->getRight()->isEmpty())
-		  if (this->getLeft()->getLeft()->oprtr[0]=='='){
+		  if (this->getLeft()->getLeft()->oprtr[0] == '='){
 		    try{
 		      if (this->getLeft()->getLeft()->checkSyntaxAndOptimize())
 			if (this->getLeft()->getRight()->checkSyntaxAndOptimize())
@@ -2017,43 +2207,58 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 
   //   double result;
   if ( isOperator() ){
+
     switch ( oprtr[0] ){
+
     case '+':
+
       this->setValue(getLeft()->eval()->operator+(getRight()->eval()));
       break;
+
     case '-':
+
       this->setValue(getLeft()->eval()->operator-(getRight()->eval()));
       break;
+
     case '*':
+
       this->setValue(getLeft()->eval()->operator*(getRight()->eval()));
       break;
+
     case '/':
+
       this->setValue(getLeft()->eval()->operator/(getRight()->eval()));
       break;
+
     case '\\':
+
       this->setValue(getLeft()->eval()->integerDivision(getRight()->eval()));
       break;
+
     case '%':
+
       this->setValue(getLeft()->eval()->operator%(getRight()->eval()));
       break;
+
     case '^':
-      /*
-	if (getLeft()->eval()<=0 && (result/(int)result)){
-	fprintf(stderr,"negative root!\n");
-	exit(1);
-	}
-	else*/
+
       this->setValue(getLeft()->eval()->pow(getRight()->eval()));
       break;
+
     case '!':
+
       this->setValue(getRight()->eval()->faculty());
       break;
+
     case '@':
+
       //       return (faculty(getLeft()->eval())/(faculty(getRight()->eval())
       // 				     *faculty(getLeft()->eval() - getRight()->eval())));
       this->setValue(getLeft()->eval()->choose(getRight()->eval()));
       break;
+
     case '=':
+
       if (getLeft()->isVariable()){
 
 	this->setValue(assignValue());
@@ -2107,30 +2312,27 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
       else if (!strcmp("atanh",getOperator()))
 	this->setValue(getRight()->eval()->atanh());
       else if (!strcmp("ln",getOperator())){
-	// 	if ((result=getRight()->eval())<=0)
-	// 	  throw EvalException("argument of ln negative!");
-	// 	else
+
 	this->setValue(getRight()->eval()->ln());
+
       } else if (!strcmp("ld",getOperator())){
-	// 	if ((result=getRight()->eval())<=0)
-	// 	  throw EvalException("argument of ld negative!");
-	// 	else
-	// 	  return(log(getRight()->eval())/log(2.0));
+
 	this->setValue(getRight()->eval()->ld());
+
       } else if (!strcmp("log",getOperator())){
-	// 	if ((result=getRight()->eval())<=0)
-	// 	  throw EvalException("argument of log negative!");
-	// 	else
-	// 	  return(log(getRight()->eval())/log(getLeft()->eval()));
+
 	this->setValue(getRight()->eval()->log(getLeft()->eval()));
+
       } else if (!strcmp("exp",getOperator()))
+
 	this->setValue(getRight()->eval()->exp());
+
       else if (!strcmp(SUM,getOperator()) || !strcmp(PROD,getOperator())){
 	
 	//TODO
 	throw EvalException("SumProd not supported yet!");
 
-// 	this->setValue(sumProd());
+	// 	this->setValue(sumProd());
 
       } else if (!strcmp("sgn",getOperator())){
 
@@ -2225,7 +2427,7 @@ double MathExpression::faculty(double fac) throw (ExceptionBase){
   if (fac==0)
     return(1);
 
-  for (int i=(int)fac-1;i>0;i--)
+  for (unsigned long i=(unsigned long)fac-1;i>0;i--)
     fac*=i;
 
   return(fac);
