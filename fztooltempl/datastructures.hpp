@@ -151,7 +151,7 @@ namespace ds{
        returns the pointer itself
        @return the pointer
     */
-    T* operator->(){ return this-get(); }
+    T* operator->(){ return this->get(); }
 
     /**
        @return true, if contained pointer is a null-pointer

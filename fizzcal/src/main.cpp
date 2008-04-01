@@ -598,7 +598,8 @@ void printHelp(const char *pname){
        << FOFF << "\t\thides the formula" << endl
        << "\n\n"
        << "In " << pname << " you can type a mathematical formula which will"
-       << " be evaluated. The\nspeciality of " << pname << " is that you can "
+       << " be evaluated.\nValue-types are complex numbers and tuples of complex numbers."
+       << " The\nspeciality of " << pname << " is that you can "
        << "omit many round brackets according\nto the mathematical "
        << "conventions. E.g. you can type \"sin2cos2\" instead "
        << "of\n\"sin(2)*cos(2)\", or \"sin^2(4)\" instead of \"(sin(4))^2\". "
@@ -667,8 +668,9 @@ void printHelp(const char *pname){
        << "   |\t^\n"
        << "   |\t* / \\ %\n"
        << "   |\t+ -\n"
+       << "   |\t,\n"
        << "   |\t=\n"
-       << "   |\t, ;\n"
+       << "   |\t;\n"
        << "low pri\n";
   cout << "\n\n";
 }
