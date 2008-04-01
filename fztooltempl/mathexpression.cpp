@@ -1657,7 +1657,7 @@ int MathExpression::determineAndSetOperatorOrVariable(const char *expr, int e_in
 
   int offset;
   char *exprstring = 0;
-  
+
   offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
   e_indx+=offset;
   
@@ -1695,7 +1695,7 @@ inline bool MathExpression::checkOperator(char x){
   return (((unsigned char)(x) >= 1 && (unsigned char)(x) <= '/')
 	  || ((unsigned char)(x) >= ':' && (unsigned char)(x) <= '@')
 	  || ((unsigned char)(x) >= '[' && (unsigned char)(x) <= '^')
-	  || ((unsigned char)(x) <= '`')
+	  || ((unsigned char)(x) == '`')
 	  || ((unsigned char)(x) >= '{') );
 }
 
@@ -1934,7 +1934,7 @@ int MathExpression::copyOperatorContent(char * & exprstring, const char *arg){
       abs_pos++;
 
     } else{
-
+ 
       while ( arg[indx] ){ 
 
 	if ( arg[indx] == '_' )
