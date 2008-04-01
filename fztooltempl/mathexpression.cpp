@@ -1694,7 +1694,8 @@ int MathExpression::determineAndSetOperatorOrVariable(const char *expr, int e_in
 inline bool MathExpression::checkOperator(char x){ 
   return (((unsigned char)(x) >= 1 && (unsigned char)(x) <= '/')
 	  || ((unsigned char)(x) >= ':' && (unsigned char)(x) <= '@')
-	  || ((unsigned char)(x) >= '[' && (unsigned char)(x) <= '`')
+	  || ((unsigned char)(x) >= '[' && (unsigned char)(x) <= '^')
+	  || ((unsigned char)(x) <= '`')
 	  || ((unsigned char)(x) >= '{') );
 }
 

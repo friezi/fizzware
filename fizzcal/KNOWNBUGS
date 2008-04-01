@@ -2,3 +2,4 @@
 - following lines will not be parsed properly:
 	2+sin^a(a) ( a must be defined as variable before ): not parsed as ((2)+((sin(a))^a))
 	sin(2)! is parsed as (sin((2)!))
+- _x will not be accepted as a variable
