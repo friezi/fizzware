@@ -1,3 +1,4 @@
+old focal:
 v2.52:
 - added commandline-parameter "commands": commands will be loaded before execution
 
@@ -19,3 +20,7 @@ v2.56:
 - blanks won't raise a syntax-error
 - input-prompt
 - arrow indicating syntax-error
+
+fizzcal:
+v1.01:
+- added tuple- and complex-handling

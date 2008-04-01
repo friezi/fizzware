@@ -1,4 +1,4 @@
-focal v2.54
+fizzcal v1.01
 
 Brief documentation for compiling the sources (see license-terms below):
 GNU-Make-Utility is needed. Environment-variable EDITOR should contain the preferred editor.
@@ -17,7 +17,7 @@ run editor:
 make ed
 
 
-    programname: focal
+    programname: fizzcal
 
     It's an evaluator of mathematical expressions.
 

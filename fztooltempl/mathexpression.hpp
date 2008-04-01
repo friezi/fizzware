@@ -165,10 +165,15 @@ namespace mexp{
 
     virtual Value *clone() const { return notSupported(); }
 
+    virtual Value *neutralAddition() const { return notSupported(); }
+    virtual Value *neutralMultiplikation() const { return notSupported(); }
+
     virtual Value *operator+(Value *right) throw (ExceptionBase){ return notSupported(); }
     virtual Value *operator-(Value *right) throw (ExceptionBase){ return notSupported(); }
     virtual Value *operator*(Value *right) throw (ExceptionBase){ return notSupported(); }
     virtual Value *operator/(Value *right) throw (ExceptionBase){ return notSupported(); }
+    virtual void operator+=(Value *right) throw (ExceptionBase){ notSupported(); }
+    virtual void operator*=(Value *right) throw (ExceptionBase){ notSupported(); }
     virtual Value *integerDivision(Value *right) throw (ExceptionBase){ return notSupported(); }
     virtual Value *operator%(Value *right) throw (ExceptionBase){ return notSupported(); }
     virtual Value *pow(Value *right) throw (ExceptionBase){ return notSupported(); }
@@ -222,6 +227,8 @@ namespace mexp{
 
   class Complex : public Value, public std::complex<cmplx_tp>{
 
+    friend class MathExpression;
+
   private:
 
     static Complex *assertComplex(Value *value) throw(EvalException,ExceptionBase);
@@ -230,7 +237,6 @@ namespace mexp{
     static Complex *assertNatural(Value *value) throw(EvalException,ExceptionBase);
     
   public:
-
     
     Complex(): Value(Value::COMPLEX), std::complex<cmplx_tp>(0,0){}
     Complex(cmplx_tp re) : Value(Value::COMPLEX), std::complex<cmplx_tp>(re){}
@@ -238,6 +244,9 @@ namespace mexp{
     Complex(const std::complex<cmplx_tp> number) : Value(Value::COMPLEX), std::complex<cmplx_tp>(number){}
 
     ~Complex(){}
+
+    Value *neutralAddition() const;
+    Value *neutralMultiplikation() const;
 
     std::string toString(std::streamsize precision) const;
 
@@ -251,6 +260,8 @@ namespace mexp{
     Value *operator-(Value *right) throw (ExceptionBase);
     Value *operator*(Value *right) throw (ExceptionBase); 
     Value *operator/(Value *right) throw (ExceptionBase);
+    void operator+=(Value *right) throw (ExceptionBase);
+    void operator*=(Value *right) throw (ExceptionBase);
     Value *integerDivision(Value *right) throw (ExceptionBase);
     Value *operator%(Value *right) throw (ExceptionBase);
     Value *pow(Value *right) throw (ExceptionBase);
@@ -309,6 +320,7 @@ namespace mexp{
     static const int BUFSIZE = 256;
 
     // operator-priorities
+    static const int SEMICOLON_PRI = 1;
     static const int EQUAL_PRI = 2;
     static const int KOMMA_PRI = 5;
     static const int ADDSUB_PRI = 10;
@@ -390,7 +402,7 @@ namespace mexp{
 
     // pri checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
-    static int pri(const char *c0, const char *c1);
+    static int priCompare(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (ParseException);
     Value *sumProd(void) throw (ExceptionBase);
     Value *assignValue(void) throw (ExceptionBase);

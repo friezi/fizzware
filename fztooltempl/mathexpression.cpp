@@ -520,6 +520,18 @@ Complex *Complex::assertNatural(Value *value) throw(EvalException,ExceptionBase)
 
 }
 
+Value *Complex::neutralAddition() const {
+
+  return new Complex(0);
+
+}
+
+Value *Complex::neutralMultiplikation() const {
+
+  return new Complex(1,1);
+
+}
+
 Value *Complex::operator+(Value *right) throw (ExceptionBase){
 
   Complex *rc = assertComplex(right);
@@ -567,6 +579,22 @@ Value *Complex::operator/(Value *right) throw (ExceptionBase){
   
   return new Complex((getRe()*rc->getRe()+getIm()*rc->getIm())/divisor,
 		     (getIm()*rc->getRe()-getRe()*rc->getIm())/divisor);
+      
+}
+
+void Complex::operator+=(Value *right) throw (ExceptionBase){
+
+  Complex *rc = assertComplex(right);
+
+  (*static_cast< complex<cmplx_tp> *>(this)) += static_cast< complex<cmplx_tp> >(*rc);
+
+}
+
+void Complex::operator*=(Value *right) throw (ExceptionBase){
+
+  Complex *rc = assertComplex(right);
+
+  (*static_cast< complex<cmplx_tp> *>(this)) *= static_cast< complex<cmplx_tp> >(*rc);
       
 }
 
@@ -1254,7 +1282,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		 Unterast hat, denn dann muss es sich um eine Form wie
 		 "(sin2)^3" handeln */
 	      if ( expr[e_indx]=='^'
-		   && (pri(&expr[e_indx],PrevNode->getOperator())==POT_PRI-SIN_PRI)
+		   && (priCompare(&expr[e_indx],PrevNode->getOperator())==POT_PRI-SIN_PRI)
 		   && !PrevNode->getRight() ){
 		ActualNode->setETOperator("^");
 		ActualNode->setOTOperation();
@@ -1494,7 +1522,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	  } else{   /* Prev hat keinen rechten Unterbaum, also wird hier neuer
 		       Ast angefuegt */
 	    // z.B "3+sin2"
-	    // 	    if (pri(ActualNode->oprtr,PrevNode->oprtr)){
+	    // 	    if (priCompare(ActualNode->oprtr,PrevNode->oprtr)){
 	    PrevNode->setRight(ActualNode);
 	    ActualNode->pred = PrevNode;
 	    // 	    }
@@ -1599,7 +1627,7 @@ void MathExpression::searchAndSetLowerPriNode(MathExpression * & ActualNode, Mat
     actn = ActualNode, prevn=PrevNode->pred;
     
     // search for node with lower priority in hierarchy
-    while ( (priority = pri(actn->getOperator(),prevn->getOperator())) <= 0
+    while ( (priority = priCompare(actn->getOperator(),prevn->getOperator())) <= 0
 	    && prevn->pred )
       prevn = prevn->pred;
     
@@ -1936,15 +1964,17 @@ void MathExpression::clearString(char *exprstring){
     *exprstring++=0;
 }
 
-int MathExpression::pri(const char *c0, const char *c1){
+int MathExpression::priCompare(const char *c0, const char *c1){
 
   int p[2],i;
   const char *c[2]={ &c0[0], &c1[0] };
 
   for ( i = 0; i < 2; i++ ){
     switch( *c[i] ){
-    case ',':
     case ';':
+      p[i] = SEMICOLON_PRI;
+      break;
+    case ',':
       p[i] = KOMMA_PRI;
       break;
     case '=':
@@ -2075,7 +2105,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	if (this->getLeft() && this->getRight())
 	  if (!this->getLeft()->isEmpty() && !this->getRight()->isEmpty())
 	    if (this->getLeft()->checkSyntaxAndOptimize() && this->getRight()->checkSyntaxAndOptimize())
-	      return(true);
+	      return true;
 	throw ParseException(abs_pos, "invalid syntax in function log!");
       } else if (!strcmp(this->getOperator(),SUM)
 		 || !strcmp(this->getOperator(),PROD)){
@@ -2089,9 +2119,9 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		      if (this->getLeft()->getLeft()->checkSyntaxAndOptimize())
 			if (this->getLeft()->getRight()->checkSyntaxAndOptimize())
 			  if (this->getRight()->checkSyntaxAndOptimize())
-			    return(true);
-		    } catch (ParseException pe){
-		      throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
+			    return true;
+		    } catch (ParseException &pe){
+		      throw ParseException(abs_pos, pe.getMsg() + "invalid syntax in function Sum/Prod!");
 		    }
 		  }
 	throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
@@ -2328,11 +2358,8 @@ Value *MathExpression::eval() throw (ExceptionBase,FunctionDefinition){
 	this->setValue(getRight()->eval()->exp());
 
       else if (!strcmp(SUM,getOperator()) || !strcmp(PROD,getOperator())){
-	
-	//TODO
-	throw EvalException("SumProd not supported yet!");
 
-	// 	this->setValue(sumProd());
+	this->setValue(sumProd());
 
       } else if (!strcmp("sgn",getOperator())){
 
@@ -2434,35 +2461,29 @@ double MathExpression::faculty(double fac) throw (ExceptionBase){
 
 }
 
-#ifdef NO_COMPILE
-MathExpression::Value *MathExpression::sumProd(void) throw (ExceptionBase){
+Value *MathExpression::sumProd(void) throw (ExceptionBase){
 
   VariableList vl = *this->varlist;  // lokaler Scope: Kopie der globalen Varlist
   MathExpression me(this,&vl,this->functionlist,abs_pos);
   Variable *currve;
-  Value *c_from,*c_to;
   double from, to;
-  Complex *value, res;
+  Value *value;
+  Complex *c_from,*c_to;
   char p = 0;
   
-  if (!strcmp(PROD,this->getOperator())){
-    res = 1;
+  if ( !strcmp(PROD,this->getOperator()) )
     p = 1;
-  }
   
   // Indexvariable zum lokalen Scope hinzufuegen
   vl.insert(this->left->left->left->getVariable(),
 	    this->left->left->right->eval()->clone());
 
   //Zaehlbereich
-  c_from = vl.getValue(me.left->left->left->getVariable());
-  c_to = me.left->right->eval()->clone();
+  c_from = Complex::assertNatural(vl.getValue(me.left->left->left->getVariable()));
+  c_to = Complex::assertNatural(me.left->right->eval()->clone());
 
-  Complex::assertReal(c_from);
-  Complex::assertReal(c_to);
-
-  from = ((Complex *)c_from)->getRe();
-  to = ((Complex *)c_to)->getRe();
+  from = c_from->getRe();
+  to = c_to->getRe();
 
   if ( from != (int)from || from < 0 || to != (int)to )
     throw EvalException("indices in Sum/Prod not natural or negative!");
@@ -2470,39 +2491,39 @@ MathExpression::Value *MathExpression::sumProd(void) throw (ExceptionBase){
   if ( to < from )
     return 0;
 
-  value = me.right->eval()->clone();
+  if ( !p )
+    value = me.right->eval()->neutralAddition();
+  else
+    value = me.right->eval()->neutralMultiplikation();
 
-  for ( int i = (int)from; i <= (int)to; ){
+  for ( unsigned long i = (unsigned long)from; i <= (unsigned long)to; ){
 
-    if (!p)
-      res += me.right->eval();  // Summe
+    if ( !p )
+      (*value) += me.right->eval();  // Summe
     else
-      res *= me.right->eval();  // Produkt
+      (*value) *= me.right->eval();  // Produkt
 
     i++;
 
     // neuen Wert der Zaehlvariablen eintragen
-    vl.insert(this->left->left->left->getVariable(),new Complex((double)i));
+    vl.insert(this->left->left->left->getVariable(),new Complex((cmplx_tp)i));
 
   }
-
-  delete value;
 
   // neu definierte Variablen in globale Varlist eintragen
   currve = vl.first;
   while ( currve ){
 
-    if (strcmp(currve->getName(),this->left->left->left->getVariable())
-	&& !currve->protect)
+    if ( strcmp(currve->getName(),this->left->left->left->getVariable())
+	&& !currve->getProtect() )
       this->varlist->insert(currve->getName(),currve->getValue()->clone());
 
-    currve=currve->next;
+    currve = currve->getNext();
 
   }
 
-  return res;
+  return value;
 }
-#endif
 
 Value *MathExpression::assignValue(void) throw (ExceptionBase){
 
