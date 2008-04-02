@@ -307,6 +307,8 @@ string setupParser(CmdlParser& parser){
   parser.addShortoption('v',"print version");
   parser.shortsynonym('v') << 'V';
 
+  parser.shortsupervisor() << 'h' << 'v';
+
   parser.addOption("help","print help");
   parser.synonym("help") << "h" << "Help" << "H";
 
