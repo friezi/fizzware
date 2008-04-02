@@ -242,14 +242,10 @@ int main(int argc, char **argv, char **envp){
 	}
 
 	MathExpression mathexpression(input.get(),varlist,functionlist);
-
-	if ( bflag == true ){
-
-	  mathexpression.print(precision);
-	  clog << endl;
-
-	}
-
+	
+	if ( bflag == true )
+	  clog << mathexpression.toString(precision) << endl;
+	
 	Value *value = mathexpression.eval();
 	cout << value->toString(precision) << endl;
 
