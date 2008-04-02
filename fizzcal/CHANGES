@@ -22,5 +22,5 @@ v2.56:
 - arrow indicating syntax-error
 
 fizzcal:
-v1.01:
+v1.02:
 - added tuple- and complex-handling

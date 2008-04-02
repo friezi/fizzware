@@ -1,4 +1,4 @@
-fizzcal v1.01
+fizzcal v1.02
 
 Brief documentation for compiling the sources (see license-terms below):
 GNU-Make-Utility is needed. Environment-variable EDITOR should contain the preferred editor.
