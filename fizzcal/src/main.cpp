@@ -1,7 +1,7 @@
 /*
   this sourcefile belongs to the programm focal,
   a mathematical formula-calculator
-  Copyright (C) 1999-2006 Friedemann Zintel
+  Copyright (C) 1999-2008 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -65,10 +65,10 @@ int main(int argc, char **argv, char **envp){
     // help-output
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
-      cout << endl << programname << " is a calculator/evaluator of mathematical formulas." << endl << endl;
-      cout << "version " << version << ", Copyright (C) 1999-2006  Friedemann Zintel" << endl << endl;
-      cout << cmdlparser.infoUsage();
-      cout << "With no options given, focal will work in interactive mode" << endl << endl;
+      clog << endl << programname << " is a calculator/evaluator of mathematical formulas." << endl << endl;
+      clog << "version " << version << ", Copyright (C) 1999-2006  Friedemann Zintel" << endl << endl;
+      clog << cmdlparser.infoUsage();
+      clog << "With no options given, focal will work in interactive mode" << endl << endl;
       exit(0);
 
     }
@@ -76,7 +76,7 @@ int main(int argc, char **argv, char **envp){
     // version-output
     if ( cmdlparser.checkShortoption('v') == true || cmdlparser.checkOption("version") == true ){
 
-      cout << version << endl;
+      clog << version << endl;
       exit(0);
 
     }
@@ -148,7 +148,7 @@ int main(int argc, char **argv, char **envp){
 	    if ( checkAnswer(exit_modified_text) == false )
 	      continue;
 
-	  cout << endl;
+	  clog << endl;
 	  
 	  break;
 	  
@@ -226,17 +226,17 @@ int main(int argc, char **argv, char **envp){
 
 	} else if ( firstword == SHOWPRECISION ){
 
-	  cout << precision << endl;
+	  clog << precision << endl;
 	  continue;
 
 	} else if (!strcmp(input.get(),FUNCS)){
 
-	  cout << functionlist->toString(precision);
+	  clog << functionlist->toString(precision);
 	  continue;
 
 	} else if (!strcmp(input.get(),BUILTINS)){
 
-	  cout << MathExpression::builtinsToString();
+	  clog << MathExpression::builtinsToString();
 	  continue;
 
 	}
@@ -246,7 +246,7 @@ int main(int argc, char **argv, char **envp){
 	if ( bflag == true ){
 
 	  mathexpression.print(precision);
-	  cout << endl;
+	  clog << endl;
 
 	}
 
@@ -256,23 +256,23 @@ int main(int argc, char **argv, char **envp){
       } catch (FunctionDefinition &fd){
 
 	if ( interactive == true )
-	  cout << "function defined: '" << fd.getName() << "'" << endl;
+	  clog << "function defined: '" << fd.getName() << "'" << endl;
 
       } catch ( ParseException &pe ){
 
 	if ( interactive == true )
 	  printErrorArrow(fullprompt.size() + pe.getPos());
-	cerr << "parse-error: '" << pe.getMsg() << "'" << endl;
+	clog << "parse-error: '" << pe.getMsg() << "'" << endl;
 
       } catch ( EvalException &ee ){
 
 	// why this doesn't work sometimes I really don't know
-	cerr << "evaluation-error: '" << ee.getMsg() << "'";
+	clog << "evaluation-error: '" << ee.getMsg() << "'";
 
 	if ( ee.getObjName() != "")
-	  cerr << ": '" <<ee.getObjName() << "'";
+	  clog << ": '" <<ee.getObjName() << "'";
 
-	cerr << endl;
+	clog << endl;
 
       }
 
@@ -290,13 +290,13 @@ int main(int argc, char **argv, char **envp){
     // nicht abgefangen !?!? (Ist eigentlich unnoetig)
     if ( interactive == true )
       printErrorArrow(pe.getPos());
-    cerr << "parse-error: '" << pe.getMsg() << "'" << endl;
+    clog << "parse-error: '" << pe.getMsg() << "'" << endl;
     exit(1);
 
   } catch ( ExceptionBase &e ){
 
     e.show();
-    cerr << usage << endl;
+    clog << usage << endl;
     exit(1);
 
   }
@@ -340,16 +340,16 @@ void undefineFunctions(FunctionList *fl, LineScanner & lscanner){
     try{
 
       fl->remove(fun.c_str());
-      cout << fun << " undefined" << endl;
+      clog << fun << " undefined" << endl;
       removed = true;
 
     } catch (Exception<FunctionList> &fle){
-      cout << fle.getMsg() << ": " << fun << endl;
+      clog << fle.getMsg() << ": " << fun << endl;
     }
   }
   
   if ( removed == false )
-    cout << "nothing undefined" << endl;
+    clog << "nothing undefined" << endl;
 
 }
 
@@ -363,16 +363,16 @@ void removeVariables(VariableList *vl, LineScanner & lscanner){
     try{
 
       vl->remove(var.c_str());
-      cout << var << " removed" << endl;
+      clog << var << " removed" << endl;
       removed = true;
 
     } catch (Exception<VariableList> &vle){
-      cout << vle.getMsg() << ": " << var << endl;
+      clog << vle.getMsg() << ": " << var << endl;
     }
   }
   
   if ( removed == false )
-    cout << "nothing removed" << endl;
+    clog << "nothing removed" << endl;
 
 }
 void save(VariableList *vl, FunctionList *fl, streamsize precision, string filename, LineScanner & lscanner){
@@ -381,7 +381,7 @@ void save(VariableList *vl, FunctionList *fl, streamsize precision, string filen
 
   if ( filename == "" ){
 
-    cout << "expecting filename!" << endl;
+    clog << "expecting filename!" << endl;
     return;
 
   }
@@ -408,7 +408,7 @@ void save(VariableList *vl, FunctionList *fl, streamsize precision, string filen
 
   if ( file == NULL ){
 
-    cout << "can't save to file " << filename << endl;
+    clog << "can't save to file " << filename << endl;
     return;
 
   }
@@ -416,7 +416,7 @@ void save(VariableList *vl, FunctionList *fl, streamsize precision, string filen
   file << vl->toString(false,precision);
   file << fl->toString(precision);
 
-  cout << "commands saved to file \"" << filename << "\"" << endl;
+  clog << "commands saved to file \"" << filename << "\"" << endl;
 
   vl->setModified(false);
   fl->setModified(false);
@@ -431,7 +431,7 @@ void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive
 
   if ( filename == "" ){
 
-    cerr << "expecting filename!" << endl;
+    clog << "expecting filename!" << endl;
     return;
 
   }
@@ -440,7 +440,7 @@ void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive
 
   if ( file == NULL ){
 
-    cerr << "file " << filename << " doesn't exist!" << endl;
+    clog << "file " << filename << " doesn't exist!" << endl;
     return;
 
   }
@@ -453,7 +453,7 @@ void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive
     try{
 
       if ( interactive == true )
-	cout << "loading " << line.c_str() << endl;
+	clog << "loading " << line.c_str() << endl;
 
       MathExpression mathexpression(line.c_str(),vl,fl);
       mathexpression.eval();
@@ -466,15 +466,15 @@ void load(VariableList *vl, FunctionList *fl,  string filename, bool interactive
 
       if ( interactive == true )
 	printErrorArrow(pe.getPos());
-      cerr << "parse-error: " << pe.getMsg() << endl;
+      clog << "parse-error: " << pe.getMsg() << endl;
 
     } catch (EvalException &ee){
 
-      cout << ee.getMsg();
+      clog << ee.getMsg();
 
       if ( ee.getObjName() != "")
-	cout << " : " << ee.getObjName();
-      cout << endl;
+	clog << " : " << ee.getObjName();
+      clog << endl;
 
     }
 
@@ -502,7 +502,7 @@ bool checkAnswer(const string & text){
     
   } else{
 
-    cout << endl;
+    clog << endl;
     result = false;
 
   }
@@ -517,27 +517,27 @@ void printErrorArrow(int pos){
     return;
 
   for ( int i = 0; i < pos-1; i++ )
-    cout << " ";
+    clog << " ";
 
-  cout << "^" << endl;
+  clog << "^" << endl;
 
 }
 
 void info(const char *appname){
 
-  cout << "\n" << appname << " version " << version
-       << ", Copyright (C) 1999-2007  Friedemann Zintel\n";
-  cout << "email: friezi@cs.tu-berlin.de\n";
-  cout << "If you have any questions, comments or suggestions about ";
-  cout << "this programm,\n";
-  cout << "please feel free to email them to me.\n";
-  cout << "To obtain the full source-code, write me an email.\n\n";
-  cout << appname << " comes with ABSOLUTELY NO WARRANTY, for details ";
-  cout << "type \"" << GPL << "\".\n";
-  cout << "This is free software, and you are welcome to redistribute it\n";
-  cout << "under certain conditions; type \"" << GPL;
-  cout << "\" for to read the GPL.\n\n";
-  cout << appname << " is a calculator/evaluator of mathematical formulas/expressions.\n"
+  clog << "\n" << appname << " version " << version
+       << ", Copyright (C) 1999-2008  Friedemann Zintel\n"
+       << "email: friezi@cs.tu-berlin.de\n"
+       << "If you have any questions, comments or suggestions about "
+       << "this programm,\n"
+       << "please feel free to email them to me.\n"
+       << "To obtain the full source-code, write me an email.\n\n"
+       << appname << " comes with ABSOLUTELY NO WARRANTY, for details "
+       << "type \"" << GPL << "\".\n"
+       << "This is free software, and you are welcome to redistribute it\n"
+       << "under certain conditions; type \"" << GPL
+       << "\" for to read the GPL.\n\n"
+       << appname << " is a calculator/evaluator of mathematical formulas/expressions.\n"
        << "Type \"" << HELP << "\" for help, \"" << QUIT << "\" or CTRL-D to quit\n\n";
 }
 
@@ -569,7 +569,7 @@ void show(const char *pname, void (*what)(const char *)){
     execvp(proc[0],proc);
     (*what)(pname);
     execvp(proc2[0],proc);
-    cout << "neither \"" << SHOWHELP << "\" nor \"" << SHOWHELP2
+    clog << "neither \"" << SHOWHELP << "\" nor \"" << SHOWHELP2
 	 << "\" installed!\n";
     exit(1);
 
@@ -658,6 +658,8 @@ void printHelp(const char *pname){
        << "sgn\t\t\t\tthe signum\n"
        << "tst\t\t\t\ttests if value is unequal to zero\n"
        << "\n"
+       << "Remark: not all the functions are applicable to really complex resp.\n"
+       << "tuple values\n\n"
        << "the priorities of the operator's are as follows:\n\n"
        << "high pri\n\n"
        << "   .\n"
@@ -671,8 +673,11 @@ void printHelp(const char *pname){
        << "   |\t,\n"
        << "   |\t=\n"
        << "   |\t;\n"
-       << "low pri\n";
-  cout << "\n\n";
+       << "low pri\n"
+       << "\n\n"
+       << "All non-result outputs will be printed to stdlog resp. stderr\n"
+       << "so with proper input- and output-redirection you can run the\n"
+       << "program in batch-mode with the results printed to a file.";
 }
 
 void gpl(const char *nix){

@@ -1,7 +1,7 @@
 /*
   this sourcefile belongs to the programm focal,
   a mathematical formula-calculator
-  Copyright (C) 1999-2006 Friedemann Zintel
+  Copyright (C) 1999-2008 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
