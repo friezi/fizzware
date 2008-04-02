@@ -154,7 +154,6 @@ int main(int agc, char *argv[]){
   SubException<bool,unsigned int> buie;
   SubException<bool,int> bie;
   Sib sib;
-  Jip *jip = (Jip *)(&sib);
   Exception<Jip> *ejip = (Exception<Jip> *)(&sib);
 
   cout << typeid(e).name() << "\n";
@@ -165,7 +164,6 @@ int main(int agc, char *argv[]){
   cout << typeid(buie).name() << "\n";
   cout << typeid(bie).name() << "\n";
   cout << typeid(sib).name() << "\n";
-  cout << typeid(jip).name() << "\n";
   cout << typeid(ejip).name() << "\n";
   cout << typeid(TestDieZweite).name() << "\n";
   

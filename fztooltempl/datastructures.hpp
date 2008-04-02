@@ -258,11 +258,11 @@ namespace ds{
 
     size_t elements;
 
+    unsigned int overwriting_mode;
+
     size_t first;
 
     size_t last;
-
-    unsigned int overwriting_mode;
 
     T *buffer;
 
@@ -846,9 +846,10 @@ clear(){
 
 template <typename T>
 ds::RingBuffer<T>::
-RingBuffer(size_t size, unsigned int overwriting_mode) : size(size), elements(0), first(0), last(-1), overwriting_mode(overwriting_mode){
+RingBuffer(size_t size, unsigned int overwriting_mode) : size(size), elements(0), overwriting_mode(overwriting_mode){
 
   buffer = new T[size];
+  reset();
 
 }
 
@@ -904,7 +905,7 @@ ds::RingBuffer<T>::
 reset(){
 
   first = 0;
-  last = -1;
+  last = first - 1;
 
 }
 
