@@ -141,24 +141,15 @@ namespace mexp{
 
   public:
 
-    static const int TUPLE = 1;
-    static const int COMPLEX = 2;
-
     static const std::streamsize DFLT_PRECISION = 6;
 
   protected:
-
-    int type;
-
-    Value(int type) : type(type){}
     
     Value *notSupported() const throw (ExceptionBase) { throw EvalException("not supported!"); }
 
   public:
 
     virtual ~Value(){}
-
-    int getType() const { return type; }
 
     virtual std::string toString(std::streamsize precision) const = 0;
     std::string toString() const { return toString(DFLT_PRECISION); }
@@ -206,8 +197,6 @@ namespace mexp{
 
     std::list<Value *> elements;
 
-    Tuple() : Value(Value::TUPLE){}
-
     ~Tuple();
 
     static Tuple *assertTuple(Value *value) throw(EvalException);
@@ -238,10 +227,10 @@ namespace mexp{
     
   public:
     
-    Complex(): Value(Value::COMPLEX), std::complex<cmplx_tp>(0,0){}
-    Complex(cmplx_tp re) : Value(Value::COMPLEX), std::complex<cmplx_tp>(re){}
-    Complex(cmplx_tp re, cmplx_tp im) : Value(Value::COMPLEX),  std::complex<cmplx_tp>(re,im){}
-    Complex(const std::complex<cmplx_tp> number) : Value(Value::COMPLEX), std::complex<cmplx_tp>(number){}
+    Complex(): /*Value(Value::COMPLEX), */std::complex<cmplx_tp>(0,0){}
+    Complex(cmplx_tp re) : std::complex<cmplx_tp>(re){}
+    Complex(cmplx_tp re, cmplx_tp im) : std::complex<cmplx_tp>(re,im){}
+    Complex(const std::complex<cmplx_tp> number) : std::complex<cmplx_tp>(number){}
 
     ~Complex(){}
 
@@ -400,7 +389,7 @@ namespace mexp{
     // erases the elements of a n-ary operator
     void eraseElements();
 
-    // pri checks difference in priorities
+    // priCompare() checks difference in priorities
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int priCompare(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (ParseException);

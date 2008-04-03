@@ -383,10 +383,10 @@ Value *Tuple::clone() const {
 
 Tuple *Tuple::assertTuple(Value *value) throw(EvalException){
 
-  if ( value->getType() != Value::TUPLE )
-    throw EvalException(string("operand to tuple is no tuple-type: ") + value->toString() + string(" !"));
+  if ( Tuple * tuple = dynamic_cast<Tuple *>(value) )
+    return tuple;
 
-  return dynamic_cast<Tuple *>(value);
+  throw EvalException(string("operand to tuple is no tuple-type: ") + value->toString() + string(" !"));
 
 }
 void Tuple::assertKind(const Tuple *t1, const Tuple *t2) throw(EvalException){
@@ -453,11 +453,11 @@ string Complex::toString(std::streamsize precision) const {
 }
 
 Complex *Complex::assertComplex(Value *value) throw(EvalException,ExceptionBase){
-  
-  if ( value->getType() != Value::COMPLEX )
-    throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
-  
-  return dynamic_cast<Complex *>(value);
+
+  if ( Complex * cmplx = dynamic_cast<Complex *>(value) )
+    return cmplx;
+
+  throw EvalException(string("operand to complex is not complex-type: ") + value->toString() + string(" !"));
   
 }
 
@@ -548,14 +548,12 @@ Value *Complex::operator-(Value *right) throw (ExceptionBase){
 
 Value *Complex::operator*(Value *right) throw (ExceptionBase){ 
       
-  if ( right->getType() == Value::COMPLEX ){
+  if ( Complex *rc = dynamic_cast<Complex *>(right) ){
 
-    Complex *rc = dynamic_cast<Complex *>(right);
     return new Complex(getRe()*rc->getRe()-getIm()*rc->getIm(),getRe()*rc->getIm()+getIm()*rc->getRe());
 
-  } else if ( right->getType() == Value::TUPLE ){
+  } else if ( Tuple *rt = dynamic_cast<Tuple *>(right) ){
 
-    Tuple *rt = dynamic_cast<Tuple *>(right);
     Tuple *value = new Tuple();
 
     for ( list<Value *>::iterator it = rt->elements.begin(); it != rt->elements.end(); it++ )
@@ -2065,34 +2063,31 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	    // optimization: reduction  of "({-,+}1)*({-,+}1)" to "{-,+}1"
 	    if ( this->oprtr[0] == '*' )
 	      if ( this->getLeft()->isValue() == true && this->getRight()->isValue() == true )
-		if ( this->getLeft()->getValue()->getType() == Value::COMPLEX
-		     && this->getRight()->getValue()->getType() == Value::COMPLEX){
+		if ( Complex *left = dynamic_cast<Complex *>(this->getLeft()->getValue()) ){
+		  if ( Complex *right = dynamic_cast<Complex *>(this->getRight()->getValue()) ){
 		  
-		  Complex *left = (Complex *)this->getLeft()->getValue();
-		  Complex *right = (Complex *)this->getRight()->getValue();
-		  
-		  if ( left->getIm() == 0 && right->getIm() == 0 ){
+		    if ( left->getIm() == 0 && right->getIm() == 0 ){
 		    
-		    if ( abs(left->getRe()) == 1 && abs(right->getRe()) == 1 ){
+		      if ( abs(left->getRe()) == 1 && abs(right->getRe()) == 1 ){
 		      
-		      this->setETValue(new Complex(sgn(left->getRe()) * right->getRe()));
+			this->setETValue(new Complex(sgn(left->getRe()) * right->getRe()));
 		      
-		      delete this->getLeft();
-		      delete this->getRight();
-		      this->setLeft(0);
-		      this->setRight(0);
-		      
+			delete this->getLeft();
+			delete this->getRight();
+			this->setLeft(0);
+			this->setRight(0);
+			
+		      }
 		    }
-		    
 		  }
 		  
 		}
 	    
 	    return(true);
-
+	    
 	  }
       }
-
+      
       throw ParseException(abs_pos, "invalid syntax for binary operator!");
 
     } else{
