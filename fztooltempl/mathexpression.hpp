@@ -227,7 +227,7 @@ namespace mexp{
     
   public:
     
-    Complex(): /*Value(Value::COMPLEX), */std::complex<cmplx_tp>(0,0){}
+    Complex(): std::complex<cmplx_tp>(0,0){}
     Complex(cmplx_tp re) : std::complex<cmplx_tp>(re){}
     Complex(cmplx_tp re, cmplx_tp im) : std::complex<cmplx_tp>(re,im){}
     Complex(const std::complex<cmplx_tp> number) : std::complex<cmplx_tp>(number){}

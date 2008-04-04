@@ -2439,21 +2439,21 @@ string MathExpression::skipTrailingZeros(string value){
   }
   
   return value.substr(0,stop);
+
 }
 
 double MathExpression::faculty(double fac) throw (ExceptionBase){
   
-  if (fac!=(double)((int)(fac)) || fac<0)
-    throw EvalException
-      ("Argument of Faculty not a natural number or negative!");
+  if ( fac != (double)((int)(fac)) || fac < 0 )
+    throw EvalException("Argument of Faculty not a natural number or negative!");
 
-  if (fac==0)
-    return(1);
+  if ( fac == 0 )
+    return 1;
 
-  for (unsigned long i=(unsigned long)fac-1;i>0;i--)
-    fac*=i;
+  for ( unsigned long i = (unsigned long)fac-1; i > 0; i-- )
+    fac *= i;
 
-  return(fac);
+  return fac;
 
 }
 
@@ -2760,4 +2760,5 @@ unsigned int MathExpression::countArgs(void){
     return elements.size();
   else
     return 1;
+
 }
