@@ -39,6 +39,7 @@
 #include <utility>
 #include <libgen.h>
 #include <exception.hpp>
+#include <utils.hpp>
 
 /**
    @example cmdlparser_example
@@ -101,48 +102,54 @@ namespace cmdl{
   };
 
   /**
-     @brief For storing Aliases
+     @brief For storing Alias
   */
-  class Aliases : private std::set< std::string,std::less<std::string> >{
+  class Alias : private std::set< std::string,std::less<std::string> >{
 
     friend class CmdlParser;
 
   private:
 
-    Aliases(){}
-    Aliases(Aliases &){}
+    CmdlParser *cmdlparser;
+
+    Alias(CmdlParser *cmdlparser) : cmdlparser(cmdlparser){}
+    Alias(Alias &){}
 
   public:
     
     /**
-       @brief adds the entry to the list of aliases
+       @brief adds the option to the list of an alias
+       @param option the option to be added
        @return reference to aliases
        @see CmdlParser::alias()
     */
-    Aliases& operator<<(std::string entry);
+    Alias& operator<<(std::string option) throw(Exception<CmdlParser>, ExceptionBase);
 
   };
 
   /**
-     @brief For storing short-Aliases
+     @brief For storing short-Alias
   */
-  class ShortAliases : private std::set<char>{
+  class ShortAlias : private std::set<char>{
 
     friend class CmdlParser;
 
   private:
 
-    ShortAliases(){}
-    ShortAliases(ShortAliases &){}
+    CmdlParser *cmdlparser;
+
+    ShortAlias(CmdlParser *cmdlparser) : cmdlparser(cmdlparser){}
+    ShortAlias(ShortAlias &){}
 
   public:
     
     /**
-       @brief adds the entry to the list of shortaliases
+       @brief adds the shortoption to the list of a shortalias
+       @param shortoption the shortoption to be added
        @return reference to shortaliases
        @see CmdlParser::shortalias()
     */
-    ShortAliases& operator<<(char entry);
+    ShortAlias& operator<<(char shortoption) throw(Exception<CmdlParser>, ExceptionBase);
 
   };
 
@@ -160,6 +167,8 @@ namespace cmdl{
   */
   class CmdlParser{
 
+    friend class Alias;
+    friend class ShortAlias;
     friend class Supervisors;
     friend class ShortSupervisors;
 
@@ -222,13 +231,13 @@ namespace cmdl{
       ~ShortSynonymDict();
     };
 
-    class AliasDict : public std::map< std::string,Aliases *,std::less<std::string> >{
+    class AliasDict : public std::map< std::string,Alias *,std::less<std::string> >{
 
     public:
       ~AliasDict();
     };
 
-    class ShortAliasDict : public std::map< char,ShortAliases *,std::less<char> >{
+    class ShortAliasDict : public std::map< char,ShortAlias *,std::less<char> >{
 
     public:
       ~ShortAliasDict();
@@ -455,9 +464,9 @@ namespace cmdl{
        @brief to define an alias for many options
        @param aliasname the aliasname
        @return the aliases
-       @see very useful in combination with Aliases::operator<<()
+       @see very useful in combination with Alias::operator<<()
     */
-    Aliases & alias(std::string aliasname);
+    Alias & alias(std::string aliasname);
 
     /**
        Actually, this method returns all shortaliases belonging to aliasname.
@@ -466,10 +475,10 @@ namespace cmdl{
        @brief to define an alias for many options
        @param aliasname the aliasname
        @return the shortaliases
-       @see very useful in combination with ShortAliases::operator<<()
+       @see very useful in combination with ShortAlias::operator<<()
        @note shortaliases can't be mixed with normal aliases
     */
-    ShortAliases & shortalias(char aliasname);
+    ShortAlias & shortalias(char aliasname);
 
     /**
        Actually, this method returns all supervisors.
@@ -714,7 +723,7 @@ namespace cmdl{
        @see CmdlParser::supervisor()
 
     */
-    Supervisors & operator<<(std::string supervisor) throw(Exception<CmdlParser>);
+    Supervisors & operator<<(std::string supervisor) throw(Exception<CmdlParser>, ExceptionBase);
 
   };
 
@@ -744,7 +753,7 @@ namespace cmdl{
        @see CmdlParser::shortsupervisor()
 
     */
-    ShortSupervisors & operator<<(char shortsupervisor) throw(Exception<CmdlParser>);
+    ShortSupervisors & operator<<(char shortsupervisor) throw(Exception<CmdlParser>, ExceptionBase);
 
   };
 

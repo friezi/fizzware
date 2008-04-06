@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace cmdl;
+using namespace utils;
 
 Synonyms & Synonyms::operator<<(string synonym){
   
@@ -36,27 +37,33 @@ Synonyms & Synonyms::operator<<(string synonym){
 }
 
 ShortSynonyms & ShortSynonyms::operator<<(char synonym){
-  
+
   this->insert(synonym);
   return *this;
 
 }
 
-Aliases & Aliases::operator<<(string entry){
+Alias & Alias::operator<<(string option) throw(Exception<CmdlParser>, ExceptionBase){
   
-  this->insert(entry);
+  if ( cmdlparser->allowedoptions.find(option) == cmdlparser->allowedoptions.end() )
+    throw Exception<CmdlParser>("alias definition: option \"" + option + "\" not defined!");
+  
+  this->insert(option);
   return *this;
 
 }
 
-ShortAliases & ShortAliases::operator<<(char entry){
+ShortAlias & ShortAlias::operator<<(char shortoption) throw(Exception<CmdlParser>, ExceptionBase){
   
-  this->insert(entry);
+  if ( cmdlparser->allowedshortoptions.find(shortoption) == cmdlparser->allowedshortoptions.end() )
+    throw Exception<CmdlParser>(String("shortalias definition: shortoption \"") + shortoption + "\" not defined!");
+  
+  this->insert(shortoption);
   return *this;
   
 }
 
-Supervisors & Supervisors::operator<<(string supervisor) throw(Exception<CmdlParser>){
+Supervisors & Supervisors::operator<<(string supervisor) throw(Exception<CmdlParser>, ExceptionBase){
   
   if ( synonymdict->find(supervisor) == synonymdict->end() )
     throw Exception<CmdlParser>("supervisor \"" + supervisor + "\" no representative!");
@@ -66,7 +73,7 @@ Supervisors & Supervisors::operator<<(string supervisor) throw(Exception<CmdlPar
   
 }
 
-ShortSupervisors & ShortSupervisors::operator<<(char shortsupervisor) throw(Exception<CmdlParser>){
+ShortSupervisors & ShortSupervisors::operator<<(char shortsupervisor) throw(Exception<CmdlParser>, ExceptionBase){
   
   if ( shortsynonymdict->find(shortsupervisor) == shortsynonymdict->end() )
     throw Exception<CmdlParser>("shortsupervisor \"" + (string("") += shortsupervisor) + "\" no shortrepresentative!");
@@ -162,18 +169,18 @@ ShortSynonyms & CmdlParser::shortsynonym(char representative) throw(Exception<Cm
   return *shortsynonymdict[representative];
 }
 
-Aliases & CmdlParser::alias(string aliasname){
+Alias & CmdlParser::alias(string aliasname){
 
   if ( aliasdict.find(aliasname) == aliasdict.end() )
-    aliasdict[aliasname] = new Aliases();
+    aliasdict[aliasname] = new Alias(this);
 
   return *aliasdict[aliasname];
 }
 
-ShortAliases & CmdlParser::shortalias(char aliasname){
+ShortAlias & CmdlParser::shortalias(char aliasname){
 
   if ( shortaliasdict.find(aliasname) == shortaliasdict.end() )
-    shortaliasdict[aliasname] = new ShortAliases();
+    shortaliasdict[aliasname] = new ShortAlias(this);
 
   return *shortaliasdict[aliasname];
 }
@@ -326,7 +333,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	  if ( (sad_it = shortaliasdict.find(shortoption)) != shortaliasdict.end() ){
 
 	    // insert all contained options
-	    for ( ShortAliases::iterator sa_it = (*sad_it).second->begin(); sa_it != (*sad_it).second->end(); sa_it++ )
+	    for ( ShortAlias::iterator sa_it = (*sad_it).second->begin(); sa_it != (*sad_it).second->end(); sa_it++ )
 	      shortoptions.insert(*sa_it);
 		
 	  } else {  // no alias
@@ -387,7 +394,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	    if ( (adit = aliasdict.find(option)) != aliasdict.end() ){
 
 	      // insert all contained options
-	      for ( Aliases::iterator a_it = (*adit).second->begin(); a_it != (*adit).second->end(); a_it++ )
+	      for ( Alias::iterator a_it = (*adit).second->begin(); a_it != (*adit).second->end(); a_it++ )
 		options.insert(*a_it);
 		
 	    } else{  // no alias
@@ -842,7 +849,7 @@ string CmdlParser::contents(){
   collect << endl;
   
   // shortaliases
-  collect << "Short-Aliases:\n";
+  collect << "Short-Alias:\n";
   for ( ShortAliasDict::iterator it = shortaliasdict.begin(); it != shortaliasdict.end(); it++ ){
     collect << (*it).first << " : ";
     for ( set<char>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); a_it++ )
@@ -852,7 +859,7 @@ string CmdlParser::contents(){
   collect << endl;
   
   // aliases
-  collect << "Aliases:\n";
+  collect << "Alias:\n";
   for ( AliasDict::iterator it = aliasdict.begin(); it != aliasdict.end(); it++ ){
     collect << (*it).first << " : ";
     for ( set<string>::iterator a_it = (*it).second->begin(); a_it != (*it).second->end(); a_it++ )
