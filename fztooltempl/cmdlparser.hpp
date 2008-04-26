@@ -158,12 +158,13 @@ namespace cmdl{
       - shortoptions: e.g. "-lg" means the same like "-l -g"\n
       - normal options: e.g. "--quiet"\n
       - parameters: e.g. "--editor=emacs"\n
-      - multiparameters: e.g. "--Incude:mathlib --Include:clib"
+      - multiparameters: e.g. "--Incude=mathlib --Include=clib"
       - arguments: e.g. "filename"\n
 
       The end of options and regular arguments on the commandline has to be marked by a "-- " (realise the single space-sign).
       Each string after the "--" is taken as an argument.
       @brief For parsing the commandline and extracting the options and arguments
+      @note Don't use the same names for both parameters and multiparameters otherwise the behaviour will be undefined
   */
   class CmdlParser{
 
@@ -269,6 +270,8 @@ namespace cmdl{
     // will be set to true if any mandatory parameter was defined
     bool mandatory_parameters;
 
+    bool relaxed_syntax;
+
     /// for parse-errors
     std::ostringstream errors;
   
@@ -348,6 +351,9 @@ namespace cmdl{
     // the default-destructor
     ~CmdlParser();
 
+    /** @name basic declaring functions */
+    //@{
+
     /**
        Shortoptions are single characters which can be compined with one optioncall, on the
        commandline started by a "-", e.g. "-czf",\n
@@ -377,17 +383,19 @@ namespace cmdl{
        @param valueid id-string for the value how it should be printed by usage()
        @param description a descriptive string for the parameter, printed by infoUsage()
        @param mandatory if occurence of parameter is must
+       @see allowRelaxedSyntax()
     */
     void addParameter(std::string parameter, std::string valueid, std::string description, bool mandatory = false);
 
     /**
        A multi-parameter is an optional parameter which can occur more than once, e.g. useful for a
-       compiler, which can link more than one library: "--l:lib1 --l:lib2 ..."\n
-       general syntax: --\<parameter\>:\<value\>
+       compiler, which can link more than one library: "--l=lib1 --l=lib2 ..."\n
+       general syntax: --\<parameter\>=\<value\>
        @brief to add a multi-parameter
        @param multiparameter the parameter, which can contain several value-entries
        @param valueid id-string for the value how it should be printed by usage()
        @param description a descriptive string for the multiparameter, printed by infoUsage()
+       @see allowRelaxedSyntax()
     **/
     void addMultiParameter(std::string multiparameter, std::string valueid, std::string description);
 
@@ -399,6 +407,24 @@ namespace cmdl{
        @param description a descriptive string for the argument, printed by infoUsage()
     */
     void addMandatoryArgument(std::string argument, std::string description);
+
+    //@}
+
+    /** @name parsing */
+    //@{
+
+    /**
+       It parses the commandline and extracts the options and arguments according to the definition with the add-methods
+       @brief for parsing the commandline
+       @exception Exception<CmdlParser>
+       @note This method has to be called manually, it's not called by the constructor
+    */
+    void parse() throw(Exception<CmdlParser>);
+
+    //@}
+
+    /** @name advanced declaring functions */
+    //@{
 
     /**
        Just to inform the user with the usage()-function that an infinite number of
@@ -431,6 +457,14 @@ namespace cmdl{
     }
 
     /**
+       Allows use of a relaxed syntax:\n
+       - a parameter/multiparameter may be given as "--<key> <value>" instead of "--<key>=<value>"
+       @brief allow relaxed syntax
+       @since V2.1
+    */
+    void allowRelaxedSyntax(){ relaxed_syntax = true; }
+
+    /**
        Actually, this method returns all synonyms belonging to representative.
        This method's purpose is to define synonyms for the representative. Example:\n
        synonym("representative") << "s1" << "s2";
@@ -447,7 +481,7 @@ namespace cmdl{
        Method for short-options\n
        Actually, this method returns all synonyms belonging to representative.
        This method's purpose is to define synonyms for the representative. Example:\n
-       synonym("representative") << "s1" << "s2";
+       shortsynonym("representative") << "s1" << "s2";
        @brief to define shortsynonyms
        @param representative the representative
        @exception Exception<CmdlParser>
@@ -461,7 +495,7 @@ namespace cmdl{
        Actually, this method returns all aliases belonging to aliasname.
        This method's purpose is to define an alias for many options. Example:\n
        alias("aliasname") << "a1" << "a2";
-       @brief to define an alias for many options
+       @brief to define an alias for a set of options
        @param aliasname the aliasname
        @return the aliases
        @see very useful in combination with Alias::operator<<()
@@ -471,8 +505,8 @@ namespace cmdl{
     /**
        Actually, this method returns all shortaliases belonging to aliasname.
        This method's purpose is to define a shortalias for many shortoptions. Example:\n
-       alias("aliasname") << "a1" << "a2";
-       @brief to define an alias for many options
+       shortalias("aliasname") << "a1" << "a2";
+       @brief to define an alias for a set of options
        @param aliasname the aliasname
        @return the shortaliases
        @see very useful in combination with ShortAlias::operator<<()
@@ -514,6 +548,11 @@ namespace cmdl{
     */
     ShortSupervisors & shortsupervisor();
 
+    //@}
+ 
+    /** @name getters and checkers */
+    //@{
+   
     /**
        @brief get the representative for a synonym
        @param synonym the synonym to find representative for
@@ -527,14 +566,6 @@ namespace cmdl{
        @return the representative
     */
     char getShortRepresentative(char synonym);
-
-    /**
-       It parses the commandline and extracts the options and arguments according to the definition with the add-methods
-       @brief for parsing the commandline
-       @exception Exception<CmdlParser>
-       @remark This method has to be called manually, it's not called by the constructor
-    */
-    void parse() throw(Exception<CmdlParser>);
 
 
     /**
@@ -564,8 +595,7 @@ namespace cmdl{
        the parameter is contained, second element is the value of the parameter
     */
     std::pair<bool,std::string> checkParameter(std::string parameter);
-    
-    
+       
     /**
        @brief get the value for a parameter
        @param parameter to be checked
@@ -579,6 +609,13 @@ namespace cmdl{
        @since V2.1
     */
     bool isMandatoryParameters(){ return mandatory_parameters; }
+
+    /**
+       @brief checks if relaxed syntax is allowed
+       @return true if relaxed syntax is allowed
+       @since V2.1
+    */
+    bool isRelaxedSyntax(){ return relaxed_syntax; }
     
 
     /**
@@ -643,6 +680,11 @@ namespace cmdl{
     */
     std::string getFinalArgumentValue() throw (Exception<CmdlParser>);
   
+    //@}
+
+    /** @name iterators */
+    //@{
+
     /**
        Returns an iterator pointing to the beginning of the non-mandatory-argument-list.
        @brief beginning of arguments
@@ -671,6 +713,11 @@ namespace cmdl{
     */
     Parameters::const_iterator endParameters() const { return parameters.end(); }
   
+    //@}
+
+    /** @name info */
+    //@{
+
     /**
        @brief returns a string containing the syntax of how the programm should be called
        @return the usage-string
@@ -690,6 +737,8 @@ namespace cmdl{
 	@return a string containing all the contents of the object
     */
     std::string contents();
+
+    //@}
 
   protected:
 

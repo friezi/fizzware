@@ -24,3 +24,7 @@ v2.56:
 fizzcal:
 v1.02:
 - added tuple- and complex-handling
+
+v1.03:
+- added option 'f'
+- "exit" now quits the program

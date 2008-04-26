@@ -1,6 +1,6 @@
 /*
-  this sourcefile belongs to the programm focal,
-  a mathematical formula-calculator
+  this sourcefile belongs to the programm fizzcal,
+  a calculator/evaluator for arithmetic expresions.
   Copyright (C) 1999-2008 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify
@@ -28,12 +28,12 @@ using namespace cmdl;
 using namespace mexp;
 using namespace ds;
 
-const char *version = "1.02";
+const char *version = "1.03";
 
 const static string formula = "formula";
 const static string commands = "commands";
 const static string prompt = "> ";
-const static string exit_modified_text = "Variables or functions have been modified! Do you really want to quit without saving? (y,n) ";
+const static string exit_confirmation_text = "Variables or functions have been modified! Do you really want to quit without saving? (y,n) ";
 
 int main(int argc, char **argv, char **envp){
 
@@ -65,10 +65,10 @@ int main(int argc, char **argv, char **envp){
     // help-output
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
 
-      clog << endl << programname << " is a calculator/evaluator of mathematical formulas." << endl << endl;
-      clog << "version " << version << ", Copyright (C) 1999-2006  Friedemann Zintel" << endl << endl;
+      clog << endl << programname << " is a calculator/evaluator of arithmetic expressions." << endl << endl;
+      clog << "version " << version << ", Copyright (C) 1999-2008  Friedemann Zintel" << endl << endl;
       clog << cmdlparser.infoUsage();
-      clog << "With no options given, focal will work in interactive mode" << endl << endl;
+      clog << "With no options given, " << programname << " will work in interactive mode" << endl << endl;
       exit(0);
 
     }
@@ -145,9 +145,10 @@ int main(int argc, char **argv, char **envp){
 	} else {
 
 	  if ( varlist->isModified() == true || functionlist->isModified() == true )
-	    if ( checkAnswer(exit_modified_text) == false )
-	      continue;
-
+	    if ( cmdlparser.checkShortoption('f') == false )
+	      if ( checkAnswer(exit_confirmation_text) == false )
+		continue;
+	  
 	  clog << endl;
 	  
 	  break;
@@ -160,9 +161,10 @@ int main(int argc, char **argv, char **envp){
 	if (!strcmp(input.get(),QUIT)){
 
 	  if ( varlist->isModified() == true || functionlist->isModified() == true )
-	    if ( checkAnswer(exit_modified_text) == false )
-	      continue;
-
+	    if ( cmdlparser.checkShortoption('f') == false )
+	      if ( checkAnswer(exit_confirmation_text) == false )
+		continue;
+	  
 	  break;
 
 	} else if (!strcmp(input.get(),HELP)){
@@ -258,6 +260,7 @@ int main(int argc, char **argv, char **envp){
 
 	if ( interactive == true )
 	  printErrorArrow(fullprompt.size() + pe.getPos());
+
 	clog << "parse-error: '" << pe.getMsg() << "'" << endl;
 
       } catch ( EvalException &ee ){
@@ -312,6 +315,8 @@ string setupParser(CmdlParser& parser){
   parser.addOption("help","print help");
   parser.synonym("help") << "h" << "Help" << "H";
 
+  parser.addShortoption('f',"force exit on quit without prompting for confirmation.");
+
   parser.addOption("version","print version");
   parser.synonym("version") << "v" << "Version" << "V";
 
@@ -323,6 +328,8 @@ string setupParser(CmdlParser& parser){
 
   parser.addParameter(commands,commands,"commands that should be loaded before execution");
   parser.synonym(commands) << "c" << "Commands" << "C";
+
+  parser.allowRelaxedSyntax();
 
   return parser.usage();
 
@@ -595,8 +602,8 @@ void printHelp(const char *pname){
        << FON << "\t\tdisplays the formula" << endl
        << FOFF << "\t\thides the formula" << endl
        << "\n\n"
-       << "In " << pname << " you can type a mathematical formula which will"
-       << " be evaluated.\nValue-types are complex numbers and tuples of complex numbers."
+       << "In " << pname << " you can type an arithmetic expression which will"
+       << " be evaluated.\nValue-types can be complex numbers or tuples of complex numbers."
        << " The\nspeciality of " << pname << " is that you can "
        << "omit many round brackets according\nto the mathematical "
        << "conventions. E.g. you can type \"sin2cos2\" instead "
@@ -614,6 +621,8 @@ void printHelp(const char *pname){
        << "possible even within\nexpressions like \"4*(r=3^4)+7\"."
        << "The variables \"e\" and \"pi\" are predefined and\ncan't be "
        << "redefined.\n\n"
+       << "If a function expects a number of parameters it can be called with a function as\n"
+       << "argument which returns a tuple with the same number of elements.\n\n"
        << "It's even possible to define your own fuctions.\n"
        << "You can define a function using the following syntax:\n"
        << "<fun>([<lvar>[,<lvar>[,...]]])=<expr>\n"

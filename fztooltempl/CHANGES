@@ -66,6 +66,7 @@ v2.1:
 - class CmdlParser
   - added supervisors
   - added setArgumentsLimit()
+  - added allowRelaxedSyntax()
 - class String
   - changed returntype of trunc() from string to String
   - new methods: toLower(), toUpper() etc.

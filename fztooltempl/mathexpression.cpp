@@ -528,7 +528,7 @@ Value *Complex::neutralAddition() const {
 
 Value *Complex::neutralMultiplikation() const {
 
-  return new Complex(1,1);
+  return new Complex(1);
 
 }
 
@@ -802,9 +802,8 @@ MathExpression::MathExpression(const char *expression, VariableList *vl,
 
   MathExpression *top;
   VariableList locals;
-  Context context;
   
-  top = this->parse(expression,context,locals);
+  top = this->parse(expression,locals);
 
 
   if ( top ){
@@ -959,13 +958,12 @@ void MathExpression::eraseElements(){
 
 }
 
-MathExpression *MathExpression::parse(const char *expr, const Context & context, VariableList& locals)
+MathExpression *MathExpression::parse(const char *expr, VariableList& locals)
   throw (ParseException,ExceptionBase){
 
   int e_indx, offset;
   char *exprstring=0, *bracketstring=0;
-  MathExpression *TopNode=0, *ActualNode=0, *PrevNode=0, *actn, *prevn;
-  Context new_context;
+  MathExpression *TopNode=0, *ActualNode=0, *PrevNode=0, *actn=0, *prevn;
 
   if ( !expr[0] )
     return 0;
@@ -994,8 +992,6 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
     }
 
     if ( expr[e_indx] == '(' ){
-
-      new_context.setWithinBrackets(true);
 
       if ( PrevNode ){
 	if ( PrevNode->isOperator() ){
@@ -1029,11 +1025,10 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	      abs_pos-=offset-1;
 
 	      // if nothing's in the brackets, we connect an empty element
-	      if ( !(ActualNode = this->parse(bracketstring,new_context,locals)) )
+	      if ( !(ActualNode = this->parse(bracketstring,locals)) )
 		ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 
 	      abs_pos++;
-	      new_context.setWithinBrackets(false);
 
 	      if ( bracketstring )
 		free(bracketstring);
@@ -1066,11 +1061,10 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	      e_indx+=offset;
 	      abs_pos-=offset-1;
 
-	      if ( !(ActualNode=this->parse(bracketstring,new_context,locals)) )
+	      if ( !(ActualNode=this->parse(bracketstring,locals)) )
 		ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 
 	      abs_pos++;
-	      new_context.setWithinBrackets(false);
 
 	      if ( bracketstring )
 		free(bracketstring);
@@ -1116,20 +1110,24 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	e_indx+=offset;
 	abs_pos-=offset-1;
 
-	if ( !(ActualNode=this->parse(bracketstring,new_context,locals)) )
+	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 
 	abs_pos++;
-	new_context.setWithinBrackets(false);
 
 	if ( bracketstring )
 	  free(bracketstring);
 
       }
 
+      // if a parameterlist is contained within braces, it is a tuple normally ->
+      // but only, if it is not preceeded by a functionname ( in f(x,y) x,y does not
+      // define a tuple but a parameterlist )
+      if ( ActualNode and ActualNode->isOperator() and ActualNode->isOTParameter() )
+	if ( !PrevNode or !PrevNode->isOperator() or !PrevNode->isOTFunction() )
+	  ActualNode->setOTTuple();
+      
     } else if( expr[e_indx]=='[' ){
-
-      new_context.setWithinBrackets(true);
 
       if ( !PrevNode ){
 
@@ -1165,11 +1163,10 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	e_indx+=offset;
 	abs_pos-=offset-1;
 
-	if ( !(ActualNode=this->parse(bracketstring,new_context,locals)) )
+	if ( !(ActualNode=this->parse(bracketstring,locals)) )
 	  ActualNode = new MathExpression(abs_pos,varlist,functionlist);
 
 	abs_pos++;
-	new_context.setWithinBrackets(false);
 
 	// variables defined in Sum or Prod must be added to local Scope
 	ActualNode->addVariablesToList(&locals);
@@ -1250,7 +1247,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  e_indx = determineAndSetOperatorOrVariable(expr,e_indx,ActualNode,functionlist);
 
 		}
-	      } else{          /* Prev hat kein ->pred */
+	      } else{          /* Prev hat kein ->pred */ // TODO!!! same as if-branch!!!
 
 		if ( PrevNode->getRight() ){
 
@@ -1280,7 +1277,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		 Unterast hat, denn dann muss es sich um eine Form wie
 		 "(sin2)^3" handeln */
 	      if ( expr[e_indx]=='^'
-		   && (priCompare(&expr[e_indx],PrevNode->getOperator())==POT_PRI-SIN_PRI)
+		   && ( priCompare(&expr[e_indx],PrevNode->getOperator()) == POT_PRI-SIN_PRI )
 		   && !PrevNode->getRight() ){
 		ActualNode->setETOperator("^");
 		ActualNode->setOTOperation();
@@ -1292,7 +1289,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		   an den "sin"-Node gehaengt wird. Dies wird beim checken
 		   automatisch zu einem Syntaxfehler fuehren. */
 		if ( PrevNode->pred ){
-		  if ( PrevNode==PrevNode->pred->getLeft() ){
+		  if ( PrevNode == PrevNode->pred->getLeft() ){
 
 		    prevn=PrevNode;
 
@@ -1330,10 +1327,8 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		   Klammerausdruck? ... */
 		if ( !expr[e_indx] )
 		  continue;
-		else if ( expr[e_indx]=='(' ){
 
-		  Context subsequent_context;
-		  subsequent_context.setWithinBrackets(true);
+		else if ( expr[e_indx]=='(' ){
 
 		  if ( (offset = this->copyBracketContent(bracketstring,&expr[e_indx],
 							  '(',')')) == -1 ){
@@ -1346,16 +1341,18 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  e_indx+=offset;
 		  abs_pos-=offset-1;
 		  
-		  if ( !(actn=this->parse(bracketstring,subsequent_context,locals)) )
+		  if ( !(actn = this->parse(bracketstring,locals)) )
 		    actn = new MathExpression(abs_pos,varlist,functionlist);
 
 		  abs_pos++;
-		  subsequent_context.setWithinBrackets(false);
 
 		  if ( bracketstring )
 		    free(bracketstring);
 
-		} else{ /* oder um eine simple Zahl? */
+		  if ( actn->isOperator() and actn->isOTParameter() )
+		    actn->setOTTuple();
+
+		} else if ( checkDigit(expr[e_indx]) ){ /* zahl? */
 
 		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
 
@@ -1368,6 +1365,24 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		  e_indx+=offset;
 
 		  actn->setETValue(new Complex(atof(exprstring)));
+
+		  if ( exprstring )
+		    free(exprstring);
+
+		} else if ( checkLetter(expr[e_indx]) ){ /* identifier? */
+		  // only variable makes sense
+
+		  if ( !(actn = new MathExpression(abs_pos,varlist,functionlist)) ){
+
+		    delete TopNode;
+		    throw OutOfMemException();
+
+		  }
+
+		  offset = this->copyOperatorContent(exprstring,&expr[e_indx]);
+		  e_indx+=offset;
+
+		  actn->setETVariable(exprstring);
 
 		  if ( exprstring )
 		    free(exprstring);
@@ -1410,7 +1425,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 		} else if ( expr[e_indx] == ',' ){
 		  // Tuple-Operator
 
-		  e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,context,new_context,locals);
+		  e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,locals);
 		  
 		  continue;
 		  
@@ -1457,7 +1472,7 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
 	      } else if ( expr[e_indx] == ',' ){
 		// Tuple-Operator
 
-		e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,context,new_context,locals);
+		e_indx = parseCommaOperator(expr,e_indx,ActualNode,PrevNode,TopNode,locals);
 		
 		continue;
 		
@@ -1576,18 +1591,14 @@ MathExpression *MathExpression::parse(const char *expr, const Context & context,
   return TopNode;
 }
 
-int MathExpression::parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode,
-				       const Context & context, const Context & new_context, VariableList & locals) throw (ParseException, ExceptionBase){
+int MathExpression::parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode,
+				       MathExpression * & TopNode, VariableList & locals) throw (ParseException, ExceptionBase){
 
   int offset;
   char *commastring=0;
 		  
   ActualNode->setETOperator(",");
-  
-  if ( context.isWithinBrackets() == true )
-    ActualNode->setOTTuple();
-  else
-    ActualNode->setOTParameter();
+  ActualNode->setOTParameter();
 
   searchAndSetLowerPriNode(ActualNode,PrevNode,TopNode);
   
@@ -1603,7 +1614,7 @@ int MathExpression::parseCommaOperator(const char *expr, int e_indx, MathExpress
     abs_pos-=offset;
     e_indx+=offset;
     
-    ActualNode->addElement(parse(commastring,new_context,locals));
+    ActualNode->addElement(parse(commastring,locals));
     ActualNode->elements.back()->pred = ActualNode;
     
     if ( commastring )
@@ -2121,27 +2132,21 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 		    }
 		  }
 	throw ParseException(abs_pos, "invalid syntax in function Sum/Prod!");
-      } else if (isBuiltinFunction(this->getOperator())){
-	if (!this->getLeft() && this->getRight())
-	  if (this->getRight()->isEmpty()==false)
-	    if (this->getRight()->checkSyntaxAndOptimize())
+      } else if ( isBuiltinFunction(this->getOperator()) ){
+	if ( !this->getLeft() && this->getRight() )
+	  if ( this->getRight()->isEmpty() == false )
+	    if ( this->getRight()->checkSyntaxAndOptimize() )
 	      return(true);
 	throw ParseException(abs_pos, "invalid syntax for builtin-function!");
-      } else if (functionlist->isMember(this->getOperator())){
-	if (!this->getLeft() && this->getRight()){
-	  if (this->getRight()->checkSyntaxAndOptimize()){
-	    if (this->getRight()->countArgs() ==
-		functionlist->get(this->getOperator())->getParameterList()->countArgs())
-	      return(true);
-	    else{
+      } else if ( functionlist->isMember(this->getOperator()) ){
+	if ( !this->getLeft() && this->getRight() ){
+	  if ( this->getRight()->checkSyntaxAndOptimize() ){
+	    return true;
 
-	      ostringstream out;
-	      out << "invalid syntax for user-defined function: invalid number of arguments: " << this->getRight()->countArgs() << " : "
-		  << functionlist->get(this->getOperator())->getParameterList()->countArgs();
-	      throw ParseException(abs_pos,out.str());
-	    }
 	  } else
+
 	    throw ParseException(abs_pos,"invalid syntax for user-defined function: checkSyntax for right operand failed!");
+
 	} else
 	  throw ParseException(abs_pos,"invalid syntax for user-defined function: left or no right operand!");
 
@@ -2151,7 +2156,7 @@ bool MathExpression::checkSyntaxAndOptimize(void) throw (ParseException){
 	return true;
     }
   }
-  return(true);
+  return true;
 }
 
 void MathExpression::print(streamsize precision) const{
@@ -2556,36 +2561,44 @@ Value *MathExpression::assignValue(void) throw (ExceptionBase){
 Value *MathExpression::evalFunction(void) throw (ExceptionBase){
 
   VariableList vl = *this->varlist; // local scope
-  Function *f_template = functionlist->get(this->getOperator());
+  Function *function = functionlist->get(this->getOperator());
 
   vl.unprotect();  // remove protection-status for all variables
 
   // assign values to all variables occuring in function-head and add them to local scope
-  assignVariablesInFunctionhead(vl,f_template->getParameterList(),this->getRight());
+  if ( this->getRight()->isOperator() and this->getRight()->isOTParameter() )
+    // parameterlist
+    assignVariablesInFunctionhead(vl,function->getParameterList(),this->getRight());
+  else // all others
+    assignVariablesInFunctionhead(vl,function->getParameterList(),this->getRight()->eval());
 
   // build an instance of the function-template
-  MathExpression function(f_template->getBody(),&vl,functionlist,abs_pos);
+  MathExpression functioncall(function->getBody(),&vl,functionlist,abs_pos);
 
   // eval the function
-  return function.eval()->clone();
+  return functioncall.eval()->clone();
 
 }
 
-void MathExpression::assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, MathExpression * argument) throw (ExceptionBase){
+void MathExpression::assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, Value * argument) throw (ExceptionBase){
 
   // if it's a variable it can be assigned directly
   if ( parameter->isVariable() )
-    vl.insert(parameter->getVariable(), argument->eval()->clone());
+    vl.insert(parameter->getVariable(), argument->clone());
+
   else{
     // a tuple of variables
     
-    list<MathExpression *>::iterator pit, ait;
+    Tuple * arguments = Tuple::assertTuple(argument);
 
-    for ( pit = parameter->elements.begin(), ait = argument->elements.begin();
+    list<MathExpression *>::iterator pit;
+    list<Value *>::iterator ait;
+
+    for ( pit = parameter->elements.begin(), ait = arguments->elements.begin();
 	  pit != parameter->elements.end();
 	  pit++, ait++ ){
       
-      if ( ait == argument->elements.end() )
+      if ( ait == arguments->elements.end() )
 	throw EvalException(string("no matching argument to parameter: ") + (*pit)->toString(Value::DFLT_PRECISION) + "!");
 
       // recursive assigment
@@ -2593,10 +2606,40 @@ void MathExpression::assignVariablesInFunctionhead(VariableList & vl, MathExpres
 
     }
 
-    if ( ait != argument->elements.end() )
+    if ( ait != arguments->elements.end() )
       throw EvalException("too many arguments for function!");
   }
 
+}
+
+void MathExpression::assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameters, MathExpression * arguments) throw (ExceptionBase){
+
+  // if it's a variable it can be assigned directly
+  if ( parameters->isVariable() and ( not arguments->isOperator() or not arguments->isOTParameter()) )
+    vl.insert(parameters->getVariable(), arguments->eval()->clone());
+  
+  else {
+    
+    list<MathExpression *>::iterator pit;
+    list<MathExpression *>::iterator ait;
+    
+    for ( pit = parameters->elements.begin(), ait = arguments->elements.begin();
+	  pit != parameters->elements.end();
+	  pit++, ait++ ){
+      
+      if ( ait == arguments->elements.end() )
+	throw EvalException(string("no matching argument to parameter: ") + (*pit)->toString(Value::DFLT_PRECISION) + "!");
+      
+      // recursive assigment
+      assignVariablesInFunctionhead(vl,(*pit),(*ait));
+      
+    }
+    
+    if ( ait != arguments->elements.end() )
+      throw EvalException("too many arguments for function!");
+    
+  }
+  
 }
 
 void MathExpression::defineFunction(void) throw (EvalException,ParseException){

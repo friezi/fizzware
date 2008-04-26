@@ -1,6 +1,6 @@
 /*
-  this sourcefile belongs to the programm focal,
-  a mathematical formula-calculator
+  this sourcefile belongs to the programm fizzcal,
+  a calculator/evaluator for arithmetic expresions.
   Copyright (C) 1999-2008 Friedemann Zintel
 
   This program is free software; you can redistribute it and/or modify

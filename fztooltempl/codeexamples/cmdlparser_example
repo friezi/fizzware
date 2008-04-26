@@ -119,6 +119,8 @@ string setupParser(CmdlParser& parser){
 
   parser.setFinalArgument("directory");
 
+  parser.allowRelaxedSyntax();
+
   return parser.usage();
 
 }

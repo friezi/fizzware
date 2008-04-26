@@ -276,25 +276,6 @@ namespace mexp{
     Value *tst() throw (ExceptionBase);
 
   };
-
-  /**
-     @brief For defining the context a MathExpression occurs in
-  */
-  class Context {
-
-  private:
-
-    bool withinBrackets;
-
-  public:
-
-    Context() : withinBrackets(false){}
-
-    bool getWithinBrackets() const { return withinBrackets; }
-    void setWithinBrackets(bool value){ this->withinBrackets = value; }
-    bool isWithinBrackets() const { return ( getWithinBrackets() == true ); }
-
-  };
  
   /**
      @brief for evaluating easy-to-write mathematical expressions
@@ -379,10 +360,10 @@ namespace mexp{
     // for n-ary operators (like ',')
     std::list<MathExpression *> elements;
     
-    MathExpression *parse(const char *expr, const Context & context, VariableList& locals) throw (ParseException,ExceptionBase);
+    MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,ExceptionBase);
 
-    int parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode,
-			   const Context & context, const Context & new_context, VariableList & locals) throw (ParseException, ExceptionBase);
+    int parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode,
+			   MathExpression * & TopNode, VariableList & locals) throw (ParseException, ExceptionBase);
     void searchAndSetLowerPriNode(MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode);
     int determineAndSetOperatorOrVariable(const char *expr, int e_indx, MathExpression * & ActualNode, const FunctionList *functionlist);
     
@@ -470,7 +451,8 @@ namespace mexp{
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
 
-    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, MathExpression * argument) throw (ExceptionBase);
+    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, Value * argument) throw (ExceptionBase);
+    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameters, MathExpression * arguments) throw (ExceptionBase);
     
     // private constructor:
     MathExpression(int abs_pos, VariableList *vl = 0, FunctionList *fl = 0);

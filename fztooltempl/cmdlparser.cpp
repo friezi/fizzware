@@ -226,7 +226,7 @@ char CmdlParser::getShortRepresentative(char synonym){
 
 CmdlParser::CmdlParser(int argc, char **argv) throw (Exception<CmdlParser>) :
   argc(argc), argv(argv), parseerror(false), infinite_args(false), infinite_args_id(""),
-  args_limited(false),args_max(0),finalargument("",""), mandatory_parameters(false){
+  args_limited(false),args_max(0),finalargument("",""), mandatory_parameters(false), relaxed_syntax(false){
 
   supervisors = 0;
   shortsupervisors = 0;
@@ -287,14 +287,47 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
   int length;
   bool end_of_options = false;
   bool supervised = false;
+  bool state_multiparam = false, state_param = false;
   unsigned int argumentcounter = 0;
+  string key;
 
   errors << endl;
 
   // scan all words from argv
-  for ( int word = 1; word<argc; word++){
+  for ( int word = 1; word < argc; word++){
 
-    if ( end_of_options == false && argv[word][0] == '-'){  // did "--" occur?
+    if ( state_param == true ){
+
+      state_param = false;
+
+      string value(argv[word]);
+
+      parameters[key] = value;
+		  
+      // set the "found"-state
+      allowedparameters[key].found = true;
+
+    } else if ( state_multiparam == true ){
+
+      state_multiparam = false;
+
+      string value(argv[word]);
+		  
+      // first occurence
+      if ( multiparameters.find(key) == multiparameters.end()){
+
+	set<string> *valueset = new set<string>();
+	valueset->insert(value);
+	multiparameters[key] = valueset;
+
+      } else{  // there's an entry already
+		    
+	set<string> *valueset = multiparameters[key];
+	valueset->insert(value);
+
+      }
+
+    } else if ( end_of_options == false && argv[word][0] == '-'){  // did "--" occur?
       
       length = strlen(argv[word]);
       if ( length < 2 ){ // only "-" -> normal argument
@@ -320,7 +353,7 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	char shortoption;
 	  
 	// insert chars in shortoptions
-	for ( int i = 1; i<length; i++){
+	for ( int i = 1; i < length; i++){
 
 	  shortoption = argv[word][i];
 
@@ -355,43 +388,83 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 	    }
 	  }
 	}
+
       } else{  // maybe normal option
 	  
 	if ( length == 2 ) // the end of all options: "--"
 	  end_of_options = true;
+
 	else{  // definitely normal option or parameter
 	    
 	  int eqs;
-	  bool param = false;
-	  bool multiparam = false;
+	  bool assign = false;
 	    
 	  // check if it is a parameter
-	  for ( eqs = 2; eqs<length; eqs++ ){
+	  for ( eqs = 2; eqs < length; eqs++ ){
 
 	    if ( argv[word][eqs] == '=' ){
 
-	      param = true;
-	      break;
-
-	    } else if ( argv[word][eqs] == ':' ){ // multi-parameter
-
-	      multiparam = true;
+	      assign = true;
 	      break;
 
 	    }
-	  }
-	    
-	  if ( param == false && multiparam == false ){  // now it is really a normal option
 
-	    string option(&argv[word][2]);
+	  }
+
+	  if ( assign == true ){
+	    // must be param or multiparam
+
+	    key = string(&argv[word][2],eqs-2);
 
 	    // check synonyms
-	    option = getRepresentative(option);
+	    key = getRepresentative(key);
+	      
+	    // invalid parameter
+	    if ( allowedparameters.find(key) != allowedparameters.end() ){
+
+	      state_param = true;
+
+	    } else if ( allowedmultiparameters.find(key) != allowedmultiparameters.end() ){
+
+	      state_multiparam = true;
+	      
+	    } else {
+	      
+	      errors << "invalid parameter/multi-parameter: " << key << endl;
+	      parseerror = true;
+
+	    }
+	    
+	  } else { // assign == false
+
+	    key = string(&argv[word][2]);
+
+	    // check synonyms
+	    key = getRepresentative(key);
+
+	    if ( relaxed_syntax == true ){
+	      
+	      // invalid parameter
+	      if ( allowedparameters.find(key) != allowedparameters.end() ){
+
+		state_param = true;
+		continue;
+
+	      } else if ( allowedmultiparameters.find(key) != allowedmultiparameters.end() ){
+
+		state_multiparam = true;
+		continue;
+	      
+	      }
+	    }
+	  }
+
+	  if ( assign == false && state_param == false && state_multiparam == false ){  // now it is really a normal option
 
 	    // check if alias
 	    AliasDict::iterator adit;
 
-	    if ( (adit = aliasdict.find(option)) != aliasdict.end() ){
+	    if ( (adit = aliasdict.find(key)) != aliasdict.end() ){
 
 	      // insert all contained options
 	      for ( Alias::iterator a_it = (*adit).second->begin(); a_it != (*adit).second->end(); a_it++ )
@@ -399,99 +472,78 @@ void CmdlParser::parse() throw(Exception<CmdlParser>){
 		
 	    } else{  // no alias
 
-	      // invalid option
-	      if ( allowedoptions.find(option) == allowedoptions.end() ){
+	      // invalid key
+	      if ( allowedoptions.find(key) == allowedoptions.end() ){
 
-		errors << "invalid option: " << option << endl;
+		errors << "invalid option: " << key << endl;
 		parseerror = true;
 
 	      } else{
 
-		options.insert(option);
+		options.insert(key);
 
 		// is it a supervisor?
-		if ( supervisors->find(option) != supervisors->end() )
+		if ( supervisors->find(key) != supervisors->end() )
 		  supervised = true;
 
 	      }
 	      
 	    }
-	  } else if ( multiparam == true ){  // a multi-parameter with value
 
-	    string parameter(&argv[word][2],eqs-2);
+	  } else if ( state_multiparam == true ){  // a multi-parameter with value
 
-	    // check synonyms
-	    parameter = getRepresentative(parameter);
-	      
-	    // invalid parameter
-	    if ( allowedmultiparameters.find(parameter) == allowedmultiparameters.end() ){
+	    state_multiparam = false;
 
-	      errors << "invalid multi-parameter: " << parameter << endl;
+	    // check if a value is given
+	    if ( argv[word][eqs+1] == '\0' ){
+
+	      errors << "no value given for multi-parameter: " << key << endl;
 	      parseerror = true;
 
 	    } else{
 
-	      // check if a value is given
-	      if ( argv[word][eqs+1] == '\0' ){
-
-		errors << "no value given for multi-parameter: " << parameter << endl;
-		parseerror = true;
-
-	      } else{
-
-		string value(&argv[word][eqs+1]);
+	      string value(&argv[word][eqs+1]);
 		  
-		// first occurence
-		if ( multiparameters.find(parameter) == multiparameters.end()){
+	      // first occurence
+	      if ( multiparameters.find(key) == multiparameters.end()){
 
-		  set<string> *valueset = new set<string>();
-		  valueset->insert(value);
-		  multiparameters[parameter] = valueset;
+		set<string> *valueset = new set<string>();
+		valueset->insert(value);
+		multiparameters[key] = valueset;
 
-		} else{  // there's an entry already
+	      } else{  // there's an entry already
 		    
-		  set<string> *valueset = multiparameters[parameter];
-		  valueset->insert(value);
+		set<string> *valueset = multiparameters[key];
+		valueset->insert(value);
 
-		}
 	      }
 	    }
-	  } else{   // a parameter with value
-	      
-	    string parameter(&argv[word][2],eqs-2);
 
-	    // check synonyms
-	    parameter = getRepresentative(parameter);
-	      
-	    // invalid parameter
-	    if ( allowedparameters.find(parameter) == allowedparameters.end() ){
+	  } else if ( state_param == true ){   // a parameter with value
 
-	      errors << "invalid parameter: " << parameter << endl;
+	    state_param = false;
+	      
+	    // check if a value is given
+	    if ( argv[word][eqs+1] == '\0' ){
+
+	      errors << "no value given for parameter: " << key << endl;
 	      parseerror = true;
 
-	    } else{
+	    } else{  // ok, there's a value
 
-	      // check if a value is given
-	      if ( argv[word][eqs+1] == '\0' ){
+	      string value(&argv[word][eqs+1]);
 
-		errors << "no value given for parameter: " << parameter << endl;
-		parseerror = true;
-
-	      } else{  // ok, there's a value
-
-		string value(&argv[word][eqs+1]);
-
-		parameters[parameter] = value;
+	      parameters[key] = value;
 		  
-		// set the "found"-state
-		allowedparameters[parameter].found = true;
+	      // set the "found"-state
+	      allowedparameters[key].found = true;
 
-	      }
 	    }
 	  }
 	}
       }
-    } else{  // end_of_options == true -> only arguments follow
+
+    } else {  // end_of_options == true -> only arguments follow
 
       string argument(argv[word]);
 
@@ -682,7 +734,8 @@ string CmdlParser::usage(){
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); it++ ){
       if ( (*it).second.mandatory == false )
 	usg << "[";
-      usg << "--" << synonymUsage((*it).first) << "=<" << (*it).second.valueid << ">";
+      usg << "--" << synonymUsage((*it).first) << ( relaxed_syntax ? "[" : "" ) << "=" << ( relaxed_syntax ? "]" : "" )
+	  << "<" << (*it).second.valueid << ">";
       if ( (*it).second.mandatory == false )     
 	usg << "]";
       usg << " ";
@@ -691,7 +744,8 @@ string CmdlParser::usage(){
 
   if ( !allowedmultiparameters.empty() ){
     for ( AMParameters::iterator it = allowedmultiparameters.begin(); it != allowedmultiparameters.end(); it++ )
-      usg << "[--" << synonymUsage((*it).first) << ":<" << (*it).second.valueid << "> [...]] ";
+      usg << "[--" << synonymUsage((*it).first) << ( relaxed_syntax ? "[" : "" ) << "=" << ( relaxed_syntax ? "]" : "" )
+	  << "<" << (*it).second.valueid << "> [...]] ";
   }
   
   // falls Argumente erwartet werden, Argumentseparator ausgeben
@@ -768,21 +822,25 @@ string CmdlParser::infoUsage(){
     
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); ++it ){
       if ( (*it).second.mandatory == false ){
-	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
+	usg << "--" << (*it).first << ( relaxed_syntax ? "[" : "" ) << "="  << ( relaxed_syntax ? "]" : "" )
+	    << "<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
 	  for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
-	    usg << ", --" << *s_it << "=<" << (*it).second.valueid << ">";
+	    usg << ", --" << *s_it << ( relaxed_syntax ? "[" : "" ) << "=" << ( relaxed_syntax ? "]" : "" )
+		<< "<" << (*it).second.valueid << ">";
 	usg << "\n  " << (*it).second.description << endl << endl;
       }
     }
     
     for ( AMParameters::iterator it = allowedmultiparameters.begin(); it != allowedmultiparameters.end(); ++it ){
-      usg << "--" << (*it).first << ":<" << (*it).second.valueid << ">";
+      usg << "--" << (*it).first << ( relaxed_syntax ? "[" : "" ) << "="  << ( relaxed_syntax ? "]" : "" )
+	  << "<" << (*it).second.valueid << ">";
       SynonymDict::iterator syn_it;
       if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
 	for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
-	  usg << ", --" << *s_it << ":<" << (*it).second.valueid << ">";
+	  usg << ", --" << *s_it << ( relaxed_syntax ? "[" : "" ) << "="  << ( relaxed_syntax ? "]" : "" )
+	      << "<" << (*it).second.valueid << ">";
       usg << "\n  " << (*it).second.description << endl << endl;
     }
 
@@ -794,11 +852,13 @@ string CmdlParser::infoUsage(){
  
     for ( AParameters::iterator it = allowedparameters.begin(); it != allowedparameters.end(); ++it ){
       if ( (*it).second.mandatory == true ){
-	usg << "--" << (*it).first << "=<" << (*it).second.valueid << ">";
+	usg << "--" << (*it).first << ( relaxed_syntax ? "[" : "" ) << "="  << ( relaxed_syntax ? "]" : "" )
+	    << "<" << (*it).second.valueid << ">";
 	SynonymDict::iterator syn_it;
 	if ( (syn_it = synonymdict.find((*it).first)) != synonymdict.end() )
 	  for ( set<string>::iterator s_it = (*syn_it).second->begin(); s_it != (*syn_it).second->end(); ++s_it )
-	    usg << ", --" << *s_it << "=<" << (*it).second.valueid << ">";
+	    usg << ", --" << *s_it << ( relaxed_syntax ? "[" : "" ) << "="  << ( relaxed_syntax ? "]" : "" )
+		<< "<" << (*it).second.valueid << ">";
 	usg << "\n  " << (*it).second.description << endl << endl;
       }
     }
