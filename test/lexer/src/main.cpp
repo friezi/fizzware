@@ -75,6 +75,9 @@ int main(int argc, char ** argv){
     if ( cmdl.checkShortoption('r') == true )
       scanner.useRawQuoting();
 
+    if ( cmdl.checkShortoption('u') == true )
+      scanner.reportWhiteUncollapsed(true);
+
     if ( cmdl.checkParameter("line-comment").first == true )
       scanner.getLexCharClasses().setLineComment(cmdl.getParameter("line-comment"));
 
@@ -163,6 +166,7 @@ string setupCmdlParser(CmdlParser & cmdl){
   cmdl.addShortoption('f',"floating-points");
   cmdl.addShortoption('s',"use signs");
   cmdl.addShortoption('r',"use raw quoting");
+  cmdl.addShortoption('u',"whitespaces should not be collapsed");
   cmdl.addOption("lines","report whole lines");
   cmdl.shortsupervisor() << 'h';
 

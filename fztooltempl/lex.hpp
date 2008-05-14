@@ -408,7 +408,11 @@ namespace parse{
     
     bool lower_case_mode;
 
-    unsigned long skipped_lines; 
+    unsigned long skipped_lines;
+
+    bool store_whitespaces;
+
+    std::ostringstream whitespaces;
     
   public:
     
@@ -450,6 +454,26 @@ namespace parse{
        @return true if lower-case mode is switched on, false otherwise
     */
     bool isLowerCaseMode(){ return lower_case_mode; }
+
+    /**
+       @brief whitespaces will be stored
+       @param flag true or false
+       @see getWhitespaces()
+    */
+    void setStoreWhitespaces(bool flag){ this->store_whitespaces = flag; }
+
+    /**
+       @brief returns the state of store_whitespaces
+       @return true if store_whitespaces is set
+    */
+    bool isStoreWhitespaces(){ return store_whitespaces; }
+
+    /**
+       @brief returns the stored whitespaces
+       @return whitespaces as a stream
+       @note makes only sense in combination with setStoreWhitespaces(true)
+    */
+    std::ostringstream & getWhitespaces(){ return whitespaces; }
 
     /**
        It reads the next character from the input stream.\n
@@ -596,6 +620,8 @@ namespace parse{
     bool floating_points;
 
     bool raw_quoting;
+
+    bool uncollapsed_white;
     
   public:
 
@@ -687,6 +713,14 @@ namespace parse{
        @param flag true if whitespaces should be reported as a token
     */
     void reportWhite(bool flag){ report_white = flag; }
+
+    /**
+       Whitespaces will not be collapsed. They will be stored in the sval field of the token. Implies reportEOL(true)
+       and reportWhite(true).
+       @brief no collapse of whitespaces
+       @param flag true if whitespaces should not be collapsed
+    */
+    void reportWhiteUncollapsed(bool flag);
 
     /**
        @brief a sign preceding a number will be interpreted as belonging to the number
@@ -809,6 +843,12 @@ namespace parse{
        @return true if raw quoting is used
     */
     bool isUseRawQuoting(){ return raw_quoting; }
+
+    /**
+       @brief returns the status of "report uncollapsed white"
+       @return true if set
+    */
+    bool isWhiteUncollapsed(){ return uncollapsed_white; }
 
     /**
        @brief checks if the character introduces a word-quote

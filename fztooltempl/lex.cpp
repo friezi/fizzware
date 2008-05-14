@@ -168,7 +168,7 @@ void LexCharClasses::setEOLs(const string eols){
     
 LexScreener::LexScreener(std::istream * input, LexCharClasses * char_classes) throw (Exception<LexScreener>) :
   input(input), char_classes(0), nested_comments(false),
-  lower_case_mode(false), skipped_lines(0){
+  lower_case_mode(false), skipped_lines(0), store_whitespaces(false){
 
   string thisMethod = "LexScreener()";
 
@@ -260,6 +260,9 @@ bool LexScreener::screen(){
 
   skipped_lines = 0;
 
+  if ( isStoreWhitespaces() )
+    whitespaces.str("");
+
   while ( true ){
 
     input->get(c);
@@ -275,6 +278,10 @@ bool LexScreener::screen(){
       skipped = true;
       first_char = false;
       whitespace_mode = true;
+
+      if ( isStoreWhitespaces() )
+	whitespaces << c;
+
       continue;
 
     }
@@ -286,8 +293,12 @@ bool LexScreener::screen(){
       if ( isWhitespace(c) ){
 
 	skipped = true;
-	continue;
 
+	if ( isStoreWhitespaces() )
+	  whitespaces << c;
+	
+	continue;
+	
       }
       
       else if ( skipIfIntroducingLineComment(c) ){
@@ -356,7 +367,7 @@ bool LexScreener::screen(){
 LexScanner::LexScanner(std::istream * input) throw (Exception<LexScreener>, ExceptionBase) :
   input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
   report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
-  signed_numbers(false), floating_points(false), raw_quoting(false){
+  signed_numbers(false), floating_points(false), raw_quoting(false), uncollapsed_white(false){
 
   screener = new LexScreener(input,&char_classes);
   
@@ -380,6 +391,20 @@ void LexScanner::useFloatingpoints(){
   
   floating_points = true;
   char_classes.setNumberConstituents(".");
+  
+}
+
+void LexScanner::reportWhiteUncollapsed(bool flag){
+  
+  if ( flag == true ){
+    
+    reportEOL(true);
+    reportWhite(true);
+    
+  }  
+  
+  screener->setStoreWhitespaces(flag);
+  uncollapsed_white = flag;
   
 }
 
@@ -488,6 +513,10 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	      input->putback(next);
 	      token.type = LexToken::TT_WHITE;
 	      previous_token_type = token.type;
+
+	      if ( isWhiteUncollapsed() )
+		token.sval = screener->getWhitespaces().str();
+
 	      return token.type;
 	      
 	    } else
@@ -866,6 +895,7 @@ String LexToken::toString() const {
   switch ( type ){
 
   case TT_WORD:
+  case TT_WHITE:
 
     tsstream << sval;
     break;
@@ -878,7 +908,6 @@ String LexToken::toString() const {
   case TT_NONE:
   case TT_EOF:
   case TT_EOL:
-  case TT_WHITE:
 
     break;
 
