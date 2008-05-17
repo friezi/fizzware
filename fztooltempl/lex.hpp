@@ -566,6 +566,9 @@ namespace parse{
     /** @brief Word */
     static const int TT_WORD;
 
+    /** @brief Numberword */
+    static const int TT_NUMBERWORD;
+
     /** @brief Whitespace */
     static const int TT_WHITE;
 
@@ -594,6 +597,7 @@ namespace parse{
   /**
      @brief A class for performing lexical analysis
      @since V2.1
+     @todo detailed docu (token-types etc.)
   */
   class LexScanner{
 
@@ -613,7 +617,7 @@ namespace parse{
 
     bool token_putback;
 
-    bool parse_numbers;
+    bool report_numbers_as_real;
 
     bool signed_numbers;
 
@@ -695,10 +699,10 @@ namespace parse{
     void lowerCaseMode();
 
     /**
-       The number will be stored in the nval-field of LexToken
+       The number will be stored in the nval-field of LexToken. Token-type will be LexToken::TT_NUMBER.
        @brief specifies that numbers should not be treated as plain words but as real-numbers
     */
-    void parseNumbers(){ parse_numbers = true; }
+    void reportNumbersAsReal(){ report_numbers_as_real = true; }
 
     /**
        @brief determines whether or not EOL will be reported as a token
@@ -708,7 +712,7 @@ namespace parse{
 
     /**
        If set to true and if an arbitrary number of whitespaces occur between two tokens they will be reported
-       as one single token of type TT_WHITE. Only whitespaces which are not followed by EOL or EOF will be reported.
+       as one single token of type LexToken::TT_WHITE. Only whitespaces which are not followed by EOL or EOF will be reported.
        @brief determines whether or not whitespaces will be reported as a token
        @param flag true if whitespaces should be reported as a token
     */
@@ -764,10 +768,10 @@ namespace parse{
     //@{
 
     /**
-       @brief returns status of the parse-numbers-flag
-       @return true if parse-numbers is set
+       @brief returns status of the report_numbers_as_real-flag
+       @return true if report_numbers_as_real is set
     */
-    bool isParseNumbers(){ return parse_numbers; }
+    bool isReportNumbersAsReal(){ return report_numbers_as_real; }
 
     /**
        @brief returns the status of "report EOL"

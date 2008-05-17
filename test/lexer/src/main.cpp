@@ -61,7 +61,7 @@ int main(int argc, char ** argv){
       scanner.supportNestedComments(true);
 
     if ( cmdl.checkShortoption('n') == true )
-      scanner.parseNumbers();
+      scanner.reportNumbersAsReal();
 
     if ( cmdl.checkShortoption('l') == true )
       scanner.lowerCaseMode();
@@ -157,7 +157,7 @@ string setupCmdlParser(CmdlParser & cmdl){
   cmdl.synonym("line-comment") << "lc";
   cmdl.synonym("escape") << "esc";
   cmdl.addShortoption('c',"nested comments");
-  cmdl.addShortoption('n',"parse numbers");
+  cmdl.addShortoption('n',"report numbers as real");
   cmdl.addShortoption('e',"report EOL");
   cmdl.addShortoption('l',"lowercase-mode");
   cmdl.addShortoption('w',"report Whitespace");

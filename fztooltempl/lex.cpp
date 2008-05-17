@@ -45,6 +45,7 @@ const int LexToken::TT_EOF = -2;
 const int LexToken::TT_NUMBER = -3;
 const int LexToken::TT_WORD = -4;
 const int LexToken::TT_WHITE = -5;
+const int LexToken::TT_NUMBERWORD = -6;
 
 LexCharClasses::LexCharClasses(){
 
@@ -366,7 +367,7 @@ bool LexScreener::screen(){
 
 LexScanner::LexScanner(std::istream * input) throw (Exception<LexScreener>, ExceptionBase) :
   input(input), line_number(1), previous_token_type(LexToken::TT_NONE), lower_case_mode(false),
-  report_eol(false), report_white(false), token_putback(false), parse_numbers(false),
+  report_eol(false), report_white(false), token_putback(false), report_numbers_as_real(false),
   signed_numbers(false), floating_points(false), raw_quoting(false), uncollapsed_white(false){
 
   screener = new LexScreener(input,&char_classes);
@@ -671,13 +672,13 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 	
 	input->putback(c);
 	
-	if ( isParseNumbers() ){
+	if ( isReportNumbersAsReal() ){
 
 	  token.nval = atof(number.c_str());
 	
 	} else {
 	  
-	  token.type = LexToken::TT_WORD;
+	  token.type = LexToken::TT_NUMBERWORD;
 	  token.sval = number;
 	  
 	}
@@ -703,7 +704,7 @@ int LexScanner::nextToken() throw (Exception<LexScanner>){
 
   if ( token.type == LexToken::TT_NUMBER ){
 
-    if ( isParseNumbers() ){
+    if ( isReportNumbersAsReal() ){
 
       token.nval = atof(number.c_str());
 
@@ -865,6 +866,11 @@ String LexToken::typeToString() const {
     return String("WORD");
     break;
 
+  case TT_NUMBERWORD:
+    
+    return String("NUMBERWORD");
+    break;
+
   case TT_NONE:
 
     return String("NONE");
@@ -895,6 +901,7 @@ String LexToken::toString() const {
   switch ( type ){
 
   case TT_WORD:
+  case TT_NUMBERWORD:
   case TT_WHITE:
 
     tsstream << sval;
