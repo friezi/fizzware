@@ -2,6 +2,7 @@
 
 using namespace std;
 using namespace cmdl;
+using namespace utils;
 
 void setupParser(CmdlParser &parser);
 

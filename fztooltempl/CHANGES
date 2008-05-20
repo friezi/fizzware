@@ -78,3 +78,4 @@ v2.1:
 - namespace cmdl:
   - renamed Aliases to Alias (ShortAlias resp.)
   - added option-check for alias-definition
+- class PropertyReader belongs now to namespace utils

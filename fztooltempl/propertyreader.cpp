@@ -35,7 +35,9 @@ using namespace ds;
 using namespace cmdl;
 using namespace utils;
 
-string PropertyReader::NO_SECTION = "NO_SECTION";
+const unsigned long PropertyReader::DFLT_BLKSIZE = 20;
+
+const string PropertyReader::NO_SECTION = "NO_SECTION";
 
 PropertyReader::PropertyReader(const PropertyReader &propertyreader) : cmdlparser(0){
 
@@ -92,7 +94,7 @@ void PropertyReader::read() throw (Exception<PropertyReader>,
 	property = parser.nextKeyValuePair();
 
       } catch ( SubException<Parser::NoValErr,Parser> &se ){
-	cout.flush();  // probably due to a bug in the compiler or libstdc++, whithout flushing the program will segfault
+	//	cout.flush();  // probably due to a bug in the compiler or libstdc++, whithout flushing the program will segfault
 	continue;  // Leere Properties werden ignoriert
       }
 
@@ -424,7 +426,7 @@ PropertyReader::Property PropertyReader::Parser::nextKeyValuePairSaveComments(os
 													SubException<NoIDErr,Parser>,
 													SubException<NoValErr,Parser>){
 
-  DynamicBuffer<char> buffer(BLKSIZE);
+  DynamicBuffer<char> buffer(DFLT_BLKSIZE);
   MemPointer<char> propptr,valueptr;
   bool eol = false; //End-Of-Line
   bool id,val;
