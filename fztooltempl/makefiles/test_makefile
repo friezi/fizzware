@@ -1,0 +1,42 @@
+#################################################################
+############ Erzeugt einzelnes Objektfile #######################
+#################################################################
+
+
+#################################################################
+################### zum Editieren ###############################
+
+OBJECT = test
+
+DEPENDS_ON = exception
+
+############### check the CC Variable ###########################
+#################################################################
+
+INCLUDE_PATH = ./
+
+EDITOR ?= vi
+
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I$(INCLUDE_PATH)
+
+DYN_SUFFIX = dyn.o
+
+DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
+
+.PHONY: all ed clean
+
+all: $(OBJECT).o
+
+dynamic: $(OBJECT).$(DYN_SUFFIX)
+
+$(OBJECT).o: $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
+	$(CC) $(OBJECT).cpp
+
+$(OBJECT).$(DYN_SUFFIX): $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
+	$(CC) -fPIC $(OBJECT).cpp -o $(OBJECT).$(DYN_SUFFIX)
+
+ed:
+	$(EDITOR) $(OBJECT).cpp $(OBJECT).hpp $(OBJECT)_makefile &
+
+clean:
+	rm $(OBJECT).o

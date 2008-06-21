@@ -9,7 +9,7 @@ MINOR_VERSION = 1alpha
 
 VERSION_NUMBER = $(MAJOR_VERSION).$(MINOR_VERSION)
 
-OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph lex
+OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph lex test
 
 #old: 
 
