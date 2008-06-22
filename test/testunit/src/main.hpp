@@ -1,24 +1,31 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
+#include <iostream>
 #include <test.hpp>
 
-class MyTestCase1 : public test::TestCase{
+class MyTestCase1 : public test::TestCase<MyTestCase1>{
+
+private:
+
+  std::string NAME;
 
 public:
 
-  MyTestCase1() : TestCase(){
+  MyTestCase1() : test::TestCase<MyTestCase1>(){
 
-    addTest(test1);
-    addTest(test2);
+    NAME = "MyTestCase1";
+    addTest(&MyTestCase1::test1);
+    addTest(&MyTestCase1::test2);
 
   }
 
-  void setUp(){}
+  void setUp(){ std::cout << "starting " << NAME << std::endl; }
+  void tearDown(){ std::cout << "stopping " << NAME << std::endl; }
 
-  std::string getTestcasename(){ return "MyTestCase1"; }
+  std::string getTestcasename(){ return NAME; }
 
-  static void test1() throw (ExceptionBase){
+  void test1() throw (ExceptionBase){
 
     setTestname("test1()");
 
@@ -26,7 +33,7 @@ public:
 
   }
 
-  static void test2() throw (ExceptionBase){
+  void test2() throw (ExceptionBase){
 
     setTestname("test2()");
 
@@ -36,14 +43,14 @@ public:
 
 };
 
-class MyTestCase2 : public test::TestCase{
+class MyTestCase2 : public test::TestCase<MyTestCase2>{
 
 public:
 
-  MyTestCase2() : TestCase(){
+  MyTestCase2() : test::TestCase<MyTestCase2>(){
 
-    addTest(test1);
-    addTest(test2);
+    addTest(&MyTestCase2::test1);
+    addTest(&MyTestCase2::test2);
 
   }
 
@@ -51,7 +58,7 @@ public:
 
   std::string getTestcasename(){ return "MyTestCase2"; }
 
-  static void test1() throw (ExceptionBase){
+  void test1() throw (ExceptionBase){
 
     setTestname("test1()");
 
@@ -59,7 +66,7 @@ public:
 
   }
 
-  static void test2() throw (ExceptionBase){
+  void test2() throw (ExceptionBase){
 
     setTestname("test2()");
 

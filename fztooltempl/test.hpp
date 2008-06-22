@@ -43,50 +43,80 @@ namespace test{
 
   class TestUnit;
 
-  /**
-     @brief a testcase which can contain several tests
-  */
-  class TestCase{
-
-    friend class TestUnit;
+  class TestCaseBase{
 
   private:
 
-    std::list<void (*)()> tests;
-
-    std::string testcasename;
-
-    static std::string testname;
+    std::string testname;
 
   public:
 
-    TestCase(){}
+    TestCaseBase();
+
+    virtual ~TestCaseBase(){}
+
+    virtual void operator()() = 0;
+
+    virtual std::string getTestcasename() = 0;
+
+    std::string getTestname(){ return testname; }
+
+  protected:
+
+    void setTestname(std::string name){ testname = name; }
+
+  };
+
+  /**
+     @brief a testcase which can contain several tests
+  */
+  template <typename T> class TestCase : public TestCaseBase{
+
+  private:
+
+    std::list<void (T::*)()> tests;
+
+  public:
+
+    TestCase() : TestCaseBase(){}
 
     virtual ~TestCase(){}
 
   private:
 
-    virtual void setUp() = 0;
-
-  public:
-
-    virtual std::string getTestcasename() = 0;
+    virtual void setUp(){};
+    virtual void tearDown(){};
 
   protected:
 
-    void addTest(void (*test)()){ tests.push_back(test); }
+    void addTest(void (T::*test)()){ tests.push_back(test); }
 
-    static void setTestname(std::string name){ testname = name; }
+    void operator()() throw (Exception< TestCase<T> >){
 
-  public:
+      setUp();
+      startTests();
+      tearDown();
 
-    static std::string getTestname(){ return testname; }
+    }
 
   private:
 
-    void run();
+    void startTests() throw (Exception< TestCase<T> >){
 
-    void startTests();
+      T * self = dynamic_cast<T *>(this);
+
+      if ( self == 0 )
+	throw Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
+  
+      for (typename std::list<void (T::*)()>::iterator it = tests.begin(); it != tests.end(); it++ ){
+
+	try{
+	  (self->*(*it))();
+	} catch (ExceptionBase &e){
+	  std::cout << getTestcasename() + ":" + getTestname() + " failed!: " + e.getMsg() << std::endl;
+	}    
+      }
+    }
 
   };
 
@@ -97,7 +127,7 @@ namespace test{
 
   private:
 
-    std::list<TestCase *> testcases;
+    std::list<TestCaseBase *> testcases;
 
   public:
 
@@ -105,9 +135,9 @@ namespace test{
 
     virtual ~TestUnit();
 
-    void addTestcase(TestCase * testcase){ testcases.push_back(testcase); }
+    void addTestcase(TestCaseBase * testcase){ testcases.push_back(testcase); }
 
-    void run();
+    void operator()() throw (ExceptionBase);
 
   };
 

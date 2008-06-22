@@ -28,37 +28,20 @@
 using namespace test;
 using namespace std;
 
-string TestCase::testname = "";
-
-void TestCase::run(){
-
-  setUp();
-  startTests();
-
-}
-    
-void TestCase::startTests(){
-  
-  for (list<void (*)()>::iterator it = tests.begin(); it != tests.end(); it++ ){
-
-    try{
-      (*it)();
-    } catch (ExceptionBase &e){
-      cout << getTestcasename() + ":" + getTestname() + " failed!: " + e.getMsg() << endl;
-    }    
-  }
+TestCaseBase::TestCaseBase(){
+  setTestname("");
 }
 
 TestUnit::~TestUnit(){
 
-  for ( list<TestCase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     delete *it;
 
 }
 
-void TestUnit::run(){
+void TestUnit::operator()() throw (ExceptionBase){
 
-  for ( list<TestCase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it)->run();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*(*it))();
 
 }

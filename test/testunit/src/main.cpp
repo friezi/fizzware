@@ -4,12 +4,18 @@ using namespace test;
 
 int main(){
 
-  TestUnit testunit;
+  try{
 
-  testunit.addTestcase(new MyTestCase1());
-  testunit.addTestcase(new MyTestCase2());
+    TestUnit testunit;
 
-  testunit.run();
+    testunit.addTestcase(new MyTestCase1());
+    testunit.addTestcase(new MyTestCase2());
+
+    testunit();
+
+  }catch (ExceptionBase &e){
+    e.show();
+  }
   
   return 0;
 
