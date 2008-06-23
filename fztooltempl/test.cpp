@@ -28,28 +28,48 @@
 using namespace test;
 using namespace std;
 
-void test::assertTrue(bool value) throw (Exception<TestCaseBase>){
-  if ( value != true )
-    throw Exception<TestCaseBase>("value not true");
-}
-
-void test::assertTrue(bool value, string id) throw (Exception<TestCaseBase>){
-  if ( value != true )
-    throw Exception<TestCaseBase>(id + " not true");
-}
-
-void test::assertFalse(bool value) throw (Exception<TestCaseBase>){
-  if ( value != false )
-    throw Exception<TestCaseBase>("value not false");
-}
-
-void test::assertFalse(bool value, string id) throw (Exception<TestCaseBase>){
-  if ( value != false )
-    throw Exception<TestCaseBase>(id + " not false");
-}
-
 TestCaseBase::TestCaseBase(){
+  pushErrorHandler(getDefaultErrorHandler());
   setTestname("");
+}
+
+void TestCaseBase::defaultErrorHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+  throw Exception<TestCaseBase>(msg);
+}
+
+void (*TestCaseBase::getDefaultErrorHandler())(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+  return defaultErrorHandler;
+}
+
+void TestCaseBase::error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>){
+  error(testcase,string(msg));
+}
+
+void TestCaseBase::error(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+
+  for ( ErrorHandlers::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
+    (*it)(testcase,msg);
+
+}
+
+void TestCaseBase::assertTrue(bool value) throw (Exception<TestCaseBase>){
+  if ( value != true )
+    error(this,"value not true");
+}
+
+void TestCaseBase::assertTrue(bool value, string id) throw (Exception<TestCaseBase>){
+  if ( value != true )
+    error(this,id + " not true");
+}
+
+void TestCaseBase::assertFalse(bool value) throw (Exception<TestCaseBase>){
+  if ( value != false )
+    error(this,"value not false");
+}
+
+void TestCaseBase::assertFalse(bool value, string id) throw (Exception<TestCaseBase>){
+  if ( value != false )
+    error(this,id + " not false");
 }
 
 TestUnit::~TestUnit(){
@@ -63,5 +83,30 @@ void TestUnit::operator()() throw (ExceptionBase){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*(*it))();
+
+}
+
+unsigned long TestUnit::getNmbTests(){
+
+  unsigned long nmb = 0;
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    nmb+=(*it)->getNmbTests();
+
+  return nmb;
+
+}
+
+void TestUnit::pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushErrorHandler(errorHandler);
+
+}
+
+void TestUnit::clearErrorHandlers(){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearErrorHandlers();
 
 }

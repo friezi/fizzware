@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 using namespace test;
+using namespace std;
 
 int main(){
 
@@ -10,8 +11,10 @@ int main(){
 
     testunit.addTestcase(new MyTestCase1());
     testunit.addTestcase(new MyTestCase2());
+    testunit.pushErrorHandler(globalErrorHandler);
 
     testunit();
+    cout << global_nmb << "/" << testunit.getNmbTests() << " failed global" << endl;
 
   }catch (ExceptionBase &e){
     e.show();

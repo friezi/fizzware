@@ -33,6 +33,7 @@
 #define _FZTT_TEST_HPP_
 
 #include <iostream>
+#include <sstream>
 #include <list>
 #include <exception.hpp>
 #include <utils.hpp>
@@ -45,24 +46,19 @@ namespace test{
   class TestCaseBase;
   class TestUnit;
 
-  void assertTrue(bool value) throw (Exception<TestCaseBase>);
-
-  void assertTrue(bool value, std::string id) throw (Exception<TestCaseBase>);
-
-  void assertFalse(bool value) throw (Exception<TestCaseBase>);
-
-  void assertFalse(bool value, std::string id) throw (Exception<TestCaseBase>);
-
-  template <typename T> void assertEquals(T expected, T reference){
-    if ( expected != reference )
-      throw Exception<TestCaseBase>(utils::String("Equals failed! expected was: \"") + expected + "\" got \""+ reference + "\"");
-  }
-
   class TestCaseBase{
+
+  public:
+
+    typedef std::list<void (*)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)> ErrorHandlers;
 
   private:
 
     std::string testname;
+
+    ErrorHandlers errorHandlers;
+
+    static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
 
   public:
 
@@ -74,12 +70,46 @@ namespace test{
 
     virtual std::string getTestcasename() = 0;
 
+    virtual unsigned long getNmbTests() = 0;
+
     std::string getTestname(){ return testname; }
 
+    void pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)){
+      errorHandlers.push_front(errorHandler);
+    }
+
+    void clearErrorHandlers(){ errorHandlers.clear(); }
+
+    void (*getDefaultErrorHandler())(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
+    
+    void assertTrue(bool value) throw (Exception<TestCaseBase>);
+    
+    void assertTrue(bool value, std::string id) throw (Exception<TestCaseBase>);
+    
+    void assertFalse(bool value) throw (Exception<TestCaseBase>);
+    
+    void assertFalse(bool value, std::string id) throw (Exception<TestCaseBase>);
+    
+    template <typename T>
+    void assertEquals(T expected, T reference){
+
+      if ( expected != reference ){
+
+	std::ostringstream err;
+	err << "Equals failed! expected was: \"" << expected << "\" got \"" << reference << "\"";
+	error(this,err.str());
+
+      }	
+    }
+    
   protected:
-
+    
     void setTestname(std::string name){ testname = name; }
-
+    
+    void error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>);
+    
+    void error(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
+    
   public:
 
   };
@@ -98,6 +128,8 @@ namespace test{
     TestCase() : TestCaseBase(){}
 
     virtual ~TestCase(){}
+
+    unsigned long getNmbTests(){ return tests.size(); }
 
   private:
 
@@ -155,6 +187,12 @@ namespace test{
     void addTestcase(TestCaseBase * testcase){ testcases.push_back(testcase); }
 
     void operator()() throw (ExceptionBase);
+
+    unsigned long getNmbTests();
+
+    void pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>));
+
+    void clearErrorHandlers();
 
   };
 
