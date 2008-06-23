@@ -28,6 +28,26 @@
 using namespace test;
 using namespace std;
 
+void test::assertTrue(bool value) throw (Exception<TestCaseBase>){
+  if ( value != true )
+    throw Exception<TestCaseBase>("value not true");
+}
+
+void test::assertTrue(bool value, string id) throw (Exception<TestCaseBase>){
+  if ( value != true )
+    throw Exception<TestCaseBase>(id + " not true");
+}
+
+void test::assertFalse(bool value) throw (Exception<TestCaseBase>){
+  if ( value != false )
+    throw Exception<TestCaseBase>("value not false");
+}
+
+void test::assertFalse(bool value, string id) throw (Exception<TestCaseBase>){
+  if ( value != false )
+    throw Exception<TestCaseBase>(id + " not false");
+}
+
 TestCaseBase::TestCaseBase(){
   setTestname("");
 }

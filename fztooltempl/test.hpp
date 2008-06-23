@@ -35,13 +35,28 @@
 #include <iostream>
 #include <list>
 #include <exception.hpp>
+#include <utils.hpp>
 
 /**
    @brief for testing code and classes
 */
 namespace test{
 
+  class TestCaseBase;
   class TestUnit;
+
+  void assertTrue(bool value) throw (Exception<TestCaseBase>);
+
+  void assertTrue(bool value, std::string id) throw (Exception<TestCaseBase>);
+
+  void assertFalse(bool value) throw (Exception<TestCaseBase>);
+
+  void assertFalse(bool value, std::string id) throw (Exception<TestCaseBase>);
+
+  template <typename T> void assertEquals(T expected, T reference){
+    if ( expected != reference )
+      throw Exception<TestCaseBase>(utils::String("Equals failed! expected was: \"") + expected + "\" got \""+ reference + "\"");
+  }
 
   class TestCaseBase{
 
@@ -64,6 +79,8 @@ namespace test{
   protected:
 
     void setTestname(std::string name){ testname = name; }
+
+  public:
 
   };
 

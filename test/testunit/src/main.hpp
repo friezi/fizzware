@@ -17,6 +17,8 @@ public:
     NAME = "MyTestCase1";
     addTest(&MyTestCase1::test1);
     addTest(&MyTestCase1::test2);
+    addTest(&MyTestCase1::test3);
+    addTest(&MyTestCase1::test4);
 
   }
 
@@ -29,6 +31,8 @@ public:
 
     setTestname("test1()");
 
+    test::assertTrue(false);
+
     throw Exception<MyTestCase1>("nee du!");
 
   }
@@ -37,7 +41,27 @@ public:
 
     setTestname("test2()");
 
+    test::assertEquals(1,2);
+
     throw Exception<MyTestCase1>("nee du!");
+
+  }
+
+  void test3() throw (ExceptionBase){
+
+    setTestname("test3()");
+
+    test::assertEquals(std::string("1,2,3"),std::string("1,2,3"));
+
+    throw Exception<MyTestCase1>("erfolgreich!");
+
+  }
+
+  void test4() throw (ExceptionBase){
+
+    setTestname("test4()");
+
+    test::assertEquals(std::string("1,2,3"),std::string("2,2,3"));
 
   }
 
