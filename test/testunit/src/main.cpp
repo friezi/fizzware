@@ -12,9 +12,13 @@ int main(){
     testunit.addTestcase(new MyTestCase1());
     testunit.addTestcase(new MyTestCase2());
     testunit.pushErrorHandler(globalErrorHandler);
+    testunit.pushSuccessHandler(globalSuccessHandler);
 
     testunit();
-    cout << global_nmb << "/" << testunit.getNmbTests() << " failed global" << endl;
+
+    unsigned long tests = testunit.getNmbTests();
+    cout << global_errors << "/" << tests << " failed global" << endl;
+    cout << global_success << "/" << tests << " succeeded global" << endl;
 
   }catch (ExceptionBase &e){
     e.show();

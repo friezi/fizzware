@@ -50,17 +50,18 @@ namespace test{
 
   public:
 
-    typedef void (*ErrorHandlerPtr)(TestCaseBase *testcase, std::string msg);
-    typedef std::list<ErrorHandlerPtr> ErrorHandlerStack;
+    typedef void (*UpshotHandlerType)(TestCaseBase *testcase, std::string msg);
+    typedef std::list<UpshotHandlerType> UpshotHandlerStack;
 
   private:
 
     std::string testname;
 
-    ErrorHandlerStack errorHandlers;
+    UpshotHandlerStack errorHandlers;
+    UpshotHandlerStack successHandlers;
 
     static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
-
+ 
   public:
 
     TestCaseBase();
@@ -75,13 +76,19 @@ namespace test{
 
     std::string getTestname(){ return testname; }
 
-    void pushErrorHandler(ErrorHandlerPtr errorHandler){
+    void pushErrorHandler(UpshotHandlerType errorHandler){
       errorHandlers.push_front(errorHandler);
+    }
+
+    void pushSuccessHandler(UpshotHandlerType successHandler){
+      successHandlers.push_front(successHandler);
     }
 
     void clearErrorHandlers(){ errorHandlers.clear(); }
 
-    ErrorHandlerPtr getDefaultErrorHandler();
+    void clearSuccessHandlers(){ successHandlers.clear(); }
+
+    UpshotHandlerType getDefaultErrorHandler();
     
     void assertTrue(bool value) throw (Exception<TestCaseBase>);
     
@@ -112,6 +119,10 @@ namespace test{
     void error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>);
     
     void error(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
+    
+    void success(TestCaseBase *testcase, char msg[]);
+    
+    void success(TestCaseBase *testcase, std::string msg);
 
   };
 
@@ -153,9 +164,9 @@ namespace test{
 
     void startTests() throw (Exception< TestCase<T> >){
 
-      T * self = dynamic_cast<T *>(this);
+      T * self;
 
-      if ( self == 0 )
+      if ( (self = dynamic_cast<T *>(this)) == 0 )
 	throw Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
   
       typename std::list<void (T::*)()>::iterator it;
@@ -164,6 +175,7 @@ namespace test{
 	try{
 	  
 	  (self->*(*it))();
+	  success(this,"");
 	  
 	} catch (ExceptionBase &e){
 	  
@@ -201,9 +213,13 @@ namespace test{
 
     unsigned long getNmbTests();
 
-    void pushErrorHandler(TestCaseBase::ErrorHandlerPtr errorHandler);
+    void pushErrorHandler(TestCaseBase::UpshotHandlerType errorHandler);
+
+    void pushSuccessHandler(TestCaseBase::UpshotHandlerType successHandler);
 
     void clearErrorHandlers();
+
+    void clearSuccessHandlers();
 
   };
 

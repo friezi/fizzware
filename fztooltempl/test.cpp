@@ -37,7 +37,7 @@ void TestCaseBase::defaultErrorHandler(TestCaseBase *testcase, string msg) throw
   throw Exception<TestCaseBase>(msg);
 }
 
-TestCaseBase::ErrorHandlerPtr TestCaseBase::getDefaultErrorHandler(){
+TestCaseBase::UpshotHandlerType TestCaseBase::getDefaultErrorHandler(){
   return defaultErrorHandler;
 }
 
@@ -47,7 +47,18 @@ void TestCaseBase::error(TestCaseBase *testcase, char msg[]) throw (Exception<Te
 
 void TestCaseBase::error(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
-  for ( ErrorHandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
+  for ( UpshotHandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
+    (*it)(testcase,msg);
+
+}
+
+void TestCaseBase::success(TestCaseBase *testcase, char msg[]){
+  success(testcase,string(msg));
+}
+
+void TestCaseBase::success(TestCaseBase *testcase, string msg){
+
+  for ( UpshotHandlerStack::iterator it = successHandlers.begin(); it != successHandlers.end(); it++ )
     (*it)(testcase,msg);
 
 }
@@ -97,7 +108,7 @@ unsigned long TestUnit::getNmbTests(){
 
 }
 
-void TestUnit::pushErrorHandler(TestCaseBase::ErrorHandlerPtr errorHandler){
+void TestUnit::pushErrorHandler(TestCaseBase::UpshotHandlerType errorHandler){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->pushErrorHandler(errorHandler);
@@ -108,5 +119,19 @@ void TestUnit::clearErrorHandlers(){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->clearErrorHandlers();
+
+}
+
+void TestUnit::pushSuccessHandler(TestCaseBase::UpshotHandlerType successHandler){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushSuccessHandler(successHandler);
+
+}
+
+void TestUnit::clearSuccessHandlers(){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearSuccessHandlers();
 
 }

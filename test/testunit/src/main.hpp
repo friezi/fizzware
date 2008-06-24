@@ -13,6 +13,7 @@ private:
   static unsigned long nmb;
 
   static void myErrorHandler1(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>);
+  static void mySuccessHandler1(test::TestCaseBase *testcase, std::string msg);
 
 public:
 
@@ -24,6 +25,7 @@ public:
     addTest(&MyTestCase1::test3);
     addTest(&MyTestCase1::test4);
     pushErrorHandler(myErrorHandler1);
+    pushSuccessHandler(mySuccessHandler1);
 
   }
 
@@ -117,16 +119,26 @@ void MyTestCase1::myErrorHandler1(test::TestCaseBase *testcase, std::string msg)
   nmb++;
 }
 
+void MyTestCase1::mySuccessHandler1(test::TestCaseBase *testcase, std::string msg){
+  std::cout << "success: " << testcase->getTestname() << std::endl;
+}
+
 unsigned long MyTestCase2::nmb;
 
 void MyTestCase2::myErrorHandler2(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
   nmb++;
 }
 
-unsigned long global_nmb = 0;
+unsigned long global_errors = 0;
 
 void globalErrorHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
-  global_nmb++;
+  global_errors++;
+}
+
+unsigned long global_success = 0;
+
+void globalSuccessHandler(test::TestCaseBase *testcase, std::string msg){
+  global_success++;
 }
 
 #endif
