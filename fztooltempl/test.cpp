@@ -37,7 +37,7 @@ void TestCaseBase::defaultErrorHandler(TestCaseBase *testcase, string msg) throw
   throw Exception<TestCaseBase>(msg);
 }
 
-void (*TestCaseBase::getDefaultErrorHandler())(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+TestCaseBase::ErrorHandlerPtr TestCaseBase::getDefaultErrorHandler(){
   return defaultErrorHandler;
 }
 
@@ -47,29 +47,29 @@ void TestCaseBase::error(TestCaseBase *testcase, char msg[]) throw (Exception<Te
 
 void TestCaseBase::error(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
-  for ( ErrorHandlers::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
+  for ( ErrorHandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
     (*it)(testcase,msg);
 
 }
 
 void TestCaseBase::assertTrue(bool value) throw (Exception<TestCaseBase>){
   if ( value != true )
-    error(this,"value not true");
+    throw Exception<TestCaseBase>("value not true");
 }
 
 void TestCaseBase::assertTrue(bool value, string id) throw (Exception<TestCaseBase>){
   if ( value != true )
-    error(this,id + " not true");
+    throw Exception<TestCaseBase>(id + " not true");
 }
 
 void TestCaseBase::assertFalse(bool value) throw (Exception<TestCaseBase>){
   if ( value != false )
-    error(this,"value not false");
+    throw Exception<TestCaseBase>("value not false");
 }
 
 void TestCaseBase::assertFalse(bool value, string id) throw (Exception<TestCaseBase>){
   if ( value != false )
-    error(this,id + " not false");
+    throw Exception<TestCaseBase>(id + " not false");
 }
 
 TestUnit::~TestUnit(){
@@ -97,7 +97,7 @@ unsigned long TestUnit::getNmbTests(){
 
 }
 
-void TestUnit::pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)){
+void TestUnit::pushErrorHandler(TestCaseBase::ErrorHandlerPtr errorHandler){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->pushErrorHandler(errorHandler);

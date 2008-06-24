@@ -50,13 +50,14 @@ namespace test{
 
   public:
 
-    typedef std::list<void (*)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)> ErrorHandlers;
+    typedef void (*ErrorHandlerPtr)(TestCaseBase *testcase, std::string msg);
+    typedef std::list<ErrorHandlerPtr> ErrorHandlerStack;
 
   private:
 
     std::string testname;
 
-    ErrorHandlers errorHandlers;
+    ErrorHandlerStack errorHandlers;
 
     static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
 
@@ -74,13 +75,13 @@ namespace test{
 
     std::string getTestname(){ return testname; }
 
-    void pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>)){
+    void pushErrorHandler(ErrorHandlerPtr errorHandler){
       errorHandlers.push_front(errorHandler);
     }
 
     void clearErrorHandlers(){ errorHandlers.clear(); }
 
-    void (*getDefaultErrorHandler())(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
+    ErrorHandlerPtr getDefaultErrorHandler();
     
     void assertTrue(bool value) throw (Exception<TestCaseBase>);
     
@@ -91,13 +92,13 @@ namespace test{
     void assertFalse(bool value, std::string id) throw (Exception<TestCaseBase>);
     
     template <typename T>
-    void assertEquals(T expected, T reference){
+    void assertEquals(T expected, T reference) throw (Exception<TestCaseBase>){
 
       if ( expected != reference ){
 
 	std::ostringstream err;
 	err << "Equals failed! expected was: \"" << expected << "\" got \"" << reference << "\"";
-	error(this,err.str());
+	throw Exception<TestCaseBase>(err.str());
 
       }	
     }
@@ -106,11 +107,11 @@ namespace test{
     
     void setTestname(std::string name){ testname = name; }
     
+  public:
+    
     void error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>);
     
     void error(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
-    
-  public:
 
   };
 
@@ -157,18 +158,28 @@ namespace test{
       if ( self == 0 )
 	throw Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
   
-      for (typename std::list<void (T::*)()>::iterator it = tests.begin(); it != tests.end(); it++ ){
-
+      typename std::list<void (T::*)()>::iterator it;
+      for ( it = tests.begin(); it != tests.end(); it++ ){
+	
 	try{
+	  
 	  (self->*(*it))();
+	  
 	} catch (ExceptionBase &e){
-	  std::cout << getTestcasename() + ":" + getTestname() + " failed!: " + e.getMsg() << std::endl;
+	  
+	  try{
+	    
+	    error(this,e.getMsg());
+	    
+	  } catch (ExceptionBase &ee){
+	    std::cout << getTestcasename() + ":" + getTestname() + " failed!: " + ee.getMsg() << std::endl;
+	  }
 	}    
       }
     }
-
+    
   };
-
+  
   /**
      @brief Main class for executing testcases. Can contain several Testcases.
   */
@@ -190,7 +201,7 @@ namespace test{
 
     unsigned long getNmbTests();
 
-    void pushErrorHandler(void (*errorHandler)(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>));
+    void pushErrorHandler(TestCaseBase::ErrorHandlerPtr errorHandler);
 
     void clearErrorHandlers();
 
