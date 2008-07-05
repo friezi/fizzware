@@ -53,6 +53,8 @@ public:
 //   }
 
   void test1() throw(ExceptionBase){
+
+    setTestname("test1()");
     
     utils::ChangeNotifier<int> notifier(4);
     utils::ChangeNotifier<int> notifier2;
