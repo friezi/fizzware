@@ -1,0 +1,39 @@
+#################################################################
+############ Erzeugt einzelnes Objektfile #######################
+#################################################################
+
+
+#################################################################
+################### zum Editieren ###############################
+
+OBJECT = testmain
+
+TT = ../fztooltempl
+
+DEPENDS_ON = $(TT)/exception $(TT)/test
+
+INCLUDE_PATHS = ./ $(TT)
+
+############### check the CC Variable ###########################
+#################################################################
+
+EDITOR ?= vi
+
+I_P = $(INCLUDE_PATHS:%=-I%)
+
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c $(I_P)
+
+DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
+
+.PHONY: all ed clean
+
+all: $(OBJECT).o
+
+$(OBJECT).o: $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
+	$(CC) $(OBJECT).cpp
+
+ed:
+	$(EDITOR) $(OBJECT).cpp $(OBJECT).hpp $(OBJECT)_makefile &
+
+clean:
+	rm $(OBJECT).o

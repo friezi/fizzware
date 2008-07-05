@@ -8,7 +8,11 @@ LOCAL_MODULES = <Lokale (im gleichen Verzeichnis wie <MAIN_MODULE>) Module>
 EXTERN_MODULES = <Klassenmodule im Verzeichnis <EM_PATH>>
 EM_PATH = <Pfad der fuer die Module <EXTERN_MODULES>>
 
-CLASSLIBRARY_PATH = < alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch) >
+TT = ../fztooltempl
+ST = ../fzsystools
+
+#  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
+CLASSLIBRARY_PATH = ../lib
 CLASSLIBRARIES = < Name der Klassenbibliotheken (ohne lib und .a) >
 CLASS_MODULES_PATHS = < Pfade fuer die Klassenmodulsourcen >
 CLASS_MODULES = < Module der Bibliothek, bei deren Aenderung auch das TARGET-file neu compiliert werden muss >
@@ -23,6 +27,9 @@ ADDITIONAL_DISTFILES = <zusaetzliche Dateien, die kopiert werden sollen>
 
 # in case that ansi is not allowed
 # NOANSI = true
+
+# change if modules are in a deeper directory
+# ROOT_DIR = ../
 
 ### check the field CC ########################################################
 ################################################################################

@@ -1,5 +1,5 @@
-#ifndef __MAIN_HPP__
-#define __MAIN_HPP__
+#ifndef __TESTMAIN_HPP__
+#define __TESTMAIN_HPP__
 
 #include <vector>
 #include <test.hpp>

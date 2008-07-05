@@ -37,7 +37,7 @@ void TestCaseBase::defaultErrorHandler(TestCaseBase *testcase, string msg) throw
   throw Exception<TestCaseBase>(msg);
 }
 
-TestCaseBase::UpshotHandlerType TestCaseBase::getDefaultErrorHandler(){
+TestCaseBase::HandlerType TestCaseBase::getDefaultErrorHandler(){
   return defaultErrorHandler;
 }
 
@@ -47,19 +47,22 @@ void TestCaseBase::error(TestCaseBase *testcase, char msg[]) throw (Exception<Te
 
 void TestCaseBase::error(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
-  for ( UpshotHandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
+  for ( HandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
     (*it)(testcase,msg);
 
 }
 
-void TestCaseBase::success(TestCaseBase *testcase, char msg[]){
-  success(testcase,string(msg));
+void TestCaseBase::success(){
+
+  for ( HandlerStack::iterator it = successHandlers.begin(); it != successHandlers.end(); it++ )
+    (*it)(this,"");
+
 }
 
-void TestCaseBase::success(TestCaseBase *testcase, string msg){
+void TestCaseBase::callStatisticHelpers(){
 
-  for ( UpshotHandlerStack::iterator it = successHandlers.begin(); it != successHandlers.end(); it++ )
-    (*it)(testcase,msg);
+  for (HandlerStack::iterator it = statisticHelpers.begin(); it != statisticHelpers.end(); it++ )
+    (*it)(this,"");
 
 }
 
@@ -83,6 +86,10 @@ void TestCaseBase::assertFalse(bool value, string id) throw (Exception<TestCaseB
     throw Exception<TestCaseBase>(id + " not false");
 }
 
+TestUnit::TestUnit(){
+  setTestcaseStartupHandler(defaultTestcaseStartupHandler);
+}
+
 TestUnit::~TestUnit(){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
@@ -90,10 +97,16 @@ TestUnit::~TestUnit(){
 
 }
 
+void TestUnit::defaultTestcaseStartupHandler(TestCaseBase::TestCaseBase *testcase, string msg){}
+
 void TestUnit::operator()() throw (ExceptionBase){
 
-  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ ){
+
+    (*testcaseStartupHandler)((*it),"");
     (*(*it))();
+
+  }
 
 }
 
@@ -108,7 +121,7 @@ unsigned long TestUnit::getNmbTests(){
 
 }
 
-void TestUnit::pushErrorHandler(TestCaseBase::UpshotHandlerType errorHandler){
+void TestUnit::pushErrorHandler(TestCaseBase::HandlerType errorHandler){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->pushErrorHandler(errorHandler);
@@ -122,7 +135,7 @@ void TestUnit::clearErrorHandlers(){
 
 }
 
-void TestUnit::pushSuccessHandler(TestCaseBase::UpshotHandlerType successHandler){
+void TestUnit::pushSuccessHandler(TestCaseBase::HandlerType successHandler){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->pushSuccessHandler(successHandler);
@@ -133,5 +146,19 @@ void TestUnit::clearSuccessHandlers(){
 
   for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it)->clearSuccessHandlers();
+
+}
+
+void TestUnit::pushStatisticHelper(TestCaseBase::HandlerType statisticHelper){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushStatisticHelper(statisticHelper);
+
+}
+
+void TestUnit::clearStatisticHelpers(){
+
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearStatisticHelpers();
 
 }

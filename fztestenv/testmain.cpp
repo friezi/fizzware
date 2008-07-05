@@ -1,4 +1,4 @@
-#include "main.hpp"
+#include "testmain.hpp"
 
 using namespace test;
 using namespace std;

@@ -50,15 +50,16 @@ namespace test{
 
   public:
 
-    typedef void (*UpshotHandlerType)(TestCaseBase *testcase, std::string msg);
-    typedef std::list<UpshotHandlerType> UpshotHandlerStack;
+    typedef void (*HandlerType)(TestCaseBase *testcase, std::string msg);
+    typedef std::list<HandlerType> HandlerStack;
 
   private:
 
     std::string testname;
 
-    UpshotHandlerStack errorHandlers;
-    UpshotHandlerStack successHandlers;
+    HandlerStack errorHandlers;
+    HandlerStack successHandlers;
+    HandlerStack statisticHelpers;
 
     static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
  
@@ -70,25 +71,33 @@ namespace test{
 
     virtual void operator()() = 0;
 
-    virtual std::string getTestcasename() = 0;
+    virtual std::string getTestcaseName() = 0;
 
     virtual unsigned long getNmbTests() = 0;
 
-    std::string getTestname(){ return testname; }
+    std::string getTestName(){ return testname; }
 
-    void pushErrorHandler(UpshotHandlerType errorHandler){
+    void pushErrorHandler(HandlerType errorHandler){
       errorHandlers.push_front(errorHandler);
     }
 
-    void pushSuccessHandler(UpshotHandlerType successHandler){
+    void pushSuccessHandler(HandlerType successHandler){
       successHandlers.push_front(successHandler);
+    }
+
+    void pushStatisticHelper(HandlerType statisticHelper){
+      statisticHelpers.push_front(statisticHelper);
     }
 
     void clearErrorHandlers(){ errorHandlers.clear(); }
 
     void clearSuccessHandlers(){ successHandlers.clear(); }
 
-    UpshotHandlerType getDefaultErrorHandler();
+    void clearStatisticHelpers(){ statisticHelpers.clear(); }
+
+    HandlerType getDefaultErrorHandler();
+
+    void callStatisticHelpers();
     
     void assertTrue(bool value) throw (Exception<TestCaseBase>);
     
@@ -114,15 +123,11 @@ namespace test{
     
     void setTestname(std::string name){ testname = name; }
     
-  public:
-    
     void error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>);
     
     void error(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
     
-    void success(TestCaseBase *testcase, char msg[]);
-    
-    void success(TestCaseBase *testcase, std::string msg);
+    void success();
 
   };
 
@@ -157,6 +162,7 @@ namespace test{
       setUp();
       startTests();
       tearDown();
+      callStatisticHelpers();
 
     }
 
@@ -175,7 +181,7 @@ namespace test{
 	try{
 	  
 	  (self->*(*it))();
-	  success(this,"");
+	  success();
 	  
 	} catch (ExceptionBase &e){
 	  
@@ -184,7 +190,7 @@ namespace test{
 	    error(this,e.getMsg());
 	    
 	  } catch (ExceptionBase &ee){
-	    std::cout << getTestcasename() + ":" + getTestname() + " failed!: " + ee.getMsg() << std::endl;
+	    std::cerr << getTestcaseName() + ":" + getTestName() + " failed!: " + ee.getMsg() << std::endl;
 	  }
 	}    
       }
@@ -201,9 +207,13 @@ namespace test{
 
     std::list<TestCaseBase *> testcases;
 
+    TestCaseBase::HandlerType testcaseStartupHandler;
+
+    static void defaultTestcaseStartupHandler(TestCaseBase::TestCaseBase *testcase, std::string msg);
+
   public:
 
-    TestUnit(){}
+    TestUnit();
 
     virtual ~TestUnit();
 
@@ -211,15 +221,23 @@ namespace test{
 
     void operator()() throw (ExceptionBase);
 
+    unsigned long getNmbTestcases(){ return testcases.size(); }
+
     unsigned long getNmbTests();
 
-    void pushErrorHandler(TestCaseBase::UpshotHandlerType errorHandler);
+    void setTestcaseStartupHandler(TestCaseBase::HandlerType testcaseStartupHandler){ this->testcaseStartupHandler = testcaseStartupHandler; }
 
-    void pushSuccessHandler(TestCaseBase::UpshotHandlerType successHandler);
+    void pushErrorHandler(TestCaseBase::HandlerType errorHandler);
+
+    void pushSuccessHandler(TestCaseBase::HandlerType successHandler);
+
+    void pushStatisticHelper(TestCaseBase::HandlerType statisticHelper);
 
     void clearErrorHandlers();
 
     void clearSuccessHandlers();
+
+    void clearStatisticHelpers();
 
   };
 

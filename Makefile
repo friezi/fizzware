@@ -24,7 +24,7 @@ clean:
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; pushd $(dir); $(MAKE) -k clean; popd; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
 
 ed:
-	$(EDITOR) Makefile&
+	$(EDITOR) Makefile Makefile_body Makefile_head_template &
 
 dist:
 	$(MAKE) -k -f Makefile_dist dist
