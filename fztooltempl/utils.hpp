@@ -345,11 +345,15 @@ namespace utils{
   **/
   template <typename T> class ChangeNotifier : public utils::Observable<T>{
     
+  private:
+    
     T value;
+
+    bool initialized;
     
   public:
 
-    ChangeNotifier(){}
+    ChangeNotifier() : initialized(false){}
 
     /**
        @brief Initialization on construction
@@ -362,7 +366,12 @@ namespace utils{
        @brief Initialises the observed value whithout notifying the observers.
        @param value the value
     **/
-    void initValue(T value){ this->value = value; }
+    void initValue(T value){
+      
+      initialized = true;
+      this->value = value;
+
+    }
 
     /**
        After adding, the observer will automatically be notified about the current value
@@ -373,8 +382,9 @@ namespace utils{
     virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
 
       Observable<T>::addObserver(observer);
-
-      observer->update(this,value);
+      
+      if ( initialized == true )
+	observer->update(this,value);
 
     }
 
@@ -385,8 +395,9 @@ namespace utils{
     **/
     void setValue(T value){
       
-      if ( this->value != value ){
+      if ( initialized == false || this->value != value ){
 	
+	initialized = true;
 	this->value = value;
 	
 	Observable<T>::setChanged();
