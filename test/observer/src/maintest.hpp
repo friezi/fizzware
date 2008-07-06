@@ -55,13 +55,13 @@ public:
   void test1() throw(ExceptionBase){
 
     setTestname("test1()");
-    
-    utils::ChangeNotifier<int> notifier(4);
-    utils::ChangeNotifier<int> notifier2;
 
     TestObserver1 testobserver1;
     TestObserver2 testobserver2;
     TestObserver3 testobserver3;
+    
+    utils::ChangeNotifier<int> notifier(4);
+    utils::ChangeNotifier<int> notifier2;
 
     assertEquals(0,testval1);
     assertEquals(0,testval2);

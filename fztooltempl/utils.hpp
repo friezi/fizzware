@@ -244,6 +244,11 @@ namespace utils{
     */
     virtual void update(Observable<T> *observable, T object) = 0;
 
+    /**
+       @brief for taking means in case of observable destruction
+    */
+    virtual void observableDeleted(Observable<T> * const observable){}
+
     virtual ~Observer(){}
 
   };
@@ -267,8 +272,13 @@ namespace utils{
 
     Observable() : changed(false){}
 
-    virtual ~Observable(){}
-
+    virtual ~Observable(){
+      
+      for ( typename std::set<Observer <T> *>::const_iterator it = observers.begin(); it != observers.end(); it++ )
+	(*it)->observableDeleted(this);
+      
+    }
+    
     /**
        @brief adds an observer to be notified on state-change.
        @param observer the observer to be added
@@ -432,8 +442,6 @@ namespace utils{
 
   /**
      @brief A SmartObserver automatically removes itself on destruction from all notifiers i.e. Observables it has registered to.
-     @remark An instance of SmartObserver must be defined after the notifiers have been defined it registers to. Otherwise the notifiers
-     may not exist anymore on destructor-call.
      @note Remember to overwrite Observer::update()
      @since V2.1
   */
@@ -476,7 +484,11 @@ namespace utils{
       notifier->removeObserver(this);
 
     }
-    
+ 
+    void observableDeleted(Observable<T> * const notifier){
+      notifiers.erase(notifier);
+    }
+   
   };
   
 }
