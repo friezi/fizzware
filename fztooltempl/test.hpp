@@ -113,7 +113,7 @@ namespace test{
       if ( expected != reference ){
 
 	std::ostringstream err;
-	err << "Equals failed! expected was: \"" << expected << "\" got \"" << reference << "\"";
+	err << "Equals failed! expected: \"" << expected << "\" got: \"" << reference << "\"";
 	throw Exception<TestCaseBase>(err.str());
 
       }	

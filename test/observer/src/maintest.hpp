@@ -39,22 +39,70 @@ public:
   
   ObserverTest() : test::TestCase<ObserverTest>(){
 
-    addTest(&ObserverTest::test1);
+    addTest(&ObserverTest::straight);
+    addTest(&ObserverTest::reversed);
 
   }
     
   std::string getTestcaseName(){ return "ObserverTest"; }
 
-//   void startup(){
+  void init(){
 
-//     testval1 = 0;
-//     testval2 = 0;
+    testval1 = 0;
+    testval2 = 0;
+    testval3 = 0;
 
-//   }
+  }
 
-  void test1() throw(ExceptionBase){
+  void straight() throw(ExceptionBase){
 
-    setTestname("test1()");
+    setTestname("straight()");
+
+    init();
+    
+    utils::ChangeNotifier<int> notifier(4);
+    utils::ChangeNotifier<int> notifier2;
+    
+    TestObserver1 testobserver1;
+    TestObserver2 testobserver2;
+    TestObserver3 testobserver3;
+
+    assertEquals(0,testval1);
+    assertEquals(0,testval2);
+    assertEquals(0,testval3);
+
+    testobserver1.addToNotifier(&notifier);
+    testobserver2.addToNotifier(&notifier);
+    testobserver3.addToNotifier(&notifier2);
+    
+    assertEquals(4,testval1);
+    assertEquals(4,testval2);
+    assertEquals(0,testval3);
+
+    notifier = 2;
+    notifier2 = 2;
+ 
+    assertEquals(2,testval1);
+    assertEquals(2,testval2);
+    assertEquals(2,testval3);
+
+    notifier.removeObservers();
+    notifier2.removeObservers(); 
+
+    notifier = 3;
+    notifier2 = 3;
+ 
+    assertEquals(2,testval1);
+    assertEquals(2,testval2);
+    assertEquals(2,testval3);
+    
+  }
+
+  void reversed() throw(ExceptionBase){
+
+    setTestname("reversed()");
+
+    init();
 
     TestObserver1 testobserver1;
     TestObserver2 testobserver2;
