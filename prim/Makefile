@@ -29,8 +29,12 @@ ADDITIONAL_DISTFILES =
 ### check the field CC ########################################################
 ################################################################################
 ################################################################################
-DIST_DIR = ../dist
+ROOT_DIR ?= ../
+
+DIST_DIR = $(ROOT_DIR)/dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
+TESTENV_LIB = fztestenv
+LIBTEST_DIR = $(ROOT_DIR)/$(TESTENV_LIB)/
 
 # Default-editor if Env-Variable "EDITOR" is not defined
 EDITOR ?= vi
@@ -61,10 +65,12 @@ INC_EM_PATH = $(EM_PATH:%=-I%)
 INC_CM_PATHS = $(CLASS_MODULES_PATHS:%=-I%)
 LIB_NAMES = $(CLASSLIBRARIES:%=$(CLASSLIBRARY_PATH)/lib%.a)
 
+MAINTEST = maintest
+
 #bei systemspezifischer Programmierung "-ansi" ausschalten
 CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATHS) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
 
-.PHONY: all clean all_libraries ed dist
+.PHONY: all clean all_libraries ed dist test compile_test run
 
 # falls von lokaler Bibliothek abhaengig, soll diese erst generiert werden
 all: all_libraries $(TARGET)
@@ -97,13 +103,24 @@ $(LIB_NAMES):
 clean:
 	rm -f $(TARGET) *.o $(EM_OBJECTS)
 
+compile_test: $(MAINTEST)
+$(MAINTEST): $(MAINTEST).o
+	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
+	$(CC) -I$(LIBTEST_DIR) $(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
+
+test: compile_test
+	$(MAINTEST)
+
+run: $(TARGET)
+	$(TARGET)
+
 # Editor aufrufen
 ed:
-	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) &
+	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) $(MAINTEST).?pp &
 
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
-Makefile: Makefile_head
-	cat Makefile_head ../Makefile_body > Makefile;
+Makefile: Makefile_head $(ROOT_DIR)/Makefile_body
+	cat Makefile_head $(ROOT_DIR)/Makefile_body > Makefile;
 
 # erstelle Packet fuer Distribution
 dist:

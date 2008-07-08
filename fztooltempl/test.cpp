@@ -30,7 +30,7 @@ using namespace std;
 
 TestCaseBase::TestCaseBase(){
   pushErrorHandler(getDefaultErrorHandler());
-  setTestname("");
+  setCurrentTestName("");
 }
 
 void TestCaseBase::defaultErrorHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
@@ -41,14 +41,14 @@ TestCaseBase::HandlerType TestCaseBase::getDefaultErrorHandler(){
   return defaultErrorHandler;
 }
 
-void TestCaseBase::error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>){
-  error(testcase,string(msg));
+void TestCaseBase::error(char msg[]) throw (Exception<TestCaseBase>){
+  error(string(msg));
 }
 
-void TestCaseBase::error(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+void TestCaseBase::error(string msg) throw (Exception<TestCaseBase>){
 
   for ( HandlerStack::iterator it = errorHandlers.begin(); it != errorHandlers.end(); it++ )
-    (*it)(testcase,msg);
+    (*it)(this,msg);
 
 }
 
@@ -87,7 +87,7 @@ void TestCaseBase::assertFalse(bool value, string id) throw (Exception<TestCaseB
 }
 
 TestUnit::TestUnit(){
-  setTestcaseStartupHandler(defaultTestcaseStartupHandler);
+  setTestCaseStartupHandler(defaultTestCaseStartupHandler);
 }
 
 TestUnit::~TestUnit(){
@@ -97,7 +97,7 @@ TestUnit::~TestUnit(){
 
 }
 
-void TestUnit::defaultTestcaseStartupHandler(TestCaseBase::TestCaseBase *testcase, string msg){}
+void TestUnit::defaultTestCaseStartupHandler(TestCaseBase::TestCaseBase *testcase, string msg){}
 
 void TestUnit::operator()() throw (ExceptionBase){
 

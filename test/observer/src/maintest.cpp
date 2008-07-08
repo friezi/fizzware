@@ -10,6 +10,6 @@ TestUnit mainTestUnit;
 
 void initMainTestUnit(){
 
-  mainTestUnit.addTestcase(new ObserverTest());
+  mainTestUnit.addTestCase(new ObserverTest());
 
 }

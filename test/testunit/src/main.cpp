@@ -13,7 +13,7 @@ static void statisticHelper(test::TestCaseBase *testcase, std::string msg) throw
 
   if ( (*failedTests)[testcaseNmb] > 0 )
     std::cout << endl << (*failedTests)[testcaseNmb] << "/" << testcase->getNmbTests() << " tests failed in "
-	      << testcase->getTestcaseName() << "!" << endl << std::endl;
+	      << testcase->getTestCaseName() << "!" << endl << std::endl;
   testcaseNmb++;
 
 }
@@ -28,7 +28,7 @@ static void globalErrorHandler(test::TestCaseBase *testcase, std::string msg) th
 }
 
 static void testcaseStartupHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
-  cout << "executing " << testcase->getTestcaseName() << endl;
+  cout << "executing " << testcase->getTestCaseName() << endl;
 }
 
 static unsigned long global_success = 0;
@@ -46,7 +46,7 @@ int main(){
 
     initMainTestUnit();
 
-    failedTests = new vector<unsigned long>(mainTestUnit.getNmbTestcases());
+    failedTests = new vector<unsigned long>(mainTestUnit.getNmbTestCases());
     for ( vector<unsigned long>::iterator it = failedTests->begin(); it != failedTests->end(); it++ )
       (*it) = 0;
 
@@ -54,7 +54,7 @@ int main(){
     mainTestUnit.pushErrorHandler(globalErrorHandler);
     mainTestUnit.pushStatisticHelper(statisticHelper);
     mainTestUnit.pushSuccessHandler(globalSuccessHandler);
-    mainTestUnit.setTestcaseStartupHandler(testcaseStartupHandler);
+    mainTestUnit.setTestCaseStartupHandler(testcaseStartupHandler);
     
     mainTestUnit();
     

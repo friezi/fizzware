@@ -20,10 +20,10 @@ public:
   MyTestCase1() : test::TestCase<MyTestCase1>(){
 
     NAME = "MyTestCase1";
-    addTest(&MyTestCase1::test1);
-    addTest(&MyTestCase1::test2);
-    addTest(&MyTestCase1::test3);
-    addTest(&MyTestCase1::test4);
+    addTest(&MyTestCase1::test1,"test1()");
+    addTest(&MyTestCase1::test2,"test2()");
+    addTest(&MyTestCase1::test3,"test3()");
+    addTest(&MyTestCase1::test4,"test4()");
     pushErrorHandler(myErrorHandler1);
     pushSuccessHandler(mySuccessHandler1);
 
@@ -33,11 +33,9 @@ public:
 
   void tearDown(){ std::cout << "stopping " << NAME << std::endl; }
 
-  std::string getTestcaseName(){ return NAME; }
+  std::string getTestCaseName(){ return NAME; }
 
   void test1() throw (ExceptionBase){
-
-    setTestname("test1()");
 
     assertTrue(false);
 
@@ -45,23 +43,17 @@ public:
 
   void test2() throw (ExceptionBase){
 
-    setTestname("test2()");
-
     assertEquals(1,2);
 
   }
 
   void test3() throw (ExceptionBase){
 
-    setTestname("test3()");
-
     assertEquals(std::string("1,2,3"),std::string("1,2,3"));
 
   }
 
   void test4() throw (ExceptionBase){
-
-    setTestname("test4()");
 
     assertEquals(std::string("1,2,3"),std::string("2,2,3"));
 
@@ -81,24 +73,20 @@ public:
 
   MyTestCase2() : test::TestCase<MyTestCase2>(){
 
-    addTest(&MyTestCase2::test1);
-    addTest(&MyTestCase2::test2);
+    addTest(&MyTestCase2::test1,"test1()");
+    addTest(&MyTestCase2::test2,"test2()");
     clearErrorHandlers();
 
   }
 
-  std::string getTestcaseName(){ return "MyTestCase2"; }
+  std::string getTestCaseName(){ return "MyTestCase2"; }
 
   void test1() throw (ExceptionBase){
-
-    setTestname("test1()");
     assertFalse(true);
 
   }
 
   void test2() throw (ExceptionBase){
-
-    setTestname("test2()");
     assertTrue(false);
 
   }
@@ -111,16 +99,15 @@ public:
 
   MyTestCase3() : test::TestCase<MyTestCase3>(){
 
-    addTest(&MyTestCase3::test1);
-    addTest(&MyTestCase3::test2);
+    addTest(&MyTestCase3::test1,"test1()");
+    addTest(&MyTestCase3::test2,"test2()");
 
   }
 
-  std::string getTestcaseName(){ return "MyTestCase3"; }
+  std::string getTestCaseName(){ return "MyTestCase3"; }
 
   void test1(){
 
-    setTestname("test1()");
     assertTrue(true);
 
   }
@@ -128,7 +115,6 @@ public:
 
   void test2(){
 
-    setTestname("test2()");
     assertFalse(false);
 
   }
@@ -142,7 +128,7 @@ void MyTestCase1::myErrorHandler1(test::TestCaseBase *testcase, std::string msg)
 }
 
 void MyTestCase1::mySuccessHandler1(test::TestCaseBase *testcase, std::string msg){
-  std::cout << "success: " << testcase->getTestName() << std::endl;
+  std::cout << "success: " << testcase->getCurrentTestName() << ": " << msg << std::endl;
 }
 
 #endif

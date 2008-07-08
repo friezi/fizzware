@@ -35,6 +35,7 @@
 #include <iostream>
 #include <sstream>
 #include <list>
+#include <utility>
 #include <exception.hpp>
 #include <utils.hpp>
 
@@ -46,6 +47,9 @@ namespace test{
   class TestCaseBase;
   class TestUnit;
 
+  /**
+     @brief the base of all TestCases. Not for direct use.
+  */
   class TestCaseBase{
 
   public:
@@ -55,8 +59,7 @@ namespace test{
 
   private:
 
-    std::string testname;
-
+    std::string currentTestName;
     HandlerStack errorHandlers;
     HandlerStack successHandlers;
     HandlerStack statisticHelpers;
@@ -71,11 +74,11 @@ namespace test{
 
     virtual void operator()() = 0;
 
-    virtual std::string getTestcaseName() = 0;
+    virtual std::string getTestCaseName() = 0;
 
     virtual unsigned long getNmbTests() = 0;
 
-    std::string getTestName(){ return testname; }
+    std::string getCurrentTestName(){ return currentTestName; }
 
     void pushErrorHandler(HandlerType errorHandler){
       errorHandlers.push_front(errorHandler);
@@ -121,13 +124,13 @@ namespace test{
     
   protected:
     
-    void setTestname(std::string name){ testname = name; }
+    void error(char msg[]) throw (Exception<TestCaseBase>);
     
-    void error(TestCaseBase *testcase, char msg[]) throw (Exception<TestCaseBase>);
-    
-    void error(TestCaseBase *testcase, std::string msg) throw (Exception<TestCaseBase>);
+    void error(std::string msg) throw (Exception<TestCaseBase>);
     
     void success();
+    
+    void setCurrentTestName(std::string id){ currentTestName = id; }
 
   };
 
@@ -138,7 +141,9 @@ namespace test{
 
   private:
 
-    std::list<void (T::*)()> tests;
+    typedef std::list< std::pair<void (T::*)(),std::string> > Tests;
+
+    Tests tests;
 
   public:
 
@@ -155,7 +160,7 @@ namespace test{
 
   protected:
 
-    void addTest(void (T::*test)()){ tests.push_back(test); }
+    void addTest(void (T::*test)(), std::string id){ tests.push_back(std::pair<void (T::*)(),std::string>(test,id)); }
 
     void operator()() throw (Exception< TestCase<T> >){
 
@@ -175,22 +180,23 @@ namespace test{
       if ( (self = dynamic_cast<T *>(this)) == 0 )
 	throw Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
   
-      typename std::list<void (T::*)()>::iterator it;
+      typename Tests::iterator it;
       for ( it = tests.begin(); it != tests.end(); it++ ){
 	
 	try{
 	  
-	  (self->*(*it))();
+	  setCurrentTestName((*it).second);
+	  (self->*((*it).first))();
 	  success();
 	  
 	} catch (ExceptionBase &e){
 	  
 	  try{
 	    
-	    error(this,e.getMsg());
+	    error(e.getMsg());
 	    
 	  } catch (ExceptionBase &ee){
-	    std::cerr << getTestcaseName() + ":" + getTestName() + " failed!: " + ee.getMsg() << std::endl;
+	    std::cerr << getTestCaseName() + ":" + (*it).second + " failed!: " + ee.getMsg() << std::endl;
 	  }
 	}    
       }
@@ -209,7 +215,7 @@ namespace test{
 
     TestCaseBase::HandlerType testcaseStartupHandler;
 
-    static void defaultTestcaseStartupHandler(TestCaseBase::TestCaseBase *testcase, std::string msg);
+    static void defaultTestCaseStartupHandler(TestCaseBase::TestCaseBase *testcase, std::string msg);
 
   public:
 
@@ -217,15 +223,15 @@ namespace test{
 
     virtual ~TestUnit();
 
-    void addTestcase(TestCaseBase * testcase){ testcases.push_back(testcase); }
+    void addTestCase(TestCaseBase * testcase){ testcases.push_back(testcase); }
 
     void operator()() throw (ExceptionBase);
 
-    unsigned long getNmbTestcases(){ return testcases.size(); }
+    unsigned long getNmbTestCases(){ return testcases.size(); }
 
     unsigned long getNmbTests();
 
-    void setTestcaseStartupHandler(TestCaseBase::HandlerType testcaseStartupHandler){ this->testcaseStartupHandler = testcaseStartupHandler; }
+    void setTestCaseStartupHandler(TestCaseBase::HandlerType testcaseStartupHandler){ this->testcaseStartupHandler = testcaseStartupHandler; }
 
     void pushErrorHandler(TestCaseBase::HandlerType errorHandler);
 

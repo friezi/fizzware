@@ -28,7 +28,7 @@ static void globalErrorHandler(test::TestCaseBase *testcase, std::string msg) th
 }
 
 static void testcaseStartupHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
-  cout << "executing " << testcase->getTestcaseName() << endl;
+  cout << "executing " << testcase->getTestCaseName() << endl;
 }
 
 static unsigned long global_success = 0;
@@ -39,7 +39,7 @@ static void globalSuccessHandler(test::TestCaseBase *testcase, std::string msg){
 
 FailedTestsVector * constructFailedTestsVector(){
 
-  FailedTestsVector *failedTests = new FailedTestsVector(mainTestUnit.getNmbTestcases());
+  FailedTestsVector *failedTests = new FailedTestsVector(mainTestUnit.getNmbTestCases());
   for ( FailedTestsVector::iterator it = failedTests->begin(); it != failedTests->end(); it++ )
     (*it) = pair<unsigned long,TestCaseBase *>(0,0);
 
@@ -61,16 +61,18 @@ int main(){
     mainTestUnit.pushErrorHandler(globalErrorHandler);
     mainTestUnit.pushStatisticHelper(statisticHelper);
     mainTestUnit.pushSuccessHandler(globalSuccessHandler);
-    mainTestUnit.setTestcaseStartupHandler(testcaseStartupHandler);
+    mainTestUnit.setTestCaseStartupHandler(testcaseStartupHandler);
     
     mainTestUnit();
     
     unsigned long tests = mainTestUnit.getNmbTests();
     
+    cout << endl;
+
     for ( FailedTestsVector::iterator it = failedTests->begin(); it != failedTests->end(); it++ ){
       if ( (*it).first > 0 )
-	cout << endl << (*it).first << "/" << (*it).second->getNmbTests() << " tests failed in "
-	     << (*it).second->getTestcaseName() << "!" << endl << endl;
+	cout << (*it).first << "/" << (*it).second->getNmbTests() << " tests failed in "
+	     << (*it).second->getTestCaseName() << "!" << endl;
     }
     
     cout << "Success: " << global_success << "/" << tests << endl;

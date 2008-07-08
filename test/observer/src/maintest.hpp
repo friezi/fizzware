@@ -39,12 +39,12 @@ public:
   
   ObserverTest() : test::TestCase<ObserverTest>(){
 
-    addTest(&ObserverTest::straight);
-    addTest(&ObserverTest::reversed);
+    addTest(&ObserverTest::straight,"straight()");
+    addTest(&ObserverTest::reversed,"reversed()");
 
   }
     
-  std::string getTestcaseName(){ return "ObserverTest"; }
+  std::string getTestCaseName(){ return "ObserverTest"; }
 
   void init(){
 
@@ -55,8 +55,6 @@ public:
   }
 
   void straight() throw(ExceptionBase){
-
-    setTestname("straight()");
 
     init();
     
@@ -99,8 +97,6 @@ public:
   }
 
   void reversed() throw(ExceptionBase){
-
-    setTestname("reversed()");
 
     init();
 

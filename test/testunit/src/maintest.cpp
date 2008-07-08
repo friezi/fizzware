@@ -7,8 +7,8 @@ TestUnit mainTestUnit;
 
 void initMainTestUnit(){
 
-  mainTestUnit.addTestcase(new MyTestCase1());
-  mainTestUnit.addTestcase(new MyTestCase2());
-  mainTestUnit.addTestcase(new MyTestCase3());
+  mainTestUnit.addTestCase(new MyTestCase1());
+  mainTestUnit.addTestCase(new MyTestCase2());
+  mainTestUnit.addTestCase(new MyTestCase3());
 
 }
