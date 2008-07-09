@@ -109,6 +109,11 @@ namespace test{
     void assertFalse(bool value) throw (Exception<TestCaseBase>);
     
     void assertFalse(bool value, std::string id) throw (Exception<TestCaseBase>);
+
+    template <typename TE, typename TR>
+    void assertEquals(TE expected, TR reference) throw (Exception<TestCaseBase>){
+      assertEquals(static_cast<TR>(expected),reference);
+    }
     
     template <typename T>
     void assertEquals(T expected, T reference) throw (Exception<TestCaseBase>){
