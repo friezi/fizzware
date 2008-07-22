@@ -4,6 +4,7 @@
 #include <iostream>
 #include <set>
 #include <stdlib.h>
+#include <time.h>
 #include <exception.hpp>
 #include <cmdlparser.hpp>
 

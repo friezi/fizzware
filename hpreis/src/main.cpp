@@ -96,6 +96,8 @@ void game(int iterations, bool rand) throw (ExceptionBase){
   stay = change = 0;
   set<long> doors;
 
+  srandom(::time(0));
+
   for ( int it = 0; it < iterations; it++ ){
 
     initDoors(doors);
