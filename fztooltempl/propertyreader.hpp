@@ -128,17 +128,17 @@ namespace utils{
       static bool isABlank(char c);
 
       bool skipSpaces(char &c);
-      void skipRestOfLine(char &c) throw (SubException<EOFErr,Parser>);
+      void skipRestOfLine(char &c) throw (excpt::SubException<EOFErr,Parser>);
       std::string truncateString(std::string str);
 
       /**
 	 @pre line is a comment line and has already started with a '#'
       */
-      void overreadCommentline(char &c, std::ostream * comments) throw (SubException<EOFErr,Parser>);
+      void overreadCommentline(char &c, std::ostream * comments) throw (excpt::SubException<EOFErr,Parser>);
       /**
 	 @pre line is a section-definition and has already started with a '['
       */
-      void readCurrentSection(char &c) throw (SubException<EOFErr,Parser>,SubException<SyntaxErr,Parser>);
+      void readCurrentSection(char &c) throw (excpt::SubException<EOFErr,Parser>,excpt::SubException<SyntaxErr,Parser>);
     
     public:
     
@@ -157,12 +157,12 @@ namespace utils{
 	 @exception SubException<NoIDErr,Parser>
 	 @exception SubException<NoValErr,Parser>
       */
-      Property nextKeyValuePair() throw (SubException<InputInvalidErr,Parser>,
-					 SubException<IncompleteErr,Parser>,
-					 SubException<EOFErr,Parser>,
-					 SubException<SyntaxErr,Parser>,
-					 SubException<NoIDErr,Parser>,
-					 SubException<NoValErr,Parser>);
+      Property nextKeyValuePair() throw (excpt::SubException<InputInvalidErr,Parser>,
+					 excpt::SubException<IncompleteErr,Parser>,
+					 excpt::SubException<EOFErr,Parser>,
+					 excpt::SubException<SyntaxErr,Parser>,
+					 excpt::SubException<NoIDErr,Parser>,
+					 excpt::SubException<NoValErr,Parser>);
     
       /**
 	 @brief Get next pair of property and value and save all comments
@@ -175,12 +175,12 @@ namespace utils{
 	 @exception SubException<NoIDErr,Parser>
 	 @exception SubException<NoValErr,Parser>
       */
-      Property nextKeyValuePairSaveComments(std::ostream *comments) throw (SubException<InputInvalidErr,Parser>,
-									   SubException<IncompleteErr,Parser>,
-									   SubException<EOFErr,Parser>,
-									   SubException<SyntaxErr,Parser>,
-									   SubException<NoIDErr,Parser>,
-									   SubException<NoValErr,Parser>);
+      Property nextKeyValuePairSaveComments(std::ostream *comments) throw (excpt::SubException<InputInvalidErr,Parser>,
+									   excpt::SubException<IncompleteErr,Parser>,
+									   excpt::SubException<EOFErr,Parser>,
+									   excpt::SubException<SyntaxErr,Parser>,
+									   excpt::SubException<NoIDErr,Parser>,
+									   excpt::SubException<NoValErr,Parser>);
       std::string getCurrentSection(){ return currentSection; }
     
     };
@@ -276,16 +276,16 @@ namespace utils{
        @exception SubException<OpenErr,PropertyReader>
        @exception SubException<Parser::IncompleteErr,Parser>
        @exception SubException<Parser::NoValErr,Parser>
-       @exception  SubException<Parser::SyntaxErr,Parser>
+       @exception SubException<Parser::SyntaxErr,Parser>
        @exception SubException<Parser::InputInvalidErr,Parser>
     */
-    void read() throw (Exception<PropertyReader>,
-		       SubException<OpenErr,PropertyReader>,
-		       SubException<Parser::InputInvalidErr,Parser>,
-		       SubException<Parser::IncompleteErr,Parser>,
-		       SubException<Parser::SyntaxErr,Parser>,
-		       SubException<Parser::NoValErr,Parser>,
-		       SubException<Parser::NoIDErr,Parser>);
+    void read() throw (excpt::Exception<PropertyReader>,
+		       excpt::SubException<OpenErr,PropertyReader>,
+		       excpt::SubException<Parser::InputInvalidErr,Parser>,
+		       excpt::SubException<Parser::IncompleteErr,Parser>,
+		       excpt::SubException<Parser::SyntaxErr,Parser>,
+		       excpt::SubException<Parser::NoValErr,Parser>,
+		       excpt::SubException<Parser::NoIDErr,Parser>);
 
     /**
        All the properties in the file \<filename\> will be updated, non-existing properties will
@@ -296,16 +296,16 @@ namespace utils{
        @exception SubException<OpenErr,PropertyReader>
        @exception SubException<Parser::IncompleteErr,Parser>
        @exception SubException<Parser::NoValErr,Parser>
-       @exception  SubException<Parser::SyntaxErr,Parser>
+       @exception SubException<Parser::SyntaxErr,Parser>
        @exception SubException<Parser::InputInvalidErr,Parser>
     */
-    void modify(bool keep_empty_sections = false) const throw (Exception<PropertyReader>,
-							       SubException<OpenErr,PropertyReader>,
-							       SubException<Parser::InputInvalidErr,Parser>,
-							       SubException<Parser::IncompleteErr,Parser>,
-							       SubException<Parser::SyntaxErr,Parser>,
-							       SubException<Parser::NoValErr,Parser>,
-							       SubException<Parser::NoIDErr,Parser>){ update(keep_empty_sections); }
+    void modify(bool keep_empty_sections = false) const throw (excpt::Exception<PropertyReader>,
+							       excpt::SubException<OpenErr,PropertyReader>,
+							       excpt::SubException<Parser::InputInvalidErr,Parser>,
+							       excpt::SubException<Parser::IncompleteErr,Parser>,
+							       excpt::SubException<Parser::SyntaxErr,Parser>,
+							       excpt::SubException<Parser::NoValErr,Parser>,
+							       excpt::SubException<Parser::NoIDErr,Parser>){ update(keep_empty_sections); }
 
     /**
        All the properties in the file \<filename\> will be updated, non-existing properties will
@@ -317,22 +317,22 @@ namespace utils{
        @exception SubException<OpenErr,PropertyReader>
        @exception SubException<Parser::IncompleteErr,Parser>
        @exception SubException<Parser::NoValErr,Parser>
-       @exception  SubException<Parser::SyntaxErr,Parser>
+       @exception SubException<Parser::SyntaxErr,Parser>
        @exception SubException<Parser::InputInvalidErr,Parser>
     */
-    void update(bool keep_empty_sections = false) const throw (Exception<PropertyReader>,
-							       SubException<OpenErr,PropertyReader>,
-							       SubException<Parser::InputInvalidErr,Parser>,
-							       SubException<Parser::IncompleteErr,Parser>,
-							       SubException<Parser::SyntaxErr,Parser>,
-							       SubException<Parser::NoValErr,Parser>,
-							       SubException<Parser::NoIDErr,Parser>);
+    void update(bool keep_empty_sections = false) const throw (excpt::Exception<PropertyReader>,
+							       excpt::SubException<OpenErr,PropertyReader>,
+							       excpt::SubException<Parser::InputInvalidErr,Parser>,
+							       excpt::SubException<Parser::IncompleteErr,Parser>,
+							       excpt::SubException<Parser::SyntaxErr,Parser>,
+							       excpt::SubException<Parser::NoValErr,Parser>,
+							       excpt::SubException<Parser::NoIDErr,Parser>);
   
     /**
        @brief Writes all the properties to file \<filename\>
        @exception Exception<PropertyReader>
     */
-    void write() const throw (Exception<PropertyReader>);
+    void write() const throw (excpt::Exception<PropertyReader>);
 
     /**
        @brief Get the value of the property of a specific section 
@@ -340,7 +340,7 @@ namespace utils{
        @param property name of property
        @return value of property
     */
-    std::string get(const std::string section, const std::string property) const throw (SubException<NoSectionErr,PropertyReader>);
+    std::string get(const std::string section, const std::string property) const throw (excpt::SubException<NoSectionErr,PropertyReader>);
 
     /**
        @brief Get the value of the property of section "NO_SECTION"
@@ -377,7 +377,7 @@ namespace utils{
        @param property the property
        @return true or false
     */
-    bool isMember(std::string property) const throw (SubException<NoSectionErr,PropertyReader>){ return isMember(NO_SECTION,property); }
+    bool isMember(std::string property) const throw (excpt::SubException<NoSectionErr,PropertyReader>){ return isMember(NO_SECTION,property); }
 
     /**
        @brief erases one entry of the properties of the a specific section
@@ -426,7 +426,7 @@ namespace utils{
        @param s_it iterator of section
        @return the iterator pointing to the first element
     */
-    properties_iterator begin(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){
+    properties_iterator begin(const sections_iterator & s_it) const throw (excpt::SubException<NoSectionErr,PropertyReader>){
       return properties_iterator(s_it->second->begin());
     }
   
@@ -436,21 +436,21 @@ namespace utils{
        @param section name of section
        @return the iterator pointing to the first element
     */
-    properties_iterator begin(const std::string section) const throw (SubException<NoSectionErr,PropertyReader>);
+    properties_iterator begin(const std::string section) const throw (excpt::SubException<NoSectionErr,PropertyReader>);
 
     /**
        For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
        @brief iterator pointing to beginning of properties of section "NO_SECTION"
        @return the iterator pointing to the first element
     */
-    properties_iterator begin() const throw (SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
+    properties_iterator begin() const throw (excpt::SubException<NoSectionErr,PropertyReader>) { return begin(NO_SECTION); }
 
     /**
        @brief iterator pointing to end of properties
        @param s_it section-iterator of section
        @return the iterator pointing beyond last element
     */
-    properties_iterator end(const sections_iterator & s_it) const throw (SubException<NoSectionErr,PropertyReader>){
+    properties_iterator end(const sections_iterator & s_it) const throw (excpt::SubException<NoSectionErr,PropertyReader>){
       return properties_iterator(s_it->second->end());
     }
   
@@ -460,14 +460,14 @@ namespace utils{
        @param section name of section
        @return the iterator pointing beyond last element
     */
-    properties_iterator end(const std::string section) const throw (SubException<NoSectionErr,PropertyReader>);
+    properties_iterator end(const std::string section) const throw (excpt::SubException<NoSectionErr,PropertyReader>);
 
     /**
        For better performance the return value should be assigned to a local varibale which should be used for comparison instead.
        @brief iterator pointing to end of properties of section "NO_SECTION"
        @return the iterator pointing beyond end
     */
-    properties_iterator end() const throw (SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
+    properties_iterator end() const throw (excpt::SubException<NoSectionErr,PropertyReader>) { return end(NO_SECTION); }
 
     /**
        @brief iterator pointing to beginning of sections
@@ -484,7 +484,7 @@ namespace utils{
     /**
        @brief syntactic sugar for section "NO_SECTION"
     */
-    std::string & operator[](const std::string & property) throw (SubException<NoSectionErr,PropertyReader>) { return (*sections[NO_SECTION])[property]; }
+    std::string & operator[](const std::string & property) throw (excpt::SubException<NoSectionErr,PropertyReader>) { return (*sections[NO_SECTION])[property]; }
 
     /**
        @brief return a string-representation of all properties

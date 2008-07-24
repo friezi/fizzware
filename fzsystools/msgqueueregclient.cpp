@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace excpt;
 using namespace ds;
 
 const string MsgQueueRegClient::default_socket_path = "/var/run/msgqrd_socket";

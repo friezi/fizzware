@@ -87,7 +87,7 @@ namespace sys{
     int id;   // ID returned by system
     char flag;
   
-    void PV(int op) throw (SubException<OpErr,Semaphor>);
+    void PV(int op) throw (excpt::SubException<OpErr,Semaphor>);
 
     // copyconstructor:
     Semaphor(const Semaphor&){}
@@ -112,7 +112,7 @@ namespace sys{
        @throw SubException<CtrlErr,Semaphor>
     */
     Semaphor(int initval, key_t key=IPC_PRIVATE, char flag=S_NEW)
-      throw (Exception<Semaphor>,SubException<GetErr,Semaphor>,SubException<CtrlErr,Semaphor>);
+      throw (excpt::Exception<Semaphor>,excpt::SubException<GetErr,Semaphor>,excpt::SubException<CtrlErr,Semaphor>);
   
     /**
        Removes a semaphor, if flag was "S_NEW"
@@ -120,12 +120,12 @@ namespace sys{
     ~Semaphor();
 
     /// to get exclusive access to the semaphor
-    void P() throw (SubException<OpErr,Semaphor>){ PV(OBTAIN); }
+    void P() throw (excpt::SubException<OpErr,Semaphor>){ PV(OBTAIN); }
     /// to release the semaphor
-    void V() throw (SubException<OpErr,Semaphor>){ PV(RELEASE); }
+    void V() throw (excpt::SubException<OpErr,Semaphor>){ PV(RELEASE); }
 
     /// blocks a semaphor that no process gets access
-    void block() throw(SubException<CtrlErr,Semaphor>);
+    void block() throw(excpt::SubException<CtrlErr,Semaphor>);
     /// removes a semaphor
     void remove();
   

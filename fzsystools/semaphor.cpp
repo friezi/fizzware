@@ -29,6 +29,7 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 using namespace sys;
+using namespace excpt;
 
 #endif
 

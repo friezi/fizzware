@@ -31,6 +31,7 @@
 #include <exception.hpp>
 
 using namespace std;
+using namespace excpt;
   
 ExceptionBase::ExceptionBase(const string &id){
     this->errormsg = "";

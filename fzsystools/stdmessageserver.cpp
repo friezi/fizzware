@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace excpt;
 
 StdMessageServer::PIDSet StdMessageServer::clienthandlers;
 

@@ -42,218 +42,225 @@
 #include <string>
 #include <typeinfo>
 
-// Not for direct use!!!
 /**
-   derived from the standard-class exception.
-   @class ExceptionBase
-   @internal Use Exception< T > instead
-   @brief The baseclass for all exceptions
+   @brief the exception-namespace
 */
-class ExceptionBase : public std::exception{
+namespace excpt{
 
-private:
-
-  ExceptionBase(){}
-  
-protected:
-  
-  std::string errormsg;
-  std::string spc_id;
-  std::string id_errormsg;
-  
-  ExceptionBase(const std::string &id);
-  
-  ExceptionBase(const std::string &id, const std::string &errormsg);
-  
-  // um fuehrende Zahlen bei durch typeid() generierten Klassennamen zu entfernen
+  // Not for direct use!!!
   /**
-     To skip leading digits produced by typeid()
-     @param s the text
+     derived from the standard-class exception.
+     @class ExceptionBase
+     @internal Use Exception< T > instead
+     @brief The baseclass for all exceptions
   */
-  static std::string skipDigits(const std::string &s);
+  class ExceptionBase : public std::exception{
 
-  // um fuehrende Buchstaben bei durch typeid() generierten Klassennamen zu entfernen
-  /**
-     To skip leading letters produced by typeid()
-     @param s the text
-  */
-  static std::string skipLetters(const std::string &s);
+  private:
 
-  void setMsgs(const std::string &s);
-
-public:
+    ExceptionBase(){}
   
-  virtual ~ExceptionBase() throw () {}
+  protected:
+  
+    std::string errormsg;
+    std::string spc_id;
+    std::string id_errormsg;
+  
+    ExceptionBase(const std::string &id);
+  
+    ExceptionBase(const std::string &id, const std::string &errormsg);
+  
+    // um fuehrende Zahlen bei durch typeid() generierten Klassennamen zu entfernen
+    /**
+       To skip leading digits produced by typeid()
+       @param s the text
+    */
+    static std::string skipDigits(const std::string &s);
+
+    // um fuehrende Buchstaben bei durch typeid() generierten Klassennamen zu entfernen
+    /**
+       To skip leading letters produced by typeid()
+       @param s the text
+    */
+    static std::string skipLetters(const std::string &s);
+
+    void setMsgs(const std::string &s);
+
+  public:
+  
+    virtual ~ExceptionBase() throw () {}
+
+    /**
+       @see exception::what()
+    */
+    virtual const char* what() const throw() { return id_errormsg.c_str(); }
+
+    /** For using like: \n cout << e;
+	@brief to pass it to an output-stream
+	@param ostr the output-stream
+	@param e the exception
+    */
+    friend std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e);
+
+    /// prints the exception
+    virtual void show() const;
+
+    /** @brief returns only errormessage as string
+	@return the constructed string
+    */
+    virtual const std::string &getMsg() const { return errormsg; }
+
+    /** @brief returns id + errormessage
+	@return the constructed string
+    */
+    virtual const std::string &getIdMsg() const { return id_errormsg; }
+
+    /** @brief prepends a message-text to the existing message-text
+	@return the exception itself
+	@since V2.1
+    */
+    ExceptionBase & prependMsg(const std::string &msg);
+
+    /** @brief appends a message-text to the existing message-text
+	@return the exception itself
+	@since V2.1
+    */
+    ExceptionBase & appendMsg(const std::string &msg);
+
+    /** @brief exchanges a message-text
+	@return the exception itself
+	@since V2.1
+    */
+    ExceptionBase & exchangeMsg(const std::string &msg);
+
+  };
+
+  /** 
+      @class Exception
+      @brief A general exception-classtemplate
+      @see SubException
+  */
+  template<typename T> class Exception : public ExceptionBase{
+
+  public:
+
+    /**
+       constructor whithout message
+    */
+    Exception() : ExceptionBase(classname()){}
+
+    /**
+       constructor whith errormessage
+       @param errormsg pointer to the errormessage
+    */
+    Exception(const char * const  errormsg) : ExceptionBase(classname() + "Exception",std::string(errormsg)){}
+  
+    /**
+       constructor whith errormessage
+       @param errormsg the errormessage
+    */
+    Exception(const std::string &errormsg) : ExceptionBase(classname() + "Exception",errormsg){}
+
+    /**
+       extensibility for derived classes
+       @param id the identification-string for the class (classname)
+       @param errormsg the errormessage
+    */
+    Exception(const std::string &id, const std::string &errormsg) : ExceptionBase(id,errormsg){}
+
+    virtual ~Exception() throw () {}
+
+  protected:
+
+    /// Extracts the class-name from a typeid()-information
+    std::string extract(const std::string &s){ return ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)); }
+
+    /**
+       Generates the corresponding classname
+       @return the classname
+    */
+    virtual std::string classname(){ return extract(typeid(T).name()); }
+
+  };
 
   /**
-     @see exception::what()
+     Sometimes it's very usefull to have the possibility of defining a subclass of an exception-class \e Exception<Class>
+     which should have the same properties. For example a function \e function in the class \e Class should send an exception and you want to
+     specify the exception indicating the error more precisely. But you also want to have the possibility of just catching the exception \e Exception<Class>.
+     So your wish is to create a subclass of \e Exception<Class>. It's possible with the SubException< ... >-class. The following
+     coding-method works very well and fullfills this purpose:\n
+     - define in the beginning of your class \e Class a new class:\n
+     @code
+     private:
+     class FunctionErr{};
+     @endcode
+     - call somewhere in your code of \e function :\n
+     @code throw SubException<FunctionErr,Class>( ... ) @endcode
+     - the code which is calling the function \e function can now ...\n
+     @code catch ( Exception<Class> &e ) { ... } @endcode
+     @brief For building derived exception-classes from Exception<T>
   */
-  virtual const char* what() const throw() { return id_errormsg.c_str(); }
+  template<typename TSub, typename TBase> class SubException : public Exception<TBase>{
+  
+  public:
+    SubException() : Exception<TBase>(classname()){}
 
-  /** For using like: \n cout << e;
-      @brief to pass it to an output-stream
-      @param ostr the output-stream
-      @param e the exception
-  */
-  friend std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e);
+    SubException(const char * const errormsg) : Exception<TBase>(classname(),std::string(errormsg)){}
+  
+    SubException(const std::string &errormsg) : Exception<TBase>(classname(),errormsg){}
 
-  /// prints the exception
-  virtual void show() const;
+    SubException(const std::string &id, const std::string &errormsg) : Exception<TBase>(id,errormsg){}
 
-  /** @brief returns only errormessage as string
-      @return the constructed string
-  */
-  virtual const std::string &getMsg() const { return errormsg; }
+    virtual ~SubException() throw () {}
 
-  /** @brief returns id + errormessage
-      @return the constructed string
-  */
-  virtual const std::string &getIdMsg() const { return id_errormsg; }
+  protected:
 
-  /** @brief prepends a message-text to the existing message-text
-      @return the exception itself
-      @since V2.1
-  */
-  ExceptionBase & prependMsg(const std::string &msg);
+    /// Extracts the subclass-name from a typeid()-information
+    std::string extract_sub(const std::string &s){
+      return ExceptionBase::skipDigits(ExceptionBase::skipLetters(ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)))); }
 
-  /** @brief appends a message-text to the existing message-text
-      @return the exception itself
-      @since V2.1
-  */
-  ExceptionBase & appendMsg(const std::string &msg);
-
-  /** @brief exchanges a message-text
-      @return the exception itself
-      @since V2.1
-  */
-  ExceptionBase & exchangeMsg(const std::string &msg);
-
-};
-
-/** 
-    @class Exception
-    @brief A general exception-classtemplate
-    @see SubException
-*/
-template<typename T> class Exception : public ExceptionBase{
-
-public:
+    virtual std::string classname(){ return ( this->extract(typeid(TBase).name()) + this->extract_sub(typeid(TSub).name()) + "Exception" ); }
+  };
 
   /**
-     constructor whithout message
- */
-  Exception() : ExceptionBase(classname()){}
+     @class OutOfMem
+     @internal
+     @brief to create a OutOfMemException
+     @see OutOfMemException
+  */
+  class OutOfMem{
+
+  protected:
+
+    OutOfMem(){}
+    OutOfMem(const OutOfMem&){}
+  };
 
   /**
-     constructor whith errormessage
-     @param errormsg pointer to the errormessage
+     @class NullPointer
+     @internal
+     @brief to create a NullPointerException
+     @see NullPointerException
   */
-  Exception(const char * const  errormsg) : ExceptionBase(classname() + "Exception",std::string(errormsg)){}
+  class NullPointer{
   
-  /**
-     constructor whith errormessage
-     @param errormsg the errormessage
-  */
-  Exception(const std::string &errormsg) : ExceptionBase(classname() + "Exception",errormsg){}
-
-  /**
-     extensibility for derived classes
-     @param id the identification-string for the class (classname)
-     @param errormsg the errormessage
-  */
-  Exception(const std::string &id, const std::string &errormsg) : ExceptionBase(id,errormsg){}
-
-  virtual ~Exception() throw () {}
-
-protected:
-
-  /// Extracts the class-name from a typeid()-information
-  std::string extract(const std::string &s){ return ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)); }
+  protected:
+  
+    // Objekteerzeugung nicht erlaubt!!!
+    NullPointer(){}
+    NullPointer(const NullPointer&){}
+  
+  };
 
   /**
-     Generates the corresponding classname
-     @return the classname
+     the generated OutOfMemException
   */
-  virtual std::string classname(){ return extract(typeid(T).name()); }
+  typedef Exception<OutOfMem> OutOfMemException;
+  /**
+     the generated NullPointerException
+  */
+  typedef Exception<NullPointer> NullPointerException;
 
-};
-
-/**
-   Sometimes it's very usefull to have the possibility of defining a subclass of an exception-class \e Exception<Class>
-   which should have the same properties. For example a function \e function in the class \e Class should send an exception and you want to
-   specify the exception indicating the error more precisely. But you also want to have the possibility of just catching the exception \e Exception<Class>.
-   So your wish is to create a subclass of \e Exception<Class>. It's possible with the SubException< ... >-class. The following
-   coding-method works very well and fullfills this purpose:\n
-   - define in the beginning of your class \e Class a new class:\n
-   @code
-   private:
-   class FunctionErr{};
-   @endcode
-   - call somewhere in your code of \e function :\n
-   @code throw SubException<FunctionErr,Class>( ... ) @endcode
-   - the code which is calling the function \e function can now ...\n
-   @code catch ( Exception<Class> &e ) { ... } @endcode
-   @brief For building derived exception-classes from Exception<T>
-*/
-template<typename TSub, typename TBase> class SubException : public Exception<TBase>{
-  
-public:
-  SubException() : Exception<TBase>(classname()){}
-
-  SubException(const char * const errormsg) : Exception<TBase>(classname(),std::string(errormsg)){}
-  
-  SubException(const std::string &errormsg) : Exception<TBase>(classname(),errormsg){}
-
-  SubException(const std::string &id, const std::string &errormsg) : Exception<TBase>(id,errormsg){}
-
-  virtual ~SubException() throw () {}
-
-protected:
-
-  /// Extracts the subclass-name from a typeid()-information
-  std::string extract_sub(const std::string &s){
-    return ExceptionBase::skipDigits(ExceptionBase::skipLetters(ExceptionBase::skipDigits(ExceptionBase::skipLetters(s)))); }
-
-  virtual std::string classname(){ return ( this->extract(typeid(TBase).name()) + this->extract_sub(typeid(TSub).name()) + "Exception" ); }
-};
-
-/**
-   @class OutOfMem
-   @internal
-   @brief to create a OutOfMemException
-   @see OutOfMemException
-*/
-class OutOfMem{
-
-protected:
-
-  OutOfMem(){}
-  OutOfMem(const OutOfMem&){}
-};
-
-/**
-   @class NullPointer
-   @internal
-   @brief to create a NullPointerException
-   @see NullPointerException
-*/
-class NullPointer{
-  
-protected:
-  
-  // Objekteerzeugung nicht erlaubt!!!
-  NullPointer(){}
-  NullPointer(const NullPointer&){}
-  
-};
-
-/**
-   the generated OutOfMemException
-*/
-typedef Exception<OutOfMem> OutOfMemException;
-/**
-   the generated NullPointerException
-*/
-typedef Exception<NullPointer> NullPointerException;
+}
 
 #endif

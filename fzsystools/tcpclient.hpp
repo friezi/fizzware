@@ -96,7 +96,7 @@ namespace sys{
        @exception Exception<Socket>
        @note this function must be called manually after calling the constructor
     */
-    void init() throw (Exception<TCPClient>,Exception<Socket>);
+    void init() throw (excpt::Exception<TCPClient>,excpt::Exception<Socket>);
 
     // Verbindung zum Server herstellen: liefert socket-filedeskriptor zurueck
     /**
@@ -105,7 +105,7 @@ namespace sys{
        @exception Exception<TCPClient>
        @exception Exception<Socket>
     */
-    int buildUpConnection() throw (Exception<TCPClient>,Exception<Socket>);
+    int buildUpConnection() throw (excpt::Exception<TCPClient>,excpt::Exception<Socket>);
 
     // Client herunterfahren
     /**

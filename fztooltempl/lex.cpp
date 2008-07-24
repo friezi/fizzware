@@ -26,6 +26,7 @@
 #include <lex.hpp>
 
 using namespace std;
+using namespace excpt;
 using namespace parse;
 using namespace utils;
 

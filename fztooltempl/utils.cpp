@@ -26,6 +26,7 @@
 #include "utils.hpp"
 
 using namespace std;
+using namespace excpt;
 using namespace utils;
 
 char String::blanks[] = {' ','\t'};

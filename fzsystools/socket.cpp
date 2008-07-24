@@ -27,6 +27,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace excpt;
 
 Socket::Socket(unsigned short int port, struct hostent *host, int family, int socket_domain,
 	       int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,

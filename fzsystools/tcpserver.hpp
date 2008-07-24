@@ -97,7 +97,7 @@ namespace sys{
        @exception Exception<Socket>
        @note this function must be called manually after calling the constructor
     */
-    void init() throw (Exception<TCPServer>,Exception<Socket>);
+    void init() throw (excpt::Exception<TCPServer>,excpt::Exception<Socket>);
 
     // auf Verbindung durch client warten, Rueckgabe: Filedeskriptor zum Schreiben und Lesen
     /**
@@ -106,7 +106,7 @@ namespace sys{
        @throw Exception<TCPServer>
        @throw Exception<Socket>
     */
-    int waitForConnection() throw (Exception<TCPServer>,Exception<Socket>);
+    int waitForConnection() throw (excpt::Exception<TCPServer>,excpt::Exception<Socket>);
 
     // Server herunterfahren
     /**

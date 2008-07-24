@@ -123,7 +123,7 @@ namespace cmdl{
        @return reference to aliases
        @see CmdlParser::alias()
     */
-    Alias& operator<<(std::string option) throw(Exception<CmdlParser>, ExceptionBase);
+    Alias& operator<<(std::string option) throw(excpt::Exception<CmdlParser>, excpt::ExceptionBase);
 
   };
 
@@ -149,7 +149,7 @@ namespace cmdl{
        @return reference to shortaliases
        @see CmdlParser::shortalias()
     */
-    ShortAlias& operator<<(char shortoption) throw(Exception<CmdlParser>, ExceptionBase);
+    ShortAlias& operator<<(char shortoption) throw(excpt::Exception<CmdlParser>, excpt::ExceptionBase);
 
   };
 
@@ -346,7 +346,7 @@ namespace cmdl{
        @exception Exception<CmdlParser>
        @remark The constructor does no parsing yet, see parse()
     */
-    CmdlParser(int argc, char **argv) throw(Exception<CmdlParser>);
+    CmdlParser(int argc, char **argv) throw(excpt::Exception<CmdlParser>);
 
     // the default-destructor
     ~CmdlParser();
@@ -419,7 +419,7 @@ namespace cmdl{
        @exception Exception<CmdlParser>
        @note This method has to be called manually, it's not called by the constructor
     */
-    void parse() throw(Exception<CmdlParser>);
+    void parse() throw(excpt::Exception<CmdlParser>);
 
     //@}
 
@@ -475,7 +475,7 @@ namespace cmdl{
        @see very useful in combination with Synonyms::operator<<()
        @note the representative exists if you defined it as a option/parameter
     */
-    Synonyms & synonym(std::string representative) throw(Exception<CmdlParser>);
+    Synonyms & synonym(std::string representative) throw(excpt::Exception<CmdlParser>);
 
     /**
        Method for short-options\n
@@ -489,7 +489,7 @@ namespace cmdl{
        @see very useful in combination with ShortSynonyms::operator<<()
        @note the representative exists if you defined it as a option/parameter
     */
-    ShortSynonyms & shortsynonym(char representative) throw(Exception<CmdlParser>);
+    ShortSynonyms & shortsynonym(char representative) throw(excpt::Exception<CmdlParser>);
 
     /**
        Actually, this method returns all aliases belonging to aliasname.
@@ -671,14 +671,14 @@ namespace cmdl{
        @return id of the final argument
        @exception Exception<CmdlParser>
     */
-    std::string getFinalArgumentId() throw (Exception<CmdlParser>);
+    std::string getFinalArgumentId() throw (excpt::Exception<CmdlParser>);
 
     /**
        @brief get the value of the final argument
        @return value of the final argument
        @exception Exception<CmdlParser>
     */
-    std::string getFinalArgumentValue() throw (Exception<CmdlParser>);
+    std::string getFinalArgumentValue() throw (excpt::Exception<CmdlParser>);
   
     //@}
 
@@ -772,7 +772,7 @@ namespace cmdl{
        @see CmdlParser::supervisor()
 
     */
-    Supervisors & operator<<(std::string supervisor) throw(Exception<CmdlParser>, ExceptionBase);
+    Supervisors & operator<<(std::string supervisor) throw(excpt::Exception<CmdlParser>, excpt::ExceptionBase);
 
   };
 
@@ -802,7 +802,7 @@ namespace cmdl{
        @see CmdlParser::shortsupervisor()
 
     */
-    ShortSupervisors & operator<<(char shortsupervisor) throw(Exception<CmdlParser>, ExceptionBase);
+    ShortSupervisors & operator<<(char shortsupervisor) throw(excpt::Exception<CmdlParser>, excpt::ExceptionBase);
 
   };
 

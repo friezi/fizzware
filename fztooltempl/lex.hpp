@@ -416,7 +416,7 @@ namespace parse{
     
   public:
     
-    LexScreener(std::istream * input, LexCharClasses * char_classes) throw (Exception<LexScreener>);
+    LexScreener(std::istream * input, LexCharClasses * char_classes) throw (excpt::Exception<LexScreener>);
     
 //     /**
 //        @brief sets a reference to the lexical character classes
@@ -649,7 +649,7 @@ namespace parse{
     /**
        @param input the input-stream to be scanned
     */
-    LexScanner(std::istream * input) throw (Exception<LexScreener>, ExceptionBase);
+    LexScanner(std::istream * input) throw (excpt::Exception<LexScreener>, excpt::ExceptionBase);
 
     ~LexScanner();
 
@@ -660,7 +660,7 @@ namespace parse{
        @brief gives the next token
        @return the token-type resp. token-value
     */
-    int nextToken() throw (Exception<LexScanner>);
+    int nextToken() throw (excpt::Exception<LexScanner>);
 
     /**
        Causes the scanner to put back this token which will be given in next turn of nextToken().
@@ -674,7 +674,7 @@ namespace parse{
        @return the token type
        @note The line is untruncted. Use String::trunc() to trunc leading and trailing blanks.
     */
-    int nextLine() throw (Exception<LexScanner>);
+    int nextLine() throw (excpt::Exception<LexScanner>);
 
     /**
        @brief returns the current line number the token occured in

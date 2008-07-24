@@ -27,6 +27,7 @@
 
 using namespace test;
 using namespace std;
+using namespace excpt;
 
 TestCaseBase::TestCaseBase(){
   pushErrorHandler(getDefaultErrorHandler());

@@ -284,10 +284,10 @@ namespace utils{
        @param observer the observer to be added
        @throws Exception< Observable<T> >
     */
-    virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
+    virtual void addObserver(Observer<T> *observer) throw (excpt::Exception< Observable<T> >){ 
       
       if ( observer == 0 )
-	throw Exception< Observable<T> >("observer is a nullpointer!");
+	throw excpt::Exception< Observable<T> >("observer is a nullpointer!");
       
       observers.insert(observer);
       
@@ -389,7 +389,7 @@ namespace utils{
        @param observer the observer to be added
        @throws Exception< Observable<T> >
     */
-    virtual void addObserver(Observer<T> *observer) throw (Exception< Observable<T> >){ 
+    virtual void addObserver(Observer<T> *observer) throw (excpt::Exception< Observable<T> >){ 
 
       Observable<T>::addObserver(observer);
       
@@ -466,7 +466,7 @@ namespace utils{
        @param notifier the notifier to be added to
        @exception Exception< Observable<T> >
     **/
-    void addToNotifier(Observable<T> *notifier) throw (Exception< Observable<T> >,ExceptionBase){
+    void addToNotifier(Observable<T> *notifier) throw (excpt::Exception< Observable<T> >,excpt::ExceptionBase){
 
       notifier->addObserver(this);
       notifiers.insert(notifier);

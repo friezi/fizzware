@@ -26,6 +26,7 @@
 #include <tcpclient.hpp>
 
 using namespace sys;
+using namespace excpt;
 
 void TCPClient::init() throw (Exception<TCPClient>,Exception<Socket>){
 
