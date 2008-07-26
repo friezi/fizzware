@@ -27,7 +27,7 @@
 
 using namespace std;
 using namespace sys;
-using namespace excpt;
+using namespace exc;
 
 const int TCPServer::TCPSERVER_QU_LENGTH=5;
 

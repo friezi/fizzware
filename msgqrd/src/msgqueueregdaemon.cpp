@@ -1,6 +1,7 @@
 #include "msgqueueregdaemon.hpp"
 
 using namespace std;
+using namespace exc;
 using namespace sys;
 using namespace ds;
 

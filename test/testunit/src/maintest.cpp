@@ -1,6 +1,7 @@
 #include "maintest.hpp"
 
 using namespace test;
+using namespace exc;
 using namespace std;
 
 TestUnit mainTestUnit;

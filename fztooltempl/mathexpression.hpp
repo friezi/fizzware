@@ -73,27 +73,27 @@ namespace mexp{
 
   };
  
-  class ParseException : public excpt::Exception<MathExpression> {
+  class ParseException : public exc::Exception<MathExpression> {
     
   private:
     static const std::string id;
     int pos;
     
   public:
-    ParseException(int pos) : excpt::Exception<MathExpression>(""){
+    ParseException(int pos) : exc::Exception<MathExpression>(""){
       this->pos = pos;
     }
     
-    ParseException(int pos, char *errormsg) : excpt::Exception<MathExpression>(std::string(errormsg)){
+    ParseException(int pos, char *errormsg) : exc::Exception<MathExpression>(std::string(errormsg)){
       this->pos = pos;
     }
     
-    ParseException(int pos, std::string errormsg) : excpt::Exception<MathExpression>(errormsg){
+    ParseException(int pos, std::string errormsg) : exc::Exception<MathExpression>(errormsg){
       this->pos = pos;
     }
     
     ParseException(int pos, const std::string &id, const std::string &errormsg)
-      : excpt::Exception<MathExpression>(id,errormsg){
+      : exc::Exception<MathExpression>(id,errormsg){
       this->pos = pos;
     }
 
@@ -101,18 +101,18 @@ namespace mexp{
 
   };
   
-  class EvalException : public excpt::Exception<MathExpression> {
+  class EvalException : public exc::Exception<MathExpression> {
     
   private:
     static const std::string id;
     std::string objname;
     
   public:
-    EvalException() : excpt::Exception<MathExpression>(""){
+    EvalException() : exc::Exception<MathExpression>(""){
       this->objname = "";
     }
     
-    EvalException(char *errormsg, char *objname=0) : excpt::Exception<MathExpression>(std::string(errormsg)){
+    EvalException(char *errormsg, char *objname=0) : exc::Exception<MathExpression>(std::string(errormsg)){
 
       if (objname)
 	this->objname = objname;
@@ -121,12 +121,12 @@ namespace mexp{
 
     }
     
-    EvalException(std::string errormsg) : excpt::Exception<MathExpression>(errormsg){
+    EvalException(std::string errormsg) : exc::Exception<MathExpression>(errormsg){
       this->objname = "";
     }
     
     EvalException(const std::string &id, const std::string &errormsg)
-      : excpt::Exception<MathExpression>(id,errormsg){
+      : exc::Exception<MathExpression>(id,errormsg){
       this->objname = "";
     }
 
@@ -145,7 +145,7 @@ namespace mexp{
 
   protected:
     
-    Value *notSupported() const throw (excpt::ExceptionBase) { throw EvalException("not supported!"); }
+    Value *notSupported() const throw (exc::ExceptionBase) { throw EvalException("not supported!"); }
 
   public:
 
@@ -159,35 +159,35 @@ namespace mexp{
     virtual Value *neutralAddition() const { return notSupported(); }
     virtual Value *neutralMultiplikation() const { return notSupported(); }
 
-    virtual Value *operator+(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *operator-(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *operator*(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *operator/(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual void operator+=(Value *right) throw (excpt::ExceptionBase){ notSupported(); }
-    virtual void operator*=(Value *right) throw (excpt::ExceptionBase){ notSupported(); }
-    virtual Value *integerDivision(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *operator%(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *pow(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *faculty() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *choose(Value *right) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *sin() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *cos() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *tan() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *asin() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *acos() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *atan() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *sinh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *cosh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *tanh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *asinh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *acosh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *atanh() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *ln() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *ld() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *log(Value *base) throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *exp() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *sgn() throw (excpt::ExceptionBase){ return notSupported(); }
-    virtual Value *tst() throw (excpt::ExceptionBase){ return notSupported(); }
+    virtual Value *operator+(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *operator-(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *operator*(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *operator/(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual void operator+=(Value *right) throw (exc::ExceptionBase){ notSupported(); }
+    virtual void operator*=(Value *right) throw (exc::ExceptionBase){ notSupported(); }
+    virtual Value *integerDivision(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *operator%(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *pow(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *faculty() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *choose(Value *right) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *sin() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *cos() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *tan() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *asin() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *acos() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *atan() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *sinh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *cosh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *tanh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *asinh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *acosh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *atanh() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *ln() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *ld() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *log(Value *base) throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *exp() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *sgn() throw (exc::ExceptionBase){ return notSupported(); }
+    virtual Value *tst() throw (exc::ExceptionBase){ return notSupported(); }
 
   };
 
@@ -208,7 +208,7 @@ namespace mexp{
 
     Value *clone() const;
 
-    Value *operator+(Value *right) throw (excpt::ExceptionBase);
+    Value *operator+(Value *right) throw (exc::ExceptionBase);
 
   };
 
@@ -220,10 +220,10 @@ namespace mexp{
 
   private:
 
-    static Complex *assertComplex(Value *value) throw(EvalException,excpt::ExceptionBase);
-    static Complex *assertReal(Value *value) throw(EvalException,excpt::ExceptionBase);
-    static Complex *assertInteger(Value *value) throw(EvalException,excpt::ExceptionBase);
-    static Complex *assertNatural(Value *value) throw(EvalException,excpt::ExceptionBase);
+    static Complex *assertComplex(Value *value) throw(EvalException,exc::ExceptionBase);
+    static Complex *assertReal(Value *value) throw(EvalException,exc::ExceptionBase);
+    static Complex *assertInteger(Value *value) throw(EvalException,exc::ExceptionBase);
+    static Complex *assertNatural(Value *value) throw(EvalException,exc::ExceptionBase);
     
   public:
     
@@ -245,35 +245,35 @@ namespace mexp{
     cmplx_tp getIm() const { return std::complex<cmplx_tp>::imag(); }
     bool isReal() const { return ( getIm() == 0 ); }
 
-    Value *operator+(Value *right) throw (excpt::ExceptionBase);
-    Value *operator-(Value *right) throw (excpt::ExceptionBase);
-    Value *operator*(Value *right) throw (excpt::ExceptionBase); 
-    Value *operator/(Value *right) throw (excpt::ExceptionBase);
-    void operator+=(Value *right) throw (excpt::ExceptionBase);
-    void operator*=(Value *right) throw (excpt::ExceptionBase);
-    Value *integerDivision(Value *right) throw (excpt::ExceptionBase);
-    Value *operator%(Value *right) throw (excpt::ExceptionBase);
-    Value *pow(Value *right) throw (excpt::ExceptionBase);
-    Value *faculty() throw (excpt::ExceptionBase);
-    Value *choose(Value *right) throw (excpt::ExceptionBase);
-    Value *sin() throw (excpt::ExceptionBase);
-    Value *cos() throw (excpt::ExceptionBase);
-    Value *tan() throw (excpt::ExceptionBase);
-    Value *asin() throw (excpt::ExceptionBase);
-    Value *acos() throw (excpt::ExceptionBase);
-    Value *atan() throw (excpt::ExceptionBase);
-    Value *sinh() throw (excpt::ExceptionBase);
-    Value *cosh() throw (excpt::ExceptionBase);
-    Value *tanh() throw (excpt::ExceptionBase);
-    Value *asinh() throw (excpt::ExceptionBase);
-    Value *acosh() throw (excpt::ExceptionBase);
-    Value *atanh() throw (excpt::ExceptionBase);
-    Value *ln() throw (excpt::ExceptionBase);
-    Value *ld() throw (excpt::ExceptionBase);
-    Value *log(Value *base) throw (excpt::ExceptionBase);
-    Value *exp() throw (excpt::ExceptionBase);
-    Value *sgn() throw (excpt::ExceptionBase);
-    Value *tst() throw (excpt::ExceptionBase);
+    Value *operator+(Value *right) throw (exc::ExceptionBase);
+    Value *operator-(Value *right) throw (exc::ExceptionBase);
+    Value *operator*(Value *right) throw (exc::ExceptionBase); 
+    Value *operator/(Value *right) throw (exc::ExceptionBase);
+    void operator+=(Value *right) throw (exc::ExceptionBase);
+    void operator*=(Value *right) throw (exc::ExceptionBase);
+    Value *integerDivision(Value *right) throw (exc::ExceptionBase);
+    Value *operator%(Value *right) throw (exc::ExceptionBase);
+    Value *pow(Value *right) throw (exc::ExceptionBase);
+    Value *faculty() throw (exc::ExceptionBase);
+    Value *choose(Value *right) throw (exc::ExceptionBase);
+    Value *sin() throw (exc::ExceptionBase);
+    Value *cos() throw (exc::ExceptionBase);
+    Value *tan() throw (exc::ExceptionBase);
+    Value *asin() throw (exc::ExceptionBase);
+    Value *acos() throw (exc::ExceptionBase);
+    Value *atan() throw (exc::ExceptionBase);
+    Value *sinh() throw (exc::ExceptionBase);
+    Value *cosh() throw (exc::ExceptionBase);
+    Value *tanh() throw (exc::ExceptionBase);
+    Value *asinh() throw (exc::ExceptionBase);
+    Value *acosh() throw (exc::ExceptionBase);
+    Value *atanh() throw (exc::ExceptionBase);
+    Value *ln() throw (exc::ExceptionBase);
+    Value *ld() throw (exc::ExceptionBase);
+    Value *log(Value *base) throw (exc::ExceptionBase);
+    Value *exp() throw (exc::ExceptionBase);
+    Value *sgn() throw (exc::ExceptionBase);
+    Value *tst() throw (exc::ExceptionBase);
 
   };
  
@@ -360,10 +360,10 @@ namespace mexp{
     // for n-ary operators (like ',')
     std::list<MathExpression *> elements;
     
-    MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,excpt::ExceptionBase);
+    MathExpression *parse(const char *expr, VariableList& locals) throw (ParseException,exc::ExceptionBase);
 
     int parseCommaOperator(const char *expr, int e_indx, MathExpression * & ActualNode, MathExpression * & PrevNode,
-			   MathExpression * & TopNode, VariableList & locals) throw (ParseException, excpt::ExceptionBase);
+			   MathExpression * & TopNode, VariableList & locals) throw (ParseException, exc::ExceptionBase);
     void searchAndSetLowerPriNode(MathExpression * & ActualNode, MathExpression * & PrevNode, MathExpression * & TopNode);
     int determineAndSetOperatorOrVariable(const char *expr, int e_indx, MathExpression * & ActualNode, const FunctionList *functionlist);
     
@@ -374,9 +374,9 @@ namespace mexp{
     // return: <0 if c0<c1, =0 if c0=c1, >0 if c0>c1
     static int priCompare(const char *c0, const char *c1);
     bool checkSyntaxAndOptimize(void) throw (ParseException);
-    Value *sumProd(void) throw (excpt::ExceptionBase);
-    Value *assignValue(void) throw (excpt::ExceptionBase);
-    Value *evalFunction(void) throw (excpt::ExceptionBase);
+    Value *sumProd(void) throw (exc::ExceptionBase);
+    Value *assignValue(void) throw (exc::ExceptionBase);
+    Value *evalFunction(void) throw (exc::ExceptionBase);
     void defineFunction(void) throw (EvalException,ParseException);
     void checkBody(MathExpression *body, MathExpression *pl, VariableList *lvl) const throw(EvalException);
     bool isEmpty(void) const { return ( getEType() == ET_EMPTY ); }
@@ -451,8 +451,8 @@ namespace mexp{
     // countArgs functions only with a correct (syntax!) tree!
     unsigned int countArgs(void);
 
-    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, Value * argument) throw (excpt::ExceptionBase);
-    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameters, MathExpression * arguments) throw (excpt::ExceptionBase);
+    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameter, Value * argument) throw (exc::ExceptionBase);
+    void assignVariablesInFunctionhead(VariableList & vl, MathExpression * parameters, MathExpression * arguments) throw (exc::ExceptionBase);
     
     // private constructor:
     MathExpression(int abs_pos, VariableList *vl = 0, FunctionList *fl = 0);
@@ -470,12 +470,12 @@ namespace mexp{
        @exception OutOfMemException
     */
     MathExpression(const char *expression, VariableList *vl = 0, FunctionList *fl = 0)
-      throw (ParseException,excpt::ExceptionBase);
+      throw (ParseException,exc::ExceptionBase);
  
   protected:
 
     MathExpression(MathExpression *me, VariableList *vl, FunctionList *fl, int abs_pos)
-      throw (ParseException,excpt::ExceptionBase);
+      throw (ParseException,exc::ExceptionBase);
 
     Value * evalTupleExpression();
 
@@ -490,7 +490,7 @@ namespace mexp{
        @brief calculates the faculty
        @return the faculty
     */
-    static double faculty(double fac) throw (excpt::ExceptionBase);
+    static double faculty(double fac) throw (exc::ExceptionBase);
     
     /**
        @brief print prints the mathematic expression totally bracketed to stdout
@@ -501,7 +501,7 @@ namespace mexp{
        @brief returns a string-representation of the expression
        @return the string-representation
     */
-    std::string toString(std::streamsize precision) const throw (excpt::Exception<MathExpression>,excpt::ExceptionBase);
+    std::string toString(std::streamsize precision) const throw (exc::Exception<MathExpression>,exc::ExceptionBase);
 
     /**
        @brief returns a string-representation of the builtin functions
@@ -517,7 +517,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    Value *eval() throw (excpt::ExceptionBase,FunctionDefinition);
+    Value *eval() throw (exc::ExceptionBase,FunctionDefinition);
 
     /**
        @brief returns the signum of the value
@@ -656,7 +656,7 @@ namespace mexp{
        @exception OutOfMemException
     */
     Variable(const char *name, Value *value, char protect)
-      throw (excpt::ExceptionBase);
+      throw (exc::ExceptionBase);
     // destructor:
     ~Variable();
 
@@ -727,7 +727,7 @@ namespace mexp{
        @exception EvalException
        @exception OutOfMemException
     */
-    VariableList(const VariableList& vl) throw (excpt::ExceptionBase);
+    VariableList(const VariableList& vl) throw (exc::ExceptionBase);
 
     // destructor:
     ~VariableList();
@@ -737,15 +737,15 @@ namespace mexp{
        @exception OutOfMemException
     */
     void insert(const char *name, Value *value, char protect=0)
-      throw (excpt::ExceptionBase);
-    void remove(const char *name) throw (excpt::Exception<VariableList>);
+      throw (exc::ExceptionBase);
+    void remove(const char *name) throw (exc::Exception<VariableList>);
 
     /**
        @brief returns a new copy of the requested value
        @return copy of value
        @exception EvalException
     */
-    Value *getValue(const char *name) const throw (excpt::ExceptionBase);
+    Value *getValue(const char *name) const throw (exc::ExceptionBase);
     Variable *isMember(const char *name) const;
     void unprotect(const char *name=0);
     void print(std::streamsize precision) const;    
@@ -824,12 +824,12 @@ namespace mexp{
        @brief inserts a functionelement to the list
        @param fe the functionelement
     */
-    void insert(Function *fe) throw(excpt::Exception<FunctionList>);
+    void insert(Function *fe) throw(exc::Exception<FunctionList>);
 
     /**
        @brief removes a function from the list
     */
-    void remove(const char *name) throw(excpt::Exception<FunctionList>);
+    void remove(const char *name) throw(exc::Exception<FunctionList>);
 
     /**
        @brief prints the complete list (if name==0) or the function with name <name> to standard-output

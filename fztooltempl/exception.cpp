@@ -31,7 +31,7 @@
 #include <exception.hpp>
 
 using namespace std;
-using namespace excpt;
+using namespace exc;
   
 ExceptionBase::ExceptionBase(const string &id){
     this->errormsg = "";
@@ -65,7 +65,7 @@ string ExceptionBase::skipLetters(const string &s){
   return string(sptr);
 }
 
-ostream& operator<<(ostream& ostr, const ExceptionBase& e){
+ostream& exc::operator<<(ostream& ostr, const ExceptionBase& e){
 
   ostr << e.getIdMsg();
   return ostr;

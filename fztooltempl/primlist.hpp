@@ -60,13 +60,13 @@ private:
      set the position in the bitfield to the next primenumber
      @exception Exception<PrimList>
   */
-  void setPosToNextPrim(void) throw(excpt::Exception<PrimList>);
+  void setPosToNextPrim(void) throw(exc::Exception<PrimList>);
 
   /**
      set the position in the bitfield to the previous primenumber
      @exception Exception<PrimList>
   */
-  void setPosToPrevPrim(void) throw(excpt::Exception<PrimList>);
+  void setPosToPrevPrim(void) throw(exc::Exception<PrimList>);
  
 
 public:
@@ -83,7 +83,7 @@ public:
      @return the primenumber
      @exception Exception<PrimList>
   */
-  long get(long index) throw(excpt::Exception<PrimList>);
+  long get(long index) throw(exc::Exception<PrimList>);
 
   /**
      @brief print the primelist

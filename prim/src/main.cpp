@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 using namespace std;
+using namespace exc;
 
 int main(int argc, char *argv[]){
 

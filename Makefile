@@ -1,4 +1,4 @@
-DIRS = fizzcal matchit msgqrd msgqrclient prim primfak process
+DIRS = fizzcal matchit msgqrd msgqrclient prim primfak process hpreis
 
 EDITOR ?= vi
 

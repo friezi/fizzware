@@ -3,6 +3,7 @@
 #define SEMKEY 100
 
 using namespace std;
+using namespace exc;
 using namespace sys;
 
 class MyProcess : public Process{

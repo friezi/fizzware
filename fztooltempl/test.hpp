@@ -64,7 +64,7 @@ namespace test{
     HandlerStack successHandlers;
     HandlerStack statisticHelpers;
 
-    static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (excpt::Exception<TestCaseBase>);
+    static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (exc::Exception<TestCaseBase>);
  
   public:
 
@@ -102,36 +102,36 @@ namespace test{
 
     void callStatisticHelpers();
     
-    void assertTrue(bool value) throw (excpt::Exception<TestCaseBase>);
+    void assertTrue(bool value) throw (exc::Exception<TestCaseBase>);
     
-    void assertTrue(bool value, std::string id) throw (excpt::Exception<TestCaseBase>);
+    void assertTrue(bool value, std::string id) throw (exc::Exception<TestCaseBase>);
     
-    void assertFalse(bool value) throw (excpt::Exception<TestCaseBase>);
+    void assertFalse(bool value) throw (exc::Exception<TestCaseBase>);
     
-    void assertFalse(bool value, std::string id) throw (excpt::Exception<TestCaseBase>);
+    void assertFalse(bool value, std::string id) throw (exc::Exception<TestCaseBase>);
 
     template <typename TE, typename TR>
-    void assertEquals(TE expected, TR reference) throw (excpt::Exception<TestCaseBase>){
+    void assertEquals(TE expected, TR reference) throw (exc::Exception<TestCaseBase>){
       assertEquals(static_cast<TR>(expected),reference);
     }
     
     template <typename T>
-    void assertEquals(T expected, T reference) throw (excpt::Exception<TestCaseBase>){
+    void assertEquals(T expected, T reference) throw (exc::Exception<TestCaseBase>){
 
       if ( expected != reference ){
 
 	std::ostringstream err;
 	err << "Equals failed! expected: \"" << expected << "\" got: \"" << reference << "\"";
-	throw excpt::Exception<TestCaseBase>(err.str());
+	throw exc::Exception<TestCaseBase>(err.str());
 
       }	
     }
     
   protected:
     
-    void error(char msg[]) throw (excpt::Exception<TestCaseBase>);
+    void error(char msg[]) throw (exc::Exception<TestCaseBase>);
     
-    void error(std::string msg) throw (excpt::Exception<TestCaseBase>);
+    void error(std::string msg) throw (exc::Exception<TestCaseBase>);
     
     void success();
     
@@ -167,7 +167,7 @@ namespace test{
 
     void addTest(void (T::*test)(), std::string id){ tests.push_back(std::pair<void (T::*)(),std::string>(test,id)); }
 
-    void operator()() throw (excpt::Exception< TestCase<T> >){
+    void operator()() throw (exc::Exception< TestCase<T> >){
 
       setUp();
       startTests();
@@ -178,12 +178,12 @@ namespace test{
 
   private:
 
-    void startTests() throw (excpt::Exception< TestCase<T> >){
+    void startTests() throw (exc::Exception< TestCase<T> >){
 
       T * self;
 
       if ( (self = dynamic_cast<T *>(this)) == 0 )
-	throw excpt::Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
+	throw exc::Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
   
       typename Tests::iterator it;
       for ( it = tests.begin(); it != tests.end(); it++ ){
@@ -194,13 +194,13 @@ namespace test{
 	  (self->*((*it).first))();
 	  success();
 	  
-	} catch (excpt::ExceptionBase &e){
+	} catch (exc::ExceptionBase &e){
 	  
 	  try{
 	    
 	    error(e.getMsg());
 	    
-	  } catch (excpt::ExceptionBase &ee){
+	  } catch (exc::ExceptionBase &ee){
 	    std::cerr << getTestCaseName() + ":" + (*it).second + " failed!: " + ee.getMsg() << std::endl;
 	  }
 	}    
@@ -230,7 +230,7 @@ namespace test{
 
     void addTestCase(TestCaseBase * testcase){ testcases.push_back(testcase); }
 
-    void operator()() throw (excpt::ExceptionBase);
+    void operator()() throw (exc::ExceptionBase);
 
     unsigned long getNmbTestCases(){ return testcases.size(); }
 

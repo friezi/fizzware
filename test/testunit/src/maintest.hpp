@@ -12,7 +12,7 @@ private:
 
   static unsigned long nmb;
 
-  static void myErrorHandler1(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>);
+  static void myErrorHandler1(test::TestCaseBase *testcase, std::string msg) throw (exc::Exception<test::TestCaseBase>);
   static void mySuccessHandler1(test::TestCaseBase *testcase, std::string msg);
 
 public:
@@ -35,25 +35,25 @@ public:
 
   std::string getTestCaseName(){ return NAME; }
 
-  void test1() throw (ExceptionBase){
+  void test1() throw (exc::ExceptionBase){
 
     assertTrue(false);
 
   }
 
-  void test2() throw (ExceptionBase){
+  void test2() throw (exc::ExceptionBase){
 
     assertEquals(1,2);
 
   }
 
-  void test3() throw (ExceptionBase){
+  void test3() throw (exc::ExceptionBase){
 
     assertEquals(std::string("1,2,3"),std::string("1,2,3"));
 
   }
 
-  void test4() throw (ExceptionBase){
+  void test4() throw (exc::ExceptionBase){
 
     assertEquals(std::string("1,2,3"),std::string("2,2,3"));
 
@@ -67,7 +67,7 @@ private:
 
   static unsigned long nmb;
 
-  static void myErrorHandler2(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>);
+  static void myErrorHandler2(test::TestCaseBase *testcase, std::string msg) throw (exc::Exception<test::TestCaseBase>);
   
 public:
 
@@ -81,12 +81,12 @@ public:
 
   std::string getTestCaseName(){ return "MyTestCase2"; }
 
-  void test1() throw (ExceptionBase){
+  void test1() throw (exc::ExceptionBase){
     assertFalse(true);
 
   }
 
-  void test2() throw (ExceptionBase){
+  void test2() throw (exc::ExceptionBase){
     assertTrue(false);
 
   }
@@ -123,7 +123,7 @@ public:
 
 unsigned long MyTestCase1::nmb;
 
-void MyTestCase1::myErrorHandler1(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
+void MyTestCase1::myErrorHandler1(test::TestCaseBase *testcase, std::string msg) throw (exc::Exception<test::TestCaseBase>){
   nmb++;
 }
 

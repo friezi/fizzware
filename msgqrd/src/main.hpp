@@ -5,6 +5,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <libgen.h>
+#include <exception.hpp>
 #include <cmdlparser.hpp>
 #include "msgqueueregdaemon.hpp"
 

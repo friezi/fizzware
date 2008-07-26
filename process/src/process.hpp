@@ -90,33 +90,33 @@ public:
      @exception ActiveErr
      @exception RuntimeErr
   */
-  void launch() throw (ExceptionBase);
+  void launch() throw (exc::ExceptionBase);
 
   /**
      @brief Sends the signal SIGKILL to process
      @exception AbortErr
   */
-  void abort() throw(ExceptionBase);
+  void abort() throw(exc::ExceptionBase);
 
   /**
      @brief sends the signal SIGTERM to process
      @exception TerminateErr
   */
-  void terminate() throw(ExceptionBase);
+  void terminate() throw(exc::ExceptionBase);
 
   /**
      @brief Sends a signal to the process
      @param signal the signal
      @exception SignalErr
   */
-  void sendSignal(int signal) throw(ExceptionBase);
+  void sendSignal(int signal) throw(exc::ExceptionBase);
 
   /**
      @brief Waits for process to exit
      @param status will be filled with exit-status of the process, if status != 0
      @exception WaitErr
   */
-  pid_t wait(int *status = 0) throw(ExceptionBase);
+  pid_t wait(int *status = 0) throw(exc::ExceptionBase);
 
   /**
      @brief Get the Process-ID
@@ -138,7 +138,7 @@ public:
   
 };
 
-class CreateErr : public Exception<Process>{
+class CreateErr : public exc::Exception<Process>{
   
 private:
   
@@ -147,16 +147,16 @@ private:
 public:
   
   CreateErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   CreateErr(const char * const errormsg,unsigned int pnmb)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   CreateErr(const std::string &errormsg,unsigned int pnmb)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   CreateErr(const std::string &id, const std::string &errormsg,unsigned int pnmb)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": couldn't create process! "
@@ -164,7 +164,7 @@ public:
   }
 };
 
-class ActiveErr : public Exception<Process>{
+class ActiveErr : public exc::Exception<Process>{
    
 private:
   
@@ -173,23 +173,23 @@ private:
 public:
   
   ActiveErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   ActiveErr(const char * const errormsg, unsigned int pnmb)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   ActiveErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   ActiveErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
   virtual void show() const {
     std::cout << this->getIdMsg() << ": process is active or zombie! "
 	 << "internal processobjectnumber: " << pnmb << "\n";
   }
 };
 
-class AbortErr : public Exception<Process>{
+class AbortErr : public exc::Exception<Process>{
   
 private:
   
@@ -198,16 +198,16 @@ private:
 public:
   
   AbortErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   AbortErr(const char * const errormsg)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   AbortErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   AbortErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": process to abort is not active! "
@@ -215,7 +215,7 @@ public:
   }
 };
 
-class TerminateErr : public Exception<Process>{
+class TerminateErr : public exc::Exception<Process>{
   
 private:
   
@@ -224,16 +224,16 @@ private:
 public:
   
   TerminateErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   TerminateErr(const char * const errormsg)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   TerminateErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   TerminateErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": process to terminate is not active! "
@@ -241,7 +241,7 @@ public:
   }
 };
 
-class SignalErr : public Exception<Process>{
+class SignalErr : public exc::Exception<Process>{
   
 private:
   
@@ -250,16 +250,16 @@ private:
 public:
   
   SignalErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   SignalErr(const char * const errormsg)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   SignalErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   SignalErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": process to send signal to is not active! "
@@ -267,7 +267,7 @@ public:
   }
 };
 
-class WaitErr : public Exception<Process>{
+class WaitErr : public exc::Exception<Process>{
   
 private:
   
@@ -276,16 +276,16 @@ private:
 public:
   
   WaitErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   WaitErr(const char * const errormsg)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   WaitErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   WaitErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": process to wait for is not active! "
@@ -293,7 +293,7 @@ public:
   }
 };
 
-class RuntimeErr : public Exception<Process>{
+class RuntimeErr : public exc::Exception<Process>{
   
 private:
   
@@ -302,16 +302,16 @@ private:
 public:
   
   RuntimeErr(unsigned int pnmb)
-    : Exception<Process>(""),pnmb(pnmb){}
+    : exc::Exception<Process>(""),pnmb(pnmb){}
 
   RuntimeErr(const char * const errormsg)
-    : Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
+    : exc::Exception<Process>(std::string(errormsg)),pnmb(pnmb){}
   
   RuntimeErr(const std::string &errormsg)
-    : Exception<Process>(errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(errormsg),pnmb(pnmb){}
 
   RuntimeErr(const std::string &id, const std::string &errormsg)
-    : Exception<Process>(id,errormsg),pnmb(pnmb){}
+    : exc::Exception<Process>(id,errormsg),pnmb(pnmb){}
 
   virtual void show() const {
     std::cout << this->getIdMsg() << ": internal processobjectnumber: "

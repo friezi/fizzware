@@ -21,6 +21,8 @@
 
 #include "process.hpp"
 
+using namespace exc;
+
 unsigned int Process::pcount=0;
 
 pid_t Process::wait(int *status) throw(ExceptionBase){

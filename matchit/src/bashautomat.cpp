@@ -25,6 +25,8 @@
 
 #include "bashautomat.hpp"
 
+using namespace exc;
+
 Automat::Automat(char *pattern, SpecSymbols *spec_symbols)
   : statelist(0), nos(0){
 

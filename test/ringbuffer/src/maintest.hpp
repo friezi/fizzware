@@ -42,7 +42,7 @@ public:
 
   std::string getTestCaseName(){ return "RingbufferTest"; }
 
-  void quietTest() throw (ExceptionBase){
+  void quietTest() throw (exc::ExceptionBase){
     
     for ( int i = 1; i <= 37; i++)
       buffer->enqueue(i);
@@ -52,7 +52,7 @@ public:
 
   }
 
-  void quietInsertTest() throw (ExceptionBase){
+  void quietInsertTest() throw (exc::ExceptionBase){
    
     (*buffer)[9] = 1;
 
@@ -67,7 +67,7 @@ public:
 
   }
 
-  void alertingTest() throw (ExceptionBase){
+  void alertingTest() throw (exc::ExceptionBase){
     
     for ( int i = 1; i <= 10; i++)
       buffer2->enqueue(i);
@@ -77,7 +77,7 @@ public:
 
   }
 
-  void alertingDequeueTest() throw (ExceptionBase){
+  void alertingDequeueTest() throw (exc::ExceptionBase){
 
     assertEquals(1,buffer2->dequeue());
     assertEquals(9,buffer2->getElements());
@@ -87,7 +87,7 @@ public:
 
   }
 
-  void alertingSkipTest() throw (ExceptionBase){
+  void alertingSkipTest() throw (exc::ExceptionBase){
 
     buffer2->skip(2);
 
@@ -110,15 +110,15 @@ public:
 
   }
 
-  void alertingEnqueueTest() throw (ExceptionBase){
+  void alertingEnqueueTest() throw (exc::ExceptionBase){
   
     try{
       buffer2->enqueue(1);
-    } catch (ExceptionBase &e){
+    } catch (exc::ExceptionBase &e){
       return;
     }
 
-    throw Exception<test::TestCaseBase>("expected Exception in alerting-mode on inserting into full buffer!");
+    throw exc::Exception<test::TestCaseBase>("expected Exception in alerting-mode on inserting into full buffer!");
     
   }
   

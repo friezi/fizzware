@@ -164,9 +164,9 @@ namespace sys{
     
       ~Scanner() { fd = 0; }
     
-      Token *nextToken() throw (excpt::Exception<Scanner>,excpt::Exception<BadToken>,excpt::ExceptionBase);
+      Token *nextToken() throw (exc::Exception<Scanner>,exc::Exception<BadToken>,exc::ExceptionBase);
     
-      ULongToken *nextULongToken() throw (excpt::Exception<Scanner>,excpt::Exception<BadToken>,excpt::ExceptionBase);
+      ULongToken *nextULongToken() throw (exc::Exception<Scanner>,exc::Exception<BadToken>,exc::ExceptionBase);
     
       int isBlank(char c);
     };
@@ -183,7 +183,7 @@ namespace sys{
        @exception Exception<MsgQueueRegClient>
        @exception ExceptionBase
     */
-    MsgQueueRegClient(std::string socket_path) throw(excpt::Exception<MsgQueueRegClient>,excpt::ExceptionBase);
+    MsgQueueRegClient(std::string socket_path) throw(exc::Exception<MsgQueueRegClient>,exc::ExceptionBase);
   
     ~MsgQueueRegClient();
 
@@ -193,7 +193,7 @@ namespace sys{
        @exception Exception<MsgQueueRegClient>
        @exception ExceptionBase
     */
-    bool newPort(std::string name) throw (excpt::Exception<MsgQueueRegClient>,excpt::ExceptionBase);
+    bool newPort(std::string name) throw (exc::Exception<MsgQueueRegClient>,exc::ExceptionBase);
 
     /**
        @brief Commands the msgpd to add an already existing MsgQueue
@@ -202,7 +202,7 @@ namespace sys{
        @exception Exception<MsgQueueRegClient>
        @exception ExceptionBase
     */
-    bool addPort(std::string name, int id) throw (excpt::Exception<MsgQueueRegClient>,excpt::ExceptionBase);
+    bool addPort(std::string name, int id) throw (exc::Exception<MsgQueueRegClient>,exc::ExceptionBase);
 
     /**
        @brief Commands the msgpd to find the ID of a MsgQueue
@@ -210,7 +210,7 @@ namespace sys{
        @exception Exception<MsgQueueRegClient>
        @exception ExceptionBase
     */
-    int findPort(std::string name) throw (excpt::Exception<MsgQueueRegClient>,excpt::ExceptionBase);
+    int findPort(std::string name) throw (exc::Exception<MsgQueueRegClient>,exc::ExceptionBase);
 
     /**
        @brief Commands the msgpd to remove a MsgQueue of the list
@@ -218,7 +218,7 @@ namespace sys{
        @exception Exception<MsgQueueRegClient>
        @exception ExceptionBase
     */
-    bool removePort(std::string name) throw (excpt::Exception<MsgQueueRegClient>,excpt::ExceptionBase);
+    bool removePort(std::string name) throw (exc::Exception<MsgQueueRegClient>,exc::ExceptionBase);
 
   };
 

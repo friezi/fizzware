@@ -31,7 +31,7 @@
 #include <propertyreader.hpp>
 
 using namespace std;
-using namespace excpt;
+using namespace exc;
 using namespace ds;
 using namespace cmdl;
 using namespace utils;

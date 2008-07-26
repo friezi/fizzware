@@ -2,6 +2,7 @@
 
 using namespace std;
 using namespace sys;
+using namespace exc;
 
 int main(int argc, char **argv){
 

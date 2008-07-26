@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 using namespace sys;
+using namespace exc;
 
 int main(){
 

@@ -45,7 +45,7 @@
 /**
    @brief the exception-namespace
 */
-namespace excpt{
+namespace exc{
 
   // Not for direct use!!!
   /**

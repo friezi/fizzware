@@ -68,7 +68,7 @@ namespace ds{
        @param blksize the size of memory to be allocated
        @param clear_on_exit if true, free() will be called for internal pointer on destruction of object
     */
-    MemPointer(unsigned long blksize, bool clear_on_exit ) throw (excpt::ExceptionBase);
+    MemPointer(unsigned long blksize, bool clear_on_exit ) throw (exc::ExceptionBase);
     
     // attention: probably due to a bug in g++ (occured with V4.0.1) sometimes the ptr will be freed during copy-construction despite
     // setting clearflag to false!!!
@@ -186,10 +186,10 @@ namespace ds{
     /**
        @param blksize size of a block in the buffer
     */
-    DynamicBuffer(unsigned long blksize) throw (excpt::Exception< DynamicBuffer<T> >) : blksize(blksize), offs(0), blocks(0), elements(0){
+    DynamicBuffer(unsigned long blksize) throw (exc::Exception< DynamicBuffer<T> >) : blksize(blksize), offs(0), blocks(0), elements(0){
       
       if ( !blksize )
-	throw excpt::Exception< DynamicBuffer<T> >("DynamicBuffer(): blksize is zero!");
+	throw exc::Exception< DynamicBuffer<T> >("DynamicBuffer(): blksize is zero!");
       
     }
     
@@ -197,7 +197,7 @@ namespace ds{
     /**
        @exception ExceptionBase
     */
-    ~DynamicBuffer() throw (excpt::ExceptionBase);
+    ~DynamicBuffer() throw (exc::ExceptionBase);
     
     // Element in den Puffer schreiben
     /**
@@ -205,7 +205,7 @@ namespace ds{
        @param c reference to the object
        @exception ExceptionBase
     */
-    void put(const T &c) throw (excpt::ExceptionBase);
+    void put(const T &c) throw (exc::ExceptionBase);
     
     // Bloecke zu einem Block zusammenfuegen (NULL terminiert)
     /**
@@ -216,13 +216,13 @@ namespace ds{
        to convert it into a string, e.g. use put(0). After merging the buffer will be cleared and reset to initial state.
        @exception Exception< DynamicBuffer<T> >
     */
-    T *merge() throw (excpt::ExceptionBase);
+    T *merge() throw (exc::ExceptionBase);
 
     /**
        @brief returns a certain element
        @return the element
     */
-    T get(unsigned long number) throw (excpt::Exception< ds::DynamicBuffer<T> >,excpt::ExceptionBase);
+    T get(unsigned long number) throw (exc::Exception< ds::DynamicBuffer<T> >,exc::ExceptionBase);
     
     // Anzahl der Bloecke
     /**
@@ -282,7 +282,7 @@ namespace ds{
 
   protected:
 
-    void assertInBounds(size_t index) throw (excpt::Exception<RingBuffer>);
+    void assertInBounds(size_t index) throw (exc::Exception<RingBuffer>);
 
     void next(size_t & reference);
 
@@ -307,14 +307,14 @@ namespace ds{
        @param element the element to be stored
        @throw Exception<RingBuffer>
     */
-    void enqueue(T element) throw (excpt::Exception<RingBuffer>);
+    void enqueue(T element) throw (exc::Exception<RingBuffer>);
 
     /**
        @brief removes and returns the first element of the queue
        @return the first element
        @throw Exception<RingBuffer>
     */
-    T & dequeue() throw (excpt::Exception<RingBuffer>);
+    T & dequeue() throw (exc::Exception<RingBuffer>);
 
     /**
        @brief returns the element at a position of the buffer
@@ -322,14 +322,14 @@ namespace ds{
        @return reference to the element at position
        @throw Exception<RingBuffer>
     */
-    T & operator[](size_t position) throw (excpt::Exception<RingBuffer>);
+    T & operator[](size_t position) throw (exc::Exception<RingBuffer>);
 
     /**
        @brief skips the first number elements of the buffer
        @param number the number of elements to be skipped
        @throw Exception<RingBuffer>
     */
-    void skip(size_t number) throw (excpt::Exception<RingBuffer>);
+    void skip(size_t number) throw (exc::Exception<RingBuffer>);
 
     /**
        @brief returns the number of stored elements
@@ -547,10 +547,10 @@ namespace ds{
        @param rows number of rows
        @param columns number of columns
     **/
-    BitMatrix(unsigned long rows, unsigned long columns) throw (excpt::Exception<BitMatrix>) : rows(rows),columns(columns){
+    BitMatrix(unsigned long rows, unsigned long columns) throw (exc::Exception<BitMatrix>) : rows(rows),columns(columns){
 
       if ( !(bitmatrix = (char *)::calloc(1,(size_t)((rows*columns)/sizeof(char)) + ((rows*columns)%sizeof(char)? 1 : 0))) )
-	throw excpt::Exception<BitMatrix>("calloc() failed!");
+	throw exc::Exception<BitMatrix>("calloc() failed!");
 
     }
 
@@ -559,10 +559,10 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void setBit(unsigned long row, unsigned long column) throw (excpt::Exception<BitMatrix>){
+    void setBit(unsigned long row, unsigned long column) throw (exc::Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw excpt::Exception<BitMatrix>("OutOfBounds");
+	throw exc::Exception<BitMatrix>("OutOfBounds");
 
       bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] |= (1L << (row*columns+column)%sizeof(char));
       
@@ -573,10 +573,10 @@ namespace ds{
        @param row the row-position
        @param column the column-position
     **/
-    void clearBit(unsigned long row, unsigned long column) throw (excpt::Exception<BitMatrix>){
+    void clearBit(unsigned long row, unsigned long column) throw (exc::Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw excpt::Exception<BitMatrix>("OutOfBounds");
+	throw exc::Exception<BitMatrix>("OutOfBounds");
 
       bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] &= ~(1L << (row*columns+column)%sizeof(char));
       
@@ -588,10 +588,10 @@ namespace ds{
        @param column the column-position
        @return 0 or 1 if bit is unset resp. set
     **/
-    char getBit(unsigned long row, unsigned long column) throw (excpt::Exception<BitMatrix>){
+    char getBit(unsigned long row, unsigned long column) throw (exc::Exception<BitMatrix>){
       
       if ( row < 0 || row >= rows  || column < 0 || column >= columns )
-	throw excpt::Exception<BitMatrix>("OutOfBounds");
+	throw exc::Exception<BitMatrix>("OutOfBounds");
 
       return (char)(bitmatrix.get()[(unsigned long)((row*columns+column)/sizeof(char))] & (1L << (row*columns+column)%sizeof(char)));
       
@@ -688,18 +688,18 @@ operator--(){
 
 template<typename T>
 ds::MemPointer<T>::
-MemPointer(unsigned long blksize,bool clear_on_exit ) throw (excpt::ExceptionBase) : clearflag(clear_on_exit){
+MemPointer(unsigned long blksize,bool clear_on_exit ) throw (exc::ExceptionBase) : clearflag(clear_on_exit){
 
   if ( blksize == 0 )
-    throw excpt::Exception< ds::MemPointer<T> >("MemPointer(): blksize is zero!");
+    throw exc::Exception< ds::MemPointer<T> >("MemPointer(): blksize is zero!");
   
   if ( !(ptr = (T *)calloc(blksize,sizeof(T))) )
-    throw excpt::Exception< ds::MemPointer<T> >("MemPointer(): calloc() failed!");
+    throw exc::Exception< ds::MemPointer<T> >("MemPointer(): calloc() failed!");
 }
 
 template<typename T>
 ds::DynamicBuffer<T>::
-~DynamicBuffer() throw (excpt::ExceptionBase){
+~DynamicBuffer() throw (exc::ExceptionBase){
   clear();
 }
 
@@ -721,7 +721,7 @@ newBlock(){
 template<typename T>
 void
 ds::DynamicBuffer<T>::
-put(const T &c) throw (excpt::ExceptionBase){
+put(const T &c) throw (exc::ExceptionBase){
   
   ds::MemPointer<T> *curr;
   
@@ -750,13 +750,13 @@ put(const T &c) throw (excpt::ExceptionBase){
 template< typename T >
 T
 ds::DynamicBuffer<T>::
-get(unsigned long number) throw (excpt::Exception< ds::DynamicBuffer<T> >,excpt::ExceptionBase){
+get(unsigned long number) throw (exc::Exception< ds::DynamicBuffer<T> >,exc::ExceptionBase){
 
   unsigned long blocknumber;
   unsigned long position;
 
   if ( number < 1 || number > getElements() )
-    throw excpt::Exception< ds::DynamicBuffer<T> >("get(): index out of bounds!");
+    throw exc::Exception< ds::DynamicBuffer<T> >("get(): index out of bounds!");
 
   blocknumber = ((unsigned long)(number/blksize)) + 1;
   position = (number-1)%blksize;
@@ -768,7 +768,7 @@ get(unsigned long number) throw (excpt::Exception< ds::DynamicBuffer<T> >,excpt:
       break;
 
   if ( it == blocklist.end() )
-    throw excpt::Exception< ds::DynamicBuffer<T> >("get(): internal error: blocklist at end!");
+    throw exc::Exception< ds::DynamicBuffer<T> >("get(): internal error: blocklist at end!");
 
   return (*it)->get()[position];
 
@@ -777,7 +777,7 @@ get(unsigned long number) throw (excpt::Exception< ds::DynamicBuffer<T> >,excpt:
 template<typename T>
 T *
 ds::DynamicBuffer<T>::
-merge() throw (excpt::ExceptionBase){
+merge() throw (exc::ExceptionBase){
   
   unsigned long pos=0, full_blocks;
   T *block;
@@ -790,14 +790,14 @@ merge() throw (excpt::ExceptionBase){
   if ( blocks > 1 ){
     
     if ( !(block = (T *)calloc(getElements(),sizeof(T))) )
-      throw excpt::Exception< ds::DynamicBuffer<T> >("merge(): calloc failed!");
+      throw exc::Exception< ds::DynamicBuffer<T> >("merge(): calloc failed!");
     
     unsigned long blocknumber = 0;
 
     for ( typename std::list< ds::MemPointer<T> *>::iterator it = blocklist.begin(); it != blocklist.end(); it++, blocknumber++ ){
       
       if ( !(*it)->get() )
-	throw excpt::Exception< ds::DynamicBuffer<T> >("merge(): ptr == NULL!");
+	throw exc::Exception< ds::DynamicBuffer<T> >("merge(): ptr == NULL!");
       
       if ( blocknumber < full_blocks ){
 	
@@ -864,12 +864,12 @@ ds::RingBuffer<T>::
 template <typename T>
 void
 ds::RingBuffer<T>::
-assertInBounds(size_t index) throw (excpt::Exception<RingBuffer>){
+assertInBounds(size_t index) throw (exc::Exception<RingBuffer>){
 
   utils::String thisMethod = "assertInBounds()";
 
   if ( index >= elements || index < 0 )
-    throw excpt::Exception<RingBuffer>(thisMethod + ": object " + this + ": index " + index + " out of bounds!");
+    throw exc::Exception<RingBuffer>(thisMethod + ": object " + this + ": index " + index + " out of bounds!");
 
 }
 
@@ -925,7 +925,7 @@ getIndex(size_t position){
 template <typename T>
 void
 ds::RingBuffer<T>::
-enqueue(T element) throw (excpt::Exception<RingBuffer>){
+enqueue(T element) throw (exc::Exception<RingBuffer>){
 
   utils::String thisMethod = "enqueue()";
 
@@ -935,7 +935,7 @@ enqueue(T element) throw (excpt::Exception<RingBuffer>){
   else {
     
     if ( overwriting_mode != QUIET_OVERWRITING )
-      throw excpt::Exception<RingBuffer>(thisMethod + " buffer is full!");
+      throw exc::Exception<RingBuffer>(thisMethod + " buffer is full!");
 
     next(first);
 
@@ -950,12 +950,12 @@ enqueue(T element) throw (excpt::Exception<RingBuffer>){
 template <typename T>
 T &
 ds::RingBuffer<T>::
-dequeue() throw (excpt::Exception<RingBuffer>){
+dequeue() throw (exc::Exception<RingBuffer>){
 
   utils::String thisMethod = "dequeue()";
 
   if ( isEmpty() == true )
-    throw excpt::Exception<RingBuffer>(thisMethod + ": buffer is empty!");
+    throw exc::Exception<RingBuffer>(thisMethod + ": buffer is empty!");
 
   T & element = buffer[first];
 
@@ -973,7 +973,7 @@ dequeue() throw (excpt::Exception<RingBuffer>){
 template <typename T>
 T &
 ds::RingBuffer<T>::
-operator[](size_t position) throw (excpt::Exception<RingBuffer>){
+operator[](size_t position) throw (exc::Exception<RingBuffer>){
 
   assertInBounds(position);
 
@@ -984,7 +984,7 @@ operator[](size_t position) throw (excpt::Exception<RingBuffer>){
 template <typename T>
 void
 ds::RingBuffer<T>::
-skip(size_t number) throw (excpt::Exception<RingBuffer>){
+skip(size_t number) throw (exc::Exception<RingBuffer>){
 
   if ( number == 0 )
     return;

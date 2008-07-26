@@ -88,7 +88,7 @@ namespace sys{
        @param type the message-type according to unix-standard
        @exception Exception<Message>
     */
-    void init(const char * const buffer, long type) throw(excpt::Exception<Message>);
+    void init(const char * const buffer, long type) throw(exc::Exception<Message>);
 
   public:
 
@@ -98,7 +98,7 @@ namespace sys{
        @param type the message-type !!! PLEASE MORE INFORMATION !!!
        @exception Exception<Message>
     */
-    Message(const char * const buffer, size_t msize, long type = getpid()) throw(excpt::Exception<Message>);
+    Message(const char * const buffer, size_t msize, long type = getpid()) throw(exc::Exception<Message>);
 
     ~Message();
 
@@ -109,7 +109,7 @@ namespace sys{
        @param flag kommt noch
        @exception Exception<Message>
     */
-    void send(int id, int flag = 0) const throw(excpt::Exception<Message>);
+    void send(int id, int flag = 0) const throw(exc::Exception<Message>);
 
     // Setze Typ nachträglich
     /**
@@ -159,7 +159,7 @@ namespace sys{
        @return well, the string
        @exception Exception<Message>
     */
-    std::string getStringMsg() const throw(excpt::Exception<Message>);
+    std::string getStringMsg() const throw(exc::Exception<Message>);
 
     /**
        @brief return the mesage as ascii-string-line
@@ -185,7 +185,7 @@ namespace sys{
     MessageQueue(const MessageQueue&){}
 
     // Einrichten oder oeffnen
-    void get() throw(excpt::Exception<MessageQueue>);
+    void get() throw(exc::Exception<MessageQueue>);
 
   public:
 
@@ -211,9 +211,9 @@ namespace sys{
        @exception Exception<MessageQueue>
        @todo Infos for parameter "key" 
     */
-    MessageQueue(key_t key, int flag = 0, bool init = false) throw(excpt::Exception<MessageQueue>);
+    MessageQueue(key_t key, int flag = 0, bool init = false) throw(exc::Exception<MessageQueue>);
 
-    ~MessageQueue() throw(excpt::Exception<MessageQueue>);
+    ~MessageQueue() throw(exc::Exception<MessageQueue>);
 
     // Initialisieren: Oeffnen/Einrichten
     /**
@@ -221,7 +221,7 @@ namespace sys{
        @exception Exception<MessageQueue>
        @remark Has to be called manually if init == false in constructor-call MessageQueue(...)
     */
-    void init() throw(excpt::Exception<MessageQueue>);
+    void init() throw(exc::Exception<MessageQueue>);
 
     /**
        @brief Return the id of the unix/linux-messagequeue
@@ -238,7 +238,7 @@ namespace sys{
        @exception Exception<MessageQueue>
        @exception ExceptionBase
     */
-    Message *receive(size_t maxlength = 4096, long typ = 0, int flag = MSG_NOERROR) throw(excpt::Exception<MessageQueue>,excpt::ExceptionBase);
+    Message *receive(size_t maxlength = 4096, long typ = 0, int flag = MSG_NOERROR) throw(exc::Exception<MessageQueue>,exc::ExceptionBase);
 
     // Abfragen/Aendern/Loeschen
     /**
@@ -247,7 +247,7 @@ namespace sys{
        @param buffer !!!TO BE FILLED!!!
        @exception Exception<MessageQueue>
     */
-    void control(int kdo, struct msqid_ds *buffer) throw(excpt::Exception<MessageQueue>);
+    void control(int kdo, struct msqid_ds *buffer) throw(exc::Exception<MessageQueue>);
   };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

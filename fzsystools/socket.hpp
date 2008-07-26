@@ -129,7 +129,7 @@ namespace sys{
     */
     Socket(unsigned short int port, struct hostent *host, int family, int socket_domain,
 	   int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	   int socket_backlog) throw(excpt::ExceptionBase);
+	   int socket_backlog) throw(exc::ExceptionBase);
   
   
     /**
@@ -147,7 +147,7 @@ namespace sys{
     */
     Socket(std::string spath, int family, int socket_domain,
 	   int socket_type, int socket_protocol, int socket_opt_level, int socket_opt_name,
-	   int socket_backlog) throw(excpt::ExceptionBase);
+	   int socket_backlog) throw(exc::ExceptionBase);
     /**
        @remark close() will be called
     */
@@ -157,28 +157,28 @@ namespace sys{
        @brief Initializes and sets up the socket
        @exception Exception<Socket>
     */
-    void init() throw (excpt::Exception<Socket>);
+    void init() throw (exc::Exception<Socket>);
 
     /**
        @brief binds a socket to an address
        @exception SubException<BindErr,Socket>
        @note wrap-around for Unix/Linux bind-function
     */
-    void bind() throw (excpt::SubException<BindErr,Socket>);
+    void bind() throw (exc::SubException<BindErr,Socket>);
 
     /**
        @brief Waits for a connection
        @exception SocketListenException
        @note wrap-around for Unix/Linux listen-function
     */
-    void listen() throw (excpt::SubException<ListenErr,Socket>);
+    void listen() throw (exc::SubException<ListenErr,Socket>);
 
     /**
        @brief Accepts a connection
        @exception SubException<AcceptErr,Socket>
        @note wrap-around for Unix/Linux accept-function
     */
-    int accept() throw (excpt::SubException<AcceptErr,Socket>);
+    int accept() throw (exc::SubException<AcceptErr,Socket>);
 
     /**
        @brief Connects with a server
@@ -186,7 +186,7 @@ namespace sys{
        @exception SubException<ConnectErr,Socket>
        @note wrap-around for Unix/Linux connect-function
     */
-    int connect() throw (excpt::SubException<ConnectErr,Socket>);
+    int connect() throw (exc::SubException<ConnectErr,Socket>);
 
     /**
        @brief closes an open socket
@@ -205,7 +205,7 @@ namespace sys{
        @brief sets the correct values in sockaddr according to family
        @exception Exception<Socket>
     */
-    void setSockaddr() throw(excpt::Exception<Socket>);
+    void setSockaddr() throw(exc::Exception<Socket>);
   
   };
 
@@ -236,7 +236,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     TCPSocket(unsigned short int port, struct hostent *host, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(excpt::ExceptionBase)
+	      int socket_backlog) throw(exc::ExceptionBase)
       : Socket(port,host,AF_INET,PF_INET,SOCK_STREAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
   
@@ -250,7 +250,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     TCPSocket(std::string spath, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(excpt::ExceptionBase)
+	      int socket_backlog) throw(exc::ExceptionBase)
       : Socket(spath,AF_LOCAL,PF_LOCAL,SOCK_STREAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
 
@@ -283,7 +283,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     UDPSocket(unsigned short int port, struct hostent *host, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(excpt::ExceptionBase)
+	      int socket_backlog) throw(exc::ExceptionBase)
       : Socket(port,host,AF_INET,PF_INET,SOCK_DGRAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
   
@@ -297,7 +297,7 @@ namespace sys{
        @remark You have to call init() manually after calling the constructor
     */
     UDPSocket(std::string spath, int socket_opt_level, int socket_opt_name,
-	      int socket_backlog) throw(excpt::ExceptionBase)
+	      int socket_backlog) throw(exc::ExceptionBase)
       : Socket(spath,AF_LOCAL,PF_LOCAL,SOCK_DGRAM,0,socket_opt_level,
 	       socket_opt_name,socket_backlog){}
 

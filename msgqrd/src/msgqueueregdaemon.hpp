@@ -86,7 +86,7 @@ private:
   std::string portname;
   
   // Zusammensetzen der Kommandozeile: Kommando, Laenge des Folgestrings, Folgestring ...
-  virtual char *buildCommandline() throw(OutOfMemException) { return NULL; }
+  virtual char *buildCommandline() throw(exc::OutOfMemException) { return NULL; }
 
 protected:
 
@@ -122,7 +122,7 @@ private:
 
   // liefert einen NICHT 0-terminiertes char-array, welches beinhaltet:
   // getCommand() + getPortname().size() + 1 + getId()
-  char *buildCommandline() throw(OutOfMemException);
+  char *buildCommandline() throw(exc::OutOfMemException);
 
 protected:
 
@@ -144,7 +144,7 @@ private:
 
   // liefert einen NICHT 0-terminiertes char-array, welches beinhaltet:
   // getCommand() + getPortname().size()
-  char *buildCommandline() throw(OutOfMemException);
+  char *buildCommandline() throw(exc::OutOfMemException);
 
 protected:
 
@@ -226,7 +226,7 @@ protected:
 
 public:
 
-  MQMBody(int mqid, const char * const rest, size_t rsize) throw(OutOfMemException);
+  MQMBody(int mqid, const char * const rest, size_t rsize) throw(exc::OutOfMemException);
 
   ~MQMBody();
 
@@ -243,7 +243,7 @@ protected:
 
 public:
 
-  MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type = getpid()) throw(ExceptionBase);
+  MsgQuMessage(int mqid, const char * const buffer, size_t msize, long type = getpid()) throw(exc::ExceptionBase);
 };
 
 class FMBody{
@@ -259,7 +259,7 @@ protected:
 
 public:
 
-  FMBody(unsigned long id, const char * const start, size_t ssize) throw(OutOfMemException);
+  FMBody(unsigned long id, const char * const start, size_t ssize) throw(exc::OutOfMemException);
 
   ~FMBody();
 
@@ -276,7 +276,7 @@ protected:
 
 public:
 
-  FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type = getpid()) throw(ExceptionBase);
+  FindMessage(unsigned long id, const char * const buffer, size_t ssize, long type = getpid()) throw(exc::ExceptionBase);
 };
 
 #endif

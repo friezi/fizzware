@@ -93,39 +93,39 @@ namespace sys{
        @exception Exception<SignalHandler>;
        @note if init == false, you have to call init() by yourself
     */
-    SignalHandler(int signr, void (*handler)(int), bool init = false, int flags = 0) throw(excpt::Exception<SignalHandler>);
+    SignalHandler(int signr, void (*handler)(int), bool init = false, int flags = 0) throw(exc::Exception<SignalHandler>);
 
     /**
        @brief setup the handler, will call sigaction()
        @exception Exception<SignalHandler>;
     */
-    void init() throw(excpt::Exception<SignalHandler>);
+    void init() throw(exc::Exception<SignalHandler>);
 
     /**
        @brief wrap-around for sigemptyset
        @exception Exception<SignalHandler>;
     */
-    void emptyset() throw(excpt::Exception<SignalHandler>);
+    void emptyset() throw(exc::Exception<SignalHandler>);
 
     /**
        @brief wrap-around for sigfillset
        @exception Exception<SignalHandler>;
     */
-    void fillset() throw(excpt::Exception<SignalHandler>);
+    void fillset() throw(exc::Exception<SignalHandler>);
 
     /**
        @brief wrap-around for sigaddset
        @param signr the signal-number
        @exception Exception<SignalHandler>;
     */
-    void addset(int signr) throw(excpt::Exception<SignalHandler>);
+    void addset(int signr) throw(exc::Exception<SignalHandler>);
 
     /**
        @brief wrap-around for sigdelset
        @param signr the signal-number
        @exception Exception<SignalHandler>;
     */
-    void delset(int signr) throw(excpt::Exception<SignalHandler>);
+    void delset(int signr) throw(exc::Exception<SignalHandler>);
 
     /**
        @brief wrap-around for sigismember
@@ -138,7 +138,7 @@ namespace sys{
        @param flag the flag
        @exception Exception<SignalHandler>;
     */
-    void siginterrupt(int flag) throw(excpt::Exception<SignalHandler>);
+    void siginterrupt(int flag) throw(exc::Exception<SignalHandler>);
   };
 
 }

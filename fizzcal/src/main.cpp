@@ -24,6 +24,7 @@
 #include "main.hpp"
 
 using namespace std;
+using namespace exc;
 using namespace cmdl;
 using namespace mexp;
 using namespace ds;

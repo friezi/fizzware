@@ -26,7 +26,7 @@
 #include <cmdlparser.hpp>
 
 using namespace std;
-using namespace excpt;
+using namespace exc;
 using namespace cmdl;
 using namespace utils;
 

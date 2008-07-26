@@ -26,7 +26,7 @@
 #include <primlist.hpp>
 #include <stdio.h>
 
-using namespace excpt;
+using namespace exc;
 
 PrimList::PrimList(long number=0) : number(number),numbers(0),
 				    nsize(0),pos(0),currentnmb(0),nmbprim(0){

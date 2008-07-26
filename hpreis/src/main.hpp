@@ -11,9 +11,9 @@
 class Error{};
 
 std::string setupParser(cmdl::CmdlParser &parser);
-void game(int iterations, bool rand) throw (ExceptionBase);
+void game(int iterations, bool rand) throw (exc::ExceptionBase);
 void initDoors(std::set<long> &doors);
-long getDoor(std::set<long> &doors, long nmb) throw (ExceptionBase);
+long getDoor(std::set<long> &doors, long nmb) throw (exc::ExceptionBase);
 long percent(long value, long total);
 
 #endif

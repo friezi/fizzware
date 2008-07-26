@@ -26,7 +26,7 @@
 #include <signalhandler.hpp>
 
 using namespace sys;
-using namespace excpt;
+using namespace exc;
 
 SignalHandler::SignalHandler(int signr, void (*handler)(int), bool init, int flags)
   throw(Exception<SignalHandler>) : signr(signr){

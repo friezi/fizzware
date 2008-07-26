@@ -1,6 +1,7 @@
 #include "main.hpp"
 
 using namespace std;
+using namespace exc;
 using namespace graph;
 using namespace ds;
 

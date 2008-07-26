@@ -1,6 +1,7 @@
 #include "scanner.hpp"
 
 using namespace std;
+using namespace exc;
 using namespace ds;
 
 Token::~Token(){

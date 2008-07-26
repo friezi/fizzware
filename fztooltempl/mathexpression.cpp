@@ -32,7 +32,7 @@
 #define OPLIST '+','-','*','/','\\','%','^','!','@','=','(',')','[',']',',',';'
    
   using namespace std;
-using namespace excpt;
+using namespace exc;
 using namespace mexp;
 using namespace ds;
 

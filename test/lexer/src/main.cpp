@@ -1,5 +1,6 @@
 #include "main.hpp"
 
+using namespace exc;
 using namespace parse;
 using namespace cmdl;
 using namespace std;

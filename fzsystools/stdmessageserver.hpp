@@ -150,7 +150,7 @@ namespace sys{
        @exception Exception<StdMessageServer>
        @remark Will return immediately, if daemon == true in constructor-call StdMessageServer().
     */
-    void start() throw(excpt::Exception<StdMessageServer>);
+    void start() throw(exc::Exception<StdMessageServer>);
 
     // zurückliefern der ID der MessageQueue
     /**
@@ -165,7 +165,7 @@ namespace sys{
        @brief the calling prozess will become a daemon running in the background.
        @exception Exception<StdMessageServer>
     */
-    void daemonize(void) throw(excpt::Exception<StdMessageServer>);
+    void daemonize(void) throw(exc::Exception<StdMessageServer>);
     //@}
 
     // zu überschreibende Funktionen:

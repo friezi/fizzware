@@ -1,7 +1,7 @@
 #include <graph.hpp>
 
 using namespace graph;
-using namespace excpt;
+using namespace exc;
 
 // basically Tarjan's algorithm
 unsigned int graph::GraphableBase::scc_visit(const TNode node, SCCGraph & scc, std::stack<TNode> & nodestack, Valuemap & values, Componentmap & nodecomponents, 
