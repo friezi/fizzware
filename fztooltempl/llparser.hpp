@@ -74,7 +74,18 @@ namespace parse{
 
   protected:
 
+    // coombination of production and terminal for backtracking
+    typedef std::pair<Production *, std::string> StackEntry;
+
     Grammar * grammar;
+
+    std::list<StackEntry> stack;
+
+    unsigned long backtrack_count;
+
+  public:
+
+    bool parse();
 
   };
 
