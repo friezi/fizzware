@@ -1,0 +1,36 @@
+################################################################################
+########################### FOR EDITING ########################################
+
+TARGET = llparser
+
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
+
+MAIN_MODULE = main
+LOCAL_MODULES =
+EXTERN_MODULES =
+EM_PATH =
+
+TT = $(ROOT_DIR)/fztooltempl
+ST = $(ROOT_DIR)/fzsystools
+
+#  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
+CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/exception $(TT)/llparser
+
+IMPORTANT_HEADERS =
+
+LIBRARY_INCLUDE_PATHS =
+LIBRARIES =
+LIBRARY_PATHS =
+
+ADDITIONAL_DISTFILES =
+
+# in case that ansi is not allowed
+# NOANSI = true
+
+### check the field CC ########################################################
+################################################################################
+################################################################################

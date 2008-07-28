@@ -9,7 +9,7 @@ MINOR_VERSION = 1alpha
 
 VERSION_NUMBER = $(MAJOR_VERSION).$(MINOR_VERSION)
 
-OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph lex test
+OBJECTS = exception primlist mathexpression cmdlparser propertyreader utils graph lex test llparser
 
 #old: 
 
@@ -91,7 +91,7 @@ $(DOC):
 cleandoc:
 	rm -r $(DOC)
 
-$(STATIC_LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
+$(STATIC_LIB_NAME): Makefile $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo
 	@echo '****************' generating the static-library $(STATIC_LIB_NAME) '****************'
 	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk);)
