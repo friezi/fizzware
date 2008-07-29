@@ -45,6 +45,23 @@
 namespace parse{
 
   /**
+     @brief abstract class
+  */
+  class Tokenizer{
+
+  public:
+
+    virtual ~Tokenizer(){};
+    
+    virtual int nextToken() = 0;
+
+    virtual void putback() = 0;
+
+    virtual unsigned long getLineNumber() = 0;
+
+  };
+
+  /**
      @brief A struct to store all relevant delimitor-charakters, comment-signs, whitespaces, etc. for lexical analysis
      @since V2.1
   */
@@ -599,7 +616,7 @@ namespace parse{
      @since V2.1
      @todo detailed docu (token-types etc.)
   */
-  class LexScanner{
+  class LexScanner : public Tokenizer{
 
   protected:
 

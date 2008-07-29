@@ -5,68 +5,133 @@
 #include <utility>
 #include <list>
 #include <set>
+#include <exception.hpp>
+#include <lex.hpp>
 
 namespace parse{
 
   class Rule;
+  class LLParser;
 
   class ProductionElement{
+    
+  public:
+    
+    virtual ~ProductionElement() = 0;
+    
   };
 
   class Terminal : public ProductionElement{
 
-  public:
+  protected:
 
     std::string name;
+
+  public:
+
+    Terminal(std::string name) : name(name){}
+
+    std::string getName(){ return name; }
   
   };
 
   class Nonterminal : public ProductionElement{
 
-  public:
+  protected:
+
+    // name of nonterminal
+    std::string name;
 
     // reference is stored in Grammar and will be deleted from there
     Rule * rule;
+
+  public:
+
+    Nonterminal(std::string name) : name(name){}
+
+    std::string getName(){ return name; }
+
+    void setRule(Rule *rule){ this->rule = rule; }
+
+    Rule * getRule(){ return rule; }
 
   };
 
   class Production{
 
-  public:
+    friend class Rule;
+
+  protected:
 
     std::list<ProductionElement *> words;
 
+    std::set<std::string> director_set;
+
+    Production * clone();
+
+  public:
+
     ~Production();
+
+    std::list<ProductionElement *> & getWords(){ return words; }
+
+    std::set<std::string> & getDirectorSet(){ return director_set; }
   
   };
 
   class Rule{
 
+    friend class LLParser;
+    
   protected:
 
-    // combination of an alternative with the corresponding director set
-    typedef std::pair< Production *, std::set<std::string> * > Alternative;
+    Nonterminal * nonterminal;
 
-    // name of rule, i.e. left hand side
-    std::string name;
+    std::list<Production *> alternatives;
 
-    std::list<Alternative> alternatives;
+  protected:
+
+    Rule * clone(std::string lookahead);
 
   public:
 
+    Rule(Nonterminal *nonterminal) : nonterminal(nonterminal){}
+
     ~Rule();
+
+    Nonterminal * getNonterminal(){ return nonterminal; }
+   
+    std::list<Production *> & getAlternatives(){ return alternatives; }
+
+    
 
   };
 
   class Grammar{
 
-  public:
+  protected:
 
+    /**
+       @brief pseudostartrule S'->S
+    */
     Rule *startrule;
 
     std::set<Rule *> rules;
 
+    std::set<Terminal *> terminals;
+
+    std::set<Nonterminal *> nonterminals;
+
+  public:
+
     ~Grammar();
+
+    /**
+       @brief returns the pseudostartrule S'->S
+    */
+    Rule * getStartRule(){ return startrule; }
+
+    std::set<Rule *> & getRules(){ return rules; }
 
   };
 
@@ -75,17 +140,23 @@ namespace parse{
   protected:
 
     // coombination of production and terminal for backtracking
-    typedef std::pair<Production *, std::string> StackEntry;
+    typedef std::pair<Rule *, std::string> StackEntry;
 
-    Grammar * grammar;
+    Grammar *grammar;
 
     std::list<StackEntry> stack;
 
     unsigned long backtrack_count;
 
+    std::list<std::string> pushed_back_terminals;
+
+    void reset();
+
   public:
 
-    bool parse();
+    LLParser(Grammar *grammar) : grammar(grammar){}
+
+    bool parse(Tokenizer *tokenizer) throw (exc::Exception<LLParser>);
 
   };
 
