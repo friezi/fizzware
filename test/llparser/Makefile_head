@@ -18,7 +18,7 @@ ST = $(ROOT_DIR)/fzsystools
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception $(TT)/llparser
+CLASS_MODULES = $(TT)/exception $(TT)/utils $(TT)/llparser
 
 IMPORTANT_HEADERS =
 

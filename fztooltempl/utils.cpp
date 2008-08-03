@@ -31,6 +31,14 @@ using namespace utils;
 
 char String::blanks[] = {' ','\t'};
 
+String::String(char c){
+
+  ostringstream out;
+  out << c;
+  *this = out.str();
+
+}
+
 bool String::isABlank(char c){
 
   for ( unsigned int i = 0; i < sizeof(blanks); i++ )

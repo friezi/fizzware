@@ -74,6 +74,8 @@ namespace utils{
        @brief The cast-constructor
     */
     String(const char * s){ (*(std::string *)this) = s; }
+
+    String(char c);
     
     /**
        @brief cuts off leading and trailing blanks;
