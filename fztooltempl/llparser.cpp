@@ -5,6 +5,11 @@ using namespace exc;
 using namespace utils;
 using namespace parse;
 
+const char Terminal::TT_WORD = 1;
+const char Terminal::TT_NUMBER = 2;
+const char Terminal::TM_OVERREAD = 1;
+const char Terminal::TM_STORE = 2;
+
 Production::~Production(){
 }
 
@@ -17,8 +22,16 @@ Production * Production::clone(){
 
 }
 
-const char Terminal::TT_WORD = 1;
-const char Terminal::TT_NUMBER = 2;
+std::string Production::toString(){
+
+  ostringstream out;
+
+  for ( list<ProductionElement *>::iterator it = words.begin(); it != words.end(); it++ )
+    out << (*it)->getName() << " ";
+
+  return out.str();
+
+}
 
 Rule::~Rule(){
 
@@ -69,6 +82,25 @@ Rule * Rule::clone(Grammar::Token lookahead) throw (Exception<LLParser>){
 
 }
 
+std::string Rule::toString(){
+
+  ostringstream out;
+
+  out << nonterminal->getName() << " -> ";
+
+  for ( list<Production *>::iterator it = alternatives.begin(); it != alternatives.end(); it++ ){
+
+    if ( it != alternatives.begin() )
+      out << "| ";
+
+    out << (*it)->toString();
+
+  }
+
+  return out.str();
+
+}
+
 Grammar::~Grammar(){
   
   for ( set<Rule *>::iterator it = rules.begin(); it != rules.end(); it++ )
@@ -80,6 +112,29 @@ Grammar::~Grammar(){
   for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ )
     delete *it;
   
+}
+
+std::string Grammar::toString(){
+
+  ostringstream out;
+
+  out << "Terminals:" << endl;
+  for ( set<Terminal *>::iterator it = terminals.begin(); it != terminals.end(); it++ )
+    out << (*it)->getName() << " ";
+
+  out << endl << endl;
+  out << "Nonterminals:" << endl;
+  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ )
+    out << (*it)->getName() << " ";
+
+  out << endl << endl;
+  out << startrule->toString() << endl << endl;
+
+  for ( set<Rule *>::iterator it = rules.begin(); it != rules.end(); it++ )
+    out << (*it)->toString() << endl;
+
+  return out.str();
+
 }
 
 Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
@@ -102,7 +157,6 @@ Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexSc
       return Grammar::Token(String((char)scantoken),LexToken::TT_WORD);
 
     }
-
 
   } else {
 

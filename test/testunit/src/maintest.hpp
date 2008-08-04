@@ -20,10 +20,10 @@ public:
   MyTestCase1() : test::TestCase<MyTestCase1>(){
 
     NAME = "MyTestCase1";
-    addTest(&MyTestCase1::test1,"test1()");
-    addTest(&MyTestCase1::test2,"test2()");
-    addTest(&MyTestCase1::test3,"test3()");
-    addTest(&MyTestCase1::test4,"test4()");
+    addTest(&MyTestCase1::test1,"test1");
+    addTest(&MyTestCase1::test2,"test2");
+    addTest(&MyTestCase1::test3,"test3");
+    addTest(&MyTestCase1::test4,"test4");
     pushErrorHandler(myErrorHandler1);
     pushSuccessHandler(mySuccessHandler1);
 
@@ -32,8 +32,6 @@ public:
   void setUp(){ std::cout << "starting " << NAME << std::endl; }
 
   void tearDown(){ std::cout << "stopping " << NAME << std::endl; }
-
-  std::string getTestCaseName(){ return NAME; }
 
   void test1() throw (exc::ExceptionBase){
 
@@ -73,13 +71,11 @@ public:
 
   MyTestCase2() : test::TestCase<MyTestCase2>(){
 
-    addTest(&MyTestCase2::test1,"test1()");
-    addTest(&MyTestCase2::test2,"test2()");
+    addTest(&MyTestCase2::test1,"test1");
+    addTest(&MyTestCase2::test2,"test2");
     clearErrorHandlers();
 
   }
-
-  std::string getTestCaseName(){ return "MyTestCase2"; }
 
   void test1() throw (exc::ExceptionBase){
     assertFalse(true);
@@ -99,12 +95,10 @@ public:
 
   MyTestCase3() : test::TestCase<MyTestCase3>(){
 
-    addTest(&MyTestCase3::test1,"test1()");
-    addTest(&MyTestCase3::test2,"test2()");
+    addTest(&MyTestCase3::test1,"test1");
+    addTest(&MyTestCase3::test2,"test2");
 
   }
-
-  std::string getTestCaseName(){ return "MyTestCase3"; }
 
   void test1(){
 

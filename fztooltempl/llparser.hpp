@@ -2,6 +2,7 @@
 #define __FZTT_LLPARSER_HPP__
 
 #include <iostream>
+#include <sstream>
 #include <utility>
 #include <list>
 #include <set>
@@ -55,12 +56,20 @@ namespace parse{
 
     ~Grammar();
 
+    void setStartRule(Rule *rule){ this->startrule = rule; }
+
     /**
        @brief returns the pseudostartrule S'->S
     */
     Rule * getStartRule(){ return startrule; }
 
     std::set<Rule *> & getRules(){ return rules; }
+
+    std::set<Terminal *> & getTerminals(){ return terminals; }
+
+    std::set<Nonterminal *> & getNonterminals(){ return nonterminals; }
+
+    std::string toString();
 
   };
 
@@ -83,6 +92,8 @@ namespace parse{
     std::list<ProductionElement *> & getWords(){ return words; }
 
     Grammar::TaggedTerminals & getDirectorSet(){ return director_set; }
+
+    std::string toString();
   
   };
   
@@ -90,7 +101,9 @@ namespace parse{
     
   public:
     
-    virtual ~ProductionElement() = 0;
+    virtual ~ProductionElement(){}
+
+    virtual std::string getName() = 0;
     
   };
 
@@ -101,6 +114,10 @@ namespace parse{
     static const char TT_WORD;
 
     static const char TT_NUMBER;
+
+    static const char TM_OVERREAD;
+
+    static const char TM_STORE;
 
   protected:
 
@@ -113,6 +130,8 @@ namespace parse{
     char mode;
 
   public:
+
+    Terminal(std::string name, char type, char mode) : name(name), type(type), mode(mode){}
 
     Terminal(std::string name) : name(name){}
 
@@ -166,11 +185,13 @@ namespace parse{
 
     ~Rule();
 
+    void setNonterminal(Nonterminal *nonterminal){ this->nonterminal = nonterminal; }
+
     Nonterminal * getNonterminal(){ return nonterminal; }
    
     std::list<Production *> & getAlternatives(){ return alternatives; }
 
-    
+    std::string toString();
 
   };
 

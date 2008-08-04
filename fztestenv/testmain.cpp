@@ -2,6 +2,7 @@
 
 using namespace test;
 using namespace std;
+using namespace exc;
 
 static unsigned long testcaseNmb;
 
@@ -9,31 +10,31 @@ static FailedTestsVector *failedTests;
 
 static unsigned long global_errors = 0;
 
-static void statisticHelper(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
+static void statisticHelper(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
   (*failedTests)[testcaseNmb].second = testcase;
   testcaseNmb++;
 
 }
 
-static void localErrorHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
+static void localErrorHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
   (*failedTests)[testcaseNmb].first++;
   cerr << " ";
 
 }
 
-static void globalErrorHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
+static void globalErrorHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
   global_errors++;
 }
 
-static void testcaseStartupHandler(test::TestCaseBase *testcase, std::string msg) throw (Exception<test::TestCaseBase>){
+static void testcaseStartupHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
   cout << "executing " << testcase->getTestCaseName() << endl;
 }
 
 static unsigned long global_success = 0;
 
-static void globalSuccessHandler(test::TestCaseBase *testcase, std::string msg){
+static void globalSuccessHandler(TestCaseBase *testcase, string msg){
   global_success++;
 }
 

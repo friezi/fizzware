@@ -5,7 +5,12 @@
 #include <utils.hpp>
 #include <test.hpp>
 
-class ObserverTest : public test::TestCase<ObserverTest>{
+using namespace std;
+using namespace exc;
+using namespace utils;
+using namespace test;
+
+class ObserverTest : public TestCase<ObserverTest>{
 
 public:
 
@@ -13,38 +18,36 @@ public:
   static int testval2;
   static int testval3;
 
-  class TestObserver1 : public utils::SmartObserver<int>{
+  class TestObserver1 : public SmartObserver<int>{
 
-    void update(utils::Observable<int> *observable, int value){
+    void update(Observable<int> *observable, int value){
       testval1 = value;
     }
 
   };
 
-  class TestObserver2 : public utils::SmartObserver<int>{
+  class TestObserver2 : public SmartObserver<int>{
 
-    void update(utils::Observable<int> *observable, int value){
+    void update(Observable<int> *observable, int value){
       testval2 = value;
     }
 
   };
 
-  class TestObserver3 : public utils::SmartObserver<int>{
+  class TestObserver3 : public SmartObserver<int>{
 
-    void update(utils::Observable<int> *observable, int value){
+    void update(Observable<int> *observable, int value){
       testval3 = value;
     }
 
   };
   
-  ObserverTest() : test::TestCase<ObserverTest>(){
+  ObserverTest() : TestCase<ObserverTest>(){
 
-    addTest(&ObserverTest::straight,"straight()");
-    addTest(&ObserverTest::reversed,"reversed()");
+    addTest(&ObserverTest::straight,"straight");
+    addTest(&ObserverTest::reversed,"reversed");
 
   }
-    
-  std::string getTestCaseName(){ return "ObserverTest"; }
 
   void init(){
 
@@ -58,8 +61,8 @@ public:
 
     init();
     
-    utils::ChangeNotifier<int> notifier(4);
-    utils::ChangeNotifier<int> notifier2;
+    ChangeNotifier<int> notifier(4);
+    ChangeNotifier<int> notifier2;
     
     TestObserver1 testobserver1;
     TestObserver2 testobserver2;
@@ -104,8 +107,8 @@ public:
     TestObserver2 testobserver2;
     TestObserver3 testobserver3;
     
-    utils::ChangeNotifier<int> notifier(4);
-    utils::ChangeNotifier<int> notifier2;
+    ChangeNotifier<int> notifier(4);
+    ChangeNotifier<int> notifier2;
 
     assertEquals(0,testval1);
     assertEquals(0,testval2);

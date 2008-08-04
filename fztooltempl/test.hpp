@@ -52,6 +52,8 @@ namespace test{
   */
   class TestCaseBase{
 
+    friend class TestUnit;
+
   public:
 
     typedef void (*HandlerType)(TestCaseBase *testcase, std::string msg);
@@ -63,6 +65,7 @@ namespace test{
     HandlerStack errorHandlers;
     HandlerStack successHandlers;
     HandlerStack statisticHelpers;
+    std::string testcasename;
 
     static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (exc::Exception<TestCaseBase>);
  
@@ -74,9 +77,9 @@ namespace test{
 
     virtual void operator()() = 0;
 
-    virtual std::string getTestCaseName() = 0;
-
     virtual unsigned long getNmbTests() = 0;
+
+    std::string getTestCaseName(){ return testcasename; }
 
     std::string getCurrentTestName(){ return currentTestName; }
 
@@ -134,6 +137,8 @@ namespace test{
     void error(std::string msg) throw (exc::Exception<TestCaseBase>);
     
     void success();
+
+    void setTestCaseName(std::string name){ testcasename = name; }
     
     void setCurrentTestName(std::string id){ currentTestName = id; }
 
@@ -201,7 +206,7 @@ namespace test{
 	    error(e.getMsg());
 	    
 	  } catch (exc::ExceptionBase &ee){
-	    std::cerr << getTestCaseName() + ":" + (*it).second + " failed!: " + ee.getMsg() << std::endl;
+	    std::cerr << getTestCaseName() + ":" + (*it).second + "() failed!: " + ee.getMsg() << std::endl;
 	  }
 	}    
       }
@@ -216,7 +221,9 @@ namespace test{
 
   private:
 
-    std::list<TestCaseBase *> testcases;
+    typedef std::pair<TestCaseBase *, std::string> TestCaseInfo;
+
+    std::list<TestCaseInfo> testcases;
 
     TestCaseBase::HandlerType testcaseStartupHandler;
 
@@ -228,7 +235,7 @@ namespace test{
 
     virtual ~TestUnit();
 
-    void addTestCase(TestCaseBase * testcase){ testcases.push_back(testcase); }
+    void addTestCase(TestCaseBase * testcase, std::string name);
 
     void operator()() throw (exc::ExceptionBase);
 
