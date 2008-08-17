@@ -6,13 +6,14 @@ TARGET = <hier den gewünschten Programmnamen eingeben>
 # change if modules are in a deeper directory
 ROOT_DIR = ../
 
-MAIN_MODULE = <Name des Hauptmoduls>
+MAIN_MODULE = main
 LOCAL_MODULES = <Lokale (im gleichen Verzeichnis wie <MAIN_MODULE>) Module>
 EXTERN_MODULES = <Klassenmodule im Verzeichnis <EM_PATH>>
 EM_PATH = <Pfad der fuer die Module <EXTERN_MODULES>>
 
 TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
+TE = $(ROOT_DIR)/fztestenv
 
 #  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib

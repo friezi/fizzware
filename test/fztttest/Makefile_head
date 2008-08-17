@@ -1,26 +1,27 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = llparser
+TARGET = fztttest
 
 # change if modules are in a deeper directory
 ROOT_DIR = ../../
 
-MAIN_MODULE = main
+MAIN_MODULE = maintest
 LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
 TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
+TE = $(ROOT_DIR)/fztestenv
 
 #  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
-CLASSLIBRARIES = fztooltempl
+CLASSLIBRARIES = fztooltempl fztestenv
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception $(TT)/utils $(TT)/datastructures $(TT)/llparser
+CLASS_MODULES = $(TT)/exception $(TT)/test
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(TT)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

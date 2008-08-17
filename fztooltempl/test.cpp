@@ -30,6 +30,7 @@ using namespace std;
 using namespace exc;
 
 TestCaseBase::TestCaseBase(){
+  show_tests = false;
   pushErrorHandler(getDefaultErrorHandler());
   setCurrentTestName("");
 }
@@ -168,5 +169,12 @@ void TestUnit::clearStatisticHelpers(){
 
   for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
     (*it).first->clearStatisticHelpers();
+
+}
+
+void TestUnit::showTests(){
+
+  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it).first->showTests();  
 
 }

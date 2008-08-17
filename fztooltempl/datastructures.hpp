@@ -30,6 +30,7 @@
 
 #ifndef _FZTT_DATASTRUCTURES_HPP_
 #define _FZTT_DATASTRUCTURES_HPP_
+
 #include <utility>
 #include <map>
 #include <list>
@@ -158,6 +159,69 @@ namespace ds{
     */
     bool operator!(){ return ( this->get() == (T *)0 ); }
     
+  };
+
+  /**
+     @brief A stack with iterator-functionality
+  */
+  template<typename T>
+  class Stack : public std::list<T>{
+    
+  public:
+    
+    Stack() : std::list<T>(){}
+    
+    /**
+       @brief pushes the element on the stack
+       @param elem element to be pushed
+    */
+    void push(T elem){ this->push_back(elem); }
+    
+    /**
+       @brief pops the top-element from the stack and returns it
+       @return top-most element
+       @throw Exception< Stack<T> >
+    */
+    T pop() throw (exc::Exception< Stack<T> >);
+	   
+    /**
+       @brief returns the top-most element
+       @return top-most element
+       @throw Exception< Stack<T> >
+    */
+    T top() throw (exc::Exception< Stack<T> >);
+	   
+    /**
+       If stack is empty, end() will be returned
+       @brief returns an iterator to the top-most element
+       @return top-element-iterator
+    */
+    typename Stack::const_iterator topIter() const { return --this->end(); }
+
+    /**
+       For handling local stacks on top of the stack. Local emptyness relative to the
+       given iterator (local bottom) means that the iterator-element is the top-most on stack, i. e.
+       nop other elements are on top of it.
+       @brief checks for local emptyness
+       @param it the local bottom
+       @return true if local empty
+    */
+    bool localEmpty(const typename std::list<T>::const_iterator & it) const { return ( it == topIter() ); }
+
+    /**
+       @brief prepends the top-most elements (upto iterator position) to a list
+       @param l the list
+       @param bottom iterator to local bottom
+    */
+    void popToListPrepend(std::list<T> & l, const typename Stack::const_iterator & bottom);
+
+    /**
+       @brief appends the top-most elements (upto iterator position) to a list
+       @param l the list
+       @param bottom iterator to local bottom
+    */
+    void popToListAppend(std::list<T> & l, const typename Stack::const_iterator & bottom);
+	     
   };
 
   /**
@@ -695,6 +759,52 @@ MemPointer(unsigned long blksize,bool clear_on_exit ) throw (exc::ExceptionBase)
   
   if ( !(ptr = (T *)calloc(blksize,sizeof(T))) )
     throw exc::Exception< ds::MemPointer<T> >("MemPointer(): calloc() failed!");
+}
+
+template<typename T>
+T
+ds::Stack<T>::
+top() throw (exc::Exception<Stack<T> >){
+  
+  if ( this->empty() )
+    throw exc::Exception< Stack<T> >("pop() failed: Stack is empty!");
+  
+  return this->back();
+  
+}
+
+template<typename T>
+T
+ds::Stack<T>::
+pop() throw (exc::Exception< Stack<T> >) {
+  
+  if ( this->empty() )
+    throw exc::Exception< Stack<T> >("pop() failed: Stack is empty!");
+  
+  T last = this->back();
+  this->pop_back();
+  return last; 
+  
+}
+
+template<typename T>
+void
+ds::Stack<T>::
+popToListPrepend(std::list<T> & l, const typename Stack::const_iterator & bottom){
+  
+  for ( typename Stack::const_iterator it = topIter(); it != bottom; it = topIter() )
+    l.push_front(pop());
+  
+}
+
+template<typename T>
+void
+ds::Stack<T>::
+popToListAppend(std::list<T> & l, const typename Stack::const_iterator & bottom){
+  
+  for ( typename Stack::const_iterator it = topIter(); it != bottom; it = topIter() )
+    l.push_back(pop());
+  
 }
 
 template<typename T>

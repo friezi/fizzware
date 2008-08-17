@@ -8,11 +8,12 @@
 #include <set>
 #include <exception.hpp>
 #include <utils.hpp>
+#include <datastructures.hpp>
 #include <lex.hpp>
 
 namespace parse{
 
-  class ProductionElement;
+  class GrammarSymbol;
   class Terminal;
   class Nonterminal;
   class Production;
@@ -46,6 +47,22 @@ namespace parse{
     */
     Rule *startrule;
 
+  private:
+
+    Rule *lastAccessedRule;
+
+    Production *lastAccessedProduction;
+
+    std::string lastGrammarSymbol;
+
+    Terminal *lastTerminal;
+
+    Nonterminal *lastNonterminal;
+
+    char defmode;
+
+  protected:
+
     std::set<Rule *> rules;
 
     std::set<Terminal *> terminals;
@@ -54,9 +71,12 @@ namespace parse{
 
   public:
 
+    Grammar() : startrule(0), lastAccessedRule(0), lastAccessedProduction(0), lastGrammarSymbol(""),
+		lastTerminal(0), lastNonterminal(0), defmode(0){}
+
     ~Grammar();
 
-    void setStartRule(Rule *rule){ this->startrule = rule; }
+    void setStartRule(Rule *rule) { this->startrule = rule; }
 
     /**
        @brief returns the pseudostartrule S'->S
@@ -71,6 +91,28 @@ namespace parse{
 
     std::string toString();
 
+    void newProduction() throw(exc::Exception<Grammar>);
+
+    void setStart(std::string nonterminal) throw(exc::Exception<Grammar>);
+
+    Grammar & rule(std::string nonterminal);
+
+    Grammar & lambda() throw(exc::Exception<Grammar>);
+
+    Grammar & operator<<(std::string gsym) throw(exc::Exception<Grammar>);
+
+    Grammar & operator<<(Grammar & grammar) throw(exc::Exception<Grammar>);
+
+    Grammar & operator,(char type) throw(exc::Exception<Grammar>);
+
+    Grammar & operator|(std::string gsym) throw(exc::Exception<Grammar>);
+
+    Grammar & operator|(Grammar & grammar) throw(exc::Exception<Grammar>);
+
+  protected:
+
+    Nonterminal * findNonterminal(std::string nonterminal);
+
   };
 
   class Production{
@@ -79,7 +121,7 @@ namespace parse{
 
   protected:
 
-    std::list<ProductionElement *> words;
+    std::list<GrammarSymbol *> symbols;
 
     Grammar::TaggedTerminals director_set;
 
@@ -87,9 +129,11 @@ namespace parse{
 
   public:
 
+    Production(){}
+
     ~Production();
 
-    std::list<ProductionElement *> & getWords(){ return words; }
+    std::list<GrammarSymbol *> & getSymbols(){ return symbols; }
 
     Grammar::TaggedTerminals & getDirectorSet(){ return director_set; }
 
@@ -97,17 +141,17 @@ namespace parse{
   
   };
   
-  class ProductionElement{
+  class GrammarSymbol{
     
   public:
     
-    virtual ~ProductionElement(){}
+    virtual ~GrammarSymbol(){}
 
     virtual std::string getName() = 0;
     
   };
 
-  class Terminal : public ProductionElement{
+  class Terminal : public GrammarSymbol{
 
   public:
 
@@ -140,10 +184,14 @@ namespace parse{
     char getType(){ return type; }
     
     char getMode(){ return mode; }
+
+    void setType(char type){ this->type = type; }
+
+    void setMode(char mode){ this->mode = mode; }
   
   };
 
-  class Nonterminal : public ProductionElement{
+  class Nonterminal : public GrammarSymbol{
 
   protected:
 
@@ -181,6 +229,8 @@ namespace parse{
 
   public:
 
+    Rule(){}
+
     Rule(Nonterminal *nonterminal) : nonterminal(nonterminal){}
 
     ~Rule();
@@ -212,13 +262,21 @@ namespace parse{
 
     Grammar *grammar;
 
-    std::list<Grammar::Token> terminalstack;
+    ds::Stack<Grammar::Token> terminalstack;
+
+    // rulebacktrackstack
+    ds::Stack<Rule *> rbstack;
+
+    ds::Stack<GrammarSymbol *> symbolstack;
+
+    bool debug;
 
   private:
 
     std::list<Grammar::Token>::iterator tStackPointer;
 
-    ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack) throw (exc::Exception<LLParser>);
+    ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack, ds::Stack<Rule *>::const_iterator bottom,
+		      unsigned long level) throw (exc::Exception<LLParser>);
     
     Grammar::Token nextToken(LexScanner *tokenizer) throw (exc::Exception<LexScanner>,exc::ExceptionBase);
 
@@ -233,7 +291,7 @@ namespace parse{
 
   public:
 
-    LLParser(Grammar *grammar) : grammar(grammar){}
+    LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug){}
 
     bool parse(LexScanner *tokenizer) throw (exc::Exception<LLParser>);
 

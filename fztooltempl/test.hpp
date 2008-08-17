@@ -67,6 +67,9 @@ namespace test{
     HandlerStack statisticHelpers;
     std::string testcasename;
 
+  protected:
+    bool show_tests;
+
     static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (exc::Exception<TestCaseBase>);
  
   public:
@@ -102,6 +105,8 @@ namespace test{
     void clearStatisticHelpers(){ statisticHelpers.clear(); }
 
     HandlerType getDefaultErrorHandler();
+    
+    void showTests(){ show_tests = true; }
 
     void callStatisticHelpers();
     
@@ -115,16 +120,26 @@ namespace test{
 
     template <typename TE, typename TR>
     void assertEquals(TE expected, TR reference) throw (exc::Exception<TestCaseBase>){
-      assertEquals(static_cast<TR>(expected),reference);
+      assertEquals(expected,reference,"");
+    }
+    
+    template <typename TE, typename TR>
+    void assertEquals(TE expected, TR reference, std::string info) throw (exc::Exception<TestCaseBase>){
+      assertEquals(static_cast<TR>(expected),reference,info);
     }
     
     template <typename T>
     void assertEquals(T expected, T reference) throw (exc::Exception<TestCaseBase>){
+      assertEquals(expected,reference,"");
+    }
+    
+    template <typename T>
+    void assertEquals(T expected, T reference, std::string info) throw (exc::Exception<TestCaseBase>){
 
       if ( expected != reference ){
 
 	std::ostringstream err;
-	err << "Equals failed! expected: \"" << expected << "\" got: \"" << reference << "\"";
+	err << "Equals failed! expected: \"" << expected << "\" got: \"" << reference << "\"\t info: " << info;
 	throw exc::Exception<TestCaseBase>(err.str());
 
       }	
@@ -196,6 +211,10 @@ namespace test{
 	try{
 	  
 	  setCurrentTestName((*it).second);
+	  
+	  if ( show_tests == true )
+	    std::cout << "  " << (*it).second << "()" << std::endl;
+
 	  (self->*((*it).first))();
 	  success();
 	  
@@ -256,6 +275,8 @@ namespace test{
     void clearSuccessHandlers();
 
     void clearStatisticHelpers();
+
+    void showTests();
 
   };
 
