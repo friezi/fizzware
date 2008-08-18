@@ -22,10 +22,11 @@ public:
   LLTest() : TestCase<LLTest>(){
     
 //     addTest(&LLTest::testGrammar1,"testGrammar1");
-    addTest(&LLTest::test1Grammar,"test1Grammar");
-    addTest(&LLTest::test2Grammar,"test2Grammar");
-    addTest(&LLTest::test3Grammar,"test3Grammar");
-    addTest(&LLTest::test4Grammar,"test4Grammar");
+//     addTest(&LLTest::test1Grammar,"test1Grammar");
+//     addTest(&LLTest::test2Grammar,"test2Grammar");
+//     addTest(&LLTest::test3Grammar,"test3Grammar");
+//     addTest(&LLTest::test4Grammar,"test4Grammar");
+    addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
     
   }
 
@@ -35,7 +36,7 @@ public:
 
     (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "c",'T','W') << "A",'N')
 	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
-    ((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | grammar.lambda();
+    (((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | "A",'N') | grammar.lambda();
     grammar.rule("B") << grammar.lambda();
 
     //   ((grammar.rule("S") << "a",'T','W') << "b",'T','W');
@@ -153,6 +154,13 @@ public:
     LLParser llparser(&grammar,true);
 
     assertFalse(llparser.parse(&tokenizer));
+
+  }
+
+  void nullabilityGrammar() throw (ExceptionBase){
+
+    grammar.calculateNDF();
+    
 
   }
   

@@ -109,9 +109,22 @@ namespace parse{
 
     Grammar & operator|(Grammar & grammar) throw(exc::Exception<Grammar>);
 
+    /**
+       calculates nullability, direct first. It will detect left-recursion and throw an
+       exception in this case.
+       @brief nullability, direct first, left recursion
+       @throw Exception<Grammar> in case of detected left recursion
+    */
+    void calculateNDF() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
   protected:
 
     Nonterminal * findNonterminal(std::string nonterminal);
+
+    /**
+       helper function for calculateNDF()
+    */
+    void traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   };
 
@@ -193,6 +206,12 @@ namespace parse{
 
   class Nonterminal : public GrammarSymbol{
 
+    friend class Grammar;
+
+  private:
+
+    bool checked;
+
   protected:
 
     // name of nonterminal
@@ -201,15 +220,25 @@ namespace parse{
     // reference is stored in Grammar and will be deleted from there
     Rule * rule;
 
+    char nullable;
+
+    std::set<Terminal *> firstset;
+
   public:
 
-    Nonterminal(std::string name) : name(name){}
+    Nonterminal(std::string name) : checked(false), name(name), rule(0), nullable(-1){}
 
     std::string getName(){ return name; }
 
     void setRule(Rule *rule){ this->rule = rule; }
 
     Rule * getRule(){ return rule; }
+
+    std::set<Terminal *> & getFirstset(){ return firstset; }
+
+    void setNullable(char val){ nullable = val; }
+
+    bool isNullable(){ return nullable == 1; }
 
   };
 

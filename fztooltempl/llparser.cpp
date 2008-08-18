@@ -428,6 +428,82 @@ Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexSc
 
 }
 
+void Grammar::calculateNDF() throw (Exception<Grammar>, exc::ExceptionBase){
+
+  // init
+  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ )
+    (*it)->checked = false;
+  
+  // select each nonterminal
+  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
+
+    if ( (*it)->checked == true )
+      continue;
+
+    traverseNDF(*it);
+
+  }
+
+}
+
+void Grammar::traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase){
+
+  Terminal *terminal;
+  Nonterminal *next_nonterminal;
+  Rule *rule = nonterminal->getRule();
+  list<Production *> & alternatives = rule->getAlternatives();
+
+  if ( nonterminal->checked == true ){
+
+    if ( nonterminal->nullable == -1 )
+      throw Exception<Grammar>("Grammar left recursive!");
+    else
+      return;
+
+  }
+
+  nonterminal->checked = true;
+
+  for ( list<Production *>::iterator ait = alternatives.begin(); ait != alternatives.end(); ait++ ){
+
+    list<GrammarSymbol *> & symbols = (*ait)->getSymbols();
+
+    if ( symbols.empty() ){
+
+      nonterminal->setNullable(1);
+      continue;
+
+    }
+    
+    list<GrammarSymbol *>::iterator git;
+    for ( git = symbols.begin(); git != symbols.end(); git++ ){
+      
+      if ( (terminal = dynamic_cast<Terminal *>(*git)) != 0 ){
+
+	nonterminal->getFirstset().insert(terminal);
+	break;
+	
+      } else if ( (next_nonterminal = dynamic_cast<Nonterminal *>(*git)) != 0 ){
+
+	if ( next_nonterminal->nullable == -1 )
+
+	if ( next_nonterminal->nullable == 0 )
+	  break;	  
+	
+      } else
+	throw Exception<LLParser>("internal Error: GrammarSymbol neither Terminal nor Nonterminal!");
+    }
+
+    if ( git == symbols.end() )
+      nonterminal->setNullable(1);
+  
+  }
+  
+  if ( nonterminal->nullable == -1 )
+    nonterminal->setNullable(0);
+  
+}
+
 bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
 
   if ( tokenizer == 0 )
