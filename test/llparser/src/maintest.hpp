@@ -22,9 +22,10 @@ public:
   LLTest() : TestCase<LLTest>(){
     
 //     addTest(&LLTest::testGrammar1,"testGrammar1");
-//     addTest(&LLTest::test1Grammar,"test1Grammar");
-//     addTest(&LLTest::test2Grammar,"test2Grammar");
+    addTest(&LLTest::test1Grammar,"test1Grammar");
+    addTest(&LLTest::test2Grammar,"test2Grammar");
     addTest(&LLTest::test3Grammar,"test3Grammar");
+    addTest(&LLTest::test4Grammar,"test4Grammar");
     
   }
 
@@ -32,13 +33,13 @@ public:
 
     grammar.setStart("S");
 
-    ((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "c",'T','W') << "A",'N')
-	 << "g",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
+    (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "c",'T','W') << "A",'N')
+	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
     ((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | grammar.lambda();
     grammar.rule("B") << grammar.lambda();
 
     //   ((grammar.rule("S") << "a",'T','W') << "b",'T','W');
-    cout << grammar.toString() << endl;
+    cout << "Grammar:" << endl << grammar.toString() << endl;
 
   }
   
@@ -63,8 +64,8 @@ public:
 
     rule = new Rule(nonterminal);
 
-    production->getWords().push_back(terminal);
-    production->getWords().push_back(nonterminal);
+    production->getSymbols().push_back(terminal);
+    production->getSymbols().push_back(nonterminal);
 
     rule->getAlternatives().push_back(production);
     production = new Production();
@@ -72,7 +73,7 @@ public:
     terminal = new Terminal("b",Terminal::TT_WORD,Terminal::TM_OVERREAD);
     grammar.getTerminals().insert(terminal);
 
-    production->getWords().push_back(terminal);
+    production->getSymbols().push_back(terminal);
 
     nonterminal->setRule(rule);
     rule->getAlternatives().push_back(production);
@@ -84,7 +85,7 @@ public:
     rule = new Rule(nonterminal);
     nonterminal->setRule(rule);
     production = new Production();
-    production->getWords().push_back(start);
+    production->getSymbols().push_back(start);
     rule->getAlternatives().push_back(production);
     
     grammar.setStartRule(rule);
@@ -112,7 +113,7 @@ public:
   void test2Grammar() throw (ExceptionBase){
 
     stringstream text;
-    text << 'c' << 'g';
+    text << 'c' << 'g' << 'v';
     cout << "word: " << text.str() << endl;
 
     LexScanner tokenizer(&text);
@@ -127,33 +128,31 @@ public:
 
   void test3Grammar() throw (ExceptionBase){
 
-//     stringstream text;
-//     text << 'c' << 'g' << '1' << 'a';
-//     cout << "word: " << text.str() << endl;
+    stringstream text;
+    text << 'c' << 'g' << '1' << 'a';
+    cout << "word: " << text.str() << endl;
 
-//     LexScanner tokenizer(&text);
-//     tokenizer.getLexCharClasses().resetSyntax();
+    LexScanner tokenizer(&text);
+    tokenizer.getLexCharClasses().resetSyntax();
     
-//     LLParser llparser(&grammar,true);
+    LLParser llparser(&grammar,true);
 
-//     assertTrue(llparser.parse(&tokenizer));
-//     cout << endl << endl;
+    assertTrue(llparser.parse(&tokenizer));
 
-    list<int> l;
+  }
 
-    list<int>::iterator it = l.begin();
+  void test4Grammar() throw (ExceptionBase){
 
-    it--;
+    stringstream text;
+    text << 'c' << 'g' << 'b';
+    cout << "word: " << text.str() << endl;
 
-    assertTrue(it == l.end());
-    cout << "hier1\n";
-    l.push_back(3);
-    it = l.begin();
-    it--;
-    cout << "hier2\n";    
-    assertTrue(it == l.end());
+    LexScanner tokenizer(&text);
+    tokenizer.getLexCharClasses().resetSyntax();
+    
+    LLParser llparser(&grammar,true);
 
-    cout << *it << endl;
+    assertFalse(llparser.parse(&tokenizer));
 
   }
   

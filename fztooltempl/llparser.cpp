@@ -137,6 +137,7 @@ std::string Grammar::toString(){
     out << (*it)->getName() << " ";
 
   out << endl << endl;
+  out << "Productions:" << endl;
   out << startrule->toString() << endl << endl;
 
   for ( set<Rule *>::iterator it = rules.begin(); it != rules.end(); it++ )
@@ -343,7 +344,7 @@ Grammar & Grammar::lambda() throw(Exception<Grammar>){
 
 void LLParser::putback(LexScanner *tokenizer){
 
-  if ( tStackPointer == terminalstack.end() )
+  if ( tStackPointer == tokenstack.end() )
     tokenizer->putback();
   else
     tStackPointer--;
@@ -360,7 +361,14 @@ Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexSc
 
 }
 
-void LLParser::restoreTerminals(unsigned long number) throw (Exception<LLParser>){
+void LLParser::pushToken(Grammar::Token token){
+
+  if ( inputtype == STREAM )
+    tokenstack.push(token);
+
+}
+
+void LLParser::restoreTerminals(unsigned long number, unsigned long level) throw (Exception<LLParser>){
 
   static const string thisMethod = "restoreTerminals()";
 
@@ -368,31 +376,32 @@ void LLParser::restoreTerminals(unsigned long number) throw (Exception<LLParser>
     return;
 
   if ( debug )
-    cout << "restoring: ";
+    clog << level << "\trestoring: ";
 
   for ( unsigned long cnt = 0; cnt < number; cnt++ ){
 
-    if ( tStackPointer == terminalstack.begin() )
+    if ( tStackPointer == tokenstack.begin() )
       throw Exception<LLParser>(thisMethod + ": Stack exceeded!");
 
-    if ( debug )
-      cout << (*tStackPointer).first << " ";
-
     tStackPointer--;
+
+    if ( debug )
+      clog << (*tStackPointer).first << " ";
 
   }
 
   if ( debug )
-    cout << endl;
+    clog << endl;
 
 }
 
 Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
 
-  if ( tStackPointer == terminalstack.end() ) {
+  if ( tStackPointer == tokenstack.end() ) {
 
     int scantoken = tokenizer->nextToken();
     int type = tokenizer->token.type;
+    inputtype = STREAM;
     
     if ( type == LexToken::TT_WORD || type == LexToken::TT_NUMBERWORD ){
 
@@ -412,6 +421,7 @@ Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexSc
 
     Grammar::Token token = *tStackPointer;
     tStackPointer++;
+    inputtype = STACK;
     return token;
 
   }
@@ -423,21 +433,35 @@ bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
   if ( tokenizer == 0 )
     throw Exception<LLParser>("tokenizer == 0!");
 
-  tStackPointer = terminalstack.end();
+  tStackPointer = tokenstack.end();
 
   Rule *rule = grammar->getStartRule()->clone(Grammar::Token("",LexToken::TT_WORD));
 
-  ParseResult result =  parse(tokenizer,rule,false,rbstack.topIter(),0);
+  ParseResult result =  parse(tokenizer,rule,false,0);
+  bool succeeded;
 
   delete rule;
-  terminalstack.clear();
+  tokenstack.clear();
 
-  return result.first;
+  if ( lookAhead(tokenizer).second == LexToken::TT_EOF )
+    succeeded = result.first;
+  else
+    succeeded = false;
+
+  if ( debug ){
+
+    if ( succeeded == true )
+      clog << "\tsuccess" << endl;
+    else
+      clog << "\tfailure" << endl;
+
+  }
+
+  return succeeded;
 
 }
 
-LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool backtrack, Stack<Rule *>::const_iterator bottom,
-				      unsigned long level) throw (Exception<LLParser>){
+LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (Exception<LLParser>){
 
   unsigned long shifted_terminals_cnt = 0;
   Terminal *terminal;
@@ -446,17 +470,10 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
   ParseResult result;
   bool nextAlternative;
 
-  // local bottom for the word(back)trackstack
-  Stack<GrammarSymbol *>::const_iterator symLocalBottom;
-
-  Stack<Stack<Rule *>::const_iterator> rbs_bottomstack;
-
-  Stack<Stack<GrammarSymbol *>::const_iterator> sym_bottomstack;
-
   level++;
 
   if ( debug )
-    cout << level << "\trule: " << rule->toString() << endl;
+    clog << level << "\trule: " << rule->toString() << endl;
 
   list<Production *> & alternatives = rule->getAlternatives();
 
@@ -468,13 +485,14 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
     list<GrammarSymbol *> & symbols = production->getSymbols();
 
     if ( debug )
-      cout << level << "\tchoosing: " << production->toString() << endl;
+      clog << level << "\tchoosing: " << production->toString() << endl;
 
     while ( !symbols.empty() && nextAlternative == false ){
       
-      GrammarSymbol *word = symbols.front();
+      GrammarSymbol *symbol = symbols.front();
+      symbols.pop_front();
       
-      if ( (terminal = dynamic_cast<Terminal *>(word)) != 0 ){
+      if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
 	// Terminal
 	
 	token = nextToken(tokenizer);
@@ -482,18 +500,18 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
 	if ( token.second == LexToken::TT_EOF ){
 	  
 	  putback(tokenizer);
-	  restoreTerminals(shifted_terminals_cnt);
+	  restoreTerminals(shifted_terminals_cnt,level);
 	  shifted_terminals_cnt = 0;
 	  nextAlternative = true;
 	  
 	} else if ( token.second == LexToken::TT_NUMBERWORD && terminal->getType() == Terminal::TT_NUMBER ){
 	  
 	  if ( debug )
-	    cout << level << "\tshifting number: " << token.first << endl;
+	    clog << level << "\tshifting number: " << token.first << endl;
 
 	  if ( backtrack ){
 
-	    terminalstack.push(token);
+	    pushToken(token);
 	    shifted_terminals_cnt++;
 
 	  }
@@ -503,30 +521,33 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
 	  if ( token.first == terminal->getName() ){
 	    
 	    if ( debug )
-	      cout << level << "\tshifting: " << token.first << endl;
+	      clog << level << "\tshifting: " << token.first << endl;
 
 	    if ( backtrack ){
 
-	      terminalstack.push(token);
+	      pushToken(token);
 	      shifted_terminals_cnt++;
 
 	    }
 	    
 	  } else {
+	    
+	    if ( debug )
+	      clog << level << "\tfailing: " << token.first << endl;
 	
 	    putback(tokenizer);
-	    restoreTerminals(shifted_terminals_cnt);
+	    restoreTerminals(shifted_terminals_cnt,level);
 	    shifted_terminals_cnt = 0;
 	    nextAlternative = true;
 
 	  }	    
 	}
 
-      } else if ( (nonterminal = dynamic_cast<Nonterminal *>(word)) != 0 ){
+      } else if ( (nonterminal = dynamic_cast<Nonterminal *>(symbol)) != 0 ){
 	// Nonterminal
 	
 	if ( debug )
-	  cout << level << "\texpanding: " << nonterminal->getName() << endl;
+	  clog << level << "\texpanding: " << nonterminal->getName() << endl;
 	
 	Rule *rule = nonterminal->getRule();
 
@@ -535,24 +556,15 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
 
 	Rule *expanded_rule = rule->clone(lookAhead(tokenizer));
 
-	// local bottom for the rbstack
-	Stack<Rule *>::const_iterator rbsLocalBottom = rbstack.topIter();
 	// recursion: do the production
-	result = parse(tokenizer,expanded_rule,(backtrack || !alternatives.empty()),rbsLocalBottom,level);
-
-	// done
-	if ( !rbs_bottomstack.localEmpty(rbsLocalBottom) || !rbs_bottomstack.empty() )
-	  rbs_bottomstack.push(rbsLocalBottom);
-
-	// me must only delete the rule if it is not on the stack, i. e. stack is empty
-	if ( rbstack.localEmpty(rbsLocalBottom) )
-	  delete expanded_rule;
+	result = parse(tokenizer,expanded_rule,(backtrack || !alternatives.empty()),level);
+	delete expanded_rule;
 	
 	shifted_terminals_cnt += result.second;
 	
 	if ( result.first == false ){
 	  
-	  restoreTerminals(shifted_terminals_cnt);
+	  restoreTerminals(shifted_terminals_cnt,level);
 	  shifted_terminals_cnt = 0;
 	  nextAlternative = true;
 	  break;
@@ -562,57 +574,15 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
       } else
 	throw Exception<LLParser>("internal Error: GrammarSymbol neither Terminal nor Nonterminal!");
       
-      //       if ( nextAlternative == false ){
-      // 	symbols.pop_front();
-      //       } else {
-      
-      // 	  restoreTerminals(shifted_terminals_cnt);
-      // 	  shifted_terminals_cnt = 0;
-      
-      
-      //       }
-      
     }
     
-    if ( nextAlternative == false ){
-      // alternative was successfull
-      // backtracking might be provided
-      
-      if ( alternatives.size() > 1 ){
-	// still alternatives: we have to put the rule on the stack
-	// for possible backtracking (we used only "first fit", not "best fit")
-	
-	// we can forget the first successfull alternative if we don't have to
-	// consider backtracking upto here
-	if ( rbstack.localEmpty(rbsLocalBottom) )
-	  alternatives.pop_front();
-	
-	rbstack.push(rule);
-	
-      }
-      
+    if ( nextAlternative == false )
       return ParseResult(true,shifted_terminals_cnt);
-      
-    }
-    else{
-      // alternative was unsuccessfull
-
-      // if we don't have to consider backtracking we can skip the first alternative
-      if ( rbstack.localEmpty(rbsLocalBottom) )
-	alternatives.pop_front();
-      else {
-	// consider backtrackiing
-	
-	
-
-      }
-    }
+    else
+      alternatives.pop_front();
   }
   
-  
-  //   if ( rbstack->empty() ){
-  //     return ParseResult(false,shifted_terminals_cnt);
-  //   } else {
+  return ParseResult(false,shifted_terminals_cnt);
   
 }
 

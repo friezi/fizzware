@@ -252,6 +252,8 @@ namespace parse{
 
   protected:
 
+    enum Inputtype { NONE, STREAM, STACK };
+
     //     // coombination of production and terminal for backtracking
     //     typedef std::pair<Rule *, > StackEntry;
 
@@ -262,36 +264,34 @@ namespace parse{
 
     Grammar *grammar;
 
-    ds::Stack<Grammar::Token> terminalstack;
-
-    // rulebacktrackstack
-    ds::Stack<Rule *> rbstack;
-
-    ds::Stack<GrammarSymbol *> symbolstack;
+    ds::Stack<Grammar::Token> tokenstack;
 
     bool debug;
+
+    Inputtype inputtype;
 
   private:
 
     std::list<Grammar::Token>::iterator tStackPointer;
 
-    ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack, ds::Stack<Rule *>::const_iterator bottom,
-		      unsigned long level) throw (exc::Exception<LLParser>);
+    ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
     
     Grammar::Token nextToken(LexScanner *tokenizer) throw (exc::Exception<LexScanner>,exc::ExceptionBase);
 
     void putback(LexScanner *tokenizer);
     
     Grammar::Token lookAhead(LexScanner *tokenizer) throw (exc::Exception<LexScanner>, exc::ExceptionBase);
+
+    void pushToken(Grammar::Token token);
     
     /**
        @brief restores the terminals
     */
-    void restoreTerminals(unsigned long number) throw (exc::Exception<LLParser>);
+    void restoreTerminals(unsigned long number, unsigned long level) throw (exc::Exception<LLParser>);
 
   public:
 
-    LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug){}
+    LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug), inputtype(NONE){}
 
     bool parse(LexScanner *tokenizer) throw (exc::Exception<LLParser>);
 
