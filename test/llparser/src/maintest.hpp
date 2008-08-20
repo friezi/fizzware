@@ -27,6 +27,7 @@ public:
 //     addTest(&LLTest::test3Grammar,"test3Grammar");
 //     addTest(&LLTest::test4Grammar,"test4Grammar");
     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
+    addTest(&LLTest::leftrecursionGrammar,"leftrecursionGrammar");
     
   }
 
@@ -161,7 +162,13 @@ public:
 
     grammar.calculateNDF();
     
+  }
 
+  void leftrecursionGrammar() throw (ExceptionBase){
+
+    grammar.calculateNDF();
+    grammar.detectLeftrecursion();
+    
   }
   
 };

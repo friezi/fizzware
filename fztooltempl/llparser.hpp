@@ -21,6 +21,8 @@ namespace parse{
   class LLParser;
   class Grammar;
 
+  enum Nullability{ NL_NONE, NL_IS_NULLABLE, NL_IS_NOT_NULLABLE };
+
   class Grammar{
 
   public:
@@ -117,6 +119,13 @@ namespace parse{
     */
     void calculateNDF() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
+    /**
+       @brief checks for direct and indirect leftrecursion
+       @pre calculation for nullability must have been done
+       @throw Exception<Grammar> in case of detected left recursion
+    */
+    void detectLeftrecursion() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
   protected:
 
     Nonterminal * findNonterminal(std::string nonterminal);
@@ -125,6 +134,11 @@ namespace parse{
        helper function for calculateNDF()
     */
     void traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       helper function for detectLeftrecursion()
+    */
+    void traverseLeftrecursion(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   };
 
@@ -210,7 +224,9 @@ namespace parse{
 
   private:
 
-    bool checked;
+    bool visited;
+
+    bool circlefree;
 
   protected:
 
@@ -220,13 +236,13 @@ namespace parse{
     // reference is stored in Grammar and will be deleted from there
     Rule * rule;
 
-    char nullable;
+    Nullability nullable;
 
     std::set<Terminal *> firstset;
 
   public:
 
-    Nonterminal(std::string name) : checked(false), name(name), rule(0), nullable(-1){}
+    Nonterminal(std::string name) : visited(false), circlefree(false), name(name), rule(0), nullable(NL_NONE){}
 
     std::string getName(){ return name; }
 
@@ -236,9 +252,9 @@ namespace parse{
 
     std::set<Terminal *> & getFirstset(){ return firstset; }
 
-    void setNullable(char val){ nullable = val; }
+    void setNullable(Nullability val){ nullable = val; }
 
-    bool isNullable(){ return nullable == 1; }
+    bool isNullable(){ return nullable == NL_IS_NULLABLE; }
 
   };
 
