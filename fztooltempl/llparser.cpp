@@ -157,6 +157,16 @@ Nonterminal * Grammar::findNonterminal(string nonterminal){
 
 }
 
+Terminal * Grammar::findTerminal(string terminal){
+
+  for ( set<Terminal *>::iterator it = terminals.begin(); it != terminals.end(); it++ )
+    if ( (*it)->getName() == terminal )
+      return *it;
+
+  return 0;
+
+}
+
 void Grammar::setStart(string nonterminal) throw(Exception<Grammar>){
 
   if ( startrule != 0 )
@@ -224,8 +234,10 @@ Grammar & Grammar::operator<<(string gsym) throw(Exception<Grammar>){
     throw Exception<Grammar>("no rule defined!");
 
   if ( lastAccessedProduction == 0 ){
+
     lastAccessedProduction = new Production();
     lastAccessedRule->getAlternatives().push_back(lastAccessedProduction);
+
   }
 
   lastGrammarSymbol = gsym;
@@ -245,8 +257,15 @@ Grammar & Grammar::operator,(char type) throw(Exception<Grammar>){
     if ( type == 'T' ){
 
       // Terminal
-      lastTerminal = new Terminal(lastGrammarSymbol);
-      terminals.insert(lastTerminal);
+      
+    // DANGER!!!!! please check type as well ind findTerminal()!!!!!
+      if ( (lastTerminal = findTerminal(lastGrammarSymbol)) == 0 ){
+	
+	lastTerminal = new Terminal(lastGrammarSymbol);
+	terminals.insert(lastTerminal);
+	
+      }
+      
       lastAccessedProduction->getSymbols().push_back(lastTerminal);
 
       defmode = 'T';
@@ -278,7 +297,9 @@ Grammar & Grammar::operator,(char type) throw(Exception<Grammar>){
 
     if ( lastTerminal == 0 )
       throw new Exception<Grammar>("wrong calling-syntax for opertor \";\"!");
-  
+
+
+    // DANGER!!!!! please check type as well ind findTerminal()!!!!!
     if ( type == 'N' ){
 
       // NUMBER
@@ -295,7 +316,7 @@ Grammar & Grammar::operator,(char type) throw(Exception<Grammar>){
     defmode = 0;
 
   } else
-    throw Exception<Grammar>("wrong calling-syntax for PE-types!");
+    throw Exception<Grammar>("wrong calling-syntax for GrammarSymbols-types!");
   
   return *this;
 
@@ -342,11 +363,15 @@ Grammar & Grammar::lambda() throw(Exception<Grammar>){
   return *this;
 }
 
-void Grammar::calculateNDF() throw (Exception<Grammar>, exc::ExceptionBase){
+void Grammar::calculateDFNL() throw (Exception<Grammar>, exc::ExceptionBase){
 
   // init
-  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ )
+  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
+
     (*it)->visited = false;
+    (*it)->circlefree = false;
+
+  }
   
   // select each nonterminal
   for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
@@ -354,13 +379,12 @@ void Grammar::calculateNDF() throw (Exception<Grammar>, exc::ExceptionBase){
     if ( (*it)->visited == true )
       continue;
 
-    traverseNDF(*it);
-
+    traverseDFNL(*it);
+    
   }
-
 }
 
-void Grammar::traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase){
+void Grammar::traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase){
 
   Terminal *terminal;
   Nonterminal *next_nonterminal;
@@ -369,11 +393,11 @@ void Grammar::traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Gramma
 
   if ( nonterminal->visited == true ){
 
-    if ( nonterminal->nullable == NL_NONE )
+    if ( nonterminal->circlefree == false )
       throw Exception<Grammar>("Grammar left recursive!");
     else
       return;
-
+    
   }
 
   nonterminal->visited = true;
@@ -399,8 +423,7 @@ void Grammar::traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Gramma
 	
       } else if ( (next_nonterminal = dynamic_cast<Nonterminal *>(*sit)) != 0 ){
 
-	if ( next_nonterminal->nullable == NL_NONE )
-	  traverseNDF(next_nonterminal);
+	traverseDFNL(next_nonterminal);
 
 	if ( next_nonterminal->nullable == NL_IS_NOT_NULLABLE )
 	  break;	  
@@ -417,73 +440,8 @@ void Grammar::traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Gramma
   if ( nonterminal->nullable == NL_NONE )
     nonterminal->setNullable(NL_IS_NOT_NULLABLE);
   
-}
-
-void Grammar::detectLeftrecursion() throw (Exception<Grammar>, exc::ExceptionBase){
-
-  // init
-  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
-
-    (*it)->visited = false;
-    (*it)->circlefree = false;
-
-  }
-
-  set<Nonterminal *> locally_visited_nt;
-  
-  // select each nonterminal
-  for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
-
-    if ( (*it)->visited == true )
-      continue;
-
-    traverseLeftrecursion(*it);
-    
-  }
-}
-
-void Grammar::traverseLeftrecursion(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase){
-
-  Terminal *terminal;
-  Nonterminal *next_nonterminal;
-  Rule *rule = nonterminal->getRule();
-  list<Production *> & alternatives = rule->getAlternatives();
-
-  if ( nonterminal->visited == true ){
-
-    if ( nonterminal->circlefree == false )
-      throw Exception<Grammar>("Grammar left recursive!");
-    else
-      return;
-    
-  }
-
-  nonterminal->visited = true;
-
-  for ( list<Production *>::iterator ait = alternatives.begin(); ait != alternatives.end(); ait++ ){
-
-    list<GrammarSymbol *> & symbols = (*ait)->getSymbols();
-    
-    for ( list<GrammarSymbol *>::iterator sit = symbols.begin(); sit != symbols.end(); sit++ ){
-      
-      if ( (terminal = dynamic_cast<Terminal *>(*sit)) != 0 ){
-	break;
-	
-      } else if ( (next_nonterminal = dynamic_cast<Nonterminal *>(*sit)) != 0 ){
-
-	traverseLeftrecursion(next_nonterminal);
-
-	if ( !next_nonterminal->isNullable() )
-	  break;	  
-	
-      } else
-	throw Exception<LLParser>("internal Error: GrammarSymbol neither Terminal nor Nonterminal!");
-    }
-  
-  }
-  
   nonterminal->circlefree = true;  
-
+  
 }
 
 void LLParser::putback(LexScanner *tokenizer){

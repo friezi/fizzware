@@ -26,7 +26,7 @@ public:
 //     addTest(&LLTest::test2Grammar,"test2Grammar");
 //     addTest(&LLTest::test3Grammar,"test3Grammar");
 //     addTest(&LLTest::test4Grammar,"test4Grammar");
-    addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
+//     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
     addTest(&LLTest::leftrecursionGrammar,"leftrecursionGrammar");
     
   }
@@ -37,8 +37,8 @@ public:
 
     (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "c",'T','W') << "A",'N')
 	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
-    (((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | "A",'N') | grammar.lambda();
-    grammar.rule("B") << grammar.lambda();
+    ((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | grammar.lambda();
+     grammar.rule("B") << grammar.lambda();
 
     //   ((grammar.rule("S") << "a",'T','W') << "b",'T','W');
     cout << "Grammar:" << endl << grammar.toString() << endl;
@@ -158,16 +158,26 @@ public:
 
   }
 
-  void nullabilityGrammar() throw (ExceptionBase){
+//   void nullabilityGrammar() throw (ExceptionBase){
 
-    grammar.calculateNDF();
+//     grammar.calculateNDF();
     
-  }
+//   }
 
   void leftrecursionGrammar() throw (ExceptionBase){
 
-    grammar.calculateNDF();
-    grammar.detectLeftrecursion();
+//     grammar.calculateNDF();
+    grammar.calculateDFNL();
+
+    cout << endl << "Nullability and direct first:" << endl;
+
+    for ( set<Nonterminal *>::iterator it = grammar.getNonterminals().begin(); it != grammar.getNonterminals().end(); it++ ){
+
+      cout << (*it)->getName() << ": " << (*it)->isNullable() << "\t";
+      for ( set<Terminal *>::iterator fit = (*it)->getFirstset().begin(); fit != (*it)->getFirstset().end(); fit++ )
+	cout << (*fit)->getName() << " ";
+      cout << endl;
+    }
     
   }
   

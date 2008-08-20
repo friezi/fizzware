@@ -112,33 +112,23 @@ namespace parse{
     Grammar & operator|(Grammar & grammar) throw(exc::Exception<Grammar>);
 
     /**
-       calculates nullability, direct first. It will detect left-recursion and throw an
-       exception in this case.
-       @brief nullability, direct first, left recursion
+       Calculates the direct first set and checks for nullability of each nonterminal. Detects
+       leftrecursion and throws an exception in this case
+       @brief direct first, nullability, left recursion
        @throw Exception<Grammar> in case of detected left recursion
     */
-    void calculateNDF() throw (exc::Exception<Grammar>, exc::ExceptionBase);
-
-    /**
-       @brief checks for direct and indirect leftrecursion
-       @pre calculation for nullability must have been done
-       @throw Exception<Grammar> in case of detected left recursion
-    */
-    void detectLeftrecursion() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+    void calculateDFNL() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   protected:
 
     Nonterminal * findNonterminal(std::string nonterminal);
 
-    /**
-       helper function for calculateNDF()
-    */
-    void traverseNDF(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
+    Terminal * findTerminal(std::string terminal);
 
     /**
-       helper function for detectLeftrecursion()
+       helper function for calculateDFNL()
     */
-    void traverseLeftrecursion(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
+    void traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   };
 
