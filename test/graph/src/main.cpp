@@ -172,7 +172,7 @@ using namespace ds;
 // };
 
 // a graph represented by a matrix (note that the nodes must be accessible objects)
-class MatrixGraph : public GraphableBase{
+class MatrixGraph{
 
 private:
   
@@ -183,108 +183,6 @@ private:
   BitMatrix *adjacencymatrix;
 
 public:
-  
-  class node_iterator : public GraphableBase::node_iterator{
-
-    friend class MatrixGraph;
-
-  private:
-
-    unsigned int *nodes;
-
-    unsigned int maxpos;
-    
-    unsigned int pos;
-
-    node_iterator(unsigned int *nodes, unsigned int maxpos, unsigned int pos) : nodes(nodes), maxpos(maxpos), pos(pos){}
-
-  public:
-
-    node_iterator(unsigned int *nodes, unsigned int maxpos) : nodes(nodes), maxpos(maxpos){
-      
-      if ( 1 > maxpos )
-	this->pos = 0;
-      else
-	this->pos = 1;
-      
-    }
-    
-    void operator++(int){ 
-     
-      pos > 0 && pos < maxpos ? pos++ : pos = 0;
-      
-    }
-    
-    TNode operator*(){ return &nodes[pos-1]; }
-    
-    bool operator==(const abstract_iterator & it_rval){ return ( this->pos == ((node_iterator &)it_rval).pos ); }
-
-  };
-
-  class neighbour_iterator : public GraphableBase::neighbour_iterator{
-
-    friend class MatrixGraph;
-
-  private:
-
-    unsigned int *nodes;
-
-    BitMatrix *adjacencymatrix;
-
-    unsigned int maxnodes;
-
-    unsigned int node;
-    
-    unsigned int neighbour;
-
-  public:
-
-    neighbour_iterator(unsigned int *nodes, BitMatrix *adjacencymatrix, unsigned int node, unsigned int maxnodes) : nodes(nodes),
-													   adjacencymatrix(adjacencymatrix), maxnodes(maxnodes){
-
-      if ( node > maxnodes )
-	this->node = 0;
-      else
-	this->node = node;
-
-      neighbour = 0;
-
-    }
-
-    void nextNeighbour(){
-
-      if ( node == 0 )
-	return;
-
-      neighbour++;
-
-      while ( neighbour <= maxnodes ) {
-
-	if ( adjacencymatrix->getBit(node-1,neighbour-1) == 1 )
-	  return;
-
-	neighbour++;
-
-      }
-
-      neighbour = 0;
-      
-    }
-
-    void operator++(int){ 
-
-      if ( node == 0 || neighbour == 0 )
-	return;
-
-      nextNeighbour();
-
-    }
-
-    TNode operator*(){ return &nodes[neighbour-1]; }
-
-    bool operator==(const abstract_iterator & it_rval){ return ( this->neighbour == ((neighbour_iterator &)it_rval).neighbour ); }
-
-  };
 
   MatrixGraph(unsigned int number_nodes) : number_nodes(number_nodes){
 
@@ -303,23 +201,12 @@ public:
     delete nodes;
     
   }
-  
-  node_iterator * beginNodesPtr(){ return new node_iterator(nodes,number_nodes); }
-  node_iterator * endNodesPtr(){ return new node_iterator(nodes,number_nodes,0); }
-  
-  neighbour_iterator * beginNeighboursPtr(TNode node){
-    
-    neighbour_iterator * neighbours = new neighbour_iterator(nodes,adjacencymatrix,*(unsigned int *)node,number_nodes);
-    
-    neighbours->nextNeighbour();
-    
-    return neighbours;
-
-  }
-
-  neighbour_iterator * endNeighboursPtr(TNode node){ return new neighbour_iterator(nodes,adjacencymatrix,*(unsigned int*)node,number_nodes); }
 
   unsigned int maxNodes(){ return number_nodes; }
+
+  unsigned int *getNodes(){ return nodes; }
+
+  BitMatrix * getAdjacencyMatrix(){ return adjacencymatrix; }
 
   void insertEdge(int node, int neighbour){
 
@@ -337,11 +224,144 @@ public:
 
 };
   
+class MatrixNodeIterator : public node_iterator<unsigned int *>{
+  
+private:
+  
+  unsigned int *nodes;
+  
+  unsigned int maxpos;
+  
+  unsigned int pos;
+
+public:
+
+  MatrixNodeIterator(unsigned int *nodes, unsigned int maxpos, unsigned int pos) : nodes(nodes), maxpos(maxpos), pos(pos){}
+
+  MatrixNodeIterator(unsigned int *nodes, unsigned int maxpos) : nodes(nodes), maxpos(maxpos){
+      
+    if ( 1 > maxpos )
+      this->pos = 0;
+    else
+      this->pos = 1;
+      
+  }
+    
+  void operator++(int){ 
+     
+    pos > 0 && pos < maxpos ? pos++ : pos = 0;
+      
+  }
+  
+  unsigned int *operator*(){ return &nodes[pos-1]; }
+    
+  bool operator==(const node_iterator<unsigned int *> *it_rval){ return ( this->pos == (static_cast<const MatrixNodeIterator *>(it_rval))->pos ); }
+
+};
+
+class MatrixNeighbourIterator : public node_iterator<unsigned int *>{
+
+private:
+
+  unsigned int *nodes;
+
+  BitMatrix *adjacencymatrix;
+
+  unsigned int maxnodes;
+
+  unsigned int node;
+    
+  unsigned int neighbour;
+
+public:
+
+  MatrixNeighbourIterator(unsigned int *nodes, BitMatrix *adjacencymatrix, unsigned int node, unsigned int maxnodes)
+  : nodes(nodes),
+    adjacencymatrix(adjacencymatrix),
+    maxnodes(maxnodes){
+    
+    if ( node > maxnodes )
+      this->node = 0;
+    else
+      this->node = node;
+
+    neighbour = 0;
+
+  }
+
+  void nextNeighbour(){
+
+    if ( node == 0 )
+      return;
+
+    neighbour++;
+
+    while ( neighbour <= maxnodes ) {
+
+      if ( adjacencymatrix->getBit(node-1,neighbour-1) == 1 )
+	return;
+
+      neighbour++;
+
+    }
+
+    neighbour = 0;
+      
+  }
+
+  void operator++(int){ 
+
+    if ( node == 0 || neighbour == 0 )
+      return;
+
+    nextNeighbour();
+
+  }
+
+  unsigned int * operator*(){ return &nodes[neighbour-1]; }
+
+  bool operator==(const node_iterator<unsigned int *> * it_rval){
+    return ( this->neighbour == (static_cast<const MatrixNeighbourIterator *>(it_rval))->neighbour );
+  }
+  
+};
+
+class GraphableMatrix : public Graphable<unsigned int *>{
+  
+protected:
+  
+  MatrixGraph & graph;
+  
+public:
+  
+  GraphableMatrix(MatrixGraph &graph) : graph(graph){}
+  
+  node_iterator<unsigned int *> * beginNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes()); }
+  node_iterator<unsigned int *> * endNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes(),0); }
+  
+  node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int * node){
+    
+    MatrixNeighbourIterator * neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int *)node,graph.maxNodes());
+    
+    neighbours->nextNeighbour();
+    
+    return static_cast<node_iterator<unsigned int *> *>(neighbours);
+    
+  }
+  
+  node_iterator<unsigned int *> * endNeighboursPtr(unsigned int * node){
+    return new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int*)node,graph.maxNodes());
+  }
+  
+  size_t maxNodes(){ return graph.maxNodes(); }
+  
+  
+};
 
 int main(int argc, char **argv){
-
-    int max = 100;
-    SCCGraph *scc;
+  
+  int max = 100;
+    //    SCCGraph *scc;
 
 //     Tstgraph tg;
 
@@ -529,44 +549,52 @@ int main(int argc, char **argv){
 
   cout << "constructing component-graph ... " << flush;
 
-  scc = mgraph.find_scc(true);
+  GraphableMatrix graph(mgraph);
+  SCCGraphConstructor<unsigned int *> sccGraphConstructor(&graph);
+
+  sccGraphConstructor.find_scc();
 
   cout << "finished" << endl << flush;
 
-  // we can consider scc as GraphableBase ...
-  for ( GraphableBase::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
-      
-    // ...then we have to cast the administered nodes explicitly, ...
-    SCCGraphComponent * component = (SCCGraphComponent *)(*scc_it);
-    // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
-
-    cout << "component " << component->getId() << ": {";
-    for ( SCCGraphComponent::nodeiterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
-
-      if ( c_it != component->beginNodes() )
-	cout << ",";
-      cout << *(unsigned int *)(*c_it);
-
-    }
-    cout << "}" << endl;
+  for ( list<SCCGraphComponent<unsigned int *> *>::iterator it = sccGraphConstructor.getSCCSet().beginComponents();
+	it != sccGraphConstructor.getSCCSet().endComponents(); it++ ){
+    cout << (*it)->toString() << endl;
   }
 
-  cout << "componentgraph:" << endl;
-
-  // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
-  // This version is type-safe.
-  for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+//   // we can consider scc as GraphableBase ...
+//   for ( GraphableBase::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
       
-    SCCGraphComponent * component = *scc_it;
+//     // ...then we have to cast the administered nodes explicitly, ...
+//     SCCGraphComponent * component = (SCCGraphComponent *)(*scc_it);
+//     // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
 
-    cout << "neighbours of component " << component->getId() << ": ";
+//     cout << "component " << component->getId() << ": {";
+//     for ( SCCGraphComponent::nodeiterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
+
+//       if ( c_it != component->beginNodes() )
+// 	cout << ",";
+//       cout << *(unsigned int *)(*c_it);
+
+//     }
+//     cout << "}" << endl;
+//   }
+
+//   cout << "componentgraph:" << endl;
+
+//   // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
+//   // This version is type-safe.
+//   for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+      
+//     SCCGraphComponent * component = *scc_it;
+
+//     cout << "neighbours of component " << component->getId() << ": ";
     
-    for ( SCCGraph::iterator nb_it = scc->beginNeighbours(component); nb_it != scc->endNeighbours(component); nb_it++ )
-      cout << (*nb_it)->getId() << " ";
-    cout << endl;
-  }
+//     for ( SCCGraph::iterator nb_it = scc->beginNeighbours(component); nb_it != scc->endNeighbours(component); nb_it++ )
+//       cout << (*nb_it)->getId() << " ";
+//     cout << endl;
+//   }
   
-  delete scc;
+//   delete scc;
 
   return 0;
 }
