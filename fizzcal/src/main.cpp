@@ -47,7 +47,6 @@ int main(int argc, char **argv, char **envp){
   bool bflag = false;
   bool interactive = true;
   MemPointer<char> input;
-  MemPointer<char> pathname;
   streamsize precision = 6;
 
 
@@ -57,11 +56,8 @@ int main(int argc, char **argv, char **envp){
 
     cmdlparser.parse();
 
-    // on some systems basename expects a char *, not a const char *, so we have to provide it with a char * !
-    pathname = (char *)calloc(cmdlparser.getProgramname().size()+1,sizeof(char));
-    strcpy(pathname.get(),cmdlparser.getProgramname().c_str());
-
-    programname = ::basename(pathname.get());
+    // on some systems basename() expects a char *, not a const char *, so we have to provide it with a char * !
+    programname = ::basename(const_cast<char *>(cmdlparser.getProgramname().c_str()));
 
     // help-output
     if ( cmdlparser.checkShortoption('h') == true || cmdlparser.checkOption("help") == true ){
@@ -549,8 +545,8 @@ void info(const char *appname){
 
 void show(const char *pname, void (*what)(const char *)){
 
-  char *proc[]={SHOWHELP,0};
-  char *proc2[]={SHOWHELP2,0};
+  const char * const proc[]={SHOWHELP,0};
+  const char * const proc2[]={SHOWHELP2,0};
   int filedes[2];
   int status;
 
@@ -572,9 +568,9 @@ void show(const char *pname, void (*what)(const char *)){
     }
 
     close(filedes[1]);
-    execvp(proc[0],proc);
+    execvp(proc[0],const_cast<char * const *>(proc));
     (*what)(pname);
-    execvp(proc2[0],proc);
+    execvp(proc2[0],const_cast<char * const *>(proc2));
     clog << "neither \"" << SHOWHELP << "\" nor \"" << SHOWHELP2
 	 << "\" installed!\n";
     exit(1);

@@ -44,7 +44,7 @@ PrimList::PrimList(long number=0) : number(number),numbers(0),
 
   // set all numbers
   for (long i=0;i<nsize;i++)
-    numbers[i]|=0xff;
+    numbers[i]|=0xffB;
 
 //    primlist=new NumList();
 

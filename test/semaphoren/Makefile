@@ -79,7 +79,7 @@ CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATHS)
 all: all_libraries $(TARGET)
 
 # <TARGET> compilieren
-$(TARGET): $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAMES)
+$(TARGET): Makefile $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAMES)
 	$(CC) $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) -o $(TARGET) $(LIBS) $(CL_LIB)
 	strip $(TARGET)
 
@@ -111,15 +111,15 @@ $(MAINTEST): $(MAINTEST).o
 	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
 	$(CC) -I$(LIBTEST_DIR) $(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
 
-test: compile_test
+test: all_libraries compile_test
 	$(MAINTEST)
 
 run: $(TARGET)
 	$(TARGET)
 
 # Editor aufrufen
-ed:
-	$(EDITOR) Makefile $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) $(MAINTEST).?pp &
+ed:	Makefile
+	$(EDITOR) Makefile_head $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) $(MAINTEST).?pp &
 
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
 Makefile: Makefile_head $(ROOT_DIR)/Makefile_body

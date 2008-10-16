@@ -252,6 +252,8 @@ namespace exc{
   
   };
 
+  std::ostream& operator<<(std::ostream& ostr, const ExceptionBase& e);
+
   /**
      the generated OutOfMemException
   */

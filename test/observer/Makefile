@@ -110,7 +110,7 @@ $(MAINTEST): $(MAINTEST).o
 	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
 	$(CC) -I$(LIBTEST_DIR) $(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
 
-test: compile_test
+test: all_libraries compile_test
 	$(MAINTEST)
 
 run: $(TARGET)
