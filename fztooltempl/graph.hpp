@@ -48,12 +48,18 @@
 */
 namespace graph{
 
+  /**
+     @defgroup algorithm Algorithms
+     @defgroup structure Structural Classes
+  */
+
   template<typename TNode> class SCCStructure;
 
   template<typename TNode> class SCCGraphComponent;
 
   /**
-     @brief an abstract node_iterator class
+     @ingroup structure
+     @brief \ref structure an abstract node_iterator class
   */
   template<typename TNode> class abstract_node_iterator{
 
@@ -83,13 +89,14 @@ namespace graph{
   };
 
   /**
-     This is a wrapper-class for an abstract_node_iterator. Since GraphableBase is an abstract class and a user must define its own subclasses of abstract_node_iterator and
-     neighbour_iterator it's impossible for the beginNodesPtr() - and beginNeighboursPtr() - method
-     to return a class-object, they have to return a pointer which won't be destructed automatically. iterator just
+     This is a wrapper-class for an abstract_node_iterator. Since Graphable is an abstract class and a user must define its own subclasses of
+     abstract_node_iterator it's impossible for the beginNodesPtr() - and beginNeighboursPtr() - method
+     to return a class-object, they have to return a pointer which won't be destructed automatically. node_iterator just
      contains this pointer and destroys the referenced object automatically on destruction. Use beginNodes() and beginNeighbours() (resp. end...()) for creating
      iterators.
+     @ingroup structure
      @attention Destruction of two different iterators containing the same reference will result (of course) in a segmentation-fault!
-     @brief A wrapper-class for an abstract_iterator.
+     @brief \ref structure A wrapper-class for an abstract_node_iterator.
   */
   template<typename TNode> class node_iterator{
     
@@ -137,6 +144,8 @@ namespace graph{
      So you resp. your graph-class has to provide several methods which are important to execute graph-algorithms.
      You can define any graph-structure you want, just define the purely virtual methods, which are mainly iterators for
      neighbours and nodes.\n\n
+     @ingroup structure
+     @brief \ref structure For mapping a class to a graph-structure
   */
   template<typename TNode> class Graphable{
 
@@ -220,7 +229,8 @@ namespace graph{
   };
 
   /**
-     @brief \b Algorithm: finds strongly connected componets and does some processing on it
+     @ingroup algorithm
+     @brief \ref algorithm finds strongly connected componets and does some processing on it
   */
   template<typename TNode> class SCCProcessor{
 
@@ -359,7 +369,8 @@ namespace graph{
   }
 
   /**
-     @brief \b Algorithm: finds strongly connected components and stores the nodes in component sets
+     @ingroup algorithm
+     @brief \ref algorithm finds strongly connected components and stores the nodes in component sets
   */
   template<typename TNode> class SCCCollector : public SCCProcessor<TNode>{
 
@@ -395,7 +406,8 @@ namespace graph{
 
   /**
      The graph will be accessible via getSCCStructure().
-     @brief \b Algorithm: finds strongly connected components and constructs a component graph.
+     @ingroup algorithm
+     @brief \ref algorithm finds strongly connected components and constructs a component graph.
   */
   template<typename TNode> class SCCGraphConstructor : public SCCCollector<TNode>{
 
@@ -445,7 +457,8 @@ namespace graph{
   /**
      It stores all containing nodes. Besides a list containing
      all neighbours in the resulting component-graph will be filled if the proper option in find_scc() is provided.
-     @brief This class represents a strongly connected component.
+     @ingroup structure
+     @brief \ref structure This class represents a strongly connected component.
      @since v1.98
   */
   template<typename TNode> class SCCGraphComponent{
@@ -561,7 +574,8 @@ namespace graph{
      Besides this class can represent a component-dag of strongly connected components (in combination with SCCGraphConstructor).
      I.e. The sccs form nodes in a graph where scc1 is neighbour of scc2
      (for any two vertices scc1 and scc2) if any of the included nodes of scc1 is neighbour of any included node of scc2.
-     @brief The purpose of this class is to store the strongly connected components of a graph.
+     @ingroup structure
+     @brief \ref structure The purpose of this class is to store the strongly connected components of a graph.
      @since v1.98
   */ 
   template<typename TNode> class SCCStructure : public Graphable<SCCGraphComponent<TNode> *>{
@@ -597,7 +611,9 @@ namespace graph{
       // Implement the virtual methods.
       void operator++(int){ it++; }
       SCCGraphComponent<TNode> * operator*(){ return *it; }
-      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> * it_rval){ return ( this->it == (static_cast<const NodeIterator *>(it_rval))->it ); }    
+      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> * it_rval){
+	return ( this->it == (static_cast<const NodeIterator *>(it_rval))->it );
+      }    
 
     };
     
