@@ -23,10 +23,10 @@ using namespace ds;
 
 // public:
 
-//   // Here we derive from the nested classes GraphableBase::node_iterator and GraphableBase::neighbour_iterator. We have to implement the pure virtual (abstract)
+//   // Here we derive from the nested classes GraphableBase::abstract_node_iterator and GraphableBase::neighbour_iterator. We have to implement the pure virtual (abstract)
 //   // methods which are declared in GraphableBase::iterator.
 
-//   class tg_node_iterator : public node_iterator{
+//   class tg_abstract_node_iterator : public abstract_node_iterator{
 
 //     friend class Tstgraph;
 
@@ -40,9 +40,9 @@ using namespace ds;
 
 //   public:
 
-//     tg_node_iterator(int **tempnode) : tempnode(tempnode){}
+//     tg_abstract_node_iterator(int **tempnode) : tempnode(tempnode){}
 
-//     ~tg_node_iterator(){}
+//     ~tg_abstract_node_iterator(){}
 
 //     // Implement the virtual methods.
 //     void operator++(int){ count++; }
@@ -55,7 +55,7 @@ using namespace ds;
 //       return *tempnode;
 
 // }
-//     bool operator==(const abstract_iterator & it_rval){ return ( this->count == ((tg_node_iterator &)it_rval).count ); }
+//     bool operator==(const abstract_iterator & it_rval){ return ( this->count == ((tg_abstract_node_iterator &)it_rval).count ); }
     
 
 //   };
@@ -129,18 +129,18 @@ using namespace ds;
 
 //   // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
 
-//   node_iterator * beginNodesPtr(){
+//   abstract_node_iterator * beginNodesPtr(){
 
-//     tg_node_iterator * it = new tg_node_iterator(&tempnode);
+//     tg_abstract_node_iterator * it = new tg_abstract_node_iterator(&tempnode);
     
 //     it->setCount(0);
 
 //     return it;
 
 //   }
-//   node_iterator * endNodesPtr(){
+//   abstract_node_iterator * endNodesPtr(){
 
-//     tg_node_iterator * it = new tg_node_iterator(&tempnode);
+//     tg_abstract_node_iterator * it = new tg_abstract_node_iterator(&tempnode);
    
 //     it->setCount(maxNodes());
 
@@ -224,7 +224,7 @@ public:
 
 };
   
-class MatrixNodeIterator : public node_iterator<unsigned int *>{
+class MatrixNodeIterator : public abstract_node_iterator<unsigned int *>{
   
 private:
   
@@ -255,11 +255,11 @@ public:
   
   unsigned int *operator*(){ return &nodes[pos-1]; }
     
-  bool operator==(const node_iterator<unsigned int *> *it_rval){ return ( this->pos == (static_cast<const MatrixNodeIterator *>(it_rval))->pos ); }
+  bool operator==(const abstract_node_iterator<unsigned int *> *it_rval){ return ( this->pos == (static_cast<const MatrixNodeIterator *>(it_rval))->pos ); }
 
 };
 
-class MatrixNeighbourIterator : public node_iterator<unsigned int *>{
+class MatrixNeighbourIterator : public abstract_node_iterator<unsigned int *>{
 
 private:
 
@@ -320,7 +320,7 @@ public:
 
   unsigned int * operator*(){ return &nodes[neighbour-1]; }
 
-  bool operator==(const node_iterator<unsigned int *> * it_rval){
+  bool operator==(const abstract_node_iterator<unsigned int *> * it_rval){
     return ( this->neighbour == (static_cast<const MatrixNeighbourIterator *>(it_rval))->neighbour );
   }
   
@@ -336,10 +336,10 @@ public:
   
   GraphableMatrix(MatrixGraph &graph) : graph(graph){}
   
-  node_iterator<unsigned int *> * beginNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes()); }
-  node_iterator<unsigned int *> * endNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes(),0); }
+  abstract_node_iterator<unsigned int *> * beginNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes()); }
+  abstract_node_iterator<unsigned int *> * endNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes(),0); }
   
-  node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int *node){
+  abstract_node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int *node){
     
     MatrixNeighbourIterator *neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int *)node,graph.maxNodes());
     
@@ -349,7 +349,7 @@ public:
     
   }
   
-  node_iterator<unsigned int *> * endNeighboursPtr(unsigned int *node){
+  abstract_node_iterator<unsigned int *> * endNeighboursPtr(unsigned int *node){
     return new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int*)node,graph.maxNodes());
   }
   
@@ -361,7 +361,7 @@ public:
 int main(int argc, char **argv){
   
   int max = 100;
-    //    SCCGraph *scc;
+//   SCCStructure *scc;
 
 //     Tstgraph tg;
 
@@ -541,6 +541,8 @@ int main(int argc, char **argv){
     for ( int j=1; j <= max/2; j++ )
       mgraph.removeEdge(i,j);
 
+  mgraph.insertEdge(1,50);
+
   cout << "finished" << endl;
 
   cout << "adjacencymatrix:" << endl;
@@ -556,45 +558,45 @@ int main(int argc, char **argv){
 
   cout << "finished" << endl << flush;
 
-  for ( list<SCCGraphComponent<unsigned int *> *>::iterator it = sccGraphConstructor.getSCCSet().beginComponents();
-	it != sccGraphConstructor.getSCCSet().endComponents(); it++ ){
+  for ( list<SCCGraphComponent<unsigned int *> *>::iterator it = sccGraphConstructor.getSCCStructure().beginComponents();
+	it != sccGraphConstructor.getSCCStructure().endComponents(); it++ ){
     cout << (*it)->toString() << endl;
   }
 
-//   // we can consider scc as GraphableBase ...
-//   for ( GraphableBase::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+  SCCStructure<unsigned int *> & scc = sccGraphConstructor.getSCCStructure();
+
+  // we can consider scc as Graphable ...
+  for ( node_iterator<SCCGraphComponent<unsigned int *> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
       
-//     // ...then we have to cast the administered nodes explicitly, ...
-//     SCCGraphComponent * component = (SCCGraphComponent *)(*scc_it);
-//     // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
+    // ...then we have to cast the administered nodes explicitly, ...
+    SCCGraphComponent<unsigned int *> * component = *scc_it;
+    // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
 
-//     cout << "component " << component->getId() << ": {";
-//     for ( SCCGraphComponent::nodeiterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
+    cout << "component " << component->getId() << ": {";
+    for ( SCCGraphComponent<unsigned int *>::Nodeset::iterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
 
-//       if ( c_it != component->beginNodes() )
-// 	cout << ",";
-//       cout << *(unsigned int *)(*c_it);
+      if ( c_it != component->beginNodes() )
+	cout << ",";
+      cout << *(unsigned int *)(*c_it);
 
-//     }
-//     cout << "}" << endl;
-//   }
+    }
+    cout << "}" << endl;
+  }
 
-//   cout << "componentgraph:" << endl;
+  cout << "componentgraph:" << endl;
 
-//   // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
-//   // This version is type-safe.
-//   for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+  // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
+  // This version is type-safe.
+  for ( node_iterator<SCCGraphComponent<unsigned int *> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
       
-//     SCCGraphComponent * component = *scc_it;
+    SCCGraphComponent<unsigned int *> * component = *scc_it;
 
-//     cout << "neighbours of component " << component->getId() << ": ";
+    cout << "neighbours of component " << component->getId() << ": ";
     
-//     for ( SCCGraph::iterator nb_it = scc->beginNeighbours(component); nb_it != scc->endNeighbours(component); nb_it++ )
-//       cout << (*nb_it)->getId() << " ";
-//     cout << endl;
-//   }
-  
-//   delete scc;
+    for ( node_iterator<SCCGraphComponent<unsigned int *> *> nb_it = scc.beginNeighbours(component); nb_it != scc.endNeighbours(component); nb_it++ )
+      cout << (*nb_it)->getId() << " ";
+    cout << endl;
+  }
 
   return 0;
 }
