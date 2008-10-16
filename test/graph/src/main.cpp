@@ -339,17 +339,17 @@ public:
   node_iterator<unsigned int *> * beginNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes()); }
   node_iterator<unsigned int *> * endNodesPtr(){ return new MatrixNodeIterator(graph.getNodes(),graph.maxNodes(),0); }
   
-  node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int * node){
+  node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int *node){
     
-    MatrixNeighbourIterator * neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int *)node,graph.maxNodes());
+    MatrixNeighbourIterator *neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int *)node,graph.maxNodes());
     
     neighbours->nextNeighbour();
     
-    return static_cast<node_iterator<unsigned int *> *>(neighbours);
+    return neighbours;
     
   }
   
-  node_iterator<unsigned int *> * endNeighboursPtr(unsigned int * node){
+  node_iterator<unsigned int *> * endNeighboursPtr(unsigned int *node){
     return new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int*)node,graph.maxNodes());
   }
   
