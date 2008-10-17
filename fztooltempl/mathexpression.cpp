@@ -1722,7 +1722,7 @@ inline bool MathExpression::checkLetter(char x){
 
 bool MathExpression::isBuiltinFunction(const char *strname){
 
-  char *flist[]={FLIST};
+  const char *flist[]={FLIST};
 
   for (unsigned int i=0;i<sizeof(flist)/sizeof(char *);i++)
     if (!strcmp(strname,flist[i]))
@@ -2221,8 +2221,8 @@ string MathExpression::builtinsToString(){
 
   ostringstream builtins;
   
-  char oplist[]={OPLIST};
-  char *flist[]={FLIST};
+  const char oplist[]={OPLIST};
+  const char *flist[]={FLIST};
 
   for (unsigned int i=0;i<sizeof(oplist)/sizeof(char);i++)
     builtins << oplist[i] << endl;

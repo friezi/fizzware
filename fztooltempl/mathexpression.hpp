@@ -80,15 +80,15 @@ namespace mexp{
     int pos;
     
   public:
-    ParseException(int pos) : exc::Exception<MathExpression>(""){
+    ParseException(const int pos) : exc::Exception<MathExpression>(""){
       this->pos = pos;
     }
     
-    ParseException(int pos, char *errormsg) : exc::Exception<MathExpression>(std::string(errormsg)){
+    ParseException(int pos, const char *errormsg) : exc::Exception<MathExpression>(std::string(errormsg)){
       this->pos = pos;
     }
     
-    ParseException(int pos, std::string errormsg) : exc::Exception<MathExpression>(errormsg){
+    ParseException(int pos, const std::string errormsg) : exc::Exception<MathExpression>(errormsg){
       this->pos = pos;
     }
     
@@ -112,7 +112,7 @@ namespace mexp{
       this->objname = "";
     }
     
-    EvalException(char *errormsg, char *objname=0) : exc::Exception<MathExpression>(std::string(errormsg)){
+    EvalException(const char *errormsg, const char *objname=0) : exc::Exception<MathExpression>(std::string(errormsg)){
 
       if (objname)
 	this->objname = objname;
@@ -121,7 +121,7 @@ namespace mexp{
 
     }
     
-    EvalException(std::string errormsg) : exc::Exception<MathExpression>(errormsg){
+    EvalException(const std::string errormsg) : exc::Exception<MathExpression>(errormsg){
       this->objname = "";
     }
     
