@@ -7,169 +7,161 @@ using namespace ds;
 
 // in the following we will define two different graph-representations
 
-// // the nodes will be stored in a map with lists holding the neighbours
-// class Tstgraph : public Graphable<int>{
+// the nodes will be stored in a map with lists holding the neighbours
+class Tstgraph : public Graphable<int>{
 
-// public:
+public:
 
-//   typedef map< int, list<int> *, less<int> > Nodemap;
+  typedef map< int, list<int> *> Nodemap;
 
-// private:
-
-//   int * tempnode;
+private:
   
-//   // our definition of nodes
-//   Nodemap * neighbours;
+  // our definition of nodes
+  Nodemap *neighbours;
 
-// public:
+public:
 
-//   // Here we derive from the nested classes GraphableBase::abstract_node_iterator and GraphableBase::neighbour_iterator. We have to implement the pure virtual (abstract)
-//   // methods which are declared in GraphableBase::iterator.
+  // Here we derive from the nested classes graph::abstract_node_iterator and put it inside our Graphable.
+  // We have to implement the pure virtual (abstract)
+  // methods which are declared in GraphableBase::iterator.
 
-//   class tg_abstract_node_iterator : public abstract_node_iterator{
+  class tg_abstract_node_iterator : public abstract_node_iterator<int>{
 
-//     friend class Tstgraph;
+    friend class Tstgraph;
 
-//   private:
+  private:
 
-//     int count;
+    Nodemap::iterator it;
+    
+  public:
 
-//     int **tempnode;
+    tg_abstract_node_iterator(const Nodemap::iterator it) : it(it){}
+    tg_abstract_node_iterator(const tg_abstract_node_iterator & it) : it(it.it){}
 
-//     void setCount(int rval_count){ count = rval_count; }
+    ~tg_abstract_node_iterator(){}
 
-//   public:
-
-//     tg_abstract_node_iterator(int **tempnode) : tempnode(tempnode){}
-
-//     ~tg_abstract_node_iterator(){}
-
-//     // Implement the virtual methods.
-//     void operator++(int){ count++; }
-//     TNode operator*(){
-
-//       if ( *tempnode )
-// 	delete *tempnode;
-
-//       *tempnode = new int(count);
-//       return *tempnode;
-
-// }
-//     bool operator==(const abstract_iterator & it_rval){ return ( this->count == ((tg_abstract_node_iterator &)it_rval).count ); }
+    // Implement the virtual methods.
+    void operator++(int){ ++it; }
+    int operator*(){ return (*it).first; }
+    bool operator==(const abstract_node_iterator<int> * it_rval){
+      return ( (*this->it).first == (*(static_cast<const tg_abstract_node_iterator *>(it_rval))->it).first );
+    }
     
 
-//   };
+  };
 
-//   class tg_neighbour_iterator : public neighbour_iterator{
-
-//     friend class Tstgraph;
-
-//   private:
-
-//     list<int>::iterator it;
-
-//     void setIt(list<int>::iterator it_rval){ it = it_rval; }
-
-//   public:
-
-//     ~tg_neighbour_iterator(){}
-
-//     // Implement the virtual methods.
-//     void operator++(int){ it++; }
-//     TNode operator*(){ return &(*it); }
-//     bool operator==(const abstract_iterator & it_rval){ return ( this->it == ((tg_neighbour_iterator &)it_rval).it ); }
-    
-
-//   };
-
-//   Tstgraph() : tempnode(0){ 
-
-//     neighbours = new Nodemap();
-
-//   }
-
-//   ~Tstgraph(){
-
-//     for ( Nodemap::iterator it = neighbours->begin(); it != neighbours->end(); it++ )
-//       delete (*it).second;
-    
-//     delete neighbours;
-
-//     if ( tempnode )
-//       delete tempnode;
-    
-//   }
-
-//   Nodemap * getNodes(){ return neighbours; }
-
-//   // The following methods are only necessary for our local GraphableBase-class Tstgraph. 
-
-//   void insertNode(int node){ 
-    
-//     (*neighbours)[node] = new list<int>();
+  class tg_neighbour_iterator : public abstract_node_iterator<int>{
   
-//   }
+    friend class Tstgraph;
+  
+  private:
 
-//   void insertEdge(int node, int neighbour){
+    list<int>::iterator it;
 
-//     (*neighbours)[node]->push_back(neighbour);
+    void setIt(const list<int>::iterator it_rval){ it = it_rval; }
 
-//   }
+  public:
 
-//   void removeEdge(int node, int neighbour){
+    ~tg_neighbour_iterator(){}
 
-//     list<int> * neighbourlist = (*neighbours)[node];
-
-//     list<int>::iterator it = find(neighbourlist->begin(),neighbourlist->end(),neighbour);
-
-//     if ( it != neighbourlist->end() )
-//       neighbourlist->erase(it);
-
-//   }
-
-//   // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
-
-//   abstract_node_iterator * beginNodesPtr(){
-
-//     tg_abstract_node_iterator * it = new tg_abstract_node_iterator(&tempnode);
+    // Implement the virtual methods.
+    void operator++(int){ ++it; }
+    int operator*(){ return *it; }
+    bool operator==(const abstract_node_iterator<int> * it_rval){
+      return ( this->it == (static_cast<const tg_neighbour_iterator *>(it_rval))->it );
+    }
     
-//     it->setCount(0);
 
-//     return it;
+  };
 
-//   }
-//   abstract_node_iterator * endNodesPtr(){
+  Tstgraph(){ 
 
-//     tg_abstract_node_iterator * it = new tg_abstract_node_iterator(&tempnode);
-   
-//     it->setCount(maxNodes());
+    neighbours = new Nodemap();
 
-//     return it;
+  }
 
-//   }
+  ~Tstgraph(){
 
-//   neighbour_iterator * beginNeighboursPtr(const TNode node){
-
-//     tg_neighbour_iterator * it = new tg_neighbour_iterator();
+    for ( Nodemap::iterator it = neighbours->begin(); it != neighbours->end(); it++ )
+      delete (*it).second;
     
-//     it->setIt((*neighbours->find(*((int *)node))).second->begin());
+    delete neighbours;
+    
+  }
 
-//     return it;
+  Nodemap * getNodes(){ return neighbours; }
 
-//   }
-//   neighbour_iterator * endNeighboursPtr(const TNode node){
+  // The following methods are only necessary for our local GraphableBase-class Tstgraph. 
 
-//     tg_neighbour_iterator * it = new tg_neighbour_iterator();
+  void insertNode(int node){ 
+    
+    Nodemap::iterator old = neighbours->find(node);
+
+    if ( old != neighbours->end() )
+      delete (*old).second;
+    
+    (*neighbours)[node] = new list<int>();
+  
+  }
+
+  void insertEdge(int node, int neighbour){
+
+    (*neighbours)[node]->push_back(neighbour);
+
+  }
+
+  void removeEdge(int node, int neighbour){
+    
+    Nodemap::iterator nit = neighbours->find(node);
+    
+    if ( nit != neighbours->end() ){
+      
+      list<int> *neighbourlist = (*nit).second;
+      
+      list<int>::iterator it = find(neighbourlist->begin(),neighbourlist->end(),neighbour);
+      
+      if ( it != neighbourlist->end() )
+	neighbourlist->erase(it);
+      
+    }
+    
+  }
+  
+  // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
+
+  abstract_node_iterator<int> * beginNodesPtr(){
+
+    return new tg_abstract_node_iterator(neighbours->begin());
+
+  }
+  abstract_node_iterator<int> * endNodesPtr(){
+
+    return new tg_abstract_node_iterator(neighbours->end());
+
+  }
+
+  abstract_node_iterator<int> * beginNeighboursPtr(const int node){
+
+    tg_neighbour_iterator * it = new tg_neighbour_iterator();
+    
+    it->setIt((*neighbours->find(node)).second->begin());
+    
+    return it;
+
+  }
+  abstract_node_iterator<int> * endNeighboursPtr(const int node){
+
+    tg_neighbour_iterator * it = new tg_neighbour_iterator();
    
-//     it->setIt((*neighbours->find(*((int *)node))).second->end());
+    it->setIt((*neighbours->find(node)).second->end());
 
-//     return it;
+    return it;
 
-//   }
+  }
 
-//   unsigned int maxNodes(){ return neighbours->size(); }
+  size_t maxNodes(){ return neighbours->size(); }
 
-// };
+};
 
 // a graph represented by a matrix (note that the nodes must be accessible objects)
 class MatrixGraph{
@@ -276,9 +268,9 @@ private:
 public:
 
   MatrixNeighbourIterator(unsigned int *nodes, BitMatrix *adjacencymatrix, unsigned int node, unsigned int maxnodes)
-  : nodes(nodes),
-    adjacencymatrix(adjacencymatrix),
-    maxnodes(maxnodes){
+    : nodes(nodes),
+      adjacencymatrix(adjacencymatrix),
+      maxnodes(maxnodes){
     
     if ( node > maxnodes )
       this->node = 0;
@@ -341,7 +333,8 @@ public:
   
   abstract_node_iterator<unsigned int *> * beginNeighboursPtr(unsigned int *node){
     
-    MatrixNeighbourIterator *neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),*(unsigned int *)node,graph.maxNodes());
+    MatrixNeighbourIterator *neighbours = new MatrixNeighbourIterator(graph.getNodes(),graph.getAdjacencyMatrix(),
+								      *(unsigned int *)node,graph.maxNodes());
     
     neighbours->nextNeighbour();
     
@@ -361,165 +354,175 @@ public:
 int main(int argc, char **argv){
   
   int max = 100;
-//   SCCStructure *scc;
 
-//     Tstgraph tg;
+  {
+    Tstgraph tg;
 
-//     // just build up a graph-structure
+    // just build up a graph-structure
 
-//     tg.insertNode(1);
-//     tg.insertNode(0);
-//     tg.insertNode(2);
-//     tg.insertNode(3);
-//     tg.insertNode(4);
-//     tg.insertNode(5);
-//     tg.insertNode(6);
-//     tg.insertNode(7);
-//     tg.insertNode(8);
-//     tg.insertNode(9);
-//     tg.insertNode(10);
-//     tg.insertNode(11);
+    tg.insertNode(1);
+    tg.insertNode(0);
+    tg.insertNode(2);
+    tg.insertNode(3);
+    tg.insertNode(4);
+    tg.insertNode(5);
+    tg.insertNode(6);
+    tg.insertNode(7);
+    tg.insertNode(8);
+    tg.insertNode(9);
+    tg.insertNode(10);
+    tg.insertNode(11);
   
-//     tg.insertEdge(0,1);
-//     tg.insertEdge(0,2);
+    tg.insertEdge(0,1);
+    tg.insertEdge(0,2);
 
-//     tg.insertEdge(2,0);
-//     tg.insertEdge(1,3);
-//     tg.insertEdge(3,4);
-//     tg.insertEdge(3,1);
-//     tg.insertEdge(4,1);
-//     tg.insertEdge(5,3);
-//     tg.insertEdge(2,6);
-//     tg.insertEdge(6,7);
-//     tg.insertEdge(7,8);
-//     tg.insertEdge(8,5);
-//     tg.insertEdge(8,9);
-//     tg.insertEdge(10,9);
-//     tg.insertEdge(9,11);
-//     tg.insertEdge(11,10);
-//     tg.insertEdge(3,7);
+    tg.insertEdge(2,0);
+    tg.insertEdge(1,3);
+    tg.insertEdge(3,4);
+    tg.insertEdge(3,1);
+    tg.insertEdge(4,1);
+    tg.insertEdge(5,3);
+    tg.insertEdge(2,6);
+    tg.insertEdge(6,7);
+    tg.insertEdge(7,8);
+    tg.insertEdge(8,5);
+    tg.insertEdge(8,9);
+    tg.insertEdge(10,9);
+    tg.insertEdge(9,11);
+    tg.insertEdge(11,10);
+    tg.insertEdge(3,7);
 
   
-//     // print the graph-structure for demonstration
-//     for ( Tstgraph::Nodemap::iterator nm_it = tg.getNodes()->begin(); nm_it != tg.getNodes()->end(); nm_it++ ){
+    // print the graph-structure for demonstration
+    for ( Tstgraph::Nodemap::iterator nm_it = tg.getNodes()->begin(); nm_it != tg.getNodes()->end(); nm_it++ ){
+	
+      cout << "neighbours from node " << (*nm_it).first << ": ";
 
-//       cout << "neighbours from node " << (*nm_it).first << ": ";
+      for ( node_iterator<int> ni = tg.beginNeighbours((*nm_it).first); ni != tg.endNeighbours((*nm_it).first); ni++ )
+	cout << *ni << " ";
 
-//       for ( Tstgraph::iterator ni = tg.beginNeighbours(&((void *)((*nm_it).first))); ni != tg.endNeighbours(&((void *)((*nm_it).first))); ni++ )
-//         cout << *ni << " ";
+      cout << endl;
 
-//       cout << endl;
+    }
 
-//     }
+    SCCGraphConstructor<int> graphconstructor(&tg);
 
+    // find all strongly connected components
+    graphconstructor.find_scc();
 
-//     // find all strongly connected components
-//     scc = tg.find_scc(true);
+    SCCStructure<int> & scc = graphconstructor.getSCCStructure();
+	
+    for ( node_iterator<SCCGraphComponent<int> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
+	  
+      cout << "component " << (*scc_it)->getId() << ": {";
+      for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
-//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+	if ( c_it != (*scc_it)->beginNodes() )
+	  cout << ",";
+	cout << *c_it;
+
+      }
+      cout << "}" << endl;
+    }
+
+    cout << "componentgraph:" << endl;
+
+    for ( node_iterator<SCCGraphComponent<int> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
+
+      cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    
+      for ( node_iterator<SCCGraphComponent<int> *> nb_it = scc.beginNeighbours(*scc_it); nb_it != scc.endNeighbours(*scc_it); nb_it++ )
+	cout << (*nb_it)->getId() << " ";
+      cout << endl;
+
+    }
+
+  }
+
+  {
+    Tstgraph cplg;
+
+    cout << endl << "building a bigger graph ... " << flush;
+  
+    for ( int i = 0; i < max; i++ )
+      cplg.insertNode(i);
+
+    for ( int i = 0; i < max; i++ )
+      for ( int j = 0; j < max; j++ )
+	if ( j != i )
+	  cplg.insertEdge(i,j);
+
+    for ( int i = max/2-1; i < max ; i++ )
+      if ( i != max/2 )
+	cplg.removeEdge(max/2-1,i);
+
+    for ( int i = 0 ; i < max/2-1; i++ )
+      for ( int j = max/2; j < max; j++ )
+	cplg.removeEdge(i,j);
+
+    for ( int i = max/2; i < max; i++ )
+      for ( int j=0; j < max/2; j++ )
+	cplg.removeEdge(i,j);
+
+    cout << "finished" << endl << flush;
+
+    cout << "constructing component-graph ... " << flush;
+
+    SCCGraphConstructor<int> gcons(&cplg);
+
+    gcons.find_scc();
+
+    SCCStructure<int> & scc = gcons.getSCCStructure();
+
+    cout << "finished" << endl << flush;
+
+    for ( node_iterator<SCCGraphComponent<int> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
       
-//       cout << "component " << (*scc_it)->getId() << ": {";
-//       for ( SCCGraphComponent::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
+      cout << "component " << (*scc_it)->getId() << ": {";
+      for ( SCCGraphComponent<int>::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
 
-//         if ( c_it != (*scc_it)->beginNodes() )
-//   	cout << ",";
-//         cout << *c_it;
+	if ( c_it != (*scc_it)->beginNodes() )
+	  cout << ",";
+	cout << *c_it;
 
-//       }
-//       cout << "}" << endl;
-//     }
+      }
+      cout << "}" << endl;
+    }
 
-//     cout << "componentgraph:" << endl;
+    cout << "componentgraph:" << endl;
 
-//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
+    for ( node_iterator<SCCGraphComponent<int> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
 
-//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+      cout << "neighbours of component " << (*scc_it)->getId() << ": ";
     
-//       for ( SCCGraph::iterator nb_it = scc->beginNeighbours(*scc_it); nb_it != scc->endNeighbours(*scc_it); nb_it++ )
-//         cout << (*nb_it)->getId() << " ";
-//       cout << endl;
+      for ( node_iterator<SCCGraphComponent<int> *> nb_it = scc.beginNeighbours(*scc_it); nb_it != scc.endNeighbours(*scc_it); nb_it++ )
+	cout << (*nb_it)->getId() << " ";
+      cout << endl;
+    }
 
-//     }
+    // scc is a graph itself so we can call find_scc() as well on this graph (won't make any difference because a dag just stays a dag; only for
+    // demonstrative purpose).
 
-//     delete scc;
+    SCCGraphConstructor<SCCGraphComponent<int> *> gc2(&scc);
 
-//     Tstgraph cplg;
+    gc2.find_scc();
 
-//     cout << endl << "building a bigger graph ... " << flush;
+    SCCStructure<SCCGraphComponent<int> *> & sccscc = gc2.getSCCStructure();
+
+    cout << endl << "componentgraph's componentgraph:" << endl;
+
+    for ( node_iterator<SCCGraphComponent<SCCGraphComponent<int> *> *> scc_it = sccscc.beginNodes(); scc_it != sccscc.endNodes(); scc_it++ ){
+
+      cout << "neighbours of component " << (*scc_it)->getId() << ": ";
+    
+      for ( node_iterator<SCCGraphComponent<SCCGraphComponent<int> *> *> nb_it = sccscc.beginNeighbours(*scc_it);
+	    nb_it != sccscc.endNeighbours(*scc_it); nb_it++ )
+	cout << (*nb_it)->getId() << " ";
+      cout << endl;
+    }
+  }
   
-//     for ( int i = 0; i < max; i++ )
-//       cplg.insertNode(i);
-
-//     for ( int i = 0; i < max; i++ )
-//       for ( int j = 0; j < max; j++ )
-//         if ( j != i )
-//   	cplg.insertEdge(i,j);
-
-//     for ( int i = max/2-1; i < max ; i++ )
-//       if ( i != max/2 )
-//         cplg.removeEdge(max/2-1,i);
-
-//     for ( int i = 0 ; i < max/2-1; i++ )
-//       for ( int j = max/2; j < max; j++ )
-//         cplg.removeEdge(i,j);
-
-//     for ( int i = max/2; i < max; i++ )
-//       for ( int j=0; j < max/2; j++ )
-//         cplg.removeEdge(i,j);
-
-//     cout << "finished" << endl << flush;
-
-//     cout << "constructing component-graph ... " << flush;
-
-//     scc = cplg.find_scc(true);
-
-//     cout << "finished" << endl << flush;
-
-//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
-      
-//       cout << "component " << (*scc_it)->getId() << ": {";
-//       for ( SCCGraphComponent::nodeiterator c_it = (*scc_it)->beginNodes(); c_it != (*scc_it)->endNodes(); c_it++ ){
-
-//         if ( c_it != (*scc_it)->beginNodes() )
-//   	cout << ",";
-//         cout << *c_it;
-
-//       }
-//       cout << "}" << endl;
-//     }
-
-//     cout << "componentgraph:" << endl;
-
-//     for ( SCCGraph::iterator scc_it = scc->beginNodes(); scc_it != scc->endNodes(); scc_it++ ){
-
-//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
-    
-//       for ( SCCGraph::iterator nb_it = scc->beginNeighbours(&(*scc_it)); nb_it != scc->endNeighbours(&(*scc_it)); nb_it++ )
-//         cout << (*nb_it)->getId() << " ";
-//       cout << endl;
-//     }
-
-//     // scc is a graph itself so we can call find_scc() as well on this graph (won't make any difference because a dag just stays a dag; only for
-//     // demonstrative purpose).
-//     SCCGraph * sccscc = scc->find_scc(true);
-
-//     cout << endl << "componentgraph's componentgraph:" << endl;
-
-//     for ( SCCGraph::iterator scc_it = sccscc->beginNodes(); scc_it != sccscc->endNodes(); scc_it++ ){
-
-//       cout << "neighbours of component " << (*scc_it)->getId() << ": ";
-    
-//       for ( SCCGraph::iterator nb_it = sccscc->beginNeighbours(*scc_it); nb_it != sccscc->endNeighbours(*scc_it); nb_it++ )
-//         cout << (*nb_it)->getId() << " ";
-//       cout << endl;
-//     }
-
-//     delete sccscc;
-
-//     delete scc;
-
   // at last a Graph represented by a Matrix
-
   cout << endl << "building Matrixgraph ... ";
 
   MatrixGraph mgraph(max);
@@ -558,19 +561,12 @@ int main(int argc, char **argv){
 
   cout << "finished" << endl << flush;
 
-  for ( list<SCCGraphComponent<unsigned int *> *>::iterator it = sccGraphConstructor.getSCCStructure().beginComponents();
-	it != sccGraphConstructor.getSCCStructure().endComponents(); it++ ){
-    cout << (*it)->toString() << endl;
-  }
-
   SCCStructure<unsigned int *> & scc = sccGraphConstructor.getSCCStructure();
 
   // we can consider scc as Graphable ...
   for ( node_iterator<SCCGraphComponent<unsigned int *> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
       
-    // ...then we have to cast the administered nodes explicitly, ...
     SCCGraphComponent<unsigned int *> * component = *scc_it;
-    // ... (but it makes the generic handling of different GraphableBase-objects flexible resp. possible) ...
 
     cout << "component " << component->getId() << ": {";
     for ( SCCGraphComponent<unsigned int *>::Nodeset::iterator c_it = component->beginNodes(); c_it != component->endNodes(); c_it++ ){
