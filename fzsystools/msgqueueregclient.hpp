@@ -85,7 +85,7 @@ namespace sys{
       // konvertiert die sizeof(long) bytes vom Token in long
       unsigned long toLong();
     
-      int operator==(char *s);
+      int operator==(const char *s);
       int operator==(const std::string &s);
     
     };

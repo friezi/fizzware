@@ -208,7 +208,7 @@ unsigned long MsgQueueRegClient::Token::toLong(){
   return value;
 }
 
-int MsgQueueRegClient::Token::operator==(char *s){
+int MsgQueueRegClient::Token::operator==(const char *s){
 
   return (strncmp(this->buffer,s,tsize) == 0);
 }
