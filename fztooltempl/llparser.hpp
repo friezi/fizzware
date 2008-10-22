@@ -10,6 +10,7 @@
 #include <utils.hpp>
 #include <datastructures.hpp>
 #include <lex.hpp>
+#include <graph.hpp>
 
 namespace parse{
 
@@ -345,6 +346,15 @@ namespace parse{
     bool parse(LexScanner *tokenizer) throw (exc::Exception<LLParser>);
 
   };
+
+//   class FirstSetNodeIterator : public graph::abstract_node_iterator{
+//   };
+
+//   class FirstSetNeighbourIterator : public graph::abstract_node_iterator{
+//   };
+
+//   class FirstSetGraph : public graph::Graphable{
+//   };
 
 }
 
