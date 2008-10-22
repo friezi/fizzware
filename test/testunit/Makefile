@@ -1,36 +1,3 @@
-################################################################################
-########################### FOR EDITING ########################################
-
-TARGET = testunit
-
-MAIN_MODULE = main
-LOCAL_MODULES = maintest
-EXTERN_MODULES =
-EM_PATH =
-
-TT = ../../fztooltempl
-
-CLASSLIBRARY_PATH = ../../lib
-CLASSLIBRARIES = fztooltempl
-CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception $(TT)/test
-
-IMPORTANT_HEADERS =
-
-LIBRARY_INCLUDE_PATHS =
-LIBRARIES =
-LIBRARY_PATHS =
-
-ADDITIONAL_DISTFILES =
-
-# in case that ansi is not allowed
-# NOANSI = true
-
-ROOT_DIR = ../../
-
-### check the field CC ########################################################
-################################################################################
-################################################################################
 ROOT_DIR ?= ../
 
 DIST_DIR = $(ROOT_DIR)/dist
@@ -110,7 +77,7 @@ $(MAINTEST): $(MAINTEST).o
 	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
 	$(CC) -I$(LIBTEST_DIR) $(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
 
-test: compile_test
+test: all_libraries compile_test
 	$(MAINTEST)
 
 run: $(TARGET)

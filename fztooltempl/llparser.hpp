@@ -128,7 +128,7 @@ namespace parse{
     /**
        helper function for calculateDFNL()
     */
-    void traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase);
+    void traverseDFNL(Rule *rule) throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   };
 
@@ -140,7 +140,7 @@ namespace parse{
 
     std::list<GrammarSymbol *> symbols;
 
-    Grammar::TaggedTerminals director_set;
+    std::set<Terminal *> director_set;
 
     Production * clone();
 
@@ -152,7 +152,7 @@ namespace parse{
 
     std::list<GrammarSymbol *> & getSymbols(){ return symbols; }
 
-    Grammar::TaggedTerminals & getDirectorSet(){ return director_set; }
+    std::set<Terminal *> & getDirectorSet(){ return director_set; }
 
     std::string toString();
   
@@ -210,14 +210,6 @@ namespace parse{
 
   class Nonterminal : public GrammarSymbol{
 
-    friend class Grammar;
-
-  private:
-
-    bool visited;
-
-    bool circlefree;
-
   protected:
 
     // name of nonterminal
@@ -226,13 +218,9 @@ namespace parse{
     // reference is stored in Grammar and will be deleted from there
     Rule * rule;
 
-    Nullability nullable;
-
-    std::set<Terminal *> firstset;
-
   public:
 
-    Nonterminal(std::string name) : visited(false), circlefree(false), name(name), rule(0), nullable(NL_NONE){}
+    Nonterminal(std::string name) : name(name), rule(0){}
 
     std::string getName(){ return name; }
 
@@ -240,33 +228,41 @@ namespace parse{
 
     Rule * getRule(){ return rule; }
 
-    std::set<Terminal *> & getFirstset(){ return firstset; }
-
-    void setNullable(Nullability val){ nullable = val; }
-
-    bool isNullable(){ return nullable == NL_IS_NULLABLE; }
-
   };
 
   class Rule{
 
     friend class LLParser;
-    
+    friend class Grammar;
+
+  private:
+
+    bool visited;
+
+    bool circlefree;
+ 
+    Nullability nullable;
+   
   protected:
+
+    // one for each component only
+    std::set<Terminal *> *first_set;
+
+    // one for each component only
+    std::set<Terminal *> *follow_set;
 
     Nonterminal * nonterminal;
 
     std::list<Production *> alternatives;
 
-  protected:
-
-    Rule * clone(Grammar::Token lookahead) throw (exc::Exception<LLParser>);
+    // one for each rule
+    std::set<Terminal *> direct_first_set;
 
   public:
 
-    Rule(){}
+    Rule() : visited(false), circlefree(false), nullable(NL_NONE), first_set(0), follow_set(0), nonterminal(0){}
 
-    Rule(Nonterminal *nonterminal) : nonterminal(nonterminal){}
+    Rule(Nonterminal *nonterminal) : visited(false), circlefree(false), nullable(NL_NONE), first_set(0), follow_set(0), nonterminal(nonterminal){}
 
     ~Rule();
 
@@ -277,6 +273,24 @@ namespace parse{
     std::list<Production *> & getAlternatives(){ return alternatives; }
 
     std::string toString();
+
+    std::set<Terminal *> & getDirectFirstSet(){ return direct_first_set; }
+
+    std::set<Terminal *> * getFirstSet(){ return first_set; }
+
+    std::set<Terminal *> * getFollowSet(){ return follow_set; }
+
+    void setFirstSet(std::set<Terminal *> *first_set){ this->first_set = first_set; }
+
+    void setFollowSet(std::set<Terminal *> *follow_set){ this->follow_set = follow_set; }
+
+    void setNullable(Nullability val){ nullable = val; }
+
+    bool isNullable(){ return nullable == NL_IS_NULLABLE; }
+
+  protected:
+
+    Rule * clone(Grammar::Token lookahead) throw (exc::Exception<LLParser>);
 
   };
 

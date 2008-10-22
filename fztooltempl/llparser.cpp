@@ -365,42 +365,47 @@ Grammar & Grammar::lambda() throw(Exception<Grammar>){
 
 void Grammar::calculateDFNL() throw (Exception<Grammar>, exc::ExceptionBase){
 
+  Rule *rule;
+
   // init
   for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
 
-    (*it)->visited = false;
-    (*it)->circlefree = false;
+    rule = (*it)->getRule();
+    rule->visited = false;
+    rule->circlefree = false;
 
   }
   
   // select each nonterminal
   for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ ){
 
-    if ( (*it)->visited == true )
+    rule = (*it)->getRule();
+
+    if ( rule->visited == true )
       continue;
 
-    traverseDFNL(*it);
+    traverseDFNL(rule);
     
   }
 }
 
-void Grammar::traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Grammar>, exc::ExceptionBase){
+void Grammar::traverseDFNL(Rule *rule) throw (exc::Exception<Grammar>, exc::ExceptionBase){
 
   Terminal *terminal;
   Nonterminal *next_nonterminal;
-  Rule *rule = nonterminal->getRule();
+  Rule *next_rule;
   list<Production *> & alternatives = rule->getAlternatives();
 
-  if ( nonterminal->visited == true ){
+  if ( rule->visited == true ){
 
-    if ( nonterminal->circlefree == false )
+    if ( rule->circlefree == false )
       throw Exception<Grammar>("Grammar left recursive!");
     else
       return;
     
   }
 
-  nonterminal->visited = true;
+  rule->visited = true;
 
   for ( list<Production *>::iterator ait = alternatives.begin(); ait != alternatives.end(); ait++ ){
 
@@ -408,7 +413,7 @@ void Grammar::traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Gramm
 
     if ( symbols.empty() ){
 
-      nonterminal->setNullable(NL_IS_NULLABLE);
+      rule->setNullable(NL_IS_NULLABLE);
       continue;
 
     }
@@ -418,14 +423,16 @@ void Grammar::traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Gramm
       
       if ( (terminal = dynamic_cast<Terminal *>(*sit)) != 0 ){
 
-	nonterminal->getFirstset().insert(terminal);
+	rule->getDirectFirstSet().insert(terminal);
 	break;
 	
       } else if ( (next_nonterminal = dynamic_cast<Nonterminal *>(*sit)) != 0 ){
 
-	traverseDFNL(next_nonterminal);
+	next_rule = next_nonterminal->getRule();
 
-	if ( next_nonterminal->nullable == NL_IS_NOT_NULLABLE )
+	traverseDFNL(next_rule);
+
+	if ( next_rule->nullable == NL_IS_NOT_NULLABLE )
 	  break;	  
 	
       } else
@@ -433,14 +440,14 @@ void Grammar::traverseDFNL(Nonterminal *nonterminal) throw (exc::Exception<Gramm
     }
 
     if ( sit == symbols.end() )
-      nonterminal->setNullable(NL_IS_NULLABLE);
+      rule->setNullable(NL_IS_NULLABLE);
   
   }
   
-  if ( nonterminal->nullable == NL_NONE )
-    nonterminal->setNullable(NL_IS_NOT_NULLABLE);
+  if ( rule->nullable == NL_NONE )
+    rule->setNullable(NL_IS_NOT_NULLABLE);
   
-  nonterminal->circlefree = true;  
+  rule->circlefree = true;  
   
 }
 

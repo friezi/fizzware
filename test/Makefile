@@ -1,4 +1,4 @@
-DIRS = cliparser funtest properties semaphoren graph tree bitmatrix lexer ringbuffer observer testunit
+DIRS = cliparser funtest properties semaphoren graph tree bitmatrix lexer ringbuffer observer testunit llparser
 
 EDITOR ?= vi
 
