@@ -269,6 +269,7 @@ namespace parse{
 
     friend class LLParser;
     friend class Grammar;
+    friend class FirstSetCollector;
 
   private:
 
@@ -451,7 +452,7 @@ namespace parse{
 
   };
 
-  class FirstSetCollector : public graph::SCCProcessor<Rule *>{
+  class FirstSetCollector : public graph::SCCCollector<Rule *>{
 
   private:
 

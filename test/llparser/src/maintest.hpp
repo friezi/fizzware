@@ -184,7 +184,16 @@ public:
 
     firstSetCollector.find_scc();
 
-    cout << "firstsets:" << endl;
+    cerr << "firstsets:" << endl;
+    for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
+     
+      cerr << (*rit)->getNonterminal()->getName() << ": ";
+
+      for ( set<Terminal *>::iterator tit = (*rit)->getFirstSet()->begin(); tit != (*rit)->getFirstSet()->end(); tit++ ){
+	cerr << (*tit)->getName() << "  ";
+      }
+      cerr << endl;
+    }
     
   }
   

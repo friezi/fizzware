@@ -858,10 +858,12 @@ size_t  FirstSetGraph::maxNodes(){
   return grammar.getRules().size();
 }
 
-FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCProcessor<Rule *>(&graph){
+FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCCollector<Rule *>(&graph){
 }
     
 void FirstSetCollector::processComponent() throw (ExceptionBase){
+
+  SCCCollector<Rule *>::processComponent();
 
   first_set = new set<Terminal *>();
   static_cast<FirstSetGraph *>(this->graph)->getGrammar().getFirstSets().insert(first_set);
@@ -870,10 +872,25 @@ void FirstSetCollector::processComponent() throw (ExceptionBase){
 
 void FirstSetCollector::processComponentNode(Rule *rule) throw (ExceptionBase){
 
+  SCCCollector<Rule *>::processComponentNode(rule);
+
+  rule->first_set = first_set;
   set<Terminal *> & direct_first_set = rule->getDirectFirstSet();
 
-  for ( set<Terminal *>::iterator it = direct_first_set.begin(); it != direct_first_set.end(); it++ ){
-    first_set->insert(*it);
+  // insert direct_first_sets
+  for ( set<Terminal *>::iterator tit = direct_first_set.begin(); tit != direct_first_set.end(); tit++ ){
+    first_set->insert(*tit);
   }
 
+  for ( graph::node_iterator<Rule *> nit = graph->beginNeighbours(rule); nit != graph->endNeighbours(rule); nit++ ){
+
+    set<Terminal *> *neighbour_first_set = (*nit)->getFirstSet();
+
+    if ( neighbour_first_set != first_set ){
+      for ( set<Terminal *>::iterator tit = neighbour_first_set->begin(); tit != neighbour_first_set->end(); tit++ ){
+	first_set->insert(*tit);
+      }
+    }
+
+  }  
 }
