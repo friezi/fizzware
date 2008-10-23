@@ -173,11 +173,18 @@ public:
 
     for ( set<Nonterminal *>::iterator it = grammar.getNonterminals().begin(); it != grammar.getNonterminals().end(); it++ ){
 
-      cout << (*it)->getName() << ": " << (*it)->isNullable() << "\t";
-      for ( set<Terminal *>::iterator fit = (*it)->getFirstset().begin(); fit != (*it)->getFirstset().end(); fit++ )
+      cout << (*it)->getName() << ": " << (*it)->getRule()->isNullable() << "\t";
+      for ( set<Terminal *>::iterator fit = (*it)->getRule()->getDirectFirstSet().begin(); fit != (*it)->getRule()->getDirectFirstSet().end(); fit++ )
 	cout << (*fit)->getName() << " ";
       cout << endl;
     }
+
+    FirstSetGraph firstSetGraph(grammar);
+    FirstSetCollector firstSetCollector(firstSetGraph);
+
+    firstSetCollector.find_scc();
+
+    cout << "firstsets:" << endl;
     
   }
   

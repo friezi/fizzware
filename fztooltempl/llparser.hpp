@@ -21,6 +21,8 @@ namespace parse{
   class Rule;
   class LLParser;
   class Grammar;
+  class FirstSetCollector;
+  class FollowSetCollector;
 
   enum Nullability{ NL_NONE, NL_IS_NULLABLE, NL_IS_NOT_NULLABLE };
 
@@ -72,6 +74,10 @@ namespace parse{
 
     std::set<Nonterminal *> nonterminals;
 
+    std::set< std::set<Terminal *> *> first_sets;
+
+    std::set< std::set<Terminal *> *> follow_sets;
+
   public:
 
     Grammar() : startrule(0), lastAccessedRule(0), lastAccessedProduction(0), lastGrammarSymbol(""),
@@ -91,6 +97,10 @@ namespace parse{
     std::set<Terminal *> & getTerminals(){ return terminals; }
 
     std::set<Nonterminal *> & getNonterminals(){ return nonterminals; }
+
+    std::set< std::set<Terminal *> *> & getFirstSets(){ return first_sets; }
+
+    std::set< std::set<Terminal *> *> & getFollowSets(){ return follow_sets; }
 
     std::string toString();
 
@@ -119,6 +129,30 @@ namespace parse{
        @throw Exception<Grammar> in case of detected left recursion
     */
     void calculateDFNL() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       Calculates the first-sets for all rules
+       @brief first-set calculation
+       @pre calculateDFNL() must have been called already
+       @throw Exception<Grammar>
+    */
+    void calculateFirstSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       Calculates the follow-sets for all rules
+       @brief follow-set calculation
+       @pre calculateFirstSets() must have been called already
+       @throw Exception<Grammar>
+    */
+    void calculateFollowSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       Calculates the director-sets for all productions
+       @brief director-set calculation
+       @pre calculateFollowSets() must have been called already
+       @throw Exception<Grammar>
+    */
+    void calculateDirectorSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   protected:
 
@@ -347,14 +381,93 @@ namespace parse{
 
   };
 
-//   class FirstSetNodeIterator : public graph::abstract_node_iterator{
-//   };
+  class FirstSetNodeIterator : public graph::abstract_node_iterator<Rule *>{
 
-//   class FirstSetNeighbourIterator : public graph::abstract_node_iterator{
-//   };
+  private:
+    
+    std::set<Rule *>::iterator it;
 
-//   class FirstSetGraph : public graph::Graphable{
-//   };
+  public:
+
+    FirstSetNodeIterator(std::set<Rule *>::iterator it);
+
+    Rule * operator*() throw(exc::ExceptionBase);
+
+    void operator++(int) throw(exc::ExceptionBase);
+
+    bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
+
+  };
+
+  class FirstSetNeighbourIterator : public graph::abstract_node_iterator<Rule *>{
+
+  private:
+
+    Rule *rule;
+
+    bool at_end;
+
+    std::list<Production *>::iterator alternatives_iterator;
+
+    std::list<GrammarSymbol *>::iterator symbols_iterator;
+
+    void setToFirstNonterminal();
+
+    void setToNextNonterminal();
+
+  public:
+
+    FirstSetNeighbourIterator(Rule *rule, bool at_end);
+
+    Rule * operator*() throw(exc::ExceptionBase);
+
+    void operator++(int) throw(exc::ExceptionBase);
+
+    bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
+   
+  };
+
+  class FirstSetGraph : public graph::Graphable<Rule *>{
+
+  private:
+
+    Grammar & grammar;
+
+  public:
+
+    FirstSetGraph(Grammar & grammar);
+
+    graph::abstract_node_iterator<Rule *> * beginNodesPtr();
+
+    graph::abstract_node_iterator<Rule *> * endNodesPtr();
+
+    graph::abstract_node_iterator<Rule *> * beginNeighboursPtr(Rule *rule);
+
+    graph::abstract_node_iterator<Rule *> * endNeighboursPtr(Rule *rule);
+
+    size_t maxNodes();
+
+    Grammar & getGrammar(){ return grammar; }
+
+  };
+
+  class FirstSetCollector : public graph::SCCProcessor<Rule *>{
+
+  private:
+
+    std::set<Terminal *> *first_set;
+    
+  public:
+
+    FirstSetCollector(FirstSetGraph & graph);
+
+    void prepareFind() throw (exc::ExceptionBase){}
+    
+    void processComponent() throw (exc::ExceptionBase);
+    
+    void processComponentNode(Rule *rule) throw (exc::ExceptionBase);
+    
+  };
 
 }
 

@@ -4,6 +4,7 @@ using namespace std;
 using namespace exc;
 using namespace utils;
 using namespace ds;
+using namespace graph;
 using namespace parse;
 
 const char Terminal::TT_WORD = 1;
@@ -119,6 +120,12 @@ Grammar::~Grammar(){
     delete *it;
 
   for ( set<Nonterminal *>::iterator it = nonterminals.begin(); it != nonterminals.end(); it++ )
+    delete *it;
+
+  for ( set< set<Terminal *> *>::iterator it = first_sets.begin(); it != first_sets.end(); it++ )
+    delete *it;
+
+  for ( set< set<Terminal *> *>::iterator it = follow_sets.begin(); it != follow_sets.end(); it++ )
     delete *it;
   
 }
@@ -389,7 +396,19 @@ void Grammar::calculateDFNL() throw (Exception<Grammar>, exc::ExceptionBase){
   }
 }
 
-void Grammar::traverseDFNL(Rule *rule) throw (exc::Exception<Grammar>, exc::ExceptionBase){
+void calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
+
+  
+
+}
+
+void calculateFollowSets() throw (Exception<Grammar>, ExceptionBase){
+}
+
+void calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase){
+}
+
+void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase){
 
   Terminal *terminal;
   Nonterminal *next_nonterminal;
@@ -695,3 +714,166 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
   
 }
 
+FirstSetNodeIterator::FirstSetNodeIterator(set<Rule *>::iterator it) : it(it){
+}
+
+Rule * FirstSetNodeIterator::operator*() throw(ExceptionBase){
+  return *it;
+}
+
+void FirstSetNodeIterator::operator++(int) throw(ExceptionBase){
+  it++;
+}
+
+bool  FirstSetNodeIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
+  return it == static_cast<const FirstSetNodeIterator *>(it_rval)->it;
+}
+
+FirstSetNeighbourIterator::FirstSetNeighbourIterator(Rule *rule, bool at_end) : rule(rule), at_end(at_end){
+
+  if ( this->at_end == false ) {
+
+    alternatives_iterator = rule->getAlternatives().begin();
+
+    if ( alternatives_iterator != rule->getAlternatives().end() ){
+
+      symbols_iterator = (*alternatives_iterator)->getSymbols().begin();
+      setToFirstNonterminal();
+
+    } else{
+
+      this->at_end = true;
+
+    }
+
+  }
+}
+
+void FirstSetNeighbourIterator::setToFirstNonterminal(){
+
+  if ( at_end == true ){
+    return;
+  }
+
+  if ( dynamic_cast<Nonterminal *>(*symbols_iterator) == 0 ){
+    setToNextNonterminal();
+  }
+
+}
+
+void FirstSetNeighbourIterator::setToNextNonterminal(){
+
+  list<Production *>::iterator alternatives_end = rule->getAlternatives().end();
+  list<GrammarSymbol *>::iterator symbols_end;
+
+  if ( alternatives_iterator != alternatives_end ){
+
+    symbols_iterator++;
+    while ( true ){
+    
+      symbols_end = (*alternatives_iterator)->getSymbols().end();
+      while ( symbols_iterator != symbols_end ){
+
+	if ( dynamic_cast<Nonterminal *>(*symbols_iterator) != 0 ){
+	  return;
+	}
+
+	symbols_iterator++;
+      }
+
+      alternatives_iterator++;
+      if ( alternatives_iterator == alternatives_end ){
+	break;
+      }
+
+      symbols_iterator = (*alternatives_iterator)->getSymbols().begin();
+
+    }
+  }
+
+  at_end = true;
+
+}
+
+Rule * FirstSetNeighbourIterator::operator*() throw(ExceptionBase){
+
+  static const string thisMethod = " FirstSetNeighbourIterator::operator*()";
+
+  if ( at_end == true ){
+    throw Exception< abstract_node_iterator<Rule *> >(thisMethod + "iterator is at end!");
+  }
+
+  if ( dynamic_cast<Nonterminal *>(*symbols_iterator) == 0 ){
+    throw Exception< abstract_node_iterator<Rule *> >(thisMethod + "iterator does not point to a nonterminal!");
+  }
+
+  return static_cast<Nonterminal *>(*symbols_iterator)->getRule();
+
+}
+
+void FirstSetNeighbourIterator::operator++(int) throw(ExceptionBase){
+
+  if ( at_end == true ){
+    return;
+  }
+
+  setToNextNonterminal();
+
+}
+
+bool  FirstSetNeighbourIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
+
+  const FirstSetNeighbourIterator *ni = static_cast<const FirstSetNeighbourIterator *>(it_rval);
+
+  if ( this->at_end == true and ni->at_end == true ){
+    return true;
+  } else if ( this->at_end == true or ni->at_end == true ){
+    return false;
+  } else {
+    return ( *alternatives_iterator == *(ni->alternatives_iterator) and *symbols_iterator == *(ni->symbols_iterator) );
+  }
+
+}
+
+FirstSetGraph::FirstSetGraph(Grammar & grammar) : grammar(grammar){
+}
+
+abstract_node_iterator<Rule *> * FirstSetGraph::beginNodesPtr(){
+  return new FirstSetNodeIterator(grammar.getRules().begin());
+}
+
+abstract_node_iterator<Rule *> *  FirstSetGraph::endNodesPtr(){
+   return new FirstSetNodeIterator(grammar.getRules().end());
+}
+
+abstract_node_iterator<Rule *> *  FirstSetGraph::beginNeighboursPtr(Rule *rule){
+  return new FirstSetNeighbourIterator(rule,false);
+}
+
+abstract_node_iterator<Rule *> *  FirstSetGraph::endNeighboursPtr(Rule *rule){
+  return new FirstSetNeighbourIterator(rule,true);
+}
+
+size_t  FirstSetGraph::maxNodes(){
+  return grammar.getRules().size();
+}
+
+FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCProcessor<Rule *>(&graph){
+}
+    
+void FirstSetCollector::processComponent() throw (ExceptionBase){
+
+  first_set = new set<Terminal *>();
+  static_cast<FirstSetGraph *>(this->graph)->getGrammar().getFirstSets().insert(first_set);
+
+}
+
+void FirstSetCollector::processComponentNode(Rule *rule) throw (ExceptionBase){
+
+  set<Terminal *> & direct_first_set = rule->getDirectFirstSet();
+
+  for ( set<Terminal *>::iterator it = direct_first_set.begin(); it != direct_first_set.end(); it++ ){
+    first_set->insert(*it);
+  }
+
+}

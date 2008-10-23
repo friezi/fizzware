@@ -69,20 +69,20 @@ namespace graph{
        @brief returns the object the iterator is pointing at
        @return the object
     */
-    virtual TNode operator*() = 0;
+    virtual TNode operator*() throw(exc::ExceptionBase) = 0;
 
     /**
        @brief postincrement
     */
-    virtual void operator++(int) = 0;
+    virtual void operator++(int) throw(exc::ExceptionBase) = 0;
     
     /**
        @brief equality
        @return true if iterators are pointing to the same position (resp. object), false otherwise
     */
-    virtual bool operator==(const abstract_node_iterator<TNode> *it_rval) = 0;
+    virtual bool operator==(const abstract_node_iterator<TNode> *it_rval) throw(exc::ExceptionBase) = 0;
     
-    bool operator!=(const abstract_node_iterator<TNode> *it_rval){ return !( *this == it_rval ); }
+    bool operator!=(const abstract_node_iterator<TNode> *it_rval) throw(exc::ExceptionBase) { return !( *this == it_rval ); }
     
     virtual ~abstract_node_iterator(){}
 
@@ -131,10 +131,10 @@ namespace graph{
 
     }
       
-    void operator++(int){ (*it)++; }
-    TNode operator*(){ return **it; }
-    bool operator!=(const node_iterator<TNode> & it_rval){ return ( *this->it != it_rval.it ); }
-    bool operator==(const node_iterator<TNode> & it_rval){ return ( *this->it == it_rval.it ); }
+    void operator++(int) throw(exc::ExceptionBase) { (*it)++; }
+    TNode operator*() throw(exc::ExceptionBase) { return **it; }
+    bool operator!=(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return ( *this->it != it_rval.it ); }
+    bool operator==(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return ( *this->it == it_rval.it ); }
 
   };
 
@@ -257,7 +257,7 @@ namespace graph{
     /**
        @brief for finding and doing some processing on strongly connected components (Tarjan)
     */
-    void find_scc();
+    void find_scc() throw(exc::ExceptionBase);
     
     //@}
 
@@ -270,31 +270,31 @@ namespace graph{
        intended to do some initialization before the search starts.
        @brief will be called initially by find_scc()
     */
-    virtual void prepareFind() = 0;
+    virtual void prepareFind() throw (exc::ExceptionBase) = 0;
     
     /**
        ...
        @brief will be called on each fully identified component
     */
-    virtual void processComponent() = 0;
+    virtual void processComponent() throw (exc::ExceptionBase) = 0;
     
     /**
        ...
        @brief will be called on each node of the component
     */
-    virtual void processComponentNode(TNode node) = 0;
+    virtual void processComponentNode(TNode node) throw (exc::ExceptionBase) = 0;
     
     //@}
     
   private:
 
     // basically Tarjan's algorithm
-    unsigned int scc_visit(const TNode node, unsigned int id);
+    unsigned int scc_visit(const TNode node, unsigned int id) throw(exc::ExceptionBase);
     
   };
 
   template<typename TNode>
-  void SCCProcessor<TNode>::find_scc(){
+  void SCCProcessor<TNode>::find_scc() throw(exc::ExceptionBase){
 
     unsigned int id = 0;
     unsigned int min;
@@ -326,7 +326,7 @@ namespace graph{
   }
 
   template<typename TNode>
-  unsigned int SCCProcessor<TNode>::scc_visit(const TNode node, unsigned int id){
+  unsigned int SCCProcessor<TNode>::scc_visit(const TNode node, unsigned int id) throw(exc::ExceptionBase){
   
     unsigned int m = 0, min;
 
@@ -337,7 +337,7 @@ namespace graph{
     nodestack.push(node);
 
     for ( node_iterator<TNode> nit = graph->beginNeighbours(node); nit != graph->endNeighbours(node); nit++ ){
-    
+
       m = (!values[*nit]) ? scc_visit(*nit,id) : values[*nit];
 
       if ( m < min )
@@ -386,15 +386,15 @@ namespace graph{
 
     SCCGraphComponent<TNode> * component;
     
-    virtual void prepareFind(){
+    virtual void prepareFind() throw (exc::ExceptionBase){
       sccstructure.clear();
     }
     
-    virtual void processComponent(){
+    virtual void processComponent() throw (exc::ExceptionBase){
       component = sccstructure.newComponent();
     }
     
-    virtual void processComponentNode(TNode node){
+    virtual void processComponentNode(TNode node) throw (exc::ExceptionBase){
       component->insertComponentNode(node);
     }
 
@@ -421,19 +421,19 @@ namespace graph{
 
     Componentmap nodecomponents;
     
-    virtual void prepareFind(TNode node){
+    virtual void prepareFind() throw (exc::ExceptionBase){
 
       SCCCollector<TNode>::prepareFind();
 
       nodecomponents.clear();
 
       for ( node_iterator<TNode> ndit = this->graph->beginNodes(); ndit != this->graph->endNodes(); ndit++ ){
-	nodecomponents[node] = 0;
+	nodecomponents[*ndit] = 0;
       }
 
     }
 
-    virtual void processComponentNode(TNode node){
+    virtual void processComponentNode(TNode node) throw (exc::ExceptionBase){
 
       SCCCollector<TNode>::processComponentNode(node);
 
@@ -548,7 +548,7 @@ namespace graph{
     */
     inline unsigned int getId() const { return id; }
 
-    std::string toString(){
+    std::string toString() throw(exc::Exception< abstract_node_iterator<TNode> >){
 
       std::ostringstream sbuffer;
 
@@ -609,10 +609,10 @@ namespace graph{
       ~NodeIterator(){}
 
       // Implement the virtual methods.
-      void operator++(int){ it++; }
-      SCCGraphComponent<TNode> * operator*(){ return *it; }
-      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> * it_rval){
-	return ( this->it == (static_cast<const NodeIterator *>(it_rval))->it );
+      void operator++(int) throw(exc::ExceptionBase){ it++; }
+      SCCGraphComponent<TNode> * operator*() throw(exc::ExceptionBase){ return *it; }
+      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> * it_rval) throw(exc::ExceptionBase){
+	return ( this->it == static_cast<const NodeIterator *>(it_rval)->it );
       }    
 
     };
@@ -632,10 +632,10 @@ namespace graph{
       ~NeighbourIterator(){}
 
       // Implement the virtual methods.
-      void operator++(int){ it++; }
-      SCCGraphComponent<TNode> * operator*(){ return *it; }
-      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> *it_rval){
-	return ( this->it == (static_cast<const NeighbourIterator *>(it_rval))->it );
+      void operator++(int) throw(exc::ExceptionBase){ it++; }
+      SCCGraphComponent<TNode> * operator*() throw(exc::ExceptionBase){ return *it; }
+      bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> *it_rval) throw(exc::ExceptionBase){
+	return ( this->it == static_cast<const NeighbourIterator *>(it_rval)->it );
       }
     
     };
