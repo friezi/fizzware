@@ -413,6 +413,7 @@ void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase)
 
     if ( symbols.empty() ){
 
+      (*ait)->setNullable(NL_IS_NULLABLE);
       rule->setNullable(NL_IS_NULLABLE);
       continue;
 
@@ -424,6 +425,7 @@ void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase)
       if ( (terminal = dynamic_cast<Terminal *>(*sit)) != 0 ){
 
 	rule->getDirectFirstSet().insert(terminal);
+	(*ait)->setNullable(NL_IS_NOT_NULLABLE);
 	break;
 	
       } else if ( (next_nonterminal = dynamic_cast<Nonterminal *>(*sit)) != 0 ){
@@ -432,19 +434,27 @@ void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase)
 
 	traverseDFNL(next_rule);
 
-	if ( next_rule->nullable == NL_IS_NOT_NULLABLE )
-	  break;	  
+	if ( next_rule->nullable == NL_IS_NOT_NULLABLE ){
+
+	  (*ait)->setNullable(NL_IS_NOT_NULLABLE);
+	  break;
+
+	}
 	
       } else
 	throw Exception<LLParser>("internal Error: GrammarSymbol neither Terminal nor Nonterminal!");
     }
 
-    if ( sit == symbols.end() )
+    if ( sit == symbols.end() ){
+
+      (*ait)->setNullable(NL_IS_NULLABLE);
       rule->setNullable(NL_IS_NULLABLE);
+
+    }
   
   }
   
-  if ( rule->nullable == NL_NONE )
+  if ( rule->nullable == NL_NONE )   
     rule->setNullable(NL_IS_NOT_NULLABLE);
   
   rule->circlefree = true;  
@@ -472,10 +482,55 @@ void  Grammar::calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
 void  Grammar::calculateFollowSets() throw (Exception<Grammar>, ExceptionBase){
   
   FollowSetGraph followSetGraph(*this);
+  FollowSetCollector followSetCollector(followSetGraph);
+
+  followSetCollector.find_scc();
 
 }
 
 void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase){
+
+  Terminal *terminal;
+  Nonterminal *nonterminal;
+  set<Terminal *> *first_set;
+  set<Terminal *> *follow_set;
+  set<Terminal *> *director_set;
+
+  for ( set<Rule *>::iterator rule_it = getRules().begin(); rule_it != getRules().end(); rule_it++ ){
+    for ( list<Production *>::iterator alt_it = (*rule_it)->getAlternatives().begin(); alt_it !=  (*rule_it)->getAlternatives().end(); alt_it++ ){
+      
+      director_set = &(*alt_it)->getDirectorSet();
+      for ( list<GrammarSymbol *>::iterator sym_it = (*alt_it)->getSymbols().begin(); sym_it != (*alt_it)->getSymbols().end(); sym_it++ ){
+	
+	if ( (terminal = dynamic_cast<Terminal *>(*sym_it)) != 0 ){
+	  
+	  director_set->insert(terminal);
+	  break;
+
+	} else {
+
+	  nonterminal = static_cast<Nonterminal *>(*sym_it);
+	  first_set = nonterminal->getRule()->getFirstSet();
+	  for ( set<Terminal *>::iterator first_it = first_set->begin(); first_it != first_set->end(); first_it++ ){
+	    director_set->insert(*first_it);
+	  }
+
+	  if ( nonterminal->getRule()->isNullable() == false)	    
+	    break;
+
+	}
+      }
+      
+      if ( (*alt_it)->isNullable() ){
+	
+	follow_set = (*rule_it)->getFollowSet();
+	for ( set<Terminal *>::iterator follow_it = follow_set->begin(); follow_it != follow_set->end(); follow_it++ ){
+	  director_set->insert(*follow_it);
+	}
+	
+      }
+    }
+  }
 }
 
 Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
@@ -944,8 +999,9 @@ size_t FollowSetGraph::maxNodes(){
 void FollowSetGraph::constructGraph(){
 
   FollowNode *follow_node;
-  FollowNode *rule_node;
-  FirstNode *first_node;
+  FollowNode *nb_follow_node;
+  FirstNode *nb_first_node;
+  Nonterminal *nonterminal;
   
 
   for ( set<Rule *>::iterator rule_it = grammar.getRules().begin(); rule_it != grammar.getRules().end(); rule_it++ ){
@@ -956,7 +1012,7 @@ void FollowSetGraph::constructGraph(){
       for ( list<GrammarSymbol *>::iterator sym_it = (*alt_it)->getSymbols().begin(); sym_it != symbols_end; sym_it++ ){
 
 	if ( dynamic_cast<Nonterminal *>(*sym_it) == 0 )
-	  continue;
+	  continue; // shift terminals
 
 	// look if FollowNode of Nonterminal already declared
 	follow_node = getFollowNode(*sym_it);
@@ -967,14 +1023,24 @@ void FollowSetGraph::constructGraph(){
 
 	if ( next_sym_it == symbols_end ){
 
-	  rule_node = getFollowNode((*rule_it)->getNonterminal());
-	  follow_node->neighbours.insert(rule_node);
+	  nb_follow_node = getFollowNode((*rule_it)->getNonterminal());
+	  follow_node->neighbours.insert(nb_follow_node);
 
 	} else {
 
-	  first_node = getFirstNode(*next_sym_it);
-	  follow_node->neighbours.insert(first_node);
+	  // include first_set in any case
+	  nb_first_node = getFirstNode(*next_sym_it);
+	  follow_node->neighbours.insert(nb_first_node);
 
+	  // if next is a nonterminal and nullable: include follow_set
+	  if ( (nonterminal = dynamic_cast<Nonterminal *>(*next_sym_it)) != 0 ){
+	    if ( nonterminal->getRule()->isNullable() ){
+
+	      nb_follow_node = getFollowNode(nonterminal);
+	      follow_node->neighbours.insert(nb_follow_node);
+
+	    }
+	  }
 	}
       }
     }
@@ -1057,7 +1123,7 @@ void FollowSetCollector::processComponent() throw (ExceptionBase){
 
   follow_set = new FollowSet();
 
-  static_cast<FollowSetGraph *>(this->graph)->getGrammar().getFirstSets().insert(first_set);
+  static_cast<FollowSetGraph *>(this->graph)->getGrammar().getFollowSets().insert(follow_set);
 
 }
 
@@ -1065,6 +1131,8 @@ void FollowSetCollector::processComponentNode(FollowGraphNode *node) throw (Exce
 
   Terminal *nb_terminal;
   Nonterminal *nb_nonterminal;
+  set<Terminal *> *nb_first_set;
+  set<Terminal *> *nb_follow_set;
 
   if ( dynamic_cast<FirstNode *>(node) != 0 )
     return;
@@ -1079,20 +1147,30 @@ void FollowSetCollector::processComponentNode(FollowGraphNode *node) throw (Exce
 
       if ( (nb_terminal = dynamic_cast<Terminal *>((*fit)->getSymbol())) != 0 ){
 
-	follow_set->insert(terminal);
+	follow_set->insert(nb_terminal);
 
       } else {
 	// Nonterminal
 	nb_nonterminal = static_cast<Nonterminal *>((*fit)->getSymbol());
+	nb_first_set = nb_nonterminal->getRule()->getFirstSet();
 
-	for ( set<Terminal *>::iterator tit = nb_nonterminal ->getRule()->getFirstSet().begin(); tit != nb_nonterminal ->getRule()->getFirstSet().end(); tit++ ){
+	for ( set<Terminal *>::iterator tit = nb_first_set->begin(); tit != nb_first_set->end(); tit++ ){
 	  follow_set->insert(*tit);
 	}
 
       }
 
-    }
+    } else {
+      // FollowNode
 
-  }
-
+      nb_nonterminal = static_cast<Nonterminal *>((*fit)->getSymbol());
+      nb_follow_set = nb_nonterminal->getRule()->getFollowSet();
+      
+      if ( nb_follow_set != follow_set ){
+	for ( set<Terminal *>::iterator tit = nb_follow_set->begin(); tit != nb_follow_set->end(); tit++ ){
+	  follow_set->insert(*tit);
+	}
+      }     
+    }    
+  }  
 }

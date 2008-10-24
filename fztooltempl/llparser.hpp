@@ -176,6 +176,8 @@ namespace parse{
 
   protected:
 
+    Nullability nullable;
+
     std::list<GrammarSymbol *> symbols;
 
     std::set<Terminal *> director_set;
@@ -184,10 +186,14 @@ namespace parse{
 
   public:
 
-    Production(){}
+    Production() : nullable(NL_NONE){}
 
     ~Production();
 
+    void setNullable(Nullability val){ nullable = val; }
+
+    bool isNullable(){ return nullable == NL_IS_NULLABLE; }
+    
     std::list<GrammarSymbol *> & getSymbols(){ return symbols; }
 
     std::set<Terminal *> & getDirectorSet(){ return director_set; }
@@ -273,6 +279,7 @@ namespace parse{
     friend class LLParser;
     friend class Grammar;
     friend class FirstSetCollector;
+    friend class FollowSetCollector;
 
   private:
 
@@ -489,6 +496,7 @@ namespace parse{
   class FollowGraphNode{
 
     friend class FollowSetGraph;
+    friend class FollowSetCollector;
 
   protected:
 
@@ -496,9 +504,11 @@ namespace parse{
 
     std::set<FollowGraphNode *> neighbours;
 
-  public:
-
     FollowGraphNode(GrammarSymbol *symbol) : symbol(symbol){}
+
+    virtual ~FollowGraphNode(){}
+
+  public:
 
     GrammarSymbol * getSymbol(){ return symbol; }
 
@@ -521,7 +531,7 @@ namespace parse{
   };
 
   // for both of node_iterator and neighbour_iterator
-  class FollowSetGraph : graph::Graphable<FollowGraphNode *>{
+  class FollowSetGraph : public graph::Graphable<FollowGraphNode *>{
 
   private:
 
@@ -596,7 +606,7 @@ namespace parse{
 
     FollowSetCollector(FollowSetGraph & graph);
 
-    ~FollowSetCollector();
+    ~FollowSetCollector(){}
 
     void prepareFind() throw (exc::ExceptionBase){}
     

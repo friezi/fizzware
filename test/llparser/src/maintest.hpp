@@ -37,8 +37,10 @@ public:
 
     (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "C",'N') << "A",'N')
 	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
-    (((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N';
-    grammar.lambda(); // muss eine Zeile tiefer stehen, da sonst zu frueh ausgewertet (warum ist noch nicht klar)
+    (((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N');
+    ((grammar.rule("S") << "C",'N') << "B",'N') << "hue",'T','W'; 
+    //grammar.lambda(); // muss eine Zeile tiefer stehen, da sonst zu frueh ausgewertet (warum ist noch nicht klar)
+    grammar.rule("B") << "123",'T','W';
     grammar.rule("B").lambda();
     (grammar.rule("C") << "x",'T','W') | "y",'T','W';
     grammar.lambda();
@@ -196,6 +198,32 @@ public:
     }
 
     grammar.calculateFollowSets();
+
+    cerr << endl << "followsets:" << endl;
+    for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
+     
+      cerr << (*rit)->getNonterminal()->getName() << ": ";
+
+      for ( set<Terminal *>::iterator tit = (*rit)->getFollowSet()->begin(); tit != (*rit)->getFollowSet()->end(); tit++ ){
+	cerr << (*tit)->getName() << "  ";
+      }
+      cerr << endl;
+    }
+
+    grammar.calculateDirectorSets();
+
+    cerr << endl << "directorsets:" << endl;
+    for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
+      for ( list<Production *>::iterator pit = (*rit)->getAlternatives().begin(); pit != (*rit)->getAlternatives().end(); pit++ ){
+     
+	cerr << (*rit)->getNonterminal()->getName() << " -> " << (*pit)->toString()<< ": ";
+
+	for ( set<Terminal *>::iterator tit = (*pit)->getDirectorSet().begin(); tit != (*pit)->getDirectorSet().end(); tit++ ){
+	  cerr << (*tit)->getName() << "  ";
+	}
+	cerr << endl;
+      }
+    }
     
   }
   
