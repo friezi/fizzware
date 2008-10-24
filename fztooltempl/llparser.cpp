@@ -58,33 +58,33 @@ Rule * Rule::clone(Grammar::Token lookahead) throw (Exception<LLParser>){
 
   for ( list<Production *>::iterator pit = alternatives.begin(); pit != alternatives.end(); pit++ ){
 
-//     if ( lookahead.first == "" ){
-//       // comes from the rule S'->S
+    //     if ( lookahead.first == "" ){
+    //       // comes from the rule S'->S
 
-      rule->getAlternatives().push_back((*pit)->clone());
+    rule->getAlternatives().push_back((*pit)->clone());
 
-//     } else {
+    //     } else {
 
-//       Grammar::TaggedTerminals & director_set = (*pit)->getDirectorSet();
-//       Grammar::TaggedTerminals::iterator dit;
+    //       Grammar::TaggedTerminals & director_set = (*pit)->getDirectorSet();
+    //       Grammar::TaggedTerminals::iterator dit;
 
-//       if ( lookahead.second == LexToken::TT_WORD ){
+    //       if ( lookahead.second == LexToken::TT_WORD ){
       
-// 	if ( (dit = director_set.find(lookahead)) != director_set.end() )
-// 	  rule->getAlternatives().push_back((*pit)->clone());
+    // 	if ( (dit = director_set.find(lookahead)) != director_set.end() )
+    // 	  rule->getAlternatives().push_back((*pit)->clone());
 	
-//       } else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
+    //       } else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
 
-// 	for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+    // 	for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
 
-// 	  if ( (*dit).second == Terminal::TT_NUMBER )
-// 	    rule->getAlternatives().push_back((*pit)->clone());
+    // 	  if ( (*dit).second == Terminal::TT_NUMBER )
+    // 	    rule->getAlternatives().push_back((*pit)->clone());
 
-// 	}
+    // 	}
 
-//       } else
-// 	throw Exception<LLParser>(thisMethod + ": wrong token-type!");
-//     }
+    //       } else
+    // 	throw Exception<LLParser>(thisMethod + ": wrong token-type!");
+    //     }
     
   }
 
@@ -179,20 +179,20 @@ void Grammar::setStart(string nonterminal) throw(Exception<Grammar>){
   if ( startrule != 0 )
     throw Exception<Grammar>("startrule double-defined!");
 
-    Nonterminal *start = new Nonterminal(nonterminal);
-    getNonterminals().insert(start);
+  Nonterminal *start = new Nonterminal(nonterminal);
+  getNonterminals().insert(start);
 
-    Nonterminal *metastart = new Nonterminal("");
-    getNonterminals().insert(metastart);
-    Rule *rule = new Rule(metastart);
-    metastart->setRule(rule);
-    Production *production = new Production();
-    production->getSymbols().push_back(start);
-    rule->getAlternatives().push_back(production);
+  Nonterminal *metastart = new Nonterminal("");
+  getNonterminals().insert(metastart);
+  Rule *rule = new Rule(metastart);
+  metastart->setRule(rule);
+  Production *production = new Production();
+  production->getSymbols().push_back(start);
+  rule->getAlternatives().push_back(production);
     
-    setStartRule(rule);
+  setStartRule(rule);
 
-    defmode = 0;
+  defmode = 0;
 
 }
 
@@ -205,8 +205,7 @@ Grammar & Grammar::rule(string nonterminal){
     nt = new Nonterminal(nonterminal);
 
     Rule *rule = new Rule(nt);
-     rules.insert(rule);
-     lastAccessedRule = rule;
+    rules.insert(rule);
 
     nt->setRule(rule);
     nonterminals.insert(nt);
@@ -217,16 +216,14 @@ Grammar & Grammar::rule(string nonterminal){
  
       Rule *rule = new Rule(nt);
       rules.insert(rule);
-      lastAccessedRule = rule;
-      
       nt->setRule(rule);
       
     }
-
-    lastAccessedRule = nt->getRule();
     
   }
-  
+ 
+
+  lastAccessedRule = nt->getRule(); 
   lastAccessedProduction = 0;
   lastGrammarSymbol = "";
   lastTerminal = 0;
@@ -265,7 +262,7 @@ Grammar & Grammar::operator,(char type) throw(Exception<Grammar>){
 
       // Terminal
       
-    // DANGER!!!!! please check type as well ind findTerminal()!!!!!
+      // DANGER!!!!! please check type as well ind findTerminal()!!!!!
       if ( (lastTerminal = findTerminal(lastGrammarSymbol)) == 0 ){
 	
 	lastTerminal = new Terminal(lastGrammarSymbol);
@@ -359,11 +356,7 @@ Grammar & Grammar::operator|(Grammar &grammar) throw(Exception<Grammar>){
 
 Grammar & Grammar::lambda() throw(Exception<Grammar>){
 
-  if ( lastAccessedRule == 0 )
-    throw Exception<Grammar>("no rule defined!");
-
-  lastAccessedProduction = new Production();
-  lastAccessedRule->getAlternatives().push_back(lastAccessedProduction);
+  newProduction();
 
   defmode = 0;
 
@@ -394,18 +387,6 @@ void Grammar::calculateDFNL() throw (Exception<Grammar>, exc::ExceptionBase){
     traverseDFNL(rule);
     
   }
-}
-
-void calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
-
-  
-
-}
-
-void calculateFollowSets() throw (Exception<Grammar>, ExceptionBase){
-}
-
-void calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase){
 }
 
 void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase){
@@ -477,6 +458,21 @@ void LLParser::putback(LexScanner *tokenizer){
   else
     tStackPointer--;
 
+}
+
+void  Grammar::calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
+
+  FirstSetGraph firstSetGraph(*this);
+  FirstSetCollector firstSetCollector(firstSetGraph);
+
+  firstSetCollector.find_scc();
+ 
+}
+
+void  Grammar::calculateFollowSets() throw (Exception<Grammar>, ExceptionBase){
+}
+
+void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase){
 }
 
 Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
@@ -731,68 +727,62 @@ bool  FirstSetNodeIterator::operator==(const abstract_node_iterator<Rule *> *it_
 
 FirstSetNeighbourIterator::FirstSetNeighbourIterator(Rule *rule, bool at_end) : rule(rule), at_end(at_end){
 
-  if ( this->at_end == false ) {
+  init();
+
+}
+
+void FirstSetNeighbourIterator::init(){
+
+  if ( at_end == false ) {
 
     alternatives_iterator = rule->getAlternatives().begin();
-
-    if ( alternatives_iterator != rule->getAlternatives().end() ){
-
-      symbols_iterator = (*alternatives_iterator)->getSymbols().begin();
-      setToFirstNonterminal();
-
-    } else{
-
-      this->at_end = true;
-
-    }
+    selectRuleWithStartingNonterminal();
 
   }
 }
 
-void FirstSetNeighbourIterator::setToFirstNonterminal(){
+void FirstSetNeighbourIterator::selectRuleWithStartingNonterminal(){
 
-  if ( at_end == true ){
-    return;
-  }
+  while ( alternatives_iterator != rule->getAlternatives().end() ){
 
-  if ( dynamic_cast<Nonterminal *>(*symbols_iterator) == 0 ){
-    setToNextNonterminal();
-  }
-
-}
-
-void FirstSetNeighbourIterator::setToNextNonterminal(){
-
-  list<Production *>::iterator alternatives_end = rule->getAlternatives().end();
-  list<GrammarSymbol *>::iterator symbols_end;
-
-  if ( alternatives_iterator != alternatives_end ){
-
-    symbols_iterator++;
-    while ( true ){
-    
-      symbols_end = (*alternatives_iterator)->getSymbols().end();
-      while ( symbols_iterator != symbols_end ){
-
-	if ( dynamic_cast<Nonterminal *>(*symbols_iterator) != 0 ){
-	  return;
-	}
-
-	symbols_iterator++;
-      }
-
-      alternatives_iterator++;
-      if ( alternatives_iterator == alternatives_end ){
-	break;
-      }
-
-      symbols_iterator = (*alternatives_iterator)->getSymbols().begin();
-
+    symbols_iterator = (*alternatives_iterator)->getSymbols().begin();
+    if ( symbols_iterator != (*alternatives_iterator)->getSymbols().end() and dynamic_cast<Nonterminal *>(*symbols_iterator) != 0 ){
+      return;
     }
+
+    alternatives_iterator++;
+
   }
 
   at_end = true;
 
+}
+
+void FirstSetNeighbourIterator::setToNextNonterminal() throw (Exception<FirstSetNeighbourIterator>){
+
+  static const string thisMethod = "setToNextNonterminal()";
+
+  list<GrammarSymbol *>::iterator symbols_end;
+  Nonterminal *nonterminal;
+
+  
+  if ( alternatives_iterator != rule->getAlternatives().end() ){
+
+    if ( (nonterminal = dynamic_cast<Nonterminal *>(*symbols_iterator)) == 0 )
+      throw Exception<FirstSetNeighbourIterator>(thisMethod + ": not pointing to nonterminal!");
+
+    if ( nonterminal->getRule()->isNullable() ) {
+
+      symbols_iterator++;
+      if ( symbols_iterator != (*alternatives_iterator)->getSymbols().end() and dynamic_cast<Nonterminal *>(*symbols_iterator) != 0 )
+	return;
+
+    }
+
+    alternatives_iterator++;
+    selectRuleWithStartingNonterminal();
+
+  }
 }
 
 Rule * FirstSetNeighbourIterator::operator*() throw(ExceptionBase){
@@ -843,7 +833,7 @@ abstract_node_iterator<Rule *> * FirstSetGraph::beginNodesPtr(){
 }
 
 abstract_node_iterator<Rule *> *  FirstSetGraph::endNodesPtr(){
-   return new FirstSetNodeIterator(grammar.getRules().end());
+  return new FirstSetNodeIterator(grammar.getRules().end());
 }
 
 abstract_node_iterator<Rule *> *  FirstSetGraph::beginNeighboursPtr(Rule *rule){
@@ -860,12 +850,24 @@ size_t  FirstSetGraph::maxNodes(){
 
 FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCCollector<Rule *>(&graph){
 }
+
+FirstSetCollector::~FirstSetCollector(){
+
+  for ( IncludedFirstSets::iterator it = included_first_sets_map.begin(); it != included_first_sets_map.end(); it++ ){
+    delete (*it).second;
+  }
+
+}
     
 void FirstSetCollector::processComponent() throw (ExceptionBase){
 
   SCCCollector<Rule *>::processComponent();
 
-  first_set = new set<Terminal *>();
+  first_set = new FirstSet();
+
+  // slightly opimized search by maintaining a first sets map
+  included_first_sets_map[first_set] = new FirstSets();
+
   static_cast<FirstSetGraph *>(this->graph)->getGrammar().getFirstSets().insert(first_set);
 
 }
@@ -875,20 +877,32 @@ void FirstSetCollector::processComponentNode(Rule *rule) throw (ExceptionBase){
   SCCCollector<Rule *>::processComponentNode(rule);
 
   rule->first_set = first_set;
-  set<Terminal *> & direct_first_set = rule->getDirectFirstSet();
+  FirstSet & direct_first_set = rule->getDirectFirstSet();
 
   // insert direct_first_sets
-  for ( set<Terminal *>::iterator tit = direct_first_set.begin(); tit != direct_first_set.end(); tit++ ){
+  for ( FirstSet::iterator tit = direct_first_set.begin(); tit != direct_first_set.end(); tit++ ){
     first_set->insert(*tit);
   }
 
+  // insert including first_sets
   for ( graph::node_iterator<Rule *> nit = graph->beginNeighbours(rule); nit != graph->endNeighbours(rule); nit++ ){
 
-    set<Terminal *> *neighbour_first_set = (*nit)->getFirstSet();
+    FirstSet *neighbour_first_set = (*nit)->getFirstSet();
 
     if ( neighbour_first_set != first_set ){
-      for ( set<Terminal *>::iterator tit = neighbour_first_set->begin(); tit != neighbour_first_set->end(); tit++ ){
-	first_set->insert(*tit);
+
+      FirstSets *included_first_sets = included_first_sets_map[first_set];
+      if ( find(included_first_sets->begin(),included_first_sets->end(),neighbour_first_set) == included_first_sets->end() ){
+
+	for ( FirstSet::iterator tit = neighbour_first_set->begin(); tit != neighbour_first_set->end(); tit++ ){
+	  first_set->insert(*tit);
+	}
+
+	included_first_sets->insert(neighbour_first_set);
+	FirstSets *included_neighbour_first_sets = included_first_sets_map[neighbour_first_set];
+	for ( FirstSets::iterator iit = included_neighbour_first_sets->begin(); iit != included_neighbour_first_sets->end(); iit++ )
+	  included_first_sets->insert(*iit);
+
       }
     }
 

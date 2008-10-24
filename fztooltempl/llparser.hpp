@@ -6,6 +6,8 @@
 #include <utility>
 #include <list>
 #include <set>
+#include <map>
+#include <algorithm>
 #include <exception.hpp>
 #include <utils.hpp>
 #include <datastructures.hpp>
@@ -273,7 +275,9 @@ namespace parse{
 
   private:
 
+    // ------------- for temprary management only
     bool visited;
+    // -------------
 
     bool circlefree;
  
@@ -291,7 +295,6 @@ namespace parse{
 
     std::list<Production *> alternatives;
 
-    // one for each rule
     std::set<Terminal *> direct_first_set;
 
   public:
@@ -412,9 +415,11 @@ namespace parse{
 
     std::list<GrammarSymbol *>::iterator symbols_iterator;
 
-    void setToFirstNonterminal();
+    void init();
 
-    void setToNextNonterminal();
+    void setToNextNonterminal() throw (exc::Exception<FirstSetNeighbourIterator>);
+
+    void selectRuleWithStartingNonterminal();
 
   public:
 
@@ -456,11 +461,21 @@ namespace parse{
 
   private:
 
-    std::set<Terminal *> *first_set;
+    typedef std::set<Terminal *> FirstSet;
+    typedef std::set<FirstSet *> FirstSets;
+    typedef std::map< FirstSet *, FirstSets * > IncludedFirstSets;
+
+    // for the current first_set
+    FirstSet *first_set;
+
+    // stores the included first_sets for each first_set
+    IncludedFirstSets included_first_sets_map;
     
   public:
 
     FirstSetCollector(FirstSetGraph & graph);
+
+    ~FirstSetCollector();
 
     void prepareFind() throw (exc::ExceptionBase){}
     

@@ -21,12 +21,12 @@ public:
 
   LLTest() : TestCase<LLTest>(){
     
-//     addTest(&LLTest::testGrammar1,"testGrammar1");
-//     addTest(&LLTest::test1Grammar,"test1Grammar");
-//     addTest(&LLTest::test2Grammar,"test2Grammar");
-//     addTest(&LLTest::test3Grammar,"test3Grammar");
-//     addTest(&LLTest::test4Grammar,"test4Grammar");
-//     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
+    //     addTest(&LLTest::testGrammar1,"testGrammar1");
+    //     addTest(&LLTest::test1Grammar,"test1Grammar");
+    //     addTest(&LLTest::test2Grammar,"test2Grammar");
+    //     addTest(&LLTest::test3Grammar,"test3Grammar");
+    //     addTest(&LLTest::test4Grammar,"test4Grammar");
+    //     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
     addTest(&LLTest::leftrecursionGrammar,"leftrecursionGrammar");
     
   }
@@ -35,10 +35,13 @@ public:
 
     grammar.setStart("S");
 
-    (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "c",'T','W') << "A",'N')
+    (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "C",'N') << "A",'N')
 	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
-    ((((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N') | grammar.lambda();
-     grammar.rule("B") << grammar.lambda();
+    (((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N') | "B",'N';
+    grammar.lambda(); // muss eine Zeile tiefer stehen, da sonst zu frueh ausgewertet (warum ist noch nicht klar)
+    grammar.rule("B").lambda();
+    (grammar.rule("C") << "x",'T','W') | "y",'T','W';
+    grammar.lambda();
 
     //   ((grammar.rule("S") << "a",'T','W') << "b",'T','W');
     cout << "Grammar:" << endl << grammar.toString() << endl;
@@ -158,15 +161,15 @@ public:
 
   }
 
-//   void nullabilityGrammar() throw (ExceptionBase){
+  //   void nullabilityGrammar() throw (ExceptionBase){
 
-//     grammar.calculateNDF();
+  //     grammar.calculateNDF();
     
-//   }
+  //   }
 
   void leftrecursionGrammar() throw (ExceptionBase){
 
-//     grammar.calculateNDF();
+    //     grammar.calculateNDF();
     grammar.calculateDFNL();
 
     cout << endl << "Nullability and direct first:" << endl;
@@ -179,10 +182,7 @@ public:
       cout << endl;
     }
 
-    FirstSetGraph firstSetGraph(grammar);
-    FirstSetCollector firstSetCollector(firstSetGraph);
-
-    firstSetCollector.find_scc();
+    grammar.calculateFirstSets();
 
     cerr << "firstsets:" << endl;
     for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
