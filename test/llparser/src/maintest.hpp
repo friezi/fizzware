@@ -174,17 +174,17 @@ public:
 
     cout << endl << "Nullability and direct first:" << endl;
 
-    for ( set<Nonterminal *>::iterator it = grammar.getNonterminals().begin(); it != grammar.getNonterminals().end(); it++ ){
+    for ( set<Rule *>::iterator it = grammar.getRules().begin(); it != grammar.getRules().end(); it++ ){
 
-      cout << (*it)->getName() << ": " << (*it)->getRule()->isNullable() << "\t";
-      for ( set<Terminal *>::iterator fit = (*it)->getRule()->getDirectFirstSet().begin(); fit != (*it)->getRule()->getDirectFirstSet().end(); fit++ )
+      cout << (*it)->getNonterminal()->getName() << ": " << (*it)->isNullable() << "\t";
+      for ( set<Terminal *>::iterator fit = (*it)->getDirectFirstSet().begin(); fit != (*it)->getDirectFirstSet().end(); fit++ )
 	cout << (*fit)->getName() << " ";
       cout << endl;
     }
 
     grammar.calculateFirstSets();
 
-    cerr << "firstsets:" << endl;
+    cerr << endl << "firstsets:" << endl;
     for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
      
       cerr << (*rit)->getNonterminal()->getName() << ": ";
@@ -194,6 +194,8 @@ public:
       }
       cerr << endl;
     }
+
+    grammar.calculateFollowSets();
     
   }
   

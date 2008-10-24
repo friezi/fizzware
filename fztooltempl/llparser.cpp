@@ -470,6 +470,9 @@ void  Grammar::calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
 }
 
 void  Grammar::calculateFollowSets() throw (Exception<Grammar>, ExceptionBase){
+  
+  FollowSetGraph followSetGraph(*this);
+
 }
 
 void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase){
@@ -710,28 +713,26 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
   
 }
 
-FirstSetNodeIterator::FirstSetNodeIterator(set<Rule *>::iterator it) : it(it){
+FirstSetGraph::FirstSetNodeIterator::FirstSetNodeIterator(set<Rule *>::iterator it) : it(it){
 }
 
-Rule * FirstSetNodeIterator::operator*() throw(ExceptionBase){
+Rule * FirstSetGraph::FirstSetNodeIterator::operator*() throw(ExceptionBase){
   return *it;
 }
 
-void FirstSetNodeIterator::operator++(int) throw(ExceptionBase){
+void FirstSetGraph::FirstSetNodeIterator::operator++(int) throw(ExceptionBase){
   it++;
 }
 
-bool  FirstSetNodeIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
+bool  FirstSetGraph::FirstSetNodeIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
   return it == static_cast<const FirstSetNodeIterator *>(it_rval)->it;
 }
 
-FirstSetNeighbourIterator::FirstSetNeighbourIterator(Rule *rule, bool at_end) : rule(rule), at_end(at_end){
-
+FirstSetGraph::FirstSetNeighbourIterator::FirstSetNeighbourIterator(Rule *rule, bool at_end) : rule(rule), at_end(at_end){
   init();
-
 }
 
-void FirstSetNeighbourIterator::init(){
+void FirstSetGraph::FirstSetNeighbourIterator::init(){
 
   if ( at_end == false ) {
 
@@ -741,7 +742,7 @@ void FirstSetNeighbourIterator::init(){
   }
 }
 
-void FirstSetNeighbourIterator::selectRuleWithStartingNonterminal(){
+void FirstSetGraph:: FirstSetNeighbourIterator::selectRuleWithStartingNonterminal(){
 
   while ( alternatives_iterator != rule->getAlternatives().end() ){
 
@@ -758,7 +759,7 @@ void FirstSetNeighbourIterator::selectRuleWithStartingNonterminal(){
 
 }
 
-void FirstSetNeighbourIterator::setToNextNonterminal() throw (Exception<FirstSetNeighbourIterator>){
+void FirstSetGraph::FirstSetNeighbourIterator::setToNextNonterminal() throw (Exception<FirstSetNeighbourIterator>){
 
   static const string thisMethod = "setToNextNonterminal()";
 
@@ -785,7 +786,7 @@ void FirstSetNeighbourIterator::setToNextNonterminal() throw (Exception<FirstSet
   }
 }
 
-Rule * FirstSetNeighbourIterator::operator*() throw(ExceptionBase){
+Rule * FirstSetGraph::FirstSetNeighbourIterator::operator*() throw(ExceptionBase){
 
   static const string thisMethod = " FirstSetNeighbourIterator::operator*()";
 
@@ -801,7 +802,7 @@ Rule * FirstSetNeighbourIterator::operator*() throw(ExceptionBase){
 
 }
 
-void FirstSetNeighbourIterator::operator++(int) throw(ExceptionBase){
+void FirstSetGraph:: FirstSetNeighbourIterator::operator++(int) throw(ExceptionBase){
 
   if ( at_end == true ){
     return;
@@ -811,7 +812,7 @@ void FirstSetNeighbourIterator::operator++(int) throw(ExceptionBase){
 
 }
 
-bool  FirstSetNeighbourIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
+bool FirstSetGraph::FirstSetNeighbourIterator::operator==(const abstract_node_iterator<Rule *> *it_rval) throw(ExceptionBase){
 
   const FirstSetNeighbourIterator *ni = static_cast<const FirstSetNeighbourIterator *>(it_rval);
 
@@ -848,7 +849,7 @@ size_t  FirstSetGraph::maxNodes(){
   return grammar.getRules().size();
 }
 
-FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCCollector<Rule *>(&graph){
+FirstSetCollector::FirstSetCollector(FirstSetGraph & graph) : SCCProcessor<Rule *>(&graph){
 }
 
 FirstSetCollector::~FirstSetCollector(){
@@ -861,8 +862,6 @@ FirstSetCollector::~FirstSetCollector(){
     
 void FirstSetCollector::processComponent() throw (ExceptionBase){
 
-  SCCCollector<Rule *>::processComponent();
-
   first_set = new FirstSet();
 
   // slightly opimized search by maintaining a first sets map
@@ -873,8 +872,6 @@ void FirstSetCollector::processComponent() throw (ExceptionBase){
 }
 
 void FirstSetCollector::processComponentNode(Rule *rule) throw (ExceptionBase){
-
-  SCCCollector<Rule *>::processComponentNode(rule);
 
   rule->first_set = first_set;
   FirstSet & direct_first_set = rule->getDirectFirstSet();
@@ -907,4 +904,195 @@ void FirstSetCollector::processComponentNode(Rule *rule) throw (ExceptionBase){
     }
 
   }  
+}
+
+FollowSetGraph::FollowSetGraph(Grammar & grammar) : grammar(grammar){
+
+  constructGraph();
+  follow_map.clear();
+  first_map.clear();
+
+}
+
+FollowSetGraph::~FollowSetGraph(){
+
+  for ( set<FollowGraphNode *>::iterator it = nodes.begin(); it != nodes.end(); it++ )
+    delete *it;
+
+}
+
+abstract_node_iterator<FollowGraphNode *> * FollowSetGraph::beginNodesPtr(){
+  return new FollowSetNodeIterator(nodes.begin());
+}
+
+abstract_node_iterator<FollowGraphNode *> * FollowSetGraph::endNodesPtr(){
+  return new FollowSetNodeIterator(nodes.end());
+}
+
+abstract_node_iterator<FollowGraphNode *> * FollowSetGraph::beginNeighboursPtr(FollowGraphNode *node){
+  return new FollowSetNodeIterator(node->neighbours.begin());
+}
+
+abstract_node_iterator<FollowGraphNode *> * FollowSetGraph::endNeighboursPtr(FollowGraphNode *node){
+  return new FollowSetNodeIterator(node->neighbours.end());
+}
+
+size_t FollowSetGraph::maxNodes(){
+  return nodes.size();
+}
+
+void FollowSetGraph::constructGraph(){
+
+  FollowNode *follow_node;
+  FollowNode *rule_node;
+  FirstNode *first_node;
+  
+
+  for ( set<Rule *>::iterator rule_it = grammar.getRules().begin(); rule_it != grammar.getRules().end(); rule_it++ ){
+
+    for ( list<Production *>::iterator alt_it = (*rule_it)->getAlternatives().begin(); alt_it != (*rule_it)->getAlternatives().end(); alt_it++ ){
+
+      list<GrammarSymbol *>::iterator symbols_end = (*alt_it)->getSymbols().end();
+      for ( list<GrammarSymbol *>::iterator sym_it = (*alt_it)->getSymbols().begin(); sym_it != symbols_end; sym_it++ ){
+
+	if ( dynamic_cast<Nonterminal *>(*sym_it) == 0 )
+	  continue;
+
+	// look if FollowNode of Nonterminal already declared
+	follow_node = getFollowNode(*sym_it);
+
+	// check next symbol
+	list<GrammarSymbol *>::iterator next_sym_it = sym_it;
+	next_sym_it++;
+
+	if ( next_sym_it == symbols_end ){
+
+	  rule_node = getFollowNode((*rule_it)->getNonterminal());
+	  follow_node->neighbours.insert(rule_node);
+
+	} else {
+
+	  first_node = getFirstNode(*next_sym_it);
+	  follow_node->neighbours.insert(first_node);
+
+	}
+      }
+    }
+  }
+}
+
+FollowNode * FollowSetGraph::getFollowNode(GrammarSymbol *symbol){
+
+  FollowNode *follow_node;
+
+  map<GrammarSymbol *, FollowNode *>::iterator fn_it = follow_map.find(symbol);
+  if ( fn_it == follow_map.end() ){
+	  
+    follow_node = newFollowNode(symbol);
+    follow_map[symbol] = follow_node;
+
+  } else{
+
+    follow_node = (*fn_it).second;
+
+  }
+
+  return follow_node;
+}
+
+FirstNode * FollowSetGraph::getFirstNode(GrammarSymbol *symbol){
+
+  FirstNode *first_node;
+
+  map<GrammarSymbol *, FirstNode *>::iterator fn_it = first_map.find(symbol);
+  if ( fn_it == first_map.end() ){
+	  
+    first_node = newFirstNode(symbol);
+    first_map[symbol] = first_node;
+
+  } else{
+
+    first_node = (*fn_it).second;
+
+  }
+
+  return first_node;
+}
+
+FollowNode * FollowSetGraph::newFollowNode(GrammarSymbol *symbol){
+
+  FollowNode *node = new FollowNode(symbol);
+  nodes.insert(node);
+  return node;
+  
+}
+    
+FirstNode * FollowSetGraph::newFirstNode(GrammarSymbol *symbol){
+
+  FirstNode *node = new FirstNode(symbol);
+  nodes.insert(node);
+  return node;
+  
+}
+
+FollowSetGraph::FollowSetNodeIterator::FollowSetNodeIterator(set<FollowGraphNode *>::iterator it) : it(it){
+}
+
+FollowGraphNode * FollowSetGraph::FollowSetNodeIterator::operator*() throw(ExceptionBase){
+  return *it;
+}
+
+void FollowSetGraph::FollowSetNodeIterator::operator++(int) throw(ExceptionBase){
+  it++;
+}
+
+bool FollowSetGraph::FollowSetNodeIterator::operator==(const abstract_node_iterator<FollowGraphNode *> *it_rval) throw(ExceptionBase){
+  return ( this->it == static_cast<const FollowSetNodeIterator *>(it_rval)->it );
+}
+
+FollowSetCollector::FollowSetCollector(FollowSetGraph & graph) : SCCProcessor<FollowGraphNode *>(&graph){
+}
+
+void FollowSetCollector::processComponent() throw (ExceptionBase){
+
+  follow_set = new FollowSet();
+
+  static_cast<FollowSetGraph *>(this->graph)->getGrammar().getFirstSets().insert(first_set);
+
+}
+
+void FollowSetCollector::processComponentNode(FollowGraphNode *node) throw (ExceptionBase){
+
+  Terminal *nb_terminal;
+  Nonterminal *nb_nonterminal;
+
+  if ( dynamic_cast<FirstNode *>(node) != 0 )
+    return;
+
+  Nonterminal *nonterminal = static_cast<Nonterminal *>(node->getSymbol());
+
+  nonterminal->getRule()->follow_set = follow_set;
+
+  for ( set<FollowGraphNode *>::iterator fit = node->neighbours.begin(); fit != node->neighbours.end(); fit++ ){
+    
+    if ( dynamic_cast<FirstNode *>(*fit) != 0 ){
+
+      if ( (nb_terminal = dynamic_cast<Terminal *>((*fit)->getSymbol())) != 0 ){
+
+	follow_set->insert(terminal);
+
+      } else {
+	// Nonterminal
+	nb_nonterminal = static_cast<Nonterminal *>((*fit)->getSymbol());
+
+	for ( set<Terminal *>::iterator tit = nb_nonterminal ->getRule()->getFirstSet().begin(); tit != nb_nonterminal ->getRule()->getFirstSet().end(); tit++ ){
+	  follow_set->insert(*tit);
+	}
+
+      }
+
+    }
+
+  }
+
 }

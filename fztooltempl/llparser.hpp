@@ -25,6 +25,7 @@ namespace parse{
   class Grammar;
   class FirstSetCollector;
   class FollowSetCollector;
+  class FollowSetGraph;
 
   enum Nullability{ NL_NONE, NL_IS_NULLABLE, NL_IS_NOT_NULLABLE };
 
@@ -385,57 +386,57 @@ namespace parse{
 
   };
 
-  class FirstSetNodeIterator : public graph::abstract_node_iterator<Rule *>{
-
-  private:
-    
-    std::set<Rule *>::iterator it;
-
-  public:
-
-    FirstSetNodeIterator(std::set<Rule *>::iterator it);
-
-    Rule * operator*() throw(exc::ExceptionBase);
-
-    void operator++(int) throw(exc::ExceptionBase);
-
-    bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
-
-  };
-
-  class FirstSetNeighbourIterator : public graph::abstract_node_iterator<Rule *>{
-
-  private:
-
-    Rule *rule;
-
-    bool at_end;
-
-    std::list<Production *>::iterator alternatives_iterator;
-
-    std::list<GrammarSymbol *>::iterator symbols_iterator;
-
-    void init();
-
-    void setToNextNonterminal() throw (exc::Exception<FirstSetNeighbourIterator>);
-
-    void selectRuleWithStartingNonterminal();
-
-  public:
-
-    FirstSetNeighbourIterator(Rule *rule, bool at_end);
-
-    Rule * operator*() throw(exc::ExceptionBase);
-
-    void operator++(int) throw(exc::ExceptionBase);
-
-    bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
-   
-  };
-
   class FirstSetGraph : public graph::Graphable<Rule *>{
 
   private:
+
+    class FirstSetNodeIterator : public graph::abstract_node_iterator<Rule *>{
+
+    private:
+    
+      std::set<Rule *>::iterator it;
+
+    public:
+
+      FirstSetNodeIterator(std::set<Rule *>::iterator it);
+
+      Rule * operator*() throw(exc::ExceptionBase);
+
+      void operator++(int) throw(exc::ExceptionBase);
+
+      bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
+
+    };
+
+    class FirstSetNeighbourIterator : public graph::abstract_node_iterator<Rule *>{
+
+    private:
+
+      Rule *rule;
+
+      bool at_end;
+
+      std::list<Production *>::iterator alternatives_iterator;
+
+      std::list<GrammarSymbol *>::iterator symbols_iterator;
+
+      void init();
+
+      void setToNextNonterminal() throw (exc::Exception<FirstSetNeighbourIterator>);
+
+      void selectRuleWithStartingNonterminal();
+
+    public:
+
+      FirstSetNeighbourIterator(Rule *rule, bool at_end);
+
+      Rule * operator*() throw(exc::ExceptionBase);
+
+      void operator++(int) throw(exc::ExceptionBase);
+
+      bool operator==(const graph::abstract_node_iterator<Rule *> *it_rval) throw(exc::ExceptionBase);   
+   
+    };
 
     Grammar & grammar;
 
@@ -457,7 +458,7 @@ namespace parse{
 
   };
 
-  class FirstSetCollector : public graph::SCCCollector<Rule *>{
+  class FirstSetCollector : public graph::SCCProcessor<Rule *>{
 
   private:
 
@@ -483,6 +484,126 @@ namespace parse{
     
     void processComponentNode(Rule *rule) throw (exc::ExceptionBase);
     
+  };
+
+  class FollowGraphNode{
+
+    friend class FollowSetGraph;
+
+  protected:
+
+    GrammarSymbol *symbol;
+
+    std::set<FollowGraphNode *> neighbours;
+
+  public:
+
+    FollowGraphNode(GrammarSymbol *symbol) : symbol(symbol){}
+
+    GrammarSymbol * getSymbol(){ return symbol; }
+
+  };
+
+  class FollowNode : public FollowGraphNode{
+
+  public:
+
+    FollowNode(GrammarSymbol *symbol) : FollowGraphNode(symbol){}
+
+  };
+
+  class FirstNode : public FollowGraphNode{
+
+  public:
+
+    FirstNode(GrammarSymbol *symbol) : FollowGraphNode(symbol){}
+
+  };
+
+  // for both of node_iterator and neighbour_iterator
+  class FollowSetGraph : graph::Graphable<FollowGraphNode *>{
+
+  private:
+
+    class FollowSetNodeIterator : public graph::abstract_node_iterator<FollowGraphNode *>{
+
+    private:
+    
+      std::set<FollowGraphNode *>::iterator it;
+
+    public:
+
+      FollowSetNodeIterator(std::set<FollowGraphNode *>::iterator it);
+
+      FollowGraphNode * operator*() throw(exc::ExceptionBase);
+
+      void operator++(int) throw(exc::ExceptionBase);
+
+      bool operator==(const graph::abstract_node_iterator<FollowGraphNode *> *it_rval) throw(exc::ExceptionBase);   
+
+    };
+   
+    Grammar & grammar;
+    
+    std::set<FollowGraphNode *> nodes;
+
+    // ------------------ for temporary management
+    std::map<GrammarSymbol *, FirstNode *> first_map;
+    
+    std::map<GrammarSymbol *, FollowNode *> follow_map;
+    // ------------------------------------------
+
+    FollowNode * getFollowNode(GrammarSymbol *symbol);
+
+    FirstNode * getFirstNode(GrammarSymbol *symbol);
+
+  public:
+
+    FollowSetGraph(Grammar & grammar);
+    
+    ~FollowSetGraph();
+
+    graph::abstract_node_iterator<FollowGraphNode *> * beginNodesPtr();
+
+    graph::abstract_node_iterator<FollowGraphNode *> * endNodesPtr();
+
+    graph::abstract_node_iterator<FollowGraphNode *> * beginNeighboursPtr(FollowGraphNode *node);
+
+    graph::abstract_node_iterator<FollowGraphNode *> * endNeighboursPtr(FollowGraphNode *node);
+
+    size_t maxNodes();
+
+    Grammar & getGrammar(){ return grammar; }
+
+    void constructGraph();
+
+    FollowNode * newFollowNode(GrammarSymbol *symbol);
+    
+    FirstNode * newFirstNode(GrammarSymbol *symbol);
+
+  };
+
+  class FollowSetCollector : public graph::SCCProcessor<FollowGraphNode *>{
+
+  private:
+
+    typedef std::set<Terminal *> FollowSet;
+
+    // current follow_set
+    FollowSet *follow_set;
+    
+  public:
+
+    FollowSetCollector(FollowSetGraph & graph);
+
+    ~FollowSetCollector();
+
+    void prepareFind() throw (exc::ExceptionBase){}
+    
+    void processComponent() throw (exc::ExceptionBase);
+    
+    void processComponentNode(FollowGraphNode *node) throw (exc::ExceptionBase);
+
   };
 
 }
