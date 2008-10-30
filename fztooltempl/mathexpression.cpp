@@ -606,29 +606,23 @@ Value *Complex::integerDivision(Value *right) throw (ExceptionBase){
   if ( divisor == 0 )
     throw EvalException("division by zero!");
 
-  return new Complex((double)((int)((getRe()*rc->getRe()+getIm()*rc->getIm())/divisor)),
-		     (double)((int)((getIm()*rc->getRe()-getRe()*rc->getIm())/divisor)));
+  return new Complex(::floor(((getRe()*rc->getRe()+getIm()*rc->getIm())/divisor)),
+		     ::floor(((getIm()*rc->getRe()-getRe()*rc->getIm())/divisor)));
       
 }
 
 Value *Complex::operator%(Value *right) throw (ExceptionBase){
 
   Complex *rc = assertComplex(right);
-
-  if ( this->isReal() && rc->isReal() )
-    return new Complex((double)(((int)getRe())%((int)rc->getRe())),0);
-  else{
     
-    Complex *div = (Complex *)integerDivision(rc);
-    Complex * prod = (Complex *)right->operator*(div);
-    Complex *diff = (Complex *)this->operator-(prod);
+  Complex *div = (Complex *)integerDivision(rc);
+  Complex * prod = (Complex *)right->operator*(div);
+  Complex *diff = (Complex *)this->operator-(prod);
 
-    delete prod;
-    delete div;
+  delete prod;
+  delete div;
 
-    return diff;
-
-  }
+  return diff;
 
 }
 
