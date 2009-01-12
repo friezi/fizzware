@@ -5,6 +5,5 @@ TestUnit mainTestUnit;
 void initMainTestUnit(){
 
   mainTestUnit.addTestCase(new LLTest(),"LLTest");
-  mainTestUnit.showTests();
 
 }

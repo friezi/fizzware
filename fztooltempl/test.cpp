@@ -94,37 +94,47 @@ TestUnit::TestUnit(){
 
 TestUnit::~TestUnit(){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    delete (*it).first;
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    delete *it;
 
 }
 
-void TestUnit::defaultTestCaseStartupHandler(TestCaseBase::TestCaseBase *testcase, string msg){}
+void TestUnit::defaultTestCaseStartupHandler(TestCaseBase *testcase, string msg){}
 
 void TestUnit::addTestCase(TestCaseBase * testcase, string name){
 
   testcase->setTestCaseName(name);
-  testcases.push_back(TestCaseInfo(testcase,name));
+  testcases.push_back(testcase);
 
 }
 
-void TestUnit::operator()() throw (ExceptionBase){
+void TestUnit::operator()(map< string,set<string> *> *selection) throw (ExceptionBase){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ ){
+  map< string,set<string> *>::iterator eit;
 
-    (*testcaseStartupHandler)((*it).first,"");
-    (*(*it).first)();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ ){
 
+    (*testcaseStartupHandler)(*it,"");
+
+    if ( selection != 0 ){
+      // execute only selected testcases
+      if ( (eit = selection->find((*it)->getTestCaseName())) == selection->end() ){
+	continue;
+      } else {
+	(*(*it))((*eit).second);
+      }
+    } else{
+      (*(*it))();
+    }
   }
-
 }
 
 unsigned long TestUnit::getNmbTests(){
 
   unsigned long nmb = 0;
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    nmb+=(*it).first->getNmbTests();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    nmb+=(*it)->getNmbTests();
 
   return nmb;
 
@@ -132,49 +142,49 @@ unsigned long TestUnit::getNmbTests(){
 
 void TestUnit::pushErrorHandler(TestCaseBase::HandlerType errorHandler){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->pushErrorHandler(errorHandler);
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushErrorHandler(errorHandler);
 
 }
 
 void TestUnit::clearErrorHandlers(){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->clearErrorHandlers();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearErrorHandlers();
 
 }
 
 void TestUnit::pushSuccessHandler(TestCaseBase::HandlerType successHandler){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->pushSuccessHandler(successHandler);
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushSuccessHandler(successHandler);
 
 }
 
 void TestUnit::clearSuccessHandlers(){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->clearSuccessHandlers();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearSuccessHandlers();
 
 }
 
 void TestUnit::pushStatisticHelper(TestCaseBase::HandlerType statisticHelper){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->pushStatisticHelper(statisticHelper);
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->pushStatisticHelper(statisticHelper);
 
 }
 
 void TestUnit::clearStatisticHelpers(){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->clearStatisticHelpers();
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->clearStatisticHelpers();
 
 }
 
-void TestUnit::showTests(){
+void TestUnit::setShowTests(){
 
-  for ( list<TestCaseInfo>::iterator it = testcases.begin(); it != testcases.end(); it++ )
-    (*it).first->showTests();  
+  for ( list<TestCaseBase *>::iterator it = testcases.begin(); it != testcases.end(); it++ )
+    (*it)->setShowTests();  
 
 }

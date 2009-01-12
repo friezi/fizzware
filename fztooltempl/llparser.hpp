@@ -127,14 +127,14 @@ namespace parse{
 
     /**
        Calculates the direct first set and checks for nullability of each nonterminal. Detects
-       leftrecursion and throws an exception in this case
+       leftrecursion and throws an exception in this case. Will be called by prepare().
        @brief direct first, nullability, left recursion
        @throw Exception<Grammar> in case of detected left recursion
     */
     void calculateDFNL() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
     /**
-       Calculates the first-sets for all rules
+       Calculates the first-sets for all rules. Will be called by prepare().
        @brief first-set calculation
        @pre calculateDFNL() must have been called already
        @throw Exception<Grammar>
@@ -142,7 +142,7 @@ namespace parse{
     void calculateFirstSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
     /**
-       Calculates the follow-sets for all rules
+       Calculates the follow-sets for all rules. Will be called by prepare().
        @brief follow-set calculation
        @pre calculateFirstSets() must have been called already
        @throw Exception<Grammar>
@@ -150,12 +150,17 @@ namespace parse{
     void calculateFollowSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
     /**
-       Calculates the director-sets for all productions
+       Calculates the director-sets for all productions. Will be called by prepare().
        @brief director-set calculation
        @pre calculateFollowSets() must have been called already
        @throw Exception<Grammar>
     */
     void calculateDirectorSets() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       Prepares the grammar for parsing, i. e. calculates all relevant sets.
+    */
+    void prepare() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
   protected:
 
@@ -360,15 +365,15 @@ namespace parse{
 
     Grammar *grammar;
 
-    ds::Stack<Grammar::Token> tokenstack;
-
     bool debug;
 
     Inputtype inputtype;
 
+    ds::Stack<Grammar::Token> tokenstack;
+
   private:
 
-    std::list<Grammar::Token>::iterator tStackPointer;
+    ds::Stack<Grammar::Token>::iterator tStackPointer;
 
     ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
     

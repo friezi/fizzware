@@ -22,13 +22,14 @@ public:
   LLTest() : TestCase<LLTest>(){
     
     //     addTest(&LLTest::testGrammar1,"testGrammar1");
-    //     addTest(&LLTest::test1Grammar,"test1Grammar");
-    //     addTest(&LLTest::test2Grammar,"test2Grammar");
-    //     addTest(&LLTest::test3Grammar,"test3Grammar");
-    //     addTest(&LLTest::test4Grammar,"test4Grammar");
+    addTest(&LLTest::test1Grammar,"test1Grammar");
+    addTest(&LLTest::test2Grammar,"test2Grammar");
+    addTest(&LLTest::test3Grammar,"test3Grammar");
+    addTest(&LLTest::test4Grammar,"test4Grammar");
+    addTest(&LLTest::test5Grammar,"test5Grammar");
     //     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
     addTest(&LLTest::leftrecursionGrammar,"leftrecursionGrammar");
-    
+   
   }
 
   void setUp(){
@@ -36,17 +37,19 @@ public:
     grammar.setStart("S");
 
     (((((((((((grammar.rule("S") << "a",'T','W') << "b",'T','W') << "A",'N') << "A",'N') | "C",'N') << "A",'N')
-	 << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
+				      << "g",'T','W') << "v",'T','W') | "c",'T','W') << "g",'T','W') << "1",'T','W') << "a",'T','W';
     (((grammar.rule("A") << "end",'T','W') | "end",'T','W') << "A",'N');
     ((grammar.rule("S") << "C",'N') << "B",'N') << "hue",'T','W'; 
     //grammar.lambda(); // muss eine Zeile tiefer stehen, da sonst zu frueh ausgewertet (warum ist noch nicht klar)
     grammar.rule("B") << "123",'T','W';
     grammar.rule("B").lambda();
-    (grammar.rule("C") << "x",'T','W') | "y",'T','W';
+    ((grammar.rule("C") << "x",'T','W') | "y",'T','W') | "zahl",'T','N';
     grammar.lambda();
-
+    
     //   ((grammar.rule("S") << "a",'T','W') << "b",'T','W');
     cout << "Grammar:" << endl << grammar.toString() << endl;
+
+    grammar.prepare();
 
   }
   
@@ -104,11 +107,10 @@ public:
   void test1Grammar() throw (ExceptionBase){
 
     stringstream text;
-    text << 'a' << 'b';
+    text << "a" << " b" << " end" << " end";
     cout << "word: " << text.str() << endl;
 
     LexScanner tokenizer(&text);
-    tokenizer.getLexCharClasses().resetSyntax();
     
     LLParser llparser(&grammar,true);
 
@@ -120,12 +122,10 @@ public:
   void test2Grammar() throw (ExceptionBase){
 
     stringstream text;
-    text << 'c' << 'g' << 'v';
+    text << 'x' << " end" << " g" << " v";
     cout << "word: " << text.str() << endl;
 
-    LexScanner tokenizer(&text);
-    tokenizer.getLexCharClasses().resetSyntax();
-    
+    LexScanner tokenizer(&text);    
     LLParser llparser(&grammar,true);
 
     assertTrue(llparser.parse(&tokenizer));
@@ -145,6 +145,7 @@ public:
     LLParser llparser(&grammar,true);
 
     assertTrue(llparser.parse(&tokenizer));
+    cout << endl << endl;
 
   }
 
@@ -163,6 +164,20 @@ public:
 
   }
 
+  void test5Grammar() throw (ExceptionBase){
+
+    stringstream text;
+    text << "4" << " " << "\"123\"" << " hue";
+    cout << "word: " << text.str() << endl;
+
+    LexScanner tokenizer(&text);
+    
+    LLParser llparser(&grammar,true);
+
+    assertTrue(llparser.parse(&tokenizer));
+
+  }
+
   //   void nullabilityGrammar() throw (ExceptionBase){
 
   //     grammar.calculateNDF();
@@ -170,9 +185,6 @@ public:
   //   }
 
   void leftrecursionGrammar() throw (ExceptionBase){
-
-    //     grammar.calculateNDF();
-    grammar.calculateDFNL();
 
     cout << endl << "Nullability and direct first:" << endl;
 
@@ -183,8 +195,6 @@ public:
 	cout << (*fit)->getName() << " ";
       cout << endl;
     }
-
-    grammar.calculateFirstSets();
 
     cerr << endl << "firstsets:" << endl;
     for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
@@ -197,20 +207,14 @@ public:
       cerr << endl;
     }
 
-    grammar.calculateFollowSets();
-
     cerr << endl << "followsets:" << endl;
     for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){
-     
       cerr << (*rit)->getNonterminal()->getName() << ": ";
-
       for ( set<Terminal *>::iterator tit = (*rit)->getFollowSet()->begin(); tit != (*rit)->getFollowSet()->end(); tit++ ){
 	cerr << (*tit)->getName() << "  ";
       }
       cerr << endl;
     }
-
-    grammar.calculateDirectorSets();
 
     cerr << endl << "directorsets:" << endl;
     for ( set<Rule *>::iterator rit = grammar.getRules().begin(); rit != grammar.getRules().end(); rit++ ){

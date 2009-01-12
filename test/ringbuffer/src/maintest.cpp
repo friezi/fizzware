@@ -7,6 +7,6 @@ TestUnit mainTestUnit;
 
 void initMainTestUnit(){
 
-  mainTestUnit.addTestCase(new RingbufferTest());
+  mainTestUnit.addTestCase(new RingbufferTest(),"RingbufferTest()");
 
 }

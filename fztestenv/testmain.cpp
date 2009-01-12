@@ -63,6 +63,7 @@ int main(){
     mainTestUnit.pushStatisticHelper(statisticHelper);
     mainTestUnit.pushSuccessHandler(globalSuccessHandler);
     mainTestUnit.setTestCaseStartupHandler(testcaseStartupHandler);
+    mainTestUnit.setShowTests();
     
     mainTestUnit();
     

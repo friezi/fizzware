@@ -54,42 +54,58 @@ Rule * Rule::clone(Grammar::Token lookahead) throw (Exception<LLParser>){
 
   static string thisMethod = "clone()";
 
+  static const bool useLookahead = true;
+
   Rule *rule = new Rule(getNonterminal());
 
   for ( list<Production *>::iterator pit = alternatives.begin(); pit != alternatives.end(); pit++ ){
 
-    //     if ( lookahead.first == "" ){
-    //       // comes from the rule S'->S
+    if ( useLookahead == false ){
 
-    rule->getAlternatives().push_back((*pit)->clone());
-
-    //     } else {
-
-    //       Grammar::TaggedTerminals & director_set = (*pit)->getDirectorSet();
-    //       Grammar::TaggedTerminals::iterator dit;
-
-    //       if ( lookahead.second == LexToken::TT_WORD ){
+      rule->getAlternatives().push_back((*pit)->clone());
       
-    // 	if ( (dit = director_set.find(lookahead)) != director_set.end() )
-    // 	  rule->getAlternatives().push_back((*pit)->clone());
-	
-    //       } else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
+    } else {
 
-    // 	for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+      if ( lookahead.first == "" ){
+	// comes from the rule S'->S
 
-    // 	  if ( (*dit).second == Terminal::TT_NUMBER )
-    // 	    rule->getAlternatives().push_back((*pit)->clone());
+	rule->getAlternatives().push_back((*pit)->clone());
 
-    // 	}
+      } else {
 
-    //       } else
-    // 	throw Exception<LLParser>(thisMethod + ": wrong token-type!");
-    //     }
-    
+	set<Terminal *> & director_set = (*pit)->getDirectorSet();
+	set<Terminal *>::iterator dit;
+	  
+	if ( lookahead.second == LexToken::TT_WORD ){
+
+	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+	    if ( (*dit)->getName() == lookahead.first && (*dit)->getType() == Terminal::TT_WORD ){
+
+	      rule->getAlternatives().push_back((*pit)->clone());
+	      break;
+	      
+	    }
+	  }
+	    
+	} else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
+	    
+	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+	    if ( (*dit)->getType() == Terminal::TT_NUMBER ){
+
+	      rule->getAlternatives().push_back((*pit)->clone());
+	      break;
+
+	    }      
+	  }
+	    
+	} else
+	  throw Exception<LLParser>(thisMethod + ": wrong token-type!");
+      }
+    }
   }
-
+  
   return rule;
-
+  
 }
 
 std::string Rule::toString(){
@@ -363,6 +379,15 @@ Grammar & Grammar::lambda() throw(Exception<Grammar>){
   return *this;
 }
 
+void Grammar::prepare() throw (Exception<Grammar>, ExceptionBase){
+
+  calculateDFNL();
+  calculateFirstSets();
+  calculateFollowSets();
+  calculateDirectorSets();
+
+}
+
 void Grammar::calculateDFNL() throw (Exception<Grammar>, exc::ExceptionBase){
 
   Rule *rule;
@@ -461,15 +486,6 @@ void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase)
   
 }
 
-void LLParser::putback(LexScanner *tokenizer){
-
-  if ( tStackPointer == tokenstack.end() )
-    tokenizer->putback();
-  else
-    tStackPointer--;
-
-}
-
 void  Grammar::calculateFirstSets() throw (Exception<Grammar>, ExceptionBase){
 
   FirstSetGraph firstSetGraph(*this);
@@ -533,23 +549,6 @@ void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase)
   }
 }
 
-Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
-
-  Grammar::Token token = nextToken(tokenizer);
-
-  putback(tokenizer);
-
-  return token;
-
-}
-
-void LLParser::pushToken(Grammar::Token token){
-
-  if ( inputtype == STREAM )
-    tokenstack.push(token);
-
-}
-
 void LLParser::restoreTerminals(unsigned long number, unsigned long level) throw (Exception<LLParser>){
 
   static const string thisMethod = "restoreTerminals()";
@@ -574,6 +573,31 @@ void LLParser::restoreTerminals(unsigned long number, unsigned long level) throw
 
   if ( debug )
     clog << endl;
+
+}
+
+void LLParser::putback(LexScanner *tokenizer){
+
+  if ( tStackPointer == tokenstack.end() )
+    tokenizer->putback();
+  else
+    tStackPointer--;
+
+}
+
+Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
+
+  Grammar::Token token = nextToken(tokenizer);
+  putback(tokenizer);
+
+  return token;
+
+}
+
+void LLParser::pushToken(Grammar::Token token){
+
+  if ( inputtype == STREAM )
+    tokenstack.push(token);
 
 }
 
@@ -619,17 +643,15 @@ bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
 
   Rule *rule = grammar->getStartRule()->clone(Grammar::Token("",LexToken::TT_WORD));
 
-  ParseResult result =  parse(tokenizer,rule,false,0);
+  ParseResult result = parse(tokenizer,rule,false,0);
   bool succeeded;
 
   delete rule;
-  tokenstack.clear();
 
   if ( lookAhead(tokenizer).second == LexToken::TT_EOF )
     succeeded = result.first;
   else
     succeeded = false;
-
   if ( debug ){
 
     if ( succeeded == true )
@@ -639,6 +661,7 @@ bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
 
   }
 
+  tokenstack.clear();
   return succeeded;
 
 }
@@ -729,23 +752,23 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
 	// Nonterminal
 	
 	if ( debug )
-	  clog << level << "\texpanding: " << nonterminal->getName() << endl;
+	  clog << level << "\tunfolding: " << nonterminal->getName() << " with lookahead: " << lookAhead(tokenizer).first << endl;
 	
 	Rule *rule = nonterminal->getRule();
 
 	if ( rule == 0 )
 	  throw Exception<LLParser>(string("no rule for nonterminal ") + nonterminal->getName());
 
-	Rule *expanded_rule = rule->clone(lookAhead(tokenizer));
+	Rule *unfolded_rule = rule->clone(lookAhead(tokenizer));
 
 	// recursion: do the production
-	result = parse(tokenizer,expanded_rule,(backtrack || !alternatives.empty()),level);
-	delete expanded_rule;
-	
+	result = parse(tokenizer,unfolded_rule,(backtrack || !alternatives.empty()),level);
+	delete unfolded_rule;
+
 	shifted_terminals_cnt += result.second;
 	
 	if ( result.first == false ){
-	  
+
 	  restoreTerminals(shifted_terminals_cnt,level);
 	  shifted_terminals_cnt = 0;
 	  nextAlternative = true;
@@ -757,13 +780,13 @@ LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool ba
 	throw Exception<LLParser>("internal Error: GrammarSymbol neither Terminal nor Nonterminal!");
       
     }
-    
+
     if ( nextAlternative == false )
       return ParseResult(true,shifted_terminals_cnt);
     else
       alternatives.pop_front();
   }
-  
+
   return ParseResult(false,shifted_terminals_cnt);
   
 }
@@ -1005,6 +1028,9 @@ void FollowSetGraph::constructGraph(){
   
 
   for ( set<Rule *>::iterator rule_it = grammar.getRules().begin(); rule_it != grammar.getRules().end(); rule_it++ ){
+
+    // this asserts that a node for each rule will be inserted, the return-value is irrelevant
+    getFollowNode((*rule_it)->getNonterminal());
 
     for ( list<Production *>::iterator alt_it = (*rule_it)->getAlternatives().begin(); alt_it != (*rule_it)->getAlternatives().end(); alt_it++ ){
 

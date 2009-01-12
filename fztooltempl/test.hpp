@@ -35,7 +35,9 @@
 #include <iostream>
 #include <sstream>
 #include <list>
+#include <map>
 #include <utility>
+#include <algorithm>
 #include <exception.hpp>
 #include <utils.hpp>
 
@@ -78,7 +80,13 @@ namespace test{
 
     virtual ~TestCaseBase(){}
 
-    virtual void operator()() = 0;
+    virtual void operator()(std::set<std::string> *selection = 0) = 0;
+
+    /**
+       @brief returns the set of names of all registered tests
+       @return pointer to a set of names
+    */
+    virtual std::set<std::string> * getTestNames() = 0;
 
     virtual unsigned long getNmbTests() = 0;
 
@@ -106,7 +114,7 @@ namespace test{
 
     HandlerType getDefaultErrorHandler();
     
-    void showTests(){ show_tests = true; }
+    void setShowTests(){ show_tests = true; }
 
     void callStatisticHelpers();
     
@@ -176,6 +184,16 @@ namespace test{
 
     virtual ~TestCase(){}
 
+    std::set<std::string> * getTestNames(){
+
+      std::set<std::string> *names = new std::set<std::string>();
+
+      for ( typename Tests::iterator it = tests.begin(); it != tests.end(); it++ )
+	names->insert((*it).second);
+
+      return names;
+    }
+
     unsigned long getNmbTests(){ return tests.size(); }
 
   private:
@@ -187,10 +205,10 @@ namespace test{
 
     void addTest(void (T::*test)(), std::string id){ tests.push_back(std::pair<void (T::*)(),std::string>(test,id)); }
 
-    void operator()() throw (exc::Exception< TestCase<T> >){
+    void operator()(std::set<std::string> *selection) throw (exc::Exception< TestCase<T> >){
 
       setUp();
-      startTests();
+      startTests(selection);
       tearDown();
       callStatisticHelpers();
 
@@ -198,15 +216,22 @@ namespace test{
 
   private:
 
-    void startTests() throw (exc::Exception< TestCase<T> >){
+    void startTests(std::set<std::string> *selection = 0) throw (exc::Exception< TestCase<T> >){
 
       T * self;
+      std::set<std::string>::iterator eit;
 
       if ( (self = dynamic_cast<T *>(this)) == 0 )
 	throw exc::Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
-  
+      
       typename Tests::iterator it;
       for ( it = tests.begin(); it != tests.end(); it++ ){
+	
+	if ( selection != 0 ){
+	  // execute only selected tests
+	  if ( (eit = std::find(selection->begin(),selection->end(),(*it).second)) == selection->end() )
+	    continue;
+	}
 	
 	try{
 	  
@@ -240,13 +265,11 @@ namespace test{
 
   private:
 
-    typedef std::pair<TestCaseBase *, std::string> TestCaseInfo;
-
-    std::list<TestCaseInfo> testcases;
+    std::list<TestCaseBase *> testcases;
 
     TestCaseBase::HandlerType testcaseStartupHandler;
 
-    static void defaultTestCaseStartupHandler(TestCaseBase::TestCaseBase *testcase, std::string msg);
+    static void defaultTestCaseStartupHandler(TestCaseBase *testcase, std::string msg);
 
   public:
 
@@ -256,11 +279,19 @@ namespace test{
 
     void addTestCase(TestCaseBase * testcase, std::string name);
 
-    void operator()() throw (exc::ExceptionBase);
+    /**
+       If parameter 'execute' is given, only the testcases and tests found in the map/set are exsecuted. Otherwise
+       all will be executed.
+       @brief executes testcases
+       @param selection if not 0, contains a map with key = TestCaseName and value = set of tests to be executed for this testcase
+    */
+    void operator()(std::map< std::string,std::set<std::string> *> *selection = 0) throw (exc::ExceptionBase);
 
     unsigned long getNmbTestCases(){ return testcases.size(); }
 
     unsigned long getNmbTests();
+
+    const std::list<TestCaseBase *> & getTestCases(){ return testcases; }
 
     void setTestCaseStartupHandler(TestCaseBase::HandlerType testcaseStartupHandler){ this->testcaseStartupHandler = testcaseStartupHandler; }
 
@@ -276,7 +307,7 @@ namespace test{
 
     void clearStatisticHelpers();
 
-    void showTests();
+    void setShowTests();
 
   };
 

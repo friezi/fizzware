@@ -1028,7 +1028,6 @@ getIndex(size_t position){
     return first + position;
   else
     return position - (size - first);
-  
  
 }
 
