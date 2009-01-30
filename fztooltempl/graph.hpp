@@ -328,7 +328,7 @@ namespace graph{
   template<typename TNode>
   unsigned int SCCProcessor<TNode>::scc_visit(const TNode node, unsigned int id) throw(exc::ExceptionBase){
   
-    unsigned int m = 0, min;
+    unsigned int m = 0, min, value;
 
     values[node] = ++id;
 
@@ -338,7 +338,8 @@ namespace graph{
 
     for ( node_iterator<TNode> nit = graph->beginNeighbours(node); nit != graph->endNeighbours(node); nit++ ){
 
-      m = (!values[*nit]) ? scc_visit(*nit,id) : values[*nit];
+      value =  values[*nit];
+      m = (!value) ? scc_visit(*nit,id) : value;
 
       if ( m < min )
 	min = m;
