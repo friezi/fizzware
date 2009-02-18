@@ -69,6 +69,8 @@ namespace parse{
 
     char defmode;
 
+    bool leftrecursive;
+
   protected:
 
     std::set<Rule *> rules;
@@ -84,7 +86,7 @@ namespace parse{
   public:
 
     Grammar() : startrule(0), lastAccessedRule(0), lastAccessedProduction(0), lastGrammarSymbol(""),
-		lastTerminal(0), lastNonterminal(0), defmode(0){}
+		lastTerminal(0), lastNonterminal(0), defmode(0), leftrecursive(false){}
 
     ~Grammar();
 
@@ -161,6 +163,18 @@ namespace parse{
        Prepares the grammar for parsing, i. e. calculates all relevant sets.
     */
     void prepare() throw (exc::Exception<Grammar>, exc::ExceptionBase);
+
+    /**
+       @brief checks if grammar fulfils LL1-property
+       @return true or false
+    */
+    bool isLL1();
+
+    /**
+       @brief was leftrecursion detected?
+       @return true if leftrecursion detected
+    */
+    bool isLeftrecursive(){ return leftrecursive; }
 
   protected:
 
@@ -339,6 +353,12 @@ namespace parse{
     void setNullable(Nullability val){ nullable = val; }
 
     bool isNullable(){ return nullable == NL_IS_NULLABLE; }
+
+    /**
+       @brief checks if director-sets are disjoint
+       @return true or false
+    */
+    bool isDisjointDirectorSets();
 
   protected:
 

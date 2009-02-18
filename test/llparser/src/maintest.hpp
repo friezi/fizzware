@@ -28,7 +28,7 @@ public:
     addTest(&LLTest::test4Grammar,"test4Grammar");
     addTest(&LLTest::test5Grammar,"test5Grammar");
     //     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
-    addTest(&LLTest::leftrecursionGrammar,"leftrecursionGrammar");
+    addTest(&LLTest::grammarInfo,"grammarInfo");
    
   }
 
@@ -184,13 +184,13 @@ public:
     
   //   }
 
-  void leftrecursionGrammar() throw (ExceptionBase){
+  void grammarInfo() throw (ExceptionBase){
 
     cout << endl << "Nullability and direct first:" << endl;
 
     for ( set<Rule *>::iterator it = grammar.getRules().begin(); it != grammar.getRules().end(); it++ ){
 
-      cout << (*it)->getNonterminal()->getName() << ": " << (*it)->isNullable() << "\t";
+      cout << (*it)->getNonterminal()->getName() << ": " << ((*it)->isNullable()? "true" : "false") << "\t";
       for ( set<Terminal *>::iterator fit = (*it)->getDirectFirstSet().begin(); fit != (*it)->getDirectFirstSet().end(); fit++ )
 	cout << (*fit)->getName() << " ";
       cout << endl;
@@ -228,6 +228,10 @@ public:
 	cerr << endl;
       }
     }
+
+    cout << endl << "grammar is leftrevursive? " << (grammar.isLeftrecursive()? "true" : "false") << endl;
+
+    cout << endl << "grammar is LL1? " << (grammar.isLL1()? "true" : "false") << endl;
     
   }
   

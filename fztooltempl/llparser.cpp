@@ -108,6 +108,21 @@ Rule * Rule::clone(Grammar::Token lookahead) throw (Exception<LLParser>){
   
 }
 
+bool Rule::isDisjointDirectorSets(){
+
+  set<Terminal *> terminals;
+
+  for ( list<Production *>::iterator pit = alternatives.begin(); pit != alternatives.end(); pit++ ){
+    for ( set<Terminal *>::iterator tit = (*pit)->getDirectorSet().begin(); tit != (*pit)->getDirectorSet().end(); tit++ ){
+      if ( terminals.insert(*tit).second == false ){
+	return false;
+      }
+    }
+  }
+
+  return true;
+}
+
 std::string Rule::toString(){
 
   ostringstream out;
@@ -423,8 +438,12 @@ void Grammar::traverseDFNL(Rule *rule) throw (Exception<Grammar>, ExceptionBase)
 
   if ( rule->visited == true ){
 
-    if ( rule->circlefree == false )
+    if ( rule->circlefree == false ){
+
+      leftrecursive = true;
       throw Exception<Grammar>("Grammar left recursive!");
+
+    }
     else
       return;
     
@@ -547,6 +566,20 @@ void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase)
       }
     }
   }
+}
+
+bool Grammar::isLL1(){
+
+  if ( isLeftrecursive() )
+    return false;
+
+  for ( set<Rule *>::iterator it = rules.begin(); it != rules.end(); it++ ){
+    if ( !(*it)->isDisjointDirectorSets() )
+      return false;
+  }
+
+  return true;
+  
 }
 
 void LLParser::restoreTerminals(unsigned long number, unsigned long level) throw (Exception<LLParser>){
