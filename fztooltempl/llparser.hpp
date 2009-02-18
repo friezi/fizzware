@@ -29,6 +29,9 @@ namespace parse{
 
   enum Nullability{ NL_NONE, NL_IS_NULLABLE, NL_IS_NOT_NULLABLE };
 
+  /**
+     @brief representation of a contextfree BNF-grammar
+  */
   class Grammar{
 
   public:
@@ -167,12 +170,14 @@ namespace parse{
     /**
        @brief checks if grammar fulfils LL1-property
        @return true or false
+       @pre calculateDirectorSets() must have been called already
     */
     bool isLL1();
 
     /**
        @brief was leftrecursion detected?
        @return true if leftrecursion detected
+       @pre calculateDFNL() must have been called already
     */
     bool isLeftrecursive(){ return leftrecursive; }
 
@@ -189,6 +194,9 @@ namespace parse{
 
   };
 
+  /**
+     @brief A single production of a rule.
+  */
   class Production{
 
     friend class Rule;
@@ -221,6 +229,9 @@ namespace parse{
   
   };
   
+  /**
+     @brief A grammar symbol: either terminal of nonterminal.
+  */
   class GrammarSymbol{
     
   public:
@@ -231,6 +242,9 @@ namespace parse{
     
   };
 
+  /**
+     @brief Class representing a terminal.
+  */
   class Terminal : public GrammarSymbol{
 
   public:
@@ -271,6 +285,9 @@ namespace parse{
   
   };
 
+  /**
+     @brief Class representing a nonterminal.
+  */
   class Nonterminal : public GrammarSymbol{
 
   protected:
@@ -293,6 +310,9 @@ namespace parse{
 
   };
 
+  /**
+     @brief A class representing a grammar rule: can consist of several alternatives on righthand side
+  */ 
   class Rule{
 
     friend class LLParser;
@@ -366,6 +386,9 @@ namespace parse{
 
   };
 
+  /**
+     @brief A LL1-parser class
+  */
   class LLParser{
 
     friend class Rule;
@@ -414,6 +437,12 @@ namespace parse{
 
     LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug), inputtype(NONE){}
 
+    /**
+       @brief parses the tokenstream provided by a tokenizer
+       @param tokenizer the tokenizer
+       @return true if word is accepted, false otherwise
+       @throw Exception<LLParser>
+    */
     bool parse(Tokenizer *tokenizer) throw (exc::Exception<LLParser>);
 
   };
