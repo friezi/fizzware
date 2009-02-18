@@ -57,6 +57,12 @@ namespace parse{
 
     virtual void putback() = 0;
 
+    virtual int getTokenType() = 0;
+
+    virtual utils::String getSVal() = 0;
+
+    virtual long double getNVal() = 0;
+
     virtual unsigned long getLineNumber() = 0;
 
   };
@@ -692,6 +698,12 @@ namespace parse{
        @note The line is untruncted. Use String::trunc() to trunc leading and trailing blanks.
     */
     int nextLine() throw (exc::Exception<LexScanner>);
+
+    int getTokenType(){ return token.type; }
+
+    utils::String getSVal(){ return token.sval; }
+
+    long double getNVal(){ return token.nval; }
 
     /**
        @brief returns the current line number the token occured in

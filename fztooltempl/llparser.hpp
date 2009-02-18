@@ -375,13 +375,13 @@ namespace parse{
 
     ds::Stack<Grammar::Token>::iterator tStackPointer;
 
-    ParseResult parse(LexScanner *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
+    ParseResult parse(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
     
-    Grammar::Token nextToken(LexScanner *tokenizer) throw (exc::Exception<LexScanner>,exc::ExceptionBase);
+    Grammar::Token nextToken(Tokenizer *tokenizer) throw (exc::Exception<Tokenizer>,exc::ExceptionBase);
 
-    void putback(LexScanner *tokenizer);
+    void putback(Tokenizer *tokenizer);
     
-    Grammar::Token lookAhead(LexScanner *tokenizer) throw (exc::Exception<LexScanner>, exc::ExceptionBase);
+    Grammar::Token lookAhead(Tokenizer *tokenizer) throw (exc::Exception<Tokenizer>, exc::ExceptionBase);
 
     void pushToken(Grammar::Token token);
     
@@ -394,7 +394,7 @@ namespace parse{
 
     LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug), inputtype(NONE){}
 
-    bool parse(LexScanner *tokenizer) throw (exc::Exception<LLParser>);
+    bool parse(Tokenizer *tokenizer) throw (exc::Exception<LLParser>);
 
   };
 

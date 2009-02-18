@@ -576,7 +576,7 @@ void LLParser::restoreTerminals(unsigned long number, unsigned long level) throw
 
 }
 
-void LLParser::putback(LexScanner *tokenizer){
+void LLParser::putback(Tokenizer *tokenizer){
 
   if ( tStackPointer == tokenstack.end() )
     tokenizer->putback();
@@ -585,7 +585,7 @@ void LLParser::putback(LexScanner *tokenizer){
 
 }
 
-Grammar::Token LLParser::lookAhead(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
+Grammar::Token LLParser::lookAhead(Tokenizer *tokenizer) throw (Exception<Tokenizer>, ExceptionBase){
 
   Grammar::Token token = nextToken(tokenizer);
   putback(tokenizer);
@@ -601,17 +601,17 @@ void LLParser::pushToken(Grammar::Token token){
 
 }
 
-Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexScanner>, ExceptionBase){
+Grammar::Token LLParser::nextToken(Tokenizer *tokenizer) throw (Exception<Tokenizer>, ExceptionBase){
 
   if ( tStackPointer == tokenstack.end() ) {
 
     int scantoken = tokenizer->nextToken();
-    int type = tokenizer->token.type;
+    int type = tokenizer->getTokenType();
     inputtype = STREAM;
     
     if ( type == LexToken::TT_WORD || type == LexToken::TT_NUMBERWORD ){
 
-      return Grammar::Token(tokenizer->token.sval,type);
+      return Grammar::Token(tokenizer->getSVal(),type);
 
     } else if ( type == LexToken::TT_EOF || type == LexToken::TT_EOL ){
 
@@ -634,7 +634,7 @@ Grammar::Token LLParser::nextToken(LexScanner *tokenizer) throw (Exception<LexSc
 
 }
 
-bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
+bool LLParser::parse(Tokenizer *tokenizer) throw (Exception<LLParser>){
 
   if ( tokenizer == 0 )
     throw Exception<LLParser>("tokenizer == 0!");
@@ -666,7 +666,7 @@ bool LLParser::parse(LexScanner *tokenizer) throw (Exception<LLParser>){
 
 }
 
-LLParser::ParseResult LLParser::parse(LexScanner *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (Exception<LLParser>){
+LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (Exception<LLParser>){
 
   unsigned long shifted_terminals_cnt = 0;
   Terminal *terminal;
