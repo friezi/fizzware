@@ -400,6 +400,7 @@ void Grammar::prepare() throw (Exception<Grammar>, ExceptionBase){
   calculateFirstSets();
   calculateFollowSets();
   calculateDirectorSets();
+  calculateLL1Property();
 
 }
 
@@ -568,17 +569,24 @@ void  Grammar::calculateDirectorSets() throw (Exception<Grammar>, ExceptionBase)
   }
 }
 
-bool Grammar::isLL1(){
+void Grammar::calculateLL1Property(){
 
-  if ( isLeftrecursive() )
-    return false;
+  if ( isLeftrecursive() ){
 
+    propertyLL1 = false;
+    return;
+
+  }
+  
   for ( set<Rule *>::iterator it = rules.begin(); it != rules.end(); it++ ){
-    if ( !(*it)->isDisjointDirectorSets() )
-      return false;
+    if ( !(*it)->isDisjointDirectorSets() ){
+
+      propertyLL1 = false;
+      return;
+    }
   }
 
-  return true;
+  propertyLL1 = true;
   
 }
 
@@ -701,10 +709,29 @@ bool LLParser::parse(Tokenizer *tokenizer) throw (Exception<LLParser>){
 
 LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (Exception<LLParser>){
 
+  if ( getTraverseMethod() == DFS ){
+
+    return parseDFS(tokenizer,rule,false,0);
+
+  }else if ( getTraverseMethod() == BFS ){
+
+    return parseBFS(tokenizer,rule);
+
+  }
+
+  throw Exception<LLParser>("unsupported traverse method!");
+
+}
+
+LLParser::ParseResult LLParser::parseDFS(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (Exception<LLParser>){
+
   unsigned long shifted_terminals_cnt = 0;
   Terminal *terminal;
   Nonterminal *nonterminal;
   Grammar::Token token;
+  Production *production;
+  GrammarSymbol *symbol;
+  Rule *unfolded_rule;
   ParseResult result;
   bool nextAlternative;
 
@@ -719,7 +746,7 @@ LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool bac
  
     nextAlternative = false;
 
-    Production *production = alternatives.front();
+    production = alternatives.front();
     list<GrammarSymbol *> & symbols = production->getSymbols();
 
     if ( debug )
@@ -727,7 +754,7 @@ LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool bac
 
     while ( !symbols.empty() && nextAlternative == false ){
       
-      GrammarSymbol *symbol = symbols.front();
+      symbol = symbols.front();
       symbols.pop_front();
       
       if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
@@ -787,12 +814,12 @@ LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool bac
 	if ( debug )
 	  clog << level << "\tunfolding: " << nonterminal->getName() << " with lookahead: " << lookAhead(tokenizer).first << endl;
 	
-	Rule *rule = nonterminal->getRule();
+	rule = nonterminal->getRule();
 
 	if ( rule == 0 )
 	  throw Exception<LLParser>(string("no rule for nonterminal ") + nonterminal->getName());
 
-	Rule *unfolded_rule = rule->clone(lookAhead(tokenizer));
+	unfolded_rule = rule->clone(lookAhead(tokenizer));
 
 	// recursion: do the production
 	result = parse(tokenizer,unfolded_rule,(backtrack || !alternatives.empty()),level);
@@ -822,6 +849,253 @@ LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool bac
 
   return ParseResult(false,shifted_terminals_cnt);
   
+}
+
+LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw (Exception<LLParser>){
+
+  QueueContent *content;
+  ProductionContent *prod_content;
+  Production *production;
+  GrammarSymbol *symbol;
+  Terminal *terminal;
+  Nonterminal *nonterminal;
+  bool token_match = false;
+  bool result;
+  Grammar::Token token;
+
+  std::deque<QueueContent *> queue;
+
+  for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
+    queue.push_back(new ProductionContent((*pit)->clone()));
+  }
+  queue.push_back(new EndContent());
+
+  content = queue.front();
+  while ( dynamic_cast<EndContent *>(content) == 0 ){
+
+    queue.pop_front();
+    token_match = false;
+    token = nextToken(tokenizer);
+
+    if ( debug )
+      clog << "shifting: " << token.first << endl;
+
+    while ( (prod_content = dynamic_cast<ProductionContent *>(content)) != 0 ){
+
+      if ( debug )
+	clog << "taking: " << prod_content->getProduction()->toString() << endl;
+
+      list<GrammarSymbol *> & symbols = prod_content->getProduction()->getSymbols();
+      
+      if ( token.second == LexToken::TT_EOF ){
+
+	if ( symbols.empty() ){
+	  
+	  delete content;
+	  clearQueue(queue);
+	  return ParseResult(true,0);
+	  
+	} else {
+	  
+	  symbol = symbols.front();
+	  symbols.pop_front();
+
+	  if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
+	    
+	    if ( debug )
+	      clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	    
+	    delete content;
+
+	  } else {
+	    // Nonterminal
+	    
+	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
+	    if ( nonterminal->getRule()->isNullable() ){
+
+	      token_match = true;
+	      
+	      if ( debug )
+		clog << "prepending: " << prod_content->getProduction()->toString() << endl;
+
+	      queue.push_front(content);
+
+	    } else{
+
+	      if ( debug )
+		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+
+	      delete content;
+
+	    }
+	  }
+	}
+      } else if ( token.second == LexToken::TT_NUMBERWORD ){
+	
+	if ( symbols.empty() ){
+	  
+	  if ( debug )
+	    clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	  
+	  delete content;
+	  
+	} else {
+	  
+	  symbol = symbols.front();
+	  symbols.pop_front();
+	  
+	  if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
+	    
+	    if ( terminal->getType() == Terminal::TT_NUMBER ){
+	      
+	      token_match = true;
+	      queue.push_back(content);
+
+	      if ( debug )
+		clog << "appending: " << prod_content->getProduction()->toString() << endl;
+	      
+	    } else {
+
+	      if ( debug )
+		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	      
+	      delete content;
+	      
+	    }
+	    
+	  } else {
+	    
+	    token_match = true;
+
+	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
+	    rule = nonterminal->getRule()->clone(token);
+	    
+	    for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
+	      
+	      production = (*pit)->clone();
+	      // all symbols of prod_content must be added to unfolded nonterminal
+	      for ( list<GrammarSymbol *>::iterator sit = symbols.begin(); sit != symbols.end(); sit++ ){
+		production->getSymbols().push_back(*sit);
+	      }
+	      
+	      if ( debug )
+		clog << "prepending: " << production->toString() << endl;
+
+	      queue.push_front(new ProductionContent(production));
+	    }
+	    
+	    delete content;	  
+	    
+	  }
+	}
+      } else{
+	// TT_WORD
+
+ 	if ( symbols.empty() ){
+
+	  if ( debug )
+	    clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	  
+	  delete content;
+	  
+	} else {
+	  
+	  symbol = symbols.front();
+	  symbols.pop_front();
+
+	  if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
+
+	    if ( terminal->getType() == Terminal::TT_WORD && token.first == terminal->getName() ){
+	      
+	      token_match = true;
+	      queue.push_back(content);
+
+	      if ( debug )
+		clog << "appending: " << prod_content->getProduction()->toString() << endl;
+
+	    } else {
+
+	      if ( debug )
+		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+
+	      delete content;
+
+	    }
+
+	  } else {
+
+	    token_match = true;
+
+	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
+	    rule = nonterminal->getRule()->clone(token);
+
+	    if ( debug )
+		clog << "prepending: ";
+
+
+	    for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
+
+	      production = (*pit)->clone();
+	      // all symbols of prod_content must be added to unfolded nonterminal
+	      for ( list<GrammarSymbol *>::iterator sit = symbols.begin(); sit != symbols.end(); sit++ ){
+		production->getSymbols().push_back(*sit);
+	      }
+	      
+	      if ( debug )
+		clog << production->toString() << ", ";
+	      
+	      queue.push_front(new ProductionContent(production));
+	    }
+
+	    if ( debug )
+		clog << endl;
+	    
+	    delete rule;
+	    delete content;
+	  }
+	}
+      }
+    
+      content = queue.front();
+      queue.pop_front();
+    }
+
+    // EndContent
+    if ( dynamic_cast<EndContent *>(content) == 0 ){
+      
+      clearQueue(queue);
+      throw Exception<LLParser>("content not EndContent as expected!");
+
+    }
+
+    if ( token_match == false ){
+      
+      clearQueue(queue);
+      return ParseResult(false,0);
+      
+    }
+    
+    queue.push_back(content);
+    content = queue.front();
+  }
+  
+  token = nextToken(tokenizer);
+
+  if ( token.second == LexToken::TT_EOF )
+    result = true;
+  else
+    result = false;  
+
+  clearQueue(queue);
+  return ParseResult(result,0);
+  
+}
+
+void LLParser::clearQueue(deque<QueueContent *> & queue){
+
+  for ( deque<QueueContent *>::iterator it = queue.begin(); it != queue.end(); it++ ){    
+    delete *it;
+  }
 }
 
 FirstSetGraph::FirstSetNodeIterator::FirstSetNodeIterator(set<Rule *>::iterator it) : it(it){

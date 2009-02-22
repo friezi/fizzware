@@ -74,6 +74,8 @@ namespace parse{
 
     bool leftrecursive;
 
+    bool propertyLL1;
+
   protected:
 
     std::set<Rule *> rules;
@@ -89,7 +91,7 @@ namespace parse{
   public:
 
     Grammar() : startrule(0), lastAccessedRule(0), lastAccessedProduction(0), lastGrammarSymbol(""),
-		lastTerminal(0), lastNonterminal(0), defmode(0), leftrecursive(false){}
+		lastTerminal(0), lastNonterminal(0), defmode(0), leftrecursive(false), propertyLL1(false){}
 
     ~Grammar();
 
@@ -168,11 +170,17 @@ namespace parse{
     void prepare() throw (exc::Exception<Grammar>, exc::ExceptionBase);
 
     /**
-       @brief checks if grammar fulfils LL1-property
-       @return true or false
+       @brief checks if grammar fulfils LL1-property. will be called by prepare().
        @pre calculateDirectorSets() must have been called already
     */
-    bool isLL1();
+    void calculateLL1Property();
+ 
+    /**
+       @brief returns stored LL1-property value
+       @return true, if fulfilled
+       @pre calculateLL1Property() must have been called already
+    */
+    bool isLL1(){ return propertyLL1; }
 
     /**
        @brief was leftrecursion detected?
@@ -200,6 +208,7 @@ namespace parse{
   class Production{
 
     friend class Rule;
+    friend class LLParser;
 
   protected:
 
@@ -394,9 +403,50 @@ namespace parse{
     friend class Rule;
     friend class Production;
 
+  public:
+
+    enum TraverseMethod{ DFS, BFS };
+
   protected:
 
     enum Inputtype { NONE, STREAM, STACK };
+
+    // used by BFS: *****
+    class QueueContent{
+
+    protected:
+
+      QueueContent(){}
+      
+    public:
+      
+      virtual ~QueueContent(){}
+      
+    };
+
+    class ProductionContent : public QueueContent{
+
+    protected:
+
+      Production *production;
+
+    public:
+
+      ProductionContent(Production *production){ this->production = production; }
+
+      ~ProductionContent(){ delete production; }
+
+      Production * getProduction(){ return production; }
+
+    };
+
+    class EndContent : public QueueContent{
+      
+      ~EndContent(){}
+      
+    };
+
+    // ******************
 
     //     // coombination of production and terminal for backtracking
     //     typedef std::pair<Rule *, > StackEntry;
@@ -412,6 +462,9 @@ namespace parse{
 
     Inputtype inputtype;
 
+    TraverseMethod traverseMethod;
+
+    // DFS stuff
     ds::Stack<Grammar::Token> tokenstack;
 
   private:
@@ -419,6 +472,12 @@ namespace parse{
     ds::Stack<Grammar::Token>::iterator tStackPointer;
 
     ParseResult parse(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
+
+    // depths-first-search
+    ParseResult parseDFS(Tokenizer *tokenizer, Rule *rule, bool backtrack, unsigned long level) throw (exc::Exception<LLParser>);
+
+    // breadth-first-search
+    ParseResult parseBFS(Tokenizer *tokenizer, Rule *rule) throw (exc::Exception<LLParser>);
     
     Grammar::Token nextToken(Tokenizer *tokenizer) throw (exc::Exception<Tokenizer>,exc::ExceptionBase);
 
@@ -433,9 +492,11 @@ namespace parse{
     */
     void restoreTerminals(unsigned long number, unsigned long level) throw (exc::Exception<LLParser>);
 
+    void clearQueue(std::deque<QueueContent *> & queue);
+
   public:
 
-    LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug), inputtype(NONE){}
+    LLParser(Grammar *grammar, bool debug = false) : grammar(grammar), debug(debug), inputtype(NONE), traverseMethod(BFS){}
 
     /**
        @brief parses the tokenstream provided by a tokenizer
@@ -444,6 +505,10 @@ namespace parse{
        @throw Exception<LLParser>
     */
     bool parse(Tokenizer *tokenizer) throw (exc::Exception<LLParser>);
+
+    void setTraverseMethod(TraverseMethod traverseMethod){ this->traverseMethod = traverseMethod; }
+
+    TraverseMethod getTraverseMethod(){ return traverseMethod; }
 
   };
 

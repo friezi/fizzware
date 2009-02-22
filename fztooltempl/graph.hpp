@@ -230,7 +230,7 @@ namespace graph{
 
   /**
      @ingroup algorithm
-     @brief \ref algorithm finds strongly connected componets and does some processing on it
+     @brief \ref algorithm finds strongly connected components and does some processing on it
   */
   template<typename TNode> class SCCProcessor{
 

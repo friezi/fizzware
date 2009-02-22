@@ -230,8 +230,10 @@ public:
     }
 
     cout << endl << "grammar is leftrevursive? " << (grammar.isLeftrecursive()? "true" : "false") << endl;
+    assertFalse(grammar.isLeftrecursive());
 
     cout << endl << "grammar is LL1? " << (grammar.isLL1()? "true" : "false") << endl;
+    assertFalse(grammar.isLL1());
     
   }
   
