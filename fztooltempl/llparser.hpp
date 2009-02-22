@@ -389,10 +389,6 @@ namespace parse{
     */
     bool isDisjointDirectorSets();
 
-  protected:
-
-    Rule * clone(Grammar::Token lookahead) throw (exc::Exception<LLParser>);
-
   };
 
   /**
@@ -410,41 +406,6 @@ namespace parse{
   protected:
 
     enum Inputtype { NONE, STREAM, STACK };
-
-    // used by BFS: *****
-    class QueueContent{
-
-    protected:
-
-      QueueContent(){}
-      
-    public:
-      
-      virtual ~QueueContent(){}
-      
-    };
-
-    class ProductionContent : public QueueContent{
-
-    protected:
-
-      Production *production;
-
-    public:
-
-      ProductionContent(Production *production){ this->production = production; }
-
-      ~ProductionContent(){ delete production; }
-
-      Production * getProduction(){ return production; }
-
-    };
-
-    class EndContent : public QueueContent{
-      
-      ~EndContent(){}
-      
-    };
 
     // ******************
 
@@ -492,7 +453,11 @@ namespace parse{
     */
     void restoreTerminals(unsigned long number, unsigned long level) throw (exc::Exception<LLParser>);
 
-    void clearQueue(std::deque<QueueContent *> & queue);
+    void clearQueue(std::deque<Production *> & queue);
+
+  protected:
+
+    Rule * clone(Rule *rule, Grammar::Token lookahead) throw (exc::Exception<LLParser>);
 
   public:
 

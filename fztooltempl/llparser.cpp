@@ -50,64 +50,6 @@ Rule::~Rule(){
   
 }
 
-Rule * Rule::clone(Grammar::Token lookahead) throw (Exception<LLParser>){
-
-  static string thisMethod = "clone()";
-
-  static const bool useLookahead = true;
-
-  Rule *rule = new Rule(getNonterminal());
-
-  for ( list<Production *>::iterator pit = alternatives.begin(); pit != alternatives.end(); pit++ ){
-
-    if ( useLookahead == false ){
-
-      rule->getAlternatives().push_back((*pit)->clone());
-      
-    } else {
-
-      if ( lookahead.first == "" ){
-	// comes from the rule S'->S
-
-	rule->getAlternatives().push_back((*pit)->clone());
-
-      } else {
-
-	set<Terminal *> & director_set = (*pit)->getDirectorSet();
-	set<Terminal *>::iterator dit;
-	  
-	if ( lookahead.second == LexToken::TT_WORD ){
-
-	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
-	    if ( (*dit)->getName() == lookahead.first && (*dit)->getType() == Terminal::TT_WORD ){
-
-	      rule->getAlternatives().push_back((*pit)->clone());
-	      break;
-	      
-	    }
-	  }
-	    
-	} else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
-	    
-	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
-	    if ( (*dit)->getType() == Terminal::TT_NUMBER ){
-
-	      rule->getAlternatives().push_back((*pit)->clone());
-	      break;
-
-	    }      
-	  }
-	    
-	} else
-	  throw Exception<LLParser>(thisMethod + ": wrong token-type!");
-      }
-    }
-  }
-  
-  return rule;
-  
-}
-
 bool Rule::isDisjointDirectorSets(){
 
   set<Terminal *> terminals;
@@ -675,6 +617,71 @@ Grammar::Token LLParser::nextToken(Tokenizer *tokenizer) throw (Exception<Tokeni
 
 }
 
+Rule * LLParser::clone(Rule *rule, Grammar::Token lookahead) throw (Exception<LLParser>){
+
+  static string thisMethod = "clone()";
+
+  static const bool useLookahead = true;
+
+  bool found = false;
+  Rule *rule_clone = new Rule(rule->getNonterminal());
+
+  for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
+
+    if ( useLookahead == false ){
+
+      rule_clone->getAlternatives().push_back((*pit)->clone());
+      
+    } else {
+
+      if ( lookahead.first == "" ){
+	// comes from the rule S'->S
+
+	rule_clone->getAlternatives().push_back((*pit)->clone());
+
+      } else {
+
+	set<Terminal *> & director_set = (*pit)->getDirectorSet();
+	set<Terminal *>::iterator dit;
+	  
+	if ( lookahead.second == LexToken::TT_WORD ){
+
+	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+	    if ( (*dit)->getName() == lookahead.first && (*dit)->getType() == Terminal::TT_WORD ){
+
+	      rule_clone->getAlternatives().push_back((*pit)->clone());
+	      found = true;
+	      break;
+	      
+	    }
+	  }
+	    
+	} else if ( lookahead.second == LexToken::TT_NUMBERWORD ){
+	    
+	  for ( dit = director_set.begin(); dit != director_set.end(); dit++ ){
+	    if ( (*dit)->getType() == Terminal::TT_NUMBER ){
+
+	      rule_clone->getAlternatives().push_back((*pit)->clone());
+	      found = true;
+	      break;
+
+	    }      
+	  }
+	    
+	} else
+	  throw Exception<LLParser>(thisMethod + ": wrong token-type!");
+      }
+    }
+
+    if ( found == true and grammar->isLL1() )
+      break;
+
+  }
+  
+  return rule_clone;
+  
+}
+
 bool LLParser::parse(Tokenizer *tokenizer) throw (Exception<LLParser>){
 
   if ( tokenizer == 0 )
@@ -682,7 +689,7 @@ bool LLParser::parse(Tokenizer *tokenizer) throw (Exception<LLParser>){
 
   tStackPointer = tokenstack.end();
 
-  Rule *rule = grammar->getStartRule()->clone(Grammar::Token("",LexToken::TT_WORD));
+  Rule *rule = clone(grammar->getStartRule(),Grammar::Token("",LexToken::TT_WORD));
 
   ParseResult result = parse(tokenizer,rule,false,0);
   bool succeeded;
@@ -819,7 +826,7 @@ LLParser::ParseResult LLParser::parseDFS(Tokenizer *tokenizer, Rule *rule, bool 
 	if ( rule == 0 )
 	  throw Exception<LLParser>(string("no rule for nonterminal ") + nonterminal->getName());
 
-	unfolded_rule = rule->clone(lookAhead(tokenizer));
+	unfolded_rule = clone(rule,lookAhead(tokenizer));
 
 	// recursion: do the production
 	result = parse(tokenizer,unfolded_rule,(backtrack || !alternatives.empty()),level);
@@ -853,9 +860,8 @@ LLParser::ParseResult LLParser::parseDFS(Tokenizer *tokenizer, Rule *rule, bool 
 
 LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw (Exception<LLParser>){
 
-  QueueContent *content;
-  ProductionContent *prod_content;
   Production *production;
+  Production *expanded_production;
   GrammarSymbol *symbol;
   Terminal *terminal;
   Nonterminal *nonterminal;
@@ -863,15 +869,15 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
   bool result;
   Grammar::Token token;
 
-  std::deque<QueueContent *> queue;
+  std::deque<Production *> queue;
 
   for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
-    queue.push_back(new ProductionContent((*pit)->clone()));
+    queue.push_back((*pit)->clone());
   }
-  queue.push_back(new EndContent());
+  queue.push_back(0); // end-of-productions
 
-  content = queue.front();
-  while ( dynamic_cast<EndContent *>(content) == 0 ){
+  production = queue.front();
+  while ( production != 0 ){
 
     queue.pop_front();
     token_match = false;
@@ -880,18 +886,18 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
     if ( debug )
       clog << "shifting: " << token.first << endl;
 
-    while ( (prod_content = dynamic_cast<ProductionContent *>(content)) != 0 ){
+    while ( production != 0 ){
 
       if ( debug )
-	clog << "taking: " << prod_content->getProduction()->toString() << endl;
+	clog << "taking: " << production->toString() << endl;
 
-      list<GrammarSymbol *> & symbols = prod_content->getProduction()->getSymbols();
+      list<GrammarSymbol *> & symbols = production->getSymbols();
       
       if ( token.second == LexToken::TT_EOF ){
 
 	if ( symbols.empty() ){
 	  
-	  delete content;
+	  delete production;
 	  clearQueue(queue);
 	  return ParseResult(true,0);
 	  
@@ -903,9 +909,9 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	  if ( (terminal = dynamic_cast<Terminal *>(symbol)) != 0 ){
 	    
 	    if ( debug )
-	      clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	      clog << "skipping: " << production->toString() << endl;
 	    
-	    delete content;
+	    delete production;
 
 	  } else {
 	    // Nonterminal
@@ -913,19 +919,18 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
 	    if ( nonterminal->getRule()->isNullable() ){
 
-	      token_match = true;
-	      
+	      token_match = true;	      
 	      if ( debug )
-		clog << "prepending: " << prod_content->getProduction()->toString() << endl;
+		clog << "prepending: " << production->toString() << endl;
 
-	      queue.push_front(content);
+	      queue.push_front(production);
 
 	    } else{
 
 	      if ( debug )
-		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+		clog << "skipping: " << production->toString() << endl;
 
-	      delete content;
+	      delete production;
 
 	    }
 	  }
@@ -935,9 +940,9 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	if ( symbols.empty() ){
 	  
 	  if ( debug )
-	    clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	    clog << "skipping: " << production->toString() << endl;
 	  
-	  delete content;
+	  delete production;
 	  
 	} else {
 	  
@@ -949,42 +954,41 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	    if ( terminal->getType() == Terminal::TT_NUMBER ){
 	      
 	      token_match = true;
-	      queue.push_back(content);
+	      queue.push_back(production);
 
 	      if ( debug )
-		clog << "appending: " << prod_content->getProduction()->toString() << endl;
+		clog << "appending: " << production->toString() << endl;
 	      
 	    } else {
 
 	      if ( debug )
-		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+		clog << "skipping: " << production->toString() << endl;
 	      
-	      delete content;
+	      delete production;
 	      
 	    }
 	    
 	  } else {
 	    
 	    token_match = true;
-
 	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
-	    rule = nonterminal->getRule()->clone(token);
+	    rule = clone(nonterminal->getRule(),token);
 	    
 	    for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
 	      
-	      production = (*pit)->clone();
-	      // all symbols of prod_content must be added to unfolded nonterminal
+	      expanded_production = (*pit)->clone();
+	      // all symbols of production must be added to unfolded nonterminal
 	      for ( list<GrammarSymbol *>::iterator sit = symbols.begin(); sit != symbols.end(); sit++ ){
-		production->getSymbols().push_back(*sit);
+		expanded_production->getSymbols().push_back(*sit);
 	      }
 	      
 	      if ( debug )
-		clog << "prepending: " << production->toString() << endl;
+		clog << "prepending: " << expanded_production->toString() << endl;
 
-	      queue.push_front(new ProductionContent(production));
+	      queue.push_front(expanded_production);
 	    }
 	    
-	    delete content;	  
+	    delete production;	  
 	    
 	  }
 	}
@@ -994,9 +998,9 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
  	if ( symbols.empty() ){
 
 	  if ( debug )
-	    clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+	    clog << "skipping: " << production->toString() << endl;
 	  
-	  delete content;
+	  delete production;
 	  
 	} else {
 	  
@@ -1008,26 +1012,25 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	    if ( terminal->getType() == Terminal::TT_WORD && token.first == terminal->getName() ){
 	      
 	      token_match = true;
-	      queue.push_back(content);
+	      queue.push_back(production);
 
 	      if ( debug )
-		clog << "appending: " << prod_content->getProduction()->toString() << endl;
+		clog << "appending: " << production->toString() << endl;
 
 	    } else {
 
 	      if ( debug )
-		clog << "skipping: " << prod_content->getProduction()->toString() << endl;
+		clog << "skipping: " << production->toString() << endl;
 
-	      delete content;
+	      delete production;
 
 	    }
 
 	  } else {
 
 	    token_match = true;
-
 	    nonterminal = dynamic_cast<Nonterminal *>(symbol);
-	    rule = nonterminal->getRule()->clone(token);
+	    rule = clone(nonterminal->getRule(),token);
 
 	    if ( debug )
 		clog << "prepending: ";
@@ -1035,33 +1038,33 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 
 	    for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
 
-	      production = (*pit)->clone();
-	      // all symbols of prod_content must be added to unfolded nonterminal
+	      expanded_production = (*pit)->clone();
+	      // all symbols of production must be added to unfolded nonterminal
 	      for ( list<GrammarSymbol *>::iterator sit = symbols.begin(); sit != symbols.end(); sit++ ){
-		production->getSymbols().push_back(*sit);
+		expanded_production->getSymbols().push_back(*sit);
 	      }
 	      
 	      if ( debug )
-		clog << production->toString() << ", ";
+		clog << expanded_production->toString() << ", ";
 	      
-	      queue.push_front(new ProductionContent(production));
+	      queue.push_front(expanded_production);
 	    }
 
 	    if ( debug )
 		clog << endl;
 	    
 	    delete rule;
-	    delete content;
+	    delete production;
 	  }
 	}
       }
     
-      content = queue.front();
+      production = queue.front();
       queue.pop_front();
     }
 
     // EndContent
-    if ( dynamic_cast<EndContent *>(content) == 0 ){
+    if ( production != 0 ){
       
       clearQueue(queue);
       throw Exception<LLParser>("content not EndContent as expected!");
@@ -1075,8 +1078,8 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
       
     }
     
-    queue.push_back(content);
-    content = queue.front();
+    queue.push_back(production);
+    production = queue.front();
   }
   
   token = nextToken(tokenizer);
@@ -1091,10 +1094,11 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
   
 }
 
-void LLParser::clearQueue(deque<QueueContent *> & queue){
+void LLParser::clearQueue(deque<Production *> & queue){
 
-  for ( deque<QueueContent *>::iterator it = queue.begin(); it != queue.end(); it++ ){    
-    delete *it;
+  for ( deque<Production *>::iterator it = queue.begin(); it != queue.end(); it++ ){
+    if (*it)
+      delete *it;
   }
 }
 
