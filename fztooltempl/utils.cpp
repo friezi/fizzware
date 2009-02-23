@@ -39,6 +39,14 @@ String::String(char c){
 
 }
 
+String::String(long x){
+
+  ostringstream out;
+  out << x;
+  *this = out.str();
+
+}
+
 bool String::isABlank(char c){
 
   for ( unsigned int i = 0; i < sizeof(blanks); i++ )

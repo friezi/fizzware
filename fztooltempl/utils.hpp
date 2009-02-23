@@ -76,6 +76,8 @@ namespace utils{
     String(const char * s){ (*(std::string *)this) = s; }
 
     String(char c);
+
+    String(long x);
     
     /**
        @brief cuts off leading and trailing blanks;

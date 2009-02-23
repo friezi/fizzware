@@ -602,7 +602,7 @@ Grammar::Token LLParser::nextToken(Tokenizer *tokenizer) throw (Exception<Tokeni
 
     } else {
 
-      return Grammar::Token(String((char)scantoken),LexToken::TT_WORD);
+     return Grammar::Token(String((char)scantoken),LexToken::TT_WORD);
 
     }
 
@@ -668,13 +668,15 @@ Rule * LLParser::clone(Rule *rule, Grammar::Token lookahead) throw (Exception<LL
 	    }      
 	  }
 	    
-	} else
+	} else{
 	  throw Exception<LLParser>(thisMethod + ": wrong token-type!");
+	}
       }
     }
 
-    if ( found == true and grammar->isLL1() )
+    if ( found == true and grammar->isLL1() ){
       break;
+    }
 
   }
   
@@ -718,7 +720,7 @@ LLParser::ParseResult LLParser::parse(Tokenizer *tokenizer, Rule *rule, bool bac
 
   if ( getTraverseMethod() == DFS ){
 
-    return parseDFS(tokenizer,rule,false,0);
+    return parseDFS(tokenizer,rule,backtrack,level);
 
   }else if ( getTraverseMethod() == BFS ){
 
@@ -829,7 +831,7 @@ LLParser::ParseResult LLParser::parseDFS(Tokenizer *tokenizer, Rule *rule, bool 
 	unfolded_rule = clone(rule,lookAhead(tokenizer));
 
 	// recursion: do the production
-	result = parse(tokenizer,unfolded_rule,(backtrack || !alternatives.empty()),level);
+	result = parseDFS(tokenizer,unfolded_rule,(backtrack || !alternatives.empty()),level);
 	delete unfolded_rule;
 
 	shifted_terminals_cnt += result.second;
@@ -1033,7 +1035,7 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	    rule = clone(nonterminal->getRule(),token);
 
 	    if ( debug )
-		clog << "prepending: ";
+	      clog << "prepending: ";
 
 
 	    for ( list<Production *>::iterator pit = rule->getAlternatives().begin(); pit != rule->getAlternatives().end(); pit++ ){
@@ -1051,7 +1053,7 @@ LLParser::ParseResult LLParser::parseBFS(Tokenizer *tokenizer, Rule *rule) throw
 	    }
 
 	    if ( debug )
-		clog << endl;
+	      clog << endl;
 	    
 	    delete rule;
 	    delete production;

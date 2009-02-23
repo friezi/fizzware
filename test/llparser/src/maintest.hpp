@@ -27,6 +27,7 @@ public:
     addTest(&LLTest::test3Grammar,"test3Grammar");
     addTest(&LLTest::test4Grammar,"test4Grammar");
     addTest(&LLTest::test5Grammar,"test5Grammar");
+    addTest(&LLTest::test6Grammar,"test6Grammar");
     //     addTest(&LLTest::nullabilityGrammar,"nullabilityGrammar");
     addTest(&LLTest::grammarInfo,"grammarInfo");
    
@@ -167,12 +168,34 @@ public:
   void test5Grammar() throw (ExceptionBase){
 
     stringstream text;
+    stringstream text2;
     text << "4" << " " << "\"123\"" << " hue";
+    cout << "word: " << text.str() << endl;
+
+    text2 << text.str();
+    
+    LLParser llparser(&grammar,true);
+    LexScanner tokenizer(&text);
+
+    assertTrue(llparser.parse(&tokenizer));
+
+    LexScanner tokenizer2(&text2);
+    llparser.setTraverseMethod(LLParser::DFS);
+    
+    assertTrue(llparser.parse(&tokenizer2));
+
+  }
+
+  void test6Grammar() throw (ExceptionBase){
+
+    stringstream text;
+    text << "x" << " " << " hue";
     cout << "word: " << text.str() << endl;
 
     LexScanner tokenizer(&text);
     
     LLParser llparser(&grammar,true);
+    llparser.setTraverseMethod(LLParser::DFS);
 
     assertTrue(llparser.parse(&tokenizer));
 
