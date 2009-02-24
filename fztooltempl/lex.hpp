@@ -191,13 +191,13 @@ namespace parse{
        @brief sets the start character for a quoted word
        @param c the character to be set
     */
-    void setQuoteStart(const char & c){ quote_start = c; }
+    void setQuoteStart(const char c){ quote_start = c; }
 
     /**
        @brief sets the stop character for a quoted word
        @param c the character to be set
     */
-    void setQuoteStop(const char & c){ quote_stop = c; }
+    void setQuoteStop(const char c){ quote_stop = c; }
 
     /**
        @brief Sets all characters occuring in given word as whitespaces
@@ -211,7 +211,7 @@ namespace parse{
        @brief sets the escape character
        @param c the escape character
     */
-    void setEscape(const char & c){ escape = c; }
+    void setEscape(const char c){ escape = c; }
 
     /**
        @brief all characters in the word will introduce a word
@@ -291,42 +291,42 @@ namespace parse{
        @param c the character to be checked
        @return true if c is quote_start character
     */
-    bool isQuoteStart(const char & c) const { return ( c == quote_start ); }
+    bool isQuoteStart(const char c) const { return ( c == quote_start ); }
 
     /**
        @brief checks whether a character is the quote_stop character
        @param c the character to be checked
        @return true if c is quote_stop character
     */
-    bool isQuoteStop(const char & c) const { return ( c == quote_stop ); }
+    bool isQuoteStop(const char c) const { return ( c == quote_stop ); }
 
     /**
        @brief checks whether a character is the escape character
        @param c the character to be checked
        @return true if c is the escape character
     */
-    bool isEscape(const char & c){ return ( c == escape ); }
+    bool isEscape(const char c){ return ( c == escape ); }
 
     /**
        @brief checks if the character is constituent of a word
        @param c character to be checked
        @return true if c is constituent of a word
     */
-    bool isWordConstituent(const char & c) const { return getFlag(c,FL_WORD_CONSTITUENT); }
+    bool isWordConstituent(const char c) const { return getFlag(c,FL_WORD_CONSTITUENT); }
     
     /**
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
     */
-    bool isWhitespace(const char & c) const { return getFlag(c,FL_WHITESPACE); }
+    bool isWhitespace(const char c) const { return getFlag(c,FL_WHITESPACE); }
 
     /**
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
     */
-    bool isEOL(const char & c) const { return getFlag(c,FL_EOL); }
+    bool isEOL(const char c) const { return getFlag(c,FL_EOL); }
 
     /**
        Only the following characters introduces a word:\n
@@ -336,7 +336,7 @@ namespace parse{
        @return true if c introduces a word
        @todo doku
     */
-    bool isIntroducingWord(const char & c) const { return getFlag(c,FL_INTRODUCING_WORD); }
+    bool isIntroducingWord(const char c) const { return getFlag(c,FL_INTRODUCING_WORD); }
 
     /**
        @brief checks if the character introduces a number
@@ -344,7 +344,7 @@ namespace parse{
        @return true if c introduces a number
        @todo doku
     */
-    bool isIntroducingNumber(const char & c) const { return getFlag(c,FL_INTRODUCING_NUMBER); }
+    bool isIntroducingNumber(const char c) const { return getFlag(c,FL_INTRODUCING_NUMBER); }
 
     /**
        @brief checks if the character is a number constituent
@@ -352,35 +352,35 @@ namespace parse{
        @return true if c is a number constituent
        @todo doku
     */
-    bool isNumberConstituent(const char & c) { return getFlag(c,FL_NUMBER_CONSTITUENT); }
+    bool isNumberConstituent(const char c) { return getFlag(c,FL_NUMBER_CONSTITUENT); }
 
     /**
        @brief checks whether a character is a positive or negative sign
        @param c the character to be checked
        @return true if c is a sign
     */
-    bool isSign(const char & c) const { return getFlag(c,FL_SIGN); }
+    bool isSign(const char c) const { return getFlag(c,FL_SIGN); }
 
     /**
        @brief checks if the character introduces a block comment
        @param c character to be checked
        @return true if c introduces block comment
     */
-    bool isIntroducingBlockComment(const char & c) const { return ( block_comment_start.empty() ? false : c == block_comment_start[0] ); }
+    bool isIntroducingBlockComment(const char c) const { return ( block_comment_start.empty() ? false : c == block_comment_start[0] ); }
 
     /**
        @brief checks if the character introduces a line comment
        @param c character to be checked
        @return true if c introduces line comment
     */
-    bool isIntroducingLineComment(const char & c) const { return ( line_comment.empty() ? false : c == line_comment[0] ); }
+    bool isIntroducingLineComment(const char c) const { return ( line_comment.empty() ? false : c == line_comment[0] ); }
 
     /**
        @brief checks if the character is ordinary
        @param c character to be checked
        @return true if c is ordinary
     */
-    bool isOrdinary(const char & c) const { return ( ascii_table[(unsigned char)c] == 0 ); }
+    bool isOrdinary(const char c) const { return ( ascii_table[(unsigned char)c] == 0 ); }
 
     //@}
 
@@ -389,29 +389,29 @@ namespace parse{
        @param c character to be checked
        @return true if c is linefeed
     */
-    static bool isLF(const char & c){ return ( c == '\n' ); }
+    static bool isLF(const char c){ return ( c == '\n' ); }
 
     /**
        @brief checks if character is a carriage-return
        @param c character to be checked
        @return true if c is carriage-return
     */
-    static bool isCR(const char & c){ return ( c == '\r' ); }
+    static bool isCR(const char c){ return ( c == '\r' ); }
 
     /**
        @brief checks if the given char is the ASCII-0 character
        @param c the character to be checked
        @return true, is c ASCII-0 character
     */
-    static bool isNull(const char & c){ return ( c == '\0' ); }
+    static bool isNull(const char c){ return ( c == '\0' ); }
 
   protected:
 
-    bool getFlag(const char & c, const unsigned char & flag) const { return ( ascii_table[(unsigned char)c] & 1L<<flag ); }
+    bool getFlag(const char c, const unsigned char flag) const { return ( ascii_table[(unsigned char)c] & 1L<<flag ); }
 
-    void setFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] |= 1L<<flag; }
+    void setFlag(const char c, const unsigned char flag){ ascii_table[(unsigned char)c] |= 1L<<flag; }
 
-    void clearFlag(const char & c, const unsigned char & flag){ ascii_table[(unsigned char)c] &= ~(1L<<flag); }
+    void clearFlag(const char c, const unsigned char flag){ ascii_table[(unsigned char)c] &= ~(1L<<flag); }
     
   };
   
@@ -521,14 +521,14 @@ namespace parse{
        @param c the character to be checked
        @return true, is c is a whitespace
     */
-    bool isWhitespace(const char & c) const { return char_classes->isWhitespace(c); }
+    bool isWhitespace(const char c) const { return char_classes->isWhitespace(c); }
 
     /**
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
     */
-    bool isEOL(const char & c) const { return char_classes->isEOL(c); }
+    bool isEOL(const char c) const { return char_classes->isEOL(c); }
 
     /**
        A return is a CR of LF. A CR followed directly by an LF counts as one return.
@@ -840,7 +840,7 @@ namespace parse{
        @return true if c introduces a word
        @todo doku
     */
-    bool isIntroducingWord(const char & c) const { return char_classes.isIntroducingWord(c); }
+    bool isIntroducingWord(const char c) const { return char_classes.isIntroducingWord(c); }
 
     /**
        @brief checks if the character introduces a number
@@ -848,7 +848,7 @@ namespace parse{
        @return true if c introduces a number
        @todo doku
     */
-    bool isIntroducingNumber(const char & c) { return char_classes.isIntroducingNumber(c); }
+    bool isIntroducingNumber(const char c) { return char_classes.isIntroducingNumber(c); }
 
     /**
        @brief checks if the character is a number constituent
@@ -856,14 +856,14 @@ namespace parse{
        @return true if c is a number constituent
        @todo doku
     */
-    bool isNumberConstituent(const char & c) { return char_classes.isNumberConstituent(c); }
+    bool isNumberConstituent(const char c) { return char_classes.isNumberConstituent(c); }
 
     /**
        @brief checks whether a character is a positive or negative sign
        @param c the character to be checked
        @return true if c is a sign
     */
-    bool isSign(const char & c){ return char_classes.isSign(c); }
+    bool isSign(const char c){ return char_classes.isSign(c); }
 
     /**
        @brief returns the status of "use floating points"
@@ -888,63 +888,63 @@ namespace parse{
        @param c character to be checked
        @return true if c introduces a word-quote
     */
-    bool isIntroducingQuote(const char & c) const { return char_classes.isQuoteStart(c); }
+    bool isIntroducingQuote(const char c) const { return char_classes.isQuoteStart(c); }
 
     /**
        @brief checks if the character terminates a word-quote
        @param c character to be checked
        @return true if c terminates a word-quote
     */
-    bool isTerminatingQuote(const char & c) const { return char_classes.isQuoteStop(c); }
+    bool isTerminatingQuote(const char c) const { return char_classes.isQuoteStop(c); }
 
     /**
        @brief checks if the character introduces a block comment
        @param c character to be checked
        @return true if c introduces block comment
     */
-    bool isIntroducingBlockComment(const char & c) const { return char_classes.isIntroducingBlockComment(c); }
+    bool isIntroducingBlockComment(const char c) const { return char_classes.isIntroducingBlockComment(c); }
 
     /**
        @brief checks if the character introduces a line comment
        @param c character to be checked
        @return true if c introduces line comment
     */
-    bool isIntroducingLineComment(const char & c) const { return char_classes.isIntroducingLineComment(c); }
+    bool isIntroducingLineComment(const char c) const { return char_classes.isIntroducingLineComment(c); }
 
     /**
        @brief checks if the character is constituent of a word
        @param c character to be checked
        @return true if c is constituent of a word
     */
-    bool isWordConstituent(const char & c) const { return char_classes.isWordConstituent(c); }
+    bool isWordConstituent(const char c) const { return char_classes.isWordConstituent(c); }
 
     /**
        @brief checks if the given char is a whitespace
        @param c the character to be checked
        @return true, is c is a whitespace
     */
-    bool isWhitespace(const char & c) const { return char_classes.isWhitespace(c); }
+    bool isWhitespace(const char c) const { return char_classes.isWhitespace(c); }
 
     /**
        @brief checks whether a character is the escape character
        @param c the character to be checked
        @return true if c is the escape character
     */
-    bool isEscape(const char & c){ return char_classes.isEscape(c); }
+    bool isEscape(const char c){ return char_classes.isEscape(c); }
     
     /**
        @brief checks if the given char is a return character
        @param c the character to be checked
        @return true, is c is a return character
     */
-    bool isEOL(const char & c) const { return char_classes.isEOL(c); }
+    bool isEOL(const char c) const { return char_classes.isEOL(c); }
 
     /**
        @brief checks if the given char is the ASCII-0 character
        @param c the character to be checked
        @return true, is c ASCII-0 character
     */
-    bool isNull(const char & c) const { return char_classes.isNull(c); }
+    bool isNull(const char c) const { return char_classes.isNull(c); }
 
     //@}
 
