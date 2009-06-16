@@ -21,7 +21,9 @@ CLASS_MODULES = $(TT)/$(LSRC)/mathexpression $(TT)/$(LSRC)/exception $(TT)/$(LSR
 
 IMPORTANT_HEADERS = $(TT)/$(LSRC)/datastructures
 
-ifeq ($(UNIX),true)
+OS = $(shell uname)
+
+ifeq ($(OS),SunOS)
 	READLINEDIR = /usr/gnu/include/readline
 	READLINELIBS = readline curses
 else
@@ -38,7 +40,6 @@ ADDITIONAL_DISTFILES = GPL README BUGFIXES CHANGES
 ### check the field CC ########################################################
 ################################################################################
 ################################################################################
-
 ROOT_DIR ?= ../
 
 SRC = src

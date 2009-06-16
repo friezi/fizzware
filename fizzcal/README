@@ -4,9 +4,6 @@ Brief documentation for compiling the sources (see license-terms below):
 GNU-Make-Utility is needed. Environment-variable EDITOR should contain the preferred editor.
 The binrary/sources of the static library fztooltempl.ar should reside in the directory ../classes.
 
-on UN*X first call:
-export UNIX=true
-
 compile all:
 make
 

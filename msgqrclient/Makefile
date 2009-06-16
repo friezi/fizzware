@@ -22,7 +22,9 @@ CLASS_MODULES = $(TT)/$(LSRC)/exception $(ST)/$(LSRC)/tcpclient $(ST)/$(LSRC)/ms
 
 IMPORTANT_HEADERS =
 
-ifeq ($(UNIX),true)
+OS = $(shell uname)
+
+ifeq ($(OS),SunOS)
 	NETWORKLIBS = socket nsl resolv
 else
 	NETWORKLIBS =
