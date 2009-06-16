@@ -23,47 +23,5 @@ NOANSI = true
 
 ############### check the CC Variable ###########################
 #################################################################
-SRC = ../$(LSRC)
-OBJ = ../build
-MAKEFILES_DIR = ../makefiles
+include templates/makefile_body
 
-I_P = $(INCLUDE_PATHS:%=-I%/$(SRC))
-
-TARGET_MAKEFILE = $(MAKEFILES_DIR)/$(OBJECT)_makefile
-
-DYN_SUFFIX = dyn.o
-
-SOURCE = $(SRC)/$(OBJECT).cpp
-HEADER = $(SRC)/$(OBJECT).hpp
-TARGET = $(OBJ)/$(OBJECT).o
-DYN_TARGET = $(OBJ)/$(OBJECT).$(DYN_SUFFIX)
-
-EDITOR ?= vi
-
-ifeq ($(NOANSI),true)
-     ANSI =
-else
-     ANSI = -ansi
-endif
-
-CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 -c $(I_P)
-
-DO_HEADERS = $(DEPENDS_ON:%=$(SRC)/%.hpp)
-
-.PHONY: all ed clean dynamic
-
-all: $(TARGET)
-
-dynamic: $(DYN_TARGET)
-
-$(TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
-	$(CC) $(SOURCE) -o $(TARGET)
-
-$(DYN_TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
-	$(CC) -fPIC  $(SOURCE) -o $(DYN_TARGET)
-
-ed:
-	$(EDITOR) $(SOURCE) $(HEADER) $(TARGET_MAKEFILE) &
-
-clean:
-	rm $(TARGET)
