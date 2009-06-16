@@ -3,19 +3,25 @@
 
 TARGET = funtest
 
+ROOT_DIR = ../../
+
 MAIN_MODULE = main
 LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../../fztooltempl
+TT = $(ROOT_DIR)/fztooltempl
 
-CLASSLIBRARY_PATH = ../../lib/
+# library-sources
+LSRC = src
+
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib/
 CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_SRCS = $(TT)/$(LSRC)
 CLASS_MODULES_PATHS = $(TT)
 CLASS_MODULES =
 
-IMPORTANT_HEADERS = $(TT)/functions
+IMPORTANT_HEADERS = $(TT)/$(LSRC)/functions
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
@@ -26,12 +32,13 @@ ADDITIONAL_DISTFILES =
 # in case that ansi is not allowed
 # NOANSI = true
 
-ROOT_DIR = ../../
-
 ### check the field CC ########################################################
 ################################################################################
 ################################################################################
 ROOT_DIR ?= ../
+
+SRC = src
+OBJ = build
 
 DIST_DIR = $(ROOT_DIR)/dist
 DT_DIR = $(DIST_DIR)/$(TARGET)
@@ -47,15 +54,16 @@ else
      ANSI = -ansi
 endif
 
-MM_OBJECT = $(MAIN_MODULE:=.o)
-MM_SOURCE = $(MAIN_MODULE:=.cpp)
-MM_HEADER = $(MAIN_MODULE:=.hpp)
-LM_SOURCES = $(LOCAL_MODULES:=.cpp)
-LM_HEADERS = $(LOCAL_MODULES:=.hpp)
-LM_OBJECTS = $(LOCAL_MODULES:=.o)
+MM_OBJECT = $(MAIN_MODULE:%=$(OBJ)/%.o)
+MM_SOURCE = $(MAIN_MODULE:%=$(SRC)/%.cpp)
+MM_HEADER = $(MAIN_MODULE:%=$(SRC)/%.hpp)
+LM_SOURCES = $(LOCAL_MODULES:%=$(SRC)/%.cpp)
+LM_HEADERS = $(LOCAL_MODULES:%=$(SRC)/%.hpp)
+LM_OBJECTS = $(LOCAL_MODULES:%=$(OBJ)/%.o)
 EM_SOURCES = $(EXTERN_MODULES:%=$(EM_PATH)/%.cpp)
 EM_HEADERS = $(EXTERN_MODULES:%=$(EM_PATH)/%.hpp)
 EM_OBJECTS = $(EXTERN_MODULES:%=$(EM_PATH)/%.o)
+CM_SOURCES = $(CLASS_MODULES:%=%.cpp)
 CM_HEADERS = $(CLASS_MODULES:%=%.hpp)
 IM_HEADERS = $(IMPORTANT_HEADERS:%=%.hpp)
 INC_LI_PATHS = $(LIBRARY_INCLUDE_PATHS:%=-I%)
@@ -64,7 +72,7 @@ INC_L_PATHS = $(LIBRARY_PATHS:%=-L%)
 CL_LIB = $(CLASSLIBRARIES:%=-l%)
 INC_CL_PATH = $(CLASSLIBRARY_PATH:%=-L%)
 INC_EM_PATH = $(EM_PATH:%=-I%)
-INC_CM_PATHS = $(CLASS_MODULES_PATHS:%=-I%)
+INC_CM_PATHS = $(CLASS_MODULES_SRCS:%=-I%)
 LIB_NAMES = $(CLASSLIBRARIES:%=$(CLASSLIBRARY_PATH)/lib%.a)
 
 MAINTEST = maintest
@@ -86,7 +94,7 @@ $(TARGET): Makefile $(MM_OBJECT) $(LM_OBJECTS) $(EM_OBJECTS) $(LIB_NAMES)
 #	wc -l $(MM_SOURCE) $(MM_HEADER) $(LM_SOURCES) $(LM_HEADERS) $(EM_SOURCES) $(EM_HEADERS)
 
 # compilieren der Module 
-%.o: %.cpp %.hpp $(IM_HEADERS)
+$(OBJ)/%.o: $(SRC)/%.cpp $(SRC)/%.hpp $(IM_HEADERS)
 	$(CC) $< -c -o $@
 
 # <MAIN_MODULE> haengt von allen Header-files ab
@@ -103,12 +111,12 @@ $(LIB_NAMES):
 
 # alle Module loeschen
 clean:
-	rm -f $(TARGET) *.o $(EM_OBJECTS)
+	rm -f $(TARGET) $(OBJ)/*.o $(EM_OBJECTS)
 
 compile_test: $(MAINTEST)
-$(MAINTEST): $(MAINTEST).o
+$(MAINTEST): $(OBJ)/$(MAINTEST).o
 	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
-	$(CC) -I$(LIBTEST_DIR) $(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
+	$(CC) -I$(LIBTEST_DIR) $(OBJ)/$(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
 
 test: all_libraries compile_test
 	$(MAINTEST)
@@ -118,7 +126,7 @@ run: $(TARGET)
 
 # Editor aufrufen
 ed:	Makefile
-	$(EDITOR) Makefile_head $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EXTERN_MODULES:%=$(EM_PATH)/%.?pp) $(CLASS_MODULES:%=%.?pp) $(IM_HEADERS) $(MAINTEST).?pp &
+	$(EDITOR) Makefile_head $(MM_SOURCE) $(MM_HEADER) $(LM_SOURCES) $(LM_HEADERS) $(EM_SOURCES) $(EM_HEADERS) $(CM_SOURCES) $(CM_HEADERS) $(IM_HEADERS) $(SRC)/$(MAINTEST).?pp &
 
 # lokales Makefile neu generieren bei Aenderung des lokalen Makefile-Kopfes
 Makefile: Makefile_head $(ROOT_DIR)/Makefile_body
@@ -129,6 +137,7 @@ dist:
 	cd ../classes; make -k dist; cd -;
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
 	[[ -d $(DT_DIR) ]] || mkdir $(DT_DIR)
-	cp --target-directory=$(DT_DIR) $(MAIN_MODULE:=.?pp) $(LOCAL_MODULES:=.?pp) $(EM_SOURCES) $(EM_HEADERS) Makefile Makefile_head \
-		$(ADDITIONAL_DISTFILES)
-
+	[[ -d $(DT_DIR)/$(SRC) ]] || mkdir $(DT_DIR)/$(SRC)
+	[[ -d $(DT_DIR)/$(OBJ) ]] || mkdir $(DT_DIR)/$(OBJ)
+	cp --target-directory=$(DT_DIR)/$(SRC) $(MM_SOURCE) $(MM_HEADER) $(LM_SOURCES) $(LM_HEADERS)
+	cp --target-directory=$(DT_DIR) $(EM_SOURCES) $(EM_HEADERS) Makefile Makefile_head $(ADDITIONAL_DISTFILES)

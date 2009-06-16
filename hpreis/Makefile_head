@@ -11,11 +11,15 @@ EM_PATH =
 TT = ../fztooltempl
 ST = ../fzsystools
 
+# library-sources
+LSRC = src
+
 #  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = ../lib
 CLASSLIBRARIES = fztooltempl
-CLASS_MODULES_PATHS = $(TT)/
-CLASS_MODULES = $(TT)/exception $(TT)/cmdlparser
+CLASS_MODULES_SRCS = $(TT)/$(LSRC)
+CLASS_MODULES_PATHS = $(TT)
+CLASS_MODULES = $(TT)/$(LSRC)/exception $(TT)/$(LSRC)/cmdlparser
 
 IMPORTANT_HEADERS =
 

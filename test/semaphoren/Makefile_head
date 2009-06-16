@@ -3,18 +3,25 @@
 
 TARGET = semaphoren
 
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
+
 MAIN_MODULE = main
 LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../../fztooltempl
-ST = ../../fzsystools
+TT = $(ROOT_DIR)/fztooltempl
+ST = $(ROOT_DIR)/fzsystools
 
-CLASSLIBRARY_PATH = ../../lib
+# library-sources
+LSRC = src
+
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl fzsystools
+CLASS_MODULES_SRCS = $(TT)/$(LSRC) $(ST)/$(LSRC) 
 CLASS_MODULES_PATHS = $(TT) $(ST)
-CLASS_MODULES = $(ST)/semaphor $(TT)/exception
+CLASS_MODULES = $(ST)/$(LSRC)/semaphor $(TT)/$(LSRC)/exception
 
 IMPORTANT_HEADERS =
 
@@ -26,8 +33,6 @@ ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 NOANSI = true
-
-ROOT_DIR = ../../
 
 ### check the field CC ########################################################
 ################################################################################

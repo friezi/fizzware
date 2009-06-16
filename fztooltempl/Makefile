@@ -23,6 +23,9 @@ DT_DIR = $(DIST_DIR)/$(LIBRARY)
 
 ################################################################################
 
+SRC = src
+OBJ = build
+OBJECT_MAKEFILES_DIR = makefiles
 DOC = doc
 
 CP = gcp
@@ -31,13 +34,14 @@ EXAMPLES = codeexamples
 
 DOXY = $(DOC)/$(LIBRARY).doxyfile
 
-OBJECTNAMES = $(OBJECTS:%=%.o)
-
-IMPORTANT_HEADERS = $(HEADERS_ONLY:%=%.hpp)
+OBJECTNAMES = $(OBJECTS:%=$(OBJ)/%.o)
+SOURCES = $(OBJECTS:%=$(SRC)/%.cpp)
+HEADERS = $(OBJECTS:%=$(SRC)/%.hpp)
+IMPORTANT_HEADERS = $(HEADERS_ONLY:%=$(SRC)/%.hpp)
 
 DYN_SUFFIX = dylib
 DYN_OBJECT_SUFFIX = dyn.o
-DYN_OBJECTNAMES = $(OBJECTS:%=%.$(DYN_OBJECT_SUFFIX))
+DYN_OBJECTNAMES = $(OBJECTS:%=$(OBJ)/%.$(DYN_OBJECT_SUFFIX))
 
 STATIC_LIB_NAME = $(LIB_DIR)/lib$(LIBRARY).a
 
@@ -52,7 +56,8 @@ DYNAMIC_LIB_NAME = $(DYNLIB_SONAME).$(MINOR_VERSION)
 LINKER_OPTIONS =  -Wl,-dylib -Wl,-dylib_compatibility_version,$(MAJOR_VERSION) -Wl,-dylib_current_version,$(MINOR_VERSION) -lc
 DYN_GCC = g++ -Wall -ansi -pedantic -dynamic -fPIC -o $(LIBRARY)
 
-MAKEFILE_CALLS = $(OBJECTS:%=%_makefile)
+OBJECT_MAKEFILES = $(OBJECTS:%=%_makefile)
+OBJECT_MAKEFILE_PATHS = $(OBJECT_MAKEFILES:%=$(OBJECT_MAKEFILES_DIR)/%)
 
 OBJ_START = true
 OBJ_END = false
@@ -67,6 +72,7 @@ $(DOC):
 	@echo
 	@echo '****************' generating documentation '****************'
 	[[ -d $(DOC) ]] || mkdir $(DOC)
+
 	doxygen -g $(DOC)/doxyfile %1>/dev/zero
 	sed	-e 's/^[ ]*\(PROJECT_NAME\)[ ]*=.*$$/\1 = $(LIBRARY)/g'\
 		-e 's/^[ ]*\(PROJECT_NUMBER\)[ ]*=.*$$/\1 = $(VERSION_NUMBER)/g'\
@@ -76,15 +82,16 @@ $(DOC):
 		-e 's/^[ ]*\(WARN_IF_UNDOCUMENTED\)[ ]*=.*$$/\1 = NO/g'\
 		-e 's/^[ ]*\(INTERNAL_DOCS\)[ ]*=.*$$/\1 = YES/g'\
 		-e 's/^[ ]*\(SORT_MEMBER_DOCS\)[ ]*=.*$$/\1 = NO/g'\
-		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = $(DOC)/g'\
-		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = $(EXAMPLES)/g'\
+		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = \.\.\/$(DOC)/g'\
+		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = \.\.\/$(EXAMPLES)/g'\
 		$(DOC)/doxyfile >$(DOXY)
 
 #		-e 's/^[ ]*\(PREDEFINED\)[ ]*=.*$$/\1 = DOXYGEN_SHOULD_SKIP_THIS/g'\
 
-	doxygen $(DOXY)
-	rm $(DOC)/doxyfile
+	cd $(SRC) && doxygen ../$(DOXY)
 	rm $(DOXY)
+
+	rm $(DOC)/doxyfile
 	@echo '****************' documentation generated '*****************'
 	@echo
 
@@ -94,14 +101,14 @@ cleandoc:
 $(STATIC_LIB_NAME): Makefile $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo
 	@echo '****************' generating the static-library $(STATIC_LIB_NAME) '****************'
-	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk);)
+	$(foreach mk,$(OBJECT_MAKEFILES),$(MAKE) -k -C $(OBJECT_MAKEFILES_DIR) -f $(mk);)
 	$(AR) rs $(STATIC_LIB_NAME) $(OBJECTNAMES)
 	@echo '****************' generation of $(STATIC_LIB_NAME) finished '***********************'
 	@echo
 
-%.o:%.cpp %.hpp
+$(OBJ)/%.o:$(SRC)/%.cpp $(SRC)/%.hpp
 	@echo '***' compiling module $(@) for library  $(LIBRARY) '***'
-	$(MAKE) -f $(@:%.o=%_makefile)
+	$(MAKE) -k -C $(OBJECT_MAKEFILES_DIR) -f $(subst $(OBJ)/,,$(@:%.o=%_makefile))
 	@echo '*********************' finished '******************************'
 
 $(DYN_OBJECTNAMES):
@@ -112,9 +119,9 @@ clean:
 	rm -r -f $(DOC)
 
 ed:
-#	$(foreach mked,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mked) ed;)
+#	$(foreach mked,$(OBJECT_MAKEFILES),$(MAKE) -k -C $(OBJECT_MAKEFILES_DIR) -f $(mked) ed;)
 #	$(EDITOR) Makefile &
-	$(EDITOR) $(OBJECTS:%=%.cpp) $(OBJECTS:%=%.hpp) $(HEADERS_ONLY:%=%.hpp) $(OBJECTS:%=%_makefile) Makefile &
+	$(EDITOR) $(SOURCES) $(HEADERS) $(OBJECT_MAKEFILES_PATHS) $(IMPORTANT_HEADERS) Makefile &
 
 dist:
 	[[ -d $(DIST_DIR) ]] || mkdir $(DIST_DIR)
@@ -129,7 +136,7 @@ dynamic: $(DYNAMIC_LIB_NAME)
 $(DYNAMIC_LIB_NAME): $(DYN_OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo
 	@echo '****************' generating the dynamic-library $(DYNAMIC_LIB_NAME) '****************'
-	$(foreach mk,$(MAKEFILE_CALLS),$(MAKE) -k -f $(mk) dynamic;)
+	$(foreach mk,$(OBJECT_MAKEFILES),$(MAKE) -k -f $(mk) dynamic;)
 	$(DYN_GCC) $(DYN_OBJECTNAMES) $(LINKER_OPTIONS)
 	@echo '****************' generation of $(DYNAMIC_LIB_NAME) finished '***********************'
 	@echo

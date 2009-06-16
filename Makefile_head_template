@@ -15,10 +15,14 @@ TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
 TE = $(ROOT_DIR)/fztestenv
 
+# library-sources
+LSRC = src
+
 #  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = < Name der Klassenbibliotheken (ohne lib und .a) >
-CLASS_MODULES_PATHS = < Pfade fuer die Klassenmodulsourcen >
+CLASS_MODULES_SRCS = < Pfade fuer die sourcen der Klassenmodule >
+CLASS_MODULES_PATHS = < Pfade fuer die Basisverzeichnisse der Klassenmoduln >
 CLASS_MODULES = < Module der Bibliothek, bei deren Aenderung auch das TARGET-file neu compiliert werden muss >
 
 IMPORTANT_HEADERS = <wichtige Header-files angeben (ohne .hpp), die nicht automatisch geladen werden, z.B. fuer Templates>

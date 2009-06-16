@@ -8,32 +8,63 @@
 
 OBJECT = tcpclient
 
-TT = ../fztooltempl
+ROOT_DIR = ../../
+LSRC = src
 
-DEPENDS_ON = $(TT)/exception socket
+TT = $(ROOT_DIR)/fztooltempl
+ST = $(ROOT_DIR)/fzsystools
 
-INCLUDE_PATHS = ./ $(TT)
+DEPENDS_ON = $(TT)/$(LSRC)/exception $(ST)/$(LSRC)/socket
+
+INCLUDE_PATHS = $(ST)/$(LSRC) $(TT)/$(LSRC)
+
+# in case that ansi is not allowed
+# NOANSI = true
 
 ############### check the CC Variable ###########################
 #################################################################
 
+SRC = ../$(LSRC)
+OBJ = ../build
+MAKEFILES_DIR = ../makefiles
+
+I_P = $(INCLUDE_PATHS:%=-I%/$(SRC))
+
+TARGET_MAKEFILE = $(MAKEFILES_DIR)/$(OBJECT)_makefile
+
+DYN_SUFFIX = dyn.o
+
+SOURCE = $(SRC)/$(OBJECT).cpp
+HEADER = $(SRC)/$(OBJECT).hpp
+TARGET = $(OBJ)/$(OBJECT).o
+DYN_TARGET = $(OBJ)/$(OBJECT).$(DYN_SUFFIX)
+
 EDITOR ?= vi
 
-I_P = $(INCLUDE_PATHS:%=-I%)
+ifeq ($(NOANSI),true)
+     ANSI =
+else
+     ANSI = -ansi
+endif
 
-CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c $(I_P)
+CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 -c $(I_P)
 
-DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
+DO_HEADERS = $(DEPENDS_ON:%=$(SRC)/%.hpp)
 
-.PHONY: all ed clean
+.PHONY: all ed clean dynamic
 
-all: $(OBJECT).o
+all: $(TARGET)
 
-$(OBJECT).o: $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
-	$(CC) $(OBJECT).cpp
+dynamic: $(DYN_TARGET)
+
+$(TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
+	$(CC) $(SOURCE) -o $(TARGET)
+
+$(DYN_TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
+	$(CC) -fPIC  $(SOURCE) -o $(DYN_TARGET)
 
 ed:
-	$(EDITOR) $(OBJECT).cpp $(OBJECT).hpp $(OBJECT)_makefile &
+	$(EDITOR) $(SOURCE) $(HEADER) $(TARGET_MAKEFILE) &
 
 clean:
-	rm $(OBJECT).o
+	rm $(TARGET)

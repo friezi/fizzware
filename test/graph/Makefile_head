@@ -3,19 +3,26 @@
 
 TARGET = graph
 
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
+
 MAIN_MODULE = main
 LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../../fztooltempl
+TT = $(ROOT_DIR)/fztooltempl
 
-CLASSLIBRARY_PATH = ../../lib
+# library-sources
+LSRC = src
+
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl
+CLASS_MODULES_SRCS = $(TT)/$(LSRC)
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception $(TT)/graph
+CLASS_MODULES = $(TT)/$(LSRC)/exception $(TT)/$(LSRC)/graph
 
-IMPORTANT_HEADERS = $(TT)/datastructures
+IMPORTANT_HEADERS = $(TT)/$(LSRC)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
@@ -25,8 +32,6 @@ ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 # NOANSI = true
-
-ROOT_DIR = ../../
 
 ### check the field CC ########################################################
 ################################################################################

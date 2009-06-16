@@ -13,30 +13,40 @@ DEPENDS_ON = exception datastructures utils
 ############### check the CC Variable ###########################
 #################################################################
 
-INCLUDE_PATH = ./
+SRC = ../src
+OBJ = ../build
+MAKEFILES_DIR = ../makefiles
 
-EDITOR ?= vi
-
-CC = g++ -Wall -Wconversion -ansi -pedantic -c -I$(INCLUDE_PATH)
+INCLUDE_PATH = $(SRC)
+TARGET_MAKEFILE = $(MAKEFILES_DIR)/$(OBJECT)_makefile
 
 DYN_SUFFIX = dyn.o
 
-DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
+SOURCE = $(SRC)/$(OBJECT).cpp
+HEADER = $(SRC)/$(OBJECT).hpp
+TARGET = $(OBJ)/$(OBJECT).o
+DYN_TARGET = $(OBJ)/$(OBJECT).$(DYN_SUFFIX)
 
-.PHONY: all ed clean
+EDITOR ?= vi
 
-all: $(OBJECT).o
+CC = g++ -Wall -Wconversion -ansi -pedantic -O3 -c -I$(INCLUDE_PATH)
 
-dynamic: $(OBJECT).$(DYN_SUFFIX)
+DO_HEADERS = $(DEPENDS_ON:%=$(SRC)/%.hpp)
 
-$(OBJECT).o: $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
-	$(CC) $(OBJECT).cpp
+.PHONY: all ed clean dynamic
 
-$(OBJECT).$(DYN_SUFFIX): $(OBJECT).cpp $(OBJECT).hpp $(DO_HEADERS)
-	$(CC) -fPIC $(OBJECT).cpp -o $(OBJECT).$(DYN_SUFFIX)
+all: $(TARGET)
+
+dynamic: $(DYN_TARGET)
+
+$(TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
+	$(CC) $(SOURCE) -o $(TARGET)
+
+$(DYN_TARGET): $(SOURCE) $(HEADER) $(DO_HEADERS)
+	$(CC) -fPIC  $(SOURCE) -o $(DYN_TARGET)
 
 ed:
-	$(EDITOR) $(OBJECT).cpp $(OBJECT).hpp $(OBJECT)_makefile &
+	$(EDITOR) $(SOURCE) $(HEADER) $(TARGET_MAKEFILE) &
 
 clean:
-	rm $(OBJECT).o
+	rm $(TARGET)
