@@ -33,7 +33,7 @@
 
 #include <iostream>
 #include <string>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 /**
    @class PrimList

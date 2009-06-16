@@ -2,7 +2,7 @@
 #define MAIN_HPP
 
 #include <stdlib.h>
-#include <exception.hpp>
-#include <primlist.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/primlist.hpp>
 
 #endif

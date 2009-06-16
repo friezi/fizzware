@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include <exception.hpp>
-#include <primlist.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/primlist.hpp>
 
 #endif

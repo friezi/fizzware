@@ -33,7 +33,7 @@
 #define BASHAUTOMAT_HPP
 
 #include <iostream>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 #define STATE_NORMAL 0
 #define STATE_END 1

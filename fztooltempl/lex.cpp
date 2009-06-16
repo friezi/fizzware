@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include <lex.hpp>
+#include <fztooltempl/lex.hpp>
 
 using namespace std;
 using namespace exc;

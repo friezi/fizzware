@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include <test.hpp>
+#include <fztooltempl/test.hpp>
 
 using namespace test;
 using namespace std;

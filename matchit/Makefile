@@ -10,14 +10,10 @@ EM_PATH =
 
 TT = ../fztooltempl
 
-# library-sources
-LSRC = src
-
 CLASSLIBRARY_PATH = ../lib
 CLASSLIBRARIES = fztooltempl
-CLASS_MODULES_SRCS = $(TT)/$(LSRC)
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/$(LSRC)/exception
+CLASS_MODULES = $(TT)/exception
 
 IMPORTANT_HEADERS =
 

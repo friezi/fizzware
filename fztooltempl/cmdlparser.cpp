@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include <cmdlparser.hpp>
+#include <fztooltempl/cmdlparser.hpp>
 
 using namespace std;
 using namespace exc;

@@ -37,7 +37,7 @@
 #include <list>
 #include <stack>
 #include <utility>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 /**
    @example graph_example

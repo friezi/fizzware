@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include <mathexpression.hpp>
+#include <fztooltempl/mathexpression.hpp>
 
 #define SUM "Sum"
 #define PROD "Prod"

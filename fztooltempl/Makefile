@@ -23,7 +23,6 @@ DT_DIR = $(DIST_DIR)/$(LIBRARY)
 
 ################################################################################
 
-SRC = src
 OBJ = build
 OBJECT_MAKEFILES_DIR = makefiles
 DOC = doc
@@ -35,9 +34,9 @@ EXAMPLES = codeexamples
 DOXY = $(DOC)/$(LIBRARY).doxyfile
 
 OBJECTNAMES = $(OBJECTS:%=$(OBJ)/%.o)
-SOURCES = $(OBJECTS:%=$(SRC)/%.cpp)
-HEADERS = $(OBJECTS:%=$(SRC)/%.hpp)
-IMPORTANT_HEADERS = $(HEADERS_ONLY:%=$(SRC)/%.hpp)
+SOURCES = $(OBJECTS:%=%.cpp)
+HEADERS = $(OBJECTS:%=%.hpp)
+IMPORTANT_HEADERS = $(HEADERS_ONLY:%=%.hpp)
 
 DYN_SUFFIX = dylib
 DYN_OBJECT_SUFFIX = dyn.o
@@ -82,13 +81,13 @@ $(DOC):
 		-e 's/^[ ]*\(WARN_IF_UNDOCUMENTED\)[ ]*=.*$$/\1 = NO/g'\
 		-e 's/^[ ]*\(INTERNAL_DOCS\)[ ]*=.*$$/\1 = YES/g'\
 		-e 's/^[ ]*\(SORT_MEMBER_DOCS\)[ ]*=.*$$/\1 = NO/g'\
-		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = \.\.\/$(DOC)/g'\
-		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = \.\.\/$(EXAMPLES)/g'\
+		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = $(DOC)/g'\
+		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = $(EXAMPLES)/g'\
 		$(DOC)/doxyfile >$(DOXY)
 
 #		-e 's/^[ ]*\(PREDEFINED\)[ ]*=.*$$/\1 = DOXYGEN_SHOULD_SKIP_THIS/g'\
 
-	cd $(SRC) && doxygen ../$(DOXY)
+	doxygen $(DOXY)
 	rm $(DOXY)
 
 	rm $(DOC)/doxyfile
@@ -106,7 +105,7 @@ $(STATIC_LIB_NAME): Makefile $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo '****************' generation of $(STATIC_LIB_NAME) finished '***********************'
 	@echo
 
-$(OBJ)/%.o:$(SRC)/%.cpp $(SRC)/%.hpp
+$(OBJ)/%.o:%.cpp %.hpp
 	@echo '***' compiling module $(@) for library  $(LIBRARY) '***'
 	$(MAKE) -k -C $(OBJECT_MAKEFILES_DIR) -f $(subst $(OBJ)/,,$(@:%.o=%_makefile))
 	@echo '*********************' finished '******************************'

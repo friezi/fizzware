@@ -28,7 +28,7 @@
    @author Friedemann Zintel
 */
 
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 using namespace std;
 using namespace exc;

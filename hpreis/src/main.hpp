@@ -5,8 +5,8 @@
 #include <set>
 #include <stdlib.h>
 #include <time.h>
-#include <exception.hpp>
-#include <cmdlparser.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/cmdlparser.hpp>
 
 class Error{};
 

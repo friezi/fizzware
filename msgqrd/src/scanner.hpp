@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <ctype.h>
 #include <netinet/in.h>
-#include <exception.hpp>
-#include <datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/datastructures.hpp>
 
 #define EOS_TOKEN 0
 #define BAD_TOKEN 1

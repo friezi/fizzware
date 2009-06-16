@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include "utils.hpp"
+#include <fztooltempl/utils.hpp>
 
 using namespace std;
 using namespace exc;

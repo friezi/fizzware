@@ -8,11 +8,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <exception.hpp>
-#include <signalhandler.hpp>
-#include <stdmessageserver.hpp>
-#include <datastructures.hpp>
-#include <messagequeue.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fzsystools/signalhandler.hpp>
+#include <fzsystools/stdmessageserver.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fzsystools/messagequeue.hpp>
 #include "msgqueuelist.hpp"
 #include "scanner.hpp"
 

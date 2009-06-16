@@ -34,7 +34,7 @@
 #include <string>
 #include <set>
 #include <sstream>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 #define UTILS_LU_BIT 5
 

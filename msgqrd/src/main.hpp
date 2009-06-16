@@ -5,8 +5,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <libgen.h>
-#include <exception.hpp>
-#include <cmdlparser.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/cmdlparser.hpp>
 #include "msgqueueregdaemon.hpp"
 
 #define L_OPT (1L<<0)

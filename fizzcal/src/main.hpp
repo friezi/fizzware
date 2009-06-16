@@ -35,10 +35,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <string>
-#include <exception.hpp>
-#include <mathexpression.hpp>
-#include <cmdlparser.hpp>
-#include <datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/mathexpression.hpp>
+#include <fztooltempl/cmdlparser.hpp>
+#include <fztooltempl/datastructures.hpp>
 #include "linescanner.hpp"
 #include "filescanner.hpp"
 

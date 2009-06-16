@@ -38,8 +38,8 @@
 #include <map>
 #include <utility>
 #include <algorithm>
-#include <exception.hpp>
-#include <utils.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/utils.hpp>
 
 /**
    @brief for testing code and classes

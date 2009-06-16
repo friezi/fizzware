@@ -11,14 +11,10 @@ EM_PATH =
 TT = ../fztooltempl
 ST = ../fzsystools
 
-# library-sources
-LSRC = src
-
 CLASSLIBRARY_PATH = ../lib
 CLASSLIBRARIES = fztooltempl fzsystools
-CLASS_MODULES_SRCS = $(TT)/$(LSRC) $(ST)/$(LSRC)
 CLASS_MODULES_PATHS = $(TT) $(ST)
-CLASS_MODULES = $(TT)/$(LSRC)/exception $(ST)/$(LSRC)/tcpclient $(ST)/$(LSRC)/msgqueueregclient $(ST)/$(LSRC)/socket
+CLASS_MODULES = $(TT)/exception $(ST)/tcpclient $(ST)/msgqueueregclient $(ST)/socket
 
 IMPORTANT_HEADERS =
 

@@ -1,9 +1,9 @@
 
-SRC = ../src
+SRC = ../
 OBJ = ../build
 MAKEFILES_DIR = ../makefiles
 
-INCLUDE_PATH = $(SRC)
+INCLUDE_PATH = ../../
 TARGET_MAKEFILE = $(MAKEFILES_DIR)/$(OBJECT)_makefile
 
 DYN_SUFFIX = dyn.o

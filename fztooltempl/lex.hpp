@@ -33,8 +33,8 @@
 #include <istream>
 #include <sstream>
 #include <stdlib.h>
-#include <exception.hpp>
-#include <utils.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/utils.hpp>
 
 #define LEX_AT_SIZE 256
 

@@ -42,8 +42,8 @@
 #include <set>
 #include <functional>
 #include <complex>
-#include <exception.hpp>
-#include <datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/datastructures.hpp>
 
 /**
    @brief for evaluating easy-to-write mathematical expressions

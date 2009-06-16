@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <primlist.hpp>
+#include <fztooltempl/primlist.hpp>
 #include <stdio.h>
 
 using namespace exc;

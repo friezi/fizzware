@@ -1,2 +1,2 @@
-#include <msgqueueregclient.hpp>
-#include <messagequeue.hpp>
+#include <fzsystools/msgqueueregclient.hpp>
+#include <fzsystools/messagequeue.hpp>

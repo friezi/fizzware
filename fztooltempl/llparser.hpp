@@ -8,11 +8,11 @@
 #include <set>
 #include <map>
 #include <algorithm>
-#include <exception.hpp>
-#include <utils.hpp>
-#include <datastructures.hpp>
-#include <lex.hpp>
-#include <graph.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/utils.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fztooltempl/lex.hpp>
+#include <fztooltempl/graph.hpp>
 
 namespace parse{
 

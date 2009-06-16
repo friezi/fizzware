@@ -37,10 +37,10 @@
 #include <sstream>
 #include <fstream>
 #include <functional>
-#include <datastructures.hpp>
-#include <exception.hpp>
-#include <cmdlparser.hpp>
-#include <utils.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/cmdlparser.hpp>
+#include <fztooltempl/utils.hpp>
 
 namespace utils{
 

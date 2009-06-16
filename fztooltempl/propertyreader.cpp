@@ -28,7 +28,7 @@
    @author Friedemann Zintel
 */
 
-#include <propertyreader.hpp>
+#include <fztooltempl/propertyreader.hpp>
 
 using namespace std;
 using namespace exc;
