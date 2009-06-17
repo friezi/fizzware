@@ -29,7 +29,7 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <iostream>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 class Process;
 class CreateErr;
