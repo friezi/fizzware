@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <tcpserver.hpp>
+#include <fzsystools/tcpserver.hpp>
 
 using namespace std;
 using namespace sys;

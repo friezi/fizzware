@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 #include <set>
-#include <functions.hpp>
-#include <exception.hpp>
+#include <fztooltempl/functions.hpp>
+#include <fztooltempl/exception.hpp>
 #include <typeinfo>
 
 class Test{

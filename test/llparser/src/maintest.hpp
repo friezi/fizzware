@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <list>
-#include <exception.hpp>
-#include <llparser.hpp>
-#include <lex.hpp>
-#include <test.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/llparser.hpp>
+#include <fztooltempl/lex.hpp>
+#include <fztooltempl/test.hpp>
 
 using namespace test;
 using namespace exc;

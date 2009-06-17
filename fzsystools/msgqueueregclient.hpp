@@ -33,9 +33,9 @@
 
 #include <stdio.h>
 #include <errno.h>
-#include <exception.hpp>
-#include <tcpclient.hpp>
-#include <datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fzsystools/tcpclient.hpp>
+#include <fztooltempl/datastructures.hpp>
 
 #define EOS_TOKEN 0
 #define BAD_TOKEN 1

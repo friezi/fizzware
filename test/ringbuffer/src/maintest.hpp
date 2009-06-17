@@ -2,9 +2,9 @@
 #define MAINTEST_HPP
 
 #include <iostream>
-#include <test.hpp>
-#include <datastructures.hpp>
-#include <exception.hpp>
+#include <fztooltempl/test.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fztooltempl/exception.hpp>
 
 class RingbufferTest : public test::TestCase<RingbufferTest>{
 

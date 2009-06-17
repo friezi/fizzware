@@ -23,7 +23,7 @@
   friezi@cs.tu-berlin.de
 */
 
-#include <socket.hpp>
+#include <fzsystools/socket.hpp>
 
 using namespace std;
 using namespace sys;

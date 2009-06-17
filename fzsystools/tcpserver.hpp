@@ -33,8 +33,8 @@
 
 #include <string.h>
 #include <string>
-#include <socket.hpp>
-#include <exception.hpp>
+#include <fzsystools/socket.hpp>
+#include <fztooltempl/exception.hpp>
 
 namespace sys{
 

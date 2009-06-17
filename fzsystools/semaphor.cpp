@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <semaphor.hpp>
+#include <fzsystools/semaphor.hpp>
 
 // need extra.qualifier for doxygen (why ever)
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

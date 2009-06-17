@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <signalhandler.hpp>
+#include <fzsystools/signalhandler.hpp>
 
 using namespace sys;
 using namespace exc;

@@ -49,7 +49,7 @@
 #include <unistd.h>
 #include <netdb.h>
 #include <errno.h>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 #ifndef AF_LOCAL
 #define AF_LOCAL AF_UNIX

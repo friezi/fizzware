@@ -1,9 +1,9 @@
 
-SRC = ../$(LSRC)
+SRC = ../
 OBJ = ../build
 MAKEFILES_DIR = ../makefiles
 
-I_P = $(INCLUDE_PATHS:%=-I%/$(SRC))
+I_P = -I$(ROOT_DIR)
 
 TARGET_MAKEFILE = $(MAKEFILES_DIR)/$(OBJECT)_makefile
 
@@ -24,7 +24,7 @@ endif
 
 CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 -c $(I_P)
 
-DO_HEADERS = $(DEPENDS_ON:%=$(SRC)/%.hpp)
+DO_HEADERS = $(DEPENDS_ON:%=%.hpp)
 
 .PHONY: all ed clean dynamic
 

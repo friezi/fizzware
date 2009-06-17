@@ -39,10 +39,10 @@
 #include <unistd.h>
 #include <signal.h>
 #include <syslog.h>
-#include <tcpserver.hpp>
-#include <signalhandler.hpp>
-#include <messagequeue.hpp>
-#include <functions.hpp>
+#include <fzsystools/tcpserver.hpp>
+#include <fzsystools/signalhandler.hpp>
+#include <fzsystools/messagequeue.hpp>
+#include <fztooltempl/functions.hpp>
 
 #define STDMSGS_STOP 1L<<0
 #define STDMSGS_QUIT 1L<<1

@@ -2,8 +2,8 @@
 #define __MAIN_HPP__
 
 #include <vector>
-#include <test.hpp>
-#include <exception.hpp>
+#include <fztooltempl/test.hpp>
+#include <fztooltempl/exception.hpp>
 
 extern test::TestUnit mainTestUnit;
 

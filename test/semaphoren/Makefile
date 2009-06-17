@@ -14,14 +14,10 @@ EM_PATH =
 TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
 
-# library-sources
-LSRC = src
-
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl fzsystools
-CLASS_MODULES_SRCS = $(TT)/$(LSRC) $(ST)/$(LSRC) 
 CLASS_MODULES_PATHS = $(TT) $(ST)
-CLASS_MODULES = $(ST)/$(LSRC)/semaphor $(TT)/$(LSRC)/exception
+CLASS_MODULES = $(ST)/semaphor $(TT)/exception
 
 IMPORTANT_HEADERS =
 
@@ -74,13 +70,12 @@ INC_L_PATHS = $(LIBRARY_PATHS:%=-L%)
 CL_LIB = $(CLASSLIBRARIES:%=-l%)
 INC_CL_PATH = $(CLASSLIBRARY_PATH:%=-L%)
 INC_EM_PATH = $(EM_PATH:%=-I%)
-INC_CM_PATHS = $(CLASS_MODULES_SRCS:%=-I%)
 LIB_NAMES = $(CLASSLIBRARIES:%=$(CLASSLIBRARY_PATH)/lib%.a)
 
 MAINTEST = maintest
 
 #bei systemspezifischer Programmierung "-ansi" ausschalten
-CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 $(INC_EM_PATH) $(INC_CM_PATHS) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
+CC = g++ -Wall -Wconversion $(ANSI) -pedantic -O3 -I$(ROOT_DIR) $(INC_EM_PATH) $(INC_LI_PATHS) $(INC_L_PATHS) $(INC_CL_PATH)
 
 .PHONY: all clean all_libraries ed dist test compile_test run
 

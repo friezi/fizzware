@@ -1,4 +1,4 @@
-#include <cmdlparser.hpp>
-#include <propertyreader.hpp>
-#include <exception.hpp>
+#include <fztooltempl/cmdlparser.hpp>
+#include <fztooltempl/propertyreader.hpp>
+#include <fztooltempl/exception.hpp>
 

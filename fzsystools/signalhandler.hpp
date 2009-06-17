@@ -31,9 +31,9 @@
 #ifndef _FZST_SIGNALHANDLER_HPP_
 #define _FZST_SIGNALHANDLER_HPP_
 
-#include <exception.hpp>
 #include <string>
 #include <signal.h>
+#include <fztooltempl/exception.hpp>
 
 // in BSD-Un*x the following operations are implemented as Macros, so
 // an access-operator would confuse the compiler

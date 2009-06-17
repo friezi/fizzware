@@ -41,7 +41,7 @@
 #include <sys/msg.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 /**
    the defines from <sys/stat.h>

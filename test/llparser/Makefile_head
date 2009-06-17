@@ -14,17 +14,13 @@ EM_PATH =
 TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
 
-# library-sources
-LSRC = src
-
 #  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl
-CLASS_MODULES_SRCS = $(TT)/$(LSRC)
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/$(LSRC)/exception $(TT)/$(LSRC)/utils $(TT)/$(LSRC)/datastructures $(TT)/$(LSRC)/llparser
+CLASS_MODULES = $(TT)/exception $(TT)/utils $(TT)/datastructures $(TT)/llparser
 
-IMPORTANT_HEADERS = $(TT)/$(LSRC)/graph
+IMPORTANT_HEADERS = $(TT)/graph
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

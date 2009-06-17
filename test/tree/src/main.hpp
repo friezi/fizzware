@@ -3,7 +3,7 @@
 
 #include <string>
 #include <functional>
-#include <datastructures.hpp>
-#include <primlist.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fztooltempl/primlist.hpp>
 
 #endif

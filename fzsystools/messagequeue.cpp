@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <messagequeue.hpp>
+#include <fzsystools/messagequeue.hpp>
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 

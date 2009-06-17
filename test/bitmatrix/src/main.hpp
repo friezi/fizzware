@@ -3,7 +3,7 @@
 #define MAIN_HPP
 
 #include <iostream>
-#include <datastructures.hpp>
-#include <exception.hpp>
+#include <fztooltempl/datastructures.hpp>
+#include <fztooltempl/exception.hpp>
 
 #endif

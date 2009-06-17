@@ -1,11 +1,11 @@
 #ifndef MAIN_HPP
 #define MAIN_HPP
 
-#include <exception.hpp>
 #include <list>
 #include <map>
 #include <algorithm>
-#include <graph.hpp>
-#include <datastructures.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/graph.hpp>
+#include <fztooltempl/datastructures.hpp>
 
 #endif

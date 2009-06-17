@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <tcpclient.hpp>
+#include <fzsystools/tcpclient.hpp>
 
 using namespace sys;
 using namespace exc;

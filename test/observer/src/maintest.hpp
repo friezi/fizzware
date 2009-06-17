@@ -2,8 +2,8 @@
 #define MAINTEST_HPP
 
 #include <iostream>
-#include <utils.hpp>
-#include <test.hpp>
+#include <fztooltempl/utils.hpp>
+#include <fztooltempl/test.hpp>
 
 using namespace std;
 using namespace exc;

@@ -39,7 +39,7 @@
 #include <sys/sem.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <exception.hpp>
+#include <fztooltempl/exception.hpp>
 
 // doxygen has problems with multiple defnitions of the same namespace
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

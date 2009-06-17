@@ -3,9 +3,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <exception.hpp>
-#include <lex.hpp>
-#include <cmdlparser.hpp>
+#include <fztooltempl/exception.hpp>
+#include <fztooltempl/lex.hpp>
+#include <fztooltempl/cmdlparser.hpp>
 
 std::string setupCmdlParser(cmdl::CmdlParser & cmdl);
 

@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <msgqueueregclient.hpp>
+#include <fzsystools/msgqueueregclient.hpp>
 
 using namespace std;
 using namespace sys;

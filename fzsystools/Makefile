@@ -12,13 +12,12 @@ VERSION_NUMBER = $(MAJOR_VERSION).$(MINOR_VERSION)
 OBJECTS = messagequeue socket tcpserver tcpclient msgqueueregclient semaphor signalhandler stdmessageserver
 
 ROOT_DIR = ../
-LSRC = src
 
 #old: 
 
 TT = $(ROOT_DIR)/fztooltempl
 
-HEADERS_ONLY = $(TT)/$(LSRC)/exception $(TT)/$(LSRC)/datastructures
+HEADERS_ONLY = $(TT)/exception $(TT)/datastructures
 
 EDITOR ?= vi
 
@@ -28,7 +27,6 @@ DT_DIR = $(DIST_DIR)/$(LIBRARY)
 
 ################################################################################
 
-SRC = $(LSRC)
 OBJ = build
 OBJECT_MAKEFILES_DIR = makefiles
 
@@ -39,8 +37,8 @@ EXAMPLES = codeexamples
 DOXY = $(DOC)/$(LIBRARY).doxyfile
 
 OBJECTNAMES = $(OBJECTS:%=$(OBJ)/%.o)
-SOURCES = $(OBJECTS:%=$(SRC)/%.cpp)
-HEADERS = $(OBJECTS:%=$(SRC)/%.hpp)
+SOURCES = $(OBJECTS:%=%.cpp)
+HEADERS = $(OBJECTS:%=%.hpp)
 IMPORTANT_HEADERS = $(HEADERS_ONLY:%=%.hpp)
 
 LIB_NAME = $(LIB_DIR)/lib$(LIBRARY).a
@@ -71,13 +69,13 @@ $(DOC):
 		-e 's/^[ ]*\(WARN_IF_UNDOCUMENTED\)[ ]*=.*$$/\1 = NO/g'\
 		-e 's/^[ ]*\(INTERNAL_DOCS\)[ ]*=.*$$/\1 = YES/g'\
 		-e 's/^[ ]*\(SORT_MEMBER_DOCS\)[ ]*=.*$$/\1 = NO/g'\
-		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = \.\.\/$(DOC)/g'\
-		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = \.\.\/$(EXAMPLES)/g'\
+		-e 's/^[ ]*\(OUTPUT_DIRECTORY\)[ ]*=.*$$/\1 = $(DOC)/g'\
+		-e 's/^[ ]*\(EXAMPLE_PATH\)[ ]*=.*$$/\1 = $(EXAMPLES)/g'\
 		$(DOC)/doxyfile >$(DOXY)
 
 #		-e 's/^[ ]*\(PREDEFINED\)[ ]*=.*$$/\1 = DOXYGEN_SHOULD_SKIP_THIS/g'\
 
-	cd $(SRC) && doxygen ../$(DOXY)
+	doxygen $(DOXY)
 	rm $(DOXY)
 
 	rm $(DOC)/doxyfile
@@ -95,7 +93,7 @@ $(LIB_NAME): $(OBJECTNAMES) $(IMPORTANT_HEADERS)
 	@echo '****************' generation of $(LIB_NAME) finished '***********************'
 	@echo
 
-$(OBJ)/%.o:$(SRC)/%.cpp $(SRC)/%.hpp
+$(OBJ)/%.o:%.cpp %.hpp
 	@echo '***' compiling module $(@) for static-library  $(LIB_NAME) '***'
 	$(MAKE) -k -C $(OBJECT_MAKEFILES_DIR) -f $(subst $(OBJ)/,,$(@:%.o=%_makefile))
 	@echo '*********************' finished '******************************'

@@ -14,9 +14,7 @@ LSRC = src
 TT = $(ROOT_DIR)/fztooltempl
 ST = $(ROOT_DIR)/fzsystools
 
-DEPENDS_ON = $(TT)/$(LSRC)/exception $(TT)/$(LSRC)/datastructures $(ST)/$(LSRC)/tcpclient
-
-INCLUDE_PATHS = $(ST)/$(LSRC) $(TT)/$(LSRC)
+DEPENDS_ON = $(TT)/exception $(TT)/datastructures $(ST)/tcpclient
 
 # in case that ansi is not allowed
 # NOANSI = true

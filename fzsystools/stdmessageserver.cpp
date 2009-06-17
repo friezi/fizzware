@@ -23,7 +23,7 @@
     friezi@cs.tu-berlin.de
 */
 
-#include <stdmessageserver.hpp>
+#include <fzsystools/stdmessageserver.hpp>
 
 using namespace std;
 using namespace sys;

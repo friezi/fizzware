@@ -2,7 +2,7 @@
 #define MAINTEST_HPP
 
 #include <iostream>
-#include <test.hpp>
+#include <fztooltempl/test.hpp>
 
 class MyTestCase1 : public test::TestCase<MyTestCase1>{
 
