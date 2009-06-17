@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZST_STDMESSAGESERVER_HPP_
-#define _FZST_STDMESSAGESERVER_HPP_
+#ifndef FZSYSTOOLS_STDMESSAGESERVER_HPP
+#define FZSYSTOOLS_STDMESSAGESERVER_HPP
 
 #include <string>
 #include <fstream>

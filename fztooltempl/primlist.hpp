@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_PRIMLIST_HPP_
-#define _FZTT_PRIMLIST_HPP_
+#ifndef FZTOOLTEMPL_PRIMLIST_HPP
+#define FZTOOLTEMPL_PRIMLIST_HPP
 
 #include <iostream>
 #include <string>

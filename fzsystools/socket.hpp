@@ -35,8 +35,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZST_SOCKET_HPP_
-#define _FZST_SOCKET_HPP_
+#ifndef FZSYSTOOLS_SOCKET_HPP
+#define FZSYSTOOLS_SOCKET_HPP
 
 #include <string.h>
 #include <string>

@@ -29,8 +29,8 @@
    @todo doku!!!
 */
 
-#ifndef _FZTT_TEST_HPP_
-#define _FZTT_TEST_HPP_
+#ifndef FZTOOLTEMPL_TEST_HPP
+#define FZTOOLTEMPL_TEST_HPP
 
 #include <iostream>
 #include <sstream>

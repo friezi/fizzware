@@ -29,8 +29,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_UTILS_HPP_
-#define _FZTT_UTILS_HPP_
+#ifndef FZTOOLTEMPL_UTILS_HPP
+#define FZTOOLTEMPL_UTILS_HPP
 #include <string>
 #include <set>
 #include <sstream>

@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_DATASTRUCTURES_HPP_
-#define _FZTT_DATASTRUCTURES_HPP_
+#ifndef FZTOOLTEMPL_DATASTRUCTURES_HPP
+#define FZTOOLTEMPL_DATASTRUCTURES_HPP
 
 #include <utility>
 #include <map>

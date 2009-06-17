@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_MATHEXPRESSION_HPP_
-#define _FZTT_MATHEXPRESSION_HPP_
+#ifndef FZTOOLTEMPL_MATHEXPRESSION_HPP
+#define FZTOOLTEMPL_MATHEXPRESSION_HPP
 
 #include <iostream>
 #include <iomanip>

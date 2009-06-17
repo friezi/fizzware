@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_GRAPH_HPP_
-#define _FZTT_GRAPH_HPP_
+#ifndef FZTOOLTEMPL_GRAPH_HPP
+#define FZTOOLTEMPL_GRAPH_HPP
 
 #include <map>
 #include <set>

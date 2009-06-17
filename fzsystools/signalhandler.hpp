@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZST_SIGNALHANDLER_HPP_
-#define _FZST_SIGNALHANDLER_HPP_
+#ifndef FZSYSTOOLS_SIGNALHANDLER_HPP
+#define FZSYSTOOLS_SIGNALHANDLER_HPP
 
 #include <string>
 #include <signal.h>

@@ -1,5 +1,5 @@
-#ifndef __TESTMAIN_HPP__
-#define __TESTMAIN_HPP__
+#ifndef FZTESTENV_TESTMAIN_HPP
+#define FZTESTENV_TESTMAIN_HPP
 
 #include <vector>
 #include <utility>

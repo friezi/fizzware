@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZST_MESSAGEQUEUE_HPP_
-#define _FZST_MESSAGEQUEUE_HPP_
+#ifndef FZSYSTOOLS_MESSAGEQUEUE_HPP
+#define FZSYSTOOLS_MESSAGEQUEUE_HPP
 
 #include <stdio.h>
 #include <string.h>

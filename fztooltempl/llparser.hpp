@@ -1,5 +1,5 @@
-#ifndef __FZTT_LLPARSER_HPP__
-#define __FZTT_LLPARSER_HPP__
+#ifndef FZTOOLTEMPL_LLPARSER_HPP
+#define FZTOOLTEMPL_LLPARSER_HPP
 
 #include <iostream>
 #include <sstream>

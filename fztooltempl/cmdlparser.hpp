@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_CMDLPARSER_HPP_
-#define _FZTT_CMDLPARSER_HPP_
+#ifndef FZTOOLTEMPL_CMDLPARSER_HPP
+#define FZTOOLTEMPL_CMDLPARSER_HPP
 
 #include <string>
 #include <sstream>

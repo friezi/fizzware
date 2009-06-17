@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZST_TCPSERVER_HPP_
-#define _FZST_TCPSERVER_HPP_
+#ifndef FZSYSTOOLS_TCPSERVER_HPP
+#define FZSYSTOOLS_TCPSERVER_HPP
 
 #include <string.h>
 #include <string>

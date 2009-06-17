@@ -28,8 +28,8 @@
    @author Friedemann Zintel
 */
 
-#ifndef _FZTT_FUNCTIONS_HPP_
-#define _FZTT_FUNCTIONS_HPP_
+#ifndef FZTOOLTEMPL_FUNCTIONS_HPP
+#define FZTOOLTEMPL_FUNCTIONS_HPP
 
 #include <vector>
 
