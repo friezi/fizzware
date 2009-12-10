@@ -12,7 +12,7 @@ TT = ../fztooltempl
 
 DEPENDS_ON = $(TT)/exception $(TT)/test
 
-INCLUDE_PATHS = ./ $(TT)
+INCLUDE_PATHS = ./ ../
 
 ############### check the CC Variable ###########################
 #################################################################

@@ -3,8 +3,8 @@
 
 #include <vector>
 #include <utility>
-#include <test.hpp>
-#include <exception.hpp>
+#include <fztooltempl/test.hpp>
+#include <fztooltempl/exception.hpp>
 
 typedef std::vector< std::pair<unsigned long, test::TestCaseBase *> > FailedTestsVector;
 
