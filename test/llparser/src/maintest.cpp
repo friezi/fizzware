@@ -1,9 +1,11 @@
 #include "maintest.hpp"
 
-TestUnit mainTestUnit;
+TestUnit * createMainTestUnit(){
 
-void initMainTestUnit(){
+  TestUnit *mainTestUnit = new TestUnit();
 
-  mainTestUnit.addTestCase(new LLTest(),"LLTest");
+  mainTestUnit->addTestCase(new LLTest(),"LLTest");
+
+  return mainTestUnit;
 
 }

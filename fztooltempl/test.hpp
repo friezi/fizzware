@@ -221,26 +221,30 @@ namespace test{
       T * self;
       std::set<std::string>::iterator eit;
 
-      if ( (self = dynamic_cast<T *>(this)) == 0 )
+      if ( (self = dynamic_cast<T *>(this)) == 0 ){
 	throw exc::Exception< TestCase<T> >("ERROR: wrong class-instantiation! ");
-      
+      }      
+
       typename Tests::iterator it;
       for ( it = tests.begin(); it != tests.end(); it++ ){
 	
 	if ( selection != 0 ){
 	  // execute only selected tests
-	  if ( (eit = std::find(selection->begin(),selection->end(),(*it).second)) == selection->end() )
+	  if ( (eit = std::find(selection->begin(),selection->end(),(*it).second)) == selection->end() ){
 	    continue;
+	  }
 	}
 	
 	try{
 	  
 	  setCurrentTestName((*it).second);
 	  
-	  if ( show_tests == true )
+	  if ( show_tests == true ){
 	    std::cout << "  " << (*it).second << "()" << std::endl;
+	  }
 
 	  (self->*((*it).first))();
+
 	  success();
 	  
 	} catch (exc::ExceptionBase &e){
