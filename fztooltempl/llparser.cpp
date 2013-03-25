@@ -35,7 +35,7 @@ std::string Production::toString(){
   } else {
     
     for ( list<GrammarSymbol *>::iterator it = symbols.begin(); it != symbols.end(); it++ )
-      out << (*it)->getName() << " ";
+      out << (*it)->toString() << " ";
     
   }
 
@@ -191,11 +191,9 @@ Grammar & Grammar::rule(string nonterminal){
       rules.insert(rule);
       nt->setRule(rule);
       
-    }
-    
+    }   
   }
  
-
   lastAccessedRule = nt->getRule(); 
   lastAccessedProduction = 0;
   lastGrammarSymbol = "";
@@ -267,9 +265,14 @@ Grammar & Grammar::operator,(char type) throw(Exception<Grammar>){
 
       defmode = 0;
     
-    } else
-      throw Exception<Grammar>(String("wrong PE-type \"") + type + "\" for element \"" + lastGrammarSymbol + "\""); 
-
+    } else{
+      
+      ostringstream out;
+      (out << "wrong PE-type \"").put(type) << "\" for element \"" << lastGrammarSymbol << "\"";
+      throw Exception<Grammar>(out.str());
+      
+    }
+    
   } else if ( defmode == 'T' ){
 
     if ( lastTerminal == 0 )
@@ -599,13 +602,15 @@ Grammar::Token LLParser::nextToken(Tokenizer *tokenizer) throw (Exception<Tokeni
     } else if ( type == LexToken::TT_EOF || type == LexToken::TT_EOL ){
 
       return Grammar::Token("",type);
-
+      
     } else {
-
-     return Grammar::Token(String((char)scantoken),LexToken::TT_WORD);
-
+      
+      ostringstream out;
+      out.put((char)scantoken);
+      return Grammar::Token(out.str(),LexToken::TT_WORD);
+      
     }
-
+    
   } else {
 
     Grammar::Token token = *tStackPointer;

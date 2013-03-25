@@ -587,7 +587,7 @@ int main(int argc, char **argv){
 
     cout << "componentgraph:" << endl;
 
-    // ... or we can consider it as SCCGraph (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
+    // ... or we can consider it as SCCStructure (as derived from Graphable<SomeClass>); note the difference in the return-values of the iterators.
     // This version is type-safe.
     for ( node_iterator<SCCGraphComponent<unsigned int *> *> scc_it = scc.beginNodes(); scc_it != scc.endNodes(); scc_it++ ){
       

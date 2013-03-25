@@ -976,10 +976,15 @@ void
 ds::RingBuffer<T>::
 assertInBounds(size_t index) throw (exc::Exception<RingBuffer>){
 
-  utils::String thisMethod = "assertInBounds()";
+  std::string thisMethod = "assertInBounds()";
 
-  if ( index >= elements || index < 0 )
-    throw exc::Exception<RingBuffer>(thisMethod + ": object " + this + ": index " + index + " out of bounds!");
+  if ( index >= elements || index < 0 ){
+
+    std::ostringstream stream;
+    stream << thisMethod << ": object " << this << ": index " << index << " out of bounds!";
+    throw exc::Exception<RingBuffer>(stream.str());
+
+  }
 
 }
 
@@ -1036,7 +1041,7 @@ void
 ds::RingBuffer<T>::
 enqueue(T element) throw (exc::Exception<RingBuffer>){
 
-  utils::String thisMethod = "enqueue()";
+  std::string thisMethod = "enqueue()";
 
   if ( elements < size )
     elements++;
@@ -1061,7 +1066,7 @@ T &
 ds::RingBuffer<T>::
 dequeue() throw (exc::Exception<RingBuffer>){
 
-  utils::String thisMethod = "dequeue()";
+  std::string thisMethod = "dequeue()";
 
   if ( isEmpty() == true )
     throw exc::Exception<RingBuffer>(thisMethod + ": buffer is empty!");

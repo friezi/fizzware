@@ -38,7 +38,7 @@ const unsigned char LexCharClasses::FL_INTRODUCING_NUMBER = 4;
 const unsigned char LexCharClasses::FL_NUMBER_CONSTITUENT = 5;
 const unsigned char LexCharClasses::FL_SIGN = 6;
 
-const String LexCharClasses::eol_chars = "\n\r";
+const string LexCharClasses::eol_chars = "\n\r";
 
 const int LexToken::TT_EOL = 10;
 const int LexToken::TT_NONE = -1;
@@ -93,7 +93,7 @@ void LexCharClasses::setCommonSyntax(){
 
 void LexCharClasses::setWordConstituents(const string constituents){
 
-  for ( String::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
+  for ( string::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
     setFlag(*it,FL_WORD_CONSTITUENT);
 
 }
@@ -107,7 +107,7 @@ void LexCharClasses::setWordConstituents(const char from, const char to){
 
 void LexCharClasses::setIntroducingWord(const string intro){
 
-  for ( String::const_iterator it = intro.begin(); it != intro.end(); it++ )
+  for ( string::const_iterator it = intro.begin(); it != intro.end(); it++ )
     setFlag(*it,FL_INTRODUCING_WORD);
 
 }
@@ -121,35 +121,35 @@ void LexCharClasses::setIntroducingWord(const char from, const char to){
 
 void LexCharClasses::setIntroducingNumber(const string intro){
 
-  for ( String::const_iterator it = intro.begin(); it != intro.end(); it++ )
+  for ( string::const_iterator it = intro.begin(); it != intro.end(); it++ )
     setFlag(*it,FL_INTRODUCING_NUMBER);
 
 }
 
 void LexCharClasses::setNumberConstituents(const string constituents){
 
-  for ( String::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
+  for ( string::const_iterator it = constituents.begin(); it != constituents.end(); it++ )
     setFlag(*it,FL_NUMBER_CONSTITUENT);
 
 }
 
 void LexCharClasses::setWhitespaces(const string whitespaces){
 
-  for ( String::const_iterator it = whitespaces.begin(); it != whitespaces.end(); it++ )
+  for ( string::const_iterator it = whitespaces.begin(); it != whitespaces.end(); it++ )
     setFlag(*it,FL_WHITESPACE);
 
 }
 
 void LexCharClasses::setSigns(const string signs){
 
-  for ( String::const_iterator it = signs.begin(); it != signs.end(); it++ )
+  for ( string::const_iterator it = signs.begin(); it != signs.end(); it++ )
     setFlag(*it,FL_SIGN);
 
 }
 
 void LexCharClasses::setOrdinaries(const string ordinaries){
 
-  for ( String::const_iterator it = ordinaries.begin(); it != ordinaries.end(); it++ )
+  for ( string::const_iterator it = ordinaries.begin(); it != ordinaries.end(); it++ )
     ascii_table[(unsigned char)(*it)] = 0;
 
 }
@@ -163,7 +163,7 @@ void LexCharClasses::setOrdinaries(const char from, const char to){
 
 void LexCharClasses::setEOLs(const string eols){
 
-  for ( String::const_iterator it = eols.begin(); it != eols.end(); it++ )
+  for ( string::const_iterator it = eols.begin(); it != eols.end(); it++ )
     setFlag(*it,FL_EOL);
 
 }
@@ -181,9 +181,9 @@ LexScreener::LexScreener(std::istream * input, LexCharClasses * char_classes) th
 
 }
 
-bool LexScreener::skipIfMatchingWord(char c, const String & word){
+bool LexScreener::skipIfMatchingWord(char c, const string & word){
 
-  String::const_iterator it = word.begin();
+  string::const_iterator it = word.begin();
 
   if ( it == word.end() )
     return false;
@@ -427,7 +427,7 @@ void LexScanner::putback(){
 
 int LexScanner::nextToken() throw (Exception<LexScanner>){
 
-  String thisMethod = "nextToken()";
+  string thisMethod = "nextToken()";
 
   // specifies if a character that matches treated
   // as a normal character although it matches the beginning of a comment
@@ -843,57 +843,57 @@ int LexScanner::nextLine() throw (Exception<LexScanner>){
   
 }
 
-String LexToken::typeToString() const {
+string LexToken::typeToString() const {
   
   switch ( type ){
 
   case TT_EOF:
 
-    return String("EOF");
+    return string("EOF");
     break;
 
   case TT_EOL:
 
-    return String("EOL");
+    return string("EOL");
     break;
 
   case TT_NUMBER:
     
-    return String("NUMBER");
+    return string("NUMBER");
     break;
 
   case TT_WORD:
     
-    return String("WORD");
+    return string("WORD");
     break;
 
   case TT_NUMBERWORD:
     
-    return String("NUMBERWORD");
+    return string("NUMBERWORD");
     break;
 
   case TT_NONE:
 
-    return String("NONE");
+    return string("NONE");
     break;
 
   case TT_WHITE:
 
-    return String("WHITE");
+    return string("WHITE");
     break;
 
   default:
 
-    return String("ORDINARY");
+    return string("ORDINARY");
     break;
 
   }
 
 }
 
-String LexToken::toString() const {
+string LexToken::toString() const {
 
-  String thisMethod = "tokenToString()";
+  string thisMethod = "tokenToString()";
 
   ostringstream tsstream;
 

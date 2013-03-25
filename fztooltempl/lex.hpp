@@ -59,7 +59,7 @@ namespace parse{
 
     virtual int getTokenType() = 0;
 
-    virtual utils::String getSVal() = 0;
+    virtual std::string getSVal() = 0;
 
     virtual long double getNVal() = 0;
 
@@ -83,27 +83,27 @@ namespace parse{
     static const unsigned char FL_NUMBER_CONSTITUENT;
     static const unsigned char FL_SIGN;
 
-    static const utils::String eol_chars;
+    static const std::string eol_chars;
       
     /**
        @brief the start string of a block-comment
     */
-    utils::String block_comment_start;
+    std::string block_comment_start;
 
     /**
        @brief the stop string of a block-comment
     **/
-    utils::String block_comment_stop;
+    std::string block_comment_stop;
 
     /**
        @brief the string of a line-comment
     **/
-    utils::String line_comment;
+    std::string line_comment;
 
     /**
        @brief the whitespace characters
     */
-    utils::String white_spaces;
+    std::string white_spaces;
 
     /**
        @brief the start character for string-quoting
@@ -272,19 +272,19 @@ namespace parse{
        @brief gets the introducing-word for a block comment
        @return the word which defines the block comment introducing-word
     */
-    utils::String getBlockCommentStart() { return block_comment_start; }
+    std::string getBlockCommentStart() { return block_comment_start; }
 
     /**
        @brief gets the terminating-word for a block comment
        @return the word which defines the block comment terminating-word
     */
-    utils::String getBlockCommentStop() { return block_comment_stop; }
+    std::string getBlockCommentStop() { return block_comment_stop; }
 
     /**
        @brief gives the word for a line comment
        @return the word which defines the line-comment word
     */
-    utils::String getLineComment() { return line_comment; }
+    std::string getLineComment() { return line_comment; }
 
     /**
        @brief checks whether a character is the quote_start character
@@ -541,7 +541,7 @@ namespace parse{
 
   protected:
 
-    bool skipIfMatchingWord(char c, const utils::String & word);
+    bool skipIfMatchingWord(char c, const std::string & word);
     bool skipIfIntroducingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->getBlockCommentStart()); }
     bool skipIfTerminatingBlockComment(char c){ return skipIfMatchingWord(c,char_classes->getBlockCommentStop()); }
     bool skipIfIntroducingLineComment(char c){ return skipIfMatchingWord(c,char_classes->getLineComment()); }
@@ -558,7 +558,7 @@ namespace parse{
        @brief will store the characters of the string if type == TT_WORD
        @since V2.1
     */
-    utils::String sval;
+    std::string sval;
 
     /**
        @brief will strore the numeric value if type == TT_NUMBER
@@ -607,13 +607,13 @@ namespace parse{
        @brief returns a string representation of the current token
        @return the string representation
     */
-    utils::String toString() const;
+    std::string toString() const;
 
     /**
        @brief returns a string representation of the current token type
        @return the string representation
     */
-    utils::String typeToString() const;
+    std::string typeToString() const;
 
   };
 
@@ -701,7 +701,7 @@ namespace parse{
 
     int getTokenType(){ return token.type; }
 
-    utils::String getSVal(){ return token.sval; }
+    std::string getSVal(){ return token.sval; }
 
     long double getNVal(){ return token.nval; }
 
@@ -783,13 +783,13 @@ namespace parse{
        @brief returns a string representation of the current token
        @return the string representation
     */
-    utils::String tokenToString() const { return token.toString(); }
+    std::string tokenToString() const { return token.toString(); }
 
     /**
        @brief returns a string representation of the current token type
        @return the string representation
     */
-    utils::String typeToString() const { return token.typeToString(); }
+    std::string typeToString() const { return token.typeToString(); }
 
     //@}
 

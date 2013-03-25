@@ -247,7 +247,7 @@ namespace parse{
     
     virtual ~GrammarSymbol(){}
 
-    virtual std::string getName() = 0;
+    virtual std::string toString() = 0;
     
   };
 
@@ -284,6 +284,8 @@ namespace parse{
 
     std::string getName(){ return name; }
 
+    std::string toString(){ return getName(); }
+
     char getType(){ return type; }
     
     char getMode(){ return mode; }
@@ -312,6 +314,8 @@ namespace parse{
     Nonterminal(std::string name) : name(name), rule(0){}
 
     std::string getName(){ return name; }
+
+    std::string toString(){  return getName(); }
 
     void setRule(Rule *rule){ this->rule = rule; }
 

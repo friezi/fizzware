@@ -52,52 +52,40 @@ namespace utils{
      @brief An extended string-class
      @since v1.96
   */
-  class String : public std::string{
+  class String{
+
+  private:
+
+    String(){}
+
+    String(const String &s){}
 
   protected:
 
     static char blanks[2];
 
   public:
-
-    /**
-       @brief the standard-constructor
-    */
-    String(){}
-
-    /**
-       @brief The cast-constructor
-    */
-    String(const std::string & s){ (*(std::string *)this) = s; }
-
-    /**
-       @brief The cast-constructor
-    */
-    String(const char * s){ (*(std::string *)this) = s; }
-
-    String(char c);
-
-    String(long x);
     
     /**
        @brief cuts off leading and trailing blanks;
-       @return an truncated string
+       @param s string to be trimmed
+       @return a trimmed string
     */
-    String trunc() const ;
+    static std::string trim(const std::string &s);
 
     /**
        @brief converts all latin-characters to lower-case
        @return the converted string
        @since V2.1
-   */
-    String toLower() const ;
+    */
+    static std::string toLower(const std::string &s);
 
     /**
        @brief converts all latin-characters to upper-case
        @return the converted string
        @since V2.1
-   */
-    String toUpper() const ;
+    */
+    static std::string toUpper(const std::string &s);
 
     /**
        @brief checks if a char is a lower latin-character
@@ -118,14 +106,14 @@ namespace utils{
        @return char converted to lower case
        @since V2.1
     */
-    static char latinToLower(char c){ return ( isUpper(c) ? c | 1L<<UTILS_LU_BIT : c ); }
+    static char latinToLower(char c){ return ( isUpper(c) ? c | 1<<UTILS_LU_BIT : c ); }
 
     /**
        @brief converts a latin-char to upper case
        @return char converted to upper case
        @since V2.1
     */
-    static char latinToUpper(char c){ return ( isLower(c) ? c & ~(1L<<UTILS_LU_BIT) : c ); }
+    static char latinToUpper(char c){ return ( isLower(c) ? c & ~(1<<UTILS_LU_BIT) : c ); }
 
     /**
        @brief tests if a char is a blank-character
@@ -139,87 +127,7 @@ namespace utils{
        @param c the character ro be checked
        @return true if c is conatined in String
     */
-    bool containsChar(const char & c) const;
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const bool & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const unsigned char & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const char & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const unsigned int & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const int & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const unsigned long & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const long & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const double & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const std::string & value);
-
-    /**
-       @brief concatenates value with the string
-       @param value the value to concatenate
-       @return a reference to the string
-       @since V2.1
-    */
-    String & operator+(const char *value);
+    static bool containsChar(const std::string &s, const char c);
 
   };
 
@@ -491,10 +399,87 @@ namespace utils{
  
     void observableDeleted(Observable<T> * const notifier){
       notifiers.erase(notifier);
-    }
-   
+    } 
   };
-  
+
+  /**
+     The interface converter provides a function to convert an object of type S in an object of type T.
+     @brief to convert type S in type T
+     @since v2.1
+  **/
+  template <typename S, typename T> class Converter{
+    
+  public:
+
+    virtual ~Converter(){};
+
+    /**
+       @brief converts object of S in object of T
+       @param source object of type S
+       @return an object of type T
+    **/
+    virtual T operator()(const S &source) const = 0;
+
+  };
+
+  /**
+     @brief converts an object to itself
+   **/
+  template <typename T> class IdentityConverter : Converter<T,T>{
+
+    /**
+       @brief identity-conversion: the input-argument will be returned
+       @param source source-object
+       return the source.object
+    **/
+    virtual T operator()(const T &source) const{
+      return source;
+    }
+
+  };
+
+  /**
+     @brief create a csv with separator
+     @param collection elements to be separated
+     @param separator self-explanating
+     @param representer to represent each T-object as string
+     @return result-string
+   **/
+  template<typename T, template<typename> class C>
+  std::string separate(const C<T> &collection, const std::string &separator, const Converter<T,std::string> &representer){
+
+    typename C<T>::iterator iter = collection.begin();
+    typename C<T>::iterator end = collection.end();
+    
+    std::ostringstream out;
+
+    while ( iter != end ){
+      
+      out << representer(*iter++);
+      if ( iter != end ){
+	out << separator;
+      }
+    }
+
+    return out.str();
+  }
+ 
+  /**
+     @brief standard-identityconverter for the string-class.
+   **/
+  const IdentityConverter<std::string> string_identity_converter;
+
+  /**
+     @brief create a csv from strings with separator
+     @param collection strings to be separated
+     @param separator self-explanating
+     @return result-string
+   **/
+  template<template<typename> class C>
+  std::string separate(const C<std::string> &collection, const std::string &separator){
+    return separate(collection,separator,string_identity_converter);
+  }
+ 
 }
 
 #endif

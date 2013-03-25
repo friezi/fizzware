@@ -401,7 +401,7 @@ void PropertyReader::Parser::readCurrentSection(char &c) throw (SubException<EOF
 
   }
 
-  currentSection = ((String)section.str()).trunc();
+  currentSection = String::trim(section.str());
 
   if ( currentSection == "" )
     currentSection = NO_SECTION;

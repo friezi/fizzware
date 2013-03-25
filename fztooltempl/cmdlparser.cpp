@@ -46,9 +46,10 @@ ShortSynonyms & ShortSynonyms::operator<<(char synonym){
 
 Alias & Alias::operator<<(string option) throw(Exception<CmdlParser>, ExceptionBase){
   
-  if ( cmdlparser->allowedoptions.find(option) == cmdlparser->allowedoptions.end() )
+  if ( cmdlparser->allowedoptions.find(option) == cmdlparser->allowedoptions.end() ){
     throw Exception<CmdlParser>("alias definition: option \"" + option + "\" not defined!");
-  
+  }
+
   this->insert(option);
   return *this;
 
@@ -56,9 +57,12 @@ Alias & Alias::operator<<(string option) throw(Exception<CmdlParser>, ExceptionB
 
 ShortAlias & ShortAlias::operator<<(char shortoption) throw(Exception<CmdlParser>, ExceptionBase){
   
-  if ( cmdlparser->allowedshortoptions.find(shortoption) == cmdlparser->allowedshortoptions.end() )
-    throw Exception<CmdlParser>(String("shortalias definition: shortoption \"") + shortoption + "\" not defined!");
-  
+  if ( cmdlparser->allowedshortoptions.find(shortoption) == cmdlparser->allowedshortoptions.end() ){
+    std::ostringstream msg;
+    (msg << "shortalias definition: shortoption \"").put(shortoption) << "\" not defined!";
+    throw Exception<CmdlParser>(msg.str());
+  }  
+
   this->insert(shortoption);
   return *this;
   

@@ -31,22 +31,6 @@ using namespace utils;
 
 char String::blanks[] = {' ','\t'};
 
-String::String(char c){
-
-  ostringstream out;
-  out << c;
-  *this = out.str();
-
-}
-
-String::String(long x){
-
-  ostringstream out;
-  out << x;
-  *this = out.str();
-
-}
-
 bool String::isABlank(char c){
 
   for ( unsigned int i = 0; i < sizeof(blanks); i++ )
@@ -57,174 +41,68 @@ bool String::isABlank(char c){
 
 }
     
-String String::trunc() const {
+string String::trim(const string &s){
 
   size_t leftend, rightstart;
-  String truncstring = *this;
+  string trimstring = s;
 
-  for ( leftend = 0; leftend < this->length(); leftend++ )
-    if ( !isABlank(truncstring[leftend]) )
+  for ( leftend = 0; leftend < s.length(); leftend++ ){
+    if ( !isABlank(trimstring[leftend]) ){
       break;
+    }
+  }
 
-  truncstring.erase(0,leftend);
+  trimstring.erase(0,leftend);
 
-  if ( truncstring.empty() == false ){
+  if ( !trimstring.empty() ){
     
-    for ( rightstart = truncstring.length()-1; rightstart >= 0; rightstart-- )
-      if ( !isABlank(truncstring[rightstart]) )
+    for ( rightstart = trimstring.length()-1; rightstart >= 0; rightstart-- ){
+      if ( !isABlank(trimstring[rightstart]) ){
 	break;
+      }
+    }
     
     rightstart++;
     
-    truncstring.erase(rightstart,truncstring.length());
+    trimstring.erase(rightstart,trimstring.length());
     
   }
   
-  return truncstring;
+  return trimstring;
   
 }
 
-String String::toLower() const {
+string String::toLower(const std::string &s){
 
-  String lower = *this;
+  string lower = s;
   size_t pos = 0;
 
-  for ( String::const_iterator it = this->begin(); it != this->end(); it++, pos++ )
+  for ( string::const_iterator it = s.begin(); it != s.end(); it++, pos++ )
     lower[pos] = latinToLower(*it);
   
   return lower;
 
 }
 
-String String::toUpper() const {
+string String::toUpper(const std::string &s){
 
-  String upper = *this;
+  string upper = s;
   size_t pos = 0;
 
-  for ( String::const_iterator it = this->begin(); it != this->end(); it++, pos++ )
+  for ( string::const_iterator it = s.begin(); it != s.end(); it++, pos++ )
     upper[pos] = latinToUpper(*it);
   
   return upper;
   
 }
 
-bool String::containsChar(const char & c) const {
+bool String::containsChar(const std::string &s, const char c){
 
-  if ( this->find(c) != string::npos )
+  if ( s.find(c) != string::npos )
     return true;
 
   return false;
 
 }
 
-String & String::operator+(const bool & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const unsigned char & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const char & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const unsigned int & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const int & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const unsigned long & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const long & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const double & value){
-
-  ostringstream stream;
-
-  stream << value;
-
-  (*this) += stream.str();
-
-  return *this;
-
-}
-
-String & String::operator+(const string & value){
-
-  (*this) += value;
-
-  return *this;
-
-}
-
-String & String::operator+(const char *value){
-
-  (*this) += value;
-
-  return *this;
-
-}
+const IdentityConverter<std::string> string_identity_converter = IdentityConverter<std::string>();
