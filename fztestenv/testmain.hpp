@@ -50,7 +50,29 @@
 #include <fztooltempl/test.hpp>
 #include <fztooltempl/exception.hpp>
 
-typedef std::vector< std::pair<unsigned long, test::TestCaseBase *> > FailedTests;
+class TestCaseResult{
+
+private:
+
+  test::TestCaseBase *testcase;
+  unsigned long success;
+  unsigned long failure;
+
+public:
+
+  TestCaseResult() : testcase(0), success(0), failure(0){}
+
+  void setTestCase(test::TestCaseBase *testcase){ this->testcase = testcase; }
+  void incSuccess(){ success++; }
+  void incFailure(){ failure++; }
+
+  test::TestCaseBase * getTestCase(){ return testcase; }
+  unsigned long getSuccess(){ return success; }
+  unsigned long getFailure(){ return failure; }
+
+};
+
+typedef std::vector<TestCaseResult> TestResults;
 
 /**
    @brief creates a TestUnit and sets up all testcases whithin the TestUnit

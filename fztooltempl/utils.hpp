@@ -405,6 +405,8 @@ namespace utils{
   /**
      The interface converter provides a function to convert an object of type S in an object of type T.
      @brief to convert type S in type T
+     @tparam S source type
+     @tparam T target type
      @since v2.1
   **/
   template <typename S, typename T> class Converter{
@@ -424,8 +426,9 @@ namespace utils{
 
   /**
      @brief converts an object to itself
-   **/
-  template <typename T> class IdentityConverter : Converter<T,T>{
+     @tparam T type
+  **/
+  template <typename T> class IdentityConverter : public Converter<T,T>{
 
     /**
        @brief identity-conversion: the input-argument will be returned
@@ -437,47 +440,49 @@ namespace utils{
     }
 
   };
+ 
+  /**
+     @brief standard-identityconverter for the string-class.
+  **/
+  static const IdentityConverter<std::string> string_identity_converter;
 
   /**
      @brief create a csv with separator
-     @param collection elements to be separated
-     @param separator self-explanating
+     @tparam InputIt type of input-iterator which iterates over T-elements
+     @tparam T type of elements
+     @param begin begin-iterator for strings to be separated
+     @param end end-iterator for strings to be separated
+     @param separator strings will be separated by this string
      @param representer to represent each T-object as string
      @return result-string
-   **/
-  template<typename T, template<typename> class C>
-  std::string separate(const C<T> &collection, const std::string &separator, const Converter<T,std::string> &representer){
+  **/
+  template<typename InputIt, typename T>
+  std::string separate(InputIt begin, InputIt end, const std::string &separator, const Converter<T,std::string> &representer){
 
-    typename C<T>::iterator iter = collection.begin();
-    typename C<T>::iterator end = collection.end();
-    
     std::ostringstream out;
 
-    while ( iter != end ){
+    while ( begin != end ){
       
-      out << representer(*iter++);
-      if ( iter != end ){
+      out << representer(*begin++);
+      if ( begin != end ){
 	out << separator;
       }
     }
 
     return out.str();
   }
- 
-  /**
-     @brief standard-identityconverter for the string-class.
-   **/
-  const IdentityConverter<std::string> string_identity_converter;
 
   /**
      @brief create a csv from strings with separator
-     @param collection strings to be separated
-     @param separator self-explanating
+     @tparam InputIt type of input-iterator which iterates over T-elements
+     @param begin begin-iterator for strings to be separated
+     @param end end-iterator for strings to be separated
+     @param separator strings will be separated by this string
      @return result-string
-   **/
-  template<template<typename> class C>
-  std::string separate(const C<std::string> &collection, const std::string &separator){
-    return separate(collection,separator,string_identity_converter);
+  **/
+  template<typename InputIt>
+  std::string separate(InputIt begin, InputIt end, const std::string &separator){
+    return separate<InputIt,std::string>(begin,end,separator,string_identity_converter);
   }
  
 }

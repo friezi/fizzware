@@ -48,7 +48,10 @@ namespace test{
 
   class TestCaseBase;
   class TestUnit;
-
+  
+  typedef void (*HandlerType)(TestCaseBase *testcase, std::string msg);
+  typedef std::list<HandlerType> HandlerStack;
+  
   /**
      @brief the base of all TestCases. Not for direct use.
   */
@@ -56,23 +59,13 @@ namespace test{
 
     friend class TestUnit;
 
-  public:
-
-    typedef void (*HandlerType)(TestCaseBase *testcase, std::string msg);
-    typedef std::list<HandlerType> HandlerStack;
-
   private:
 
     std::string currentTestName;
+    HandlerStack testStartHandlers;
     HandlerStack errorHandlers;
     HandlerStack successHandlers;
-    HandlerStack statisticHelpers;
     std::string testcasename;
-
-  protected:
-    bool show_tests;
-
-    static void defaultErrorHandler(TestCaseBase *testcase, std::string msg) throw (exc::Exception<TestCaseBase>);
  
   public:
 
@@ -88,35 +81,33 @@ namespace test{
     */
     virtual std::set<std::string> * getTestNames() = 0;
 
+    /**
+       @brief returns the number of all tests.
+       @return number
+     **/
     virtual unsigned long getNmbTests() = 0;
 
     std::string getTestCaseName(){ return testcasename; }
 
     std::string getCurrentTestName(){ return currentTestName; }
 
-    void pushErrorHandler(HandlerType errorHandler){
-      errorHandlers.push_front(errorHandler);
+    void pushTestStartHandler(HandlerType handler){
+      testStartHandlers.push_front(handler);
     }
 
-    void pushSuccessHandler(HandlerType successHandler){
-      successHandlers.push_front(successHandler);
+    void pushErrorHandler(HandlerType handler){
+      errorHandlers.push_front(handler);
     }
 
-    void pushStatisticHelper(HandlerType statisticHelper){
-      statisticHelpers.push_front(statisticHelper);
+    void pushSuccessHandler(HandlerType handler){
+      successHandlers.push_front(handler);
     }
+
+    void clearTestStartHandlers(){ testStartHandlers.clear(); }
 
     void clearErrorHandlers(){ errorHandlers.clear(); }
 
     void clearSuccessHandlers(){ successHandlers.clear(); }
-
-    void clearStatisticHelpers(){ statisticHelpers.clear(); }
-
-    HandlerType getDefaultErrorHandler();
-    
-    void setShowTests(){ show_tests = true; }
-
-    void callStatisticHelpers();
     
     void assertTrue(bool value) throw (exc::Exception<TestCaseBase>);
     
@@ -155,11 +146,13 @@ namespace test{
     
   protected:
     
-    void error(char msg[]) throw (exc::Exception<TestCaseBase>);
+    void callErrorHandlers(char msg[]) throw (exc::Exception<TestCaseBase>);
     
-    void error(std::string msg) throw (exc::Exception<TestCaseBase>);
+    void callErrorHandlers(std::string msg) throw (exc::Exception<TestCaseBase>);
+
+    void callTestStartHandlers();
     
-    void success();
+    void callSuccessHandlers();
 
     void setTestCaseName(std::string name){ testcasename = name; }
     
@@ -188,8 +181,9 @@ namespace test{
 
       std::set<std::string> *names = new std::set<std::string>();
 
-      for ( typename Tests::iterator it = tests.begin(); it != tests.end(); it++ )
+      for ( typename Tests::iterator it = tests.begin(); it != tests.end(); it++ ){
 	names->insert((*it).second);
+      }
 
       return names;
     }
@@ -198,8 +192,25 @@ namespace test{
 
   private:
 
-    virtual void setUp(){};
-    virtual void tearDown(){};
+    /**
+       @brief will be executed before execution of all tests in TestCase
+     **/
+    virtual void beforeClass(){};
+
+    /**
+       @brief will be executed after execution of all tests in TestCase
+    **/
+    virtual void afterClass(){};
+
+    /**
+       @brief will be executed before execution of each test in TestCase
+     **/
+    virtual void beforeTest(){};
+
+    /**
+       @brief will be executed after execution of each test in TestCase
+     **/
+    virtual void afterTest(){};
 
   protected:
 
@@ -207,15 +218,18 @@ namespace test{
 
     void operator()(std::set<std::string> *selection) throw (exc::Exception< TestCase<T> >){
 
-      setUp();
+      beforeClass();
       startTests(selection);
-      tearDown();
-      callStatisticHelpers();
+      afterClass();
 
     }
 
   private:
 
+    /**
+       @brief starts all resp. selected tests in testcase
+       @param selection if != 0: only tests contained in selection will be executed; otherwise all tests
+     **/
     void startTests(std::set<std::string> *selection = 0) throw (exc::Exception< TestCase<T> >){
 
       T * self;
@@ -238,20 +252,21 @@ namespace test{
 	try{
 	  
 	  setCurrentTestName((*it).second);
-	  
-	  if ( show_tests == true ){
-	    std::cout << "  " << (*it).second << "()" << std::endl;
-	  }
+	  callTestStartHandlers();
 
+	  beforeTest();
 	  (self->*((*it).first))();
+	  afterTest();
 
-	  success();
+	  callSuccessHandlers();
 	  
 	} catch (exc::ExceptionBase &e){
 	  
 	  try{
 	    
-	    error(e.getMsg());
+	    std::ostringstream msg;
+	    msg << getTestCaseName() + ":" + (*it).second + "() failed!: " + e.getMsg();
+	    callErrorHandlers(msg.str());
 	    
 	  } catch (exc::ExceptionBase &ee){
 	    std::cerr << getTestCaseName() + ":" + (*it).second + "() failed!: " + ee.getMsg() << std::endl;
@@ -271,9 +286,8 @@ namespace test{
 
     std::list<TestCaseBase *> testcases;
 
-    TestCaseBase::HandlerType testcaseStartupHandler;
-
-    static void defaultTestCaseStartupHandler(TestCaseBase *testcase, std::string msg);
+    HandlerStack testcaseStartHandlers;
+    HandlerStack testcaseEndHandlers;
 
   public:
 
@@ -297,21 +311,29 @@ namespace test{
 
     const std::list<TestCaseBase *> & getTestCases(){ return testcases; }
 
-    void setTestCaseStartupHandler(TestCaseBase::HandlerType testcaseStartupHandler){ this->testcaseStartupHandler = testcaseStartupHandler; }
+    void callTestCaseStartHandlers(TestCaseBase *testcase);
 
-    void pushErrorHandler(TestCaseBase::HandlerType errorHandler);
+    void callTestCaseEndHandlers(TestCaseBase *testcase);
 
-    void pushSuccessHandler(TestCaseBase::HandlerType successHandler);
+    void pushTestCaseStartHandler(HandlerType handler);
 
-    void pushStatisticHelper(TestCaseBase::HandlerType statisticHelper);
+    void pushTestCaseEndHandler(HandlerType handler);
+
+    void pushTestStartHandler(HandlerType handler);
+
+    void pushErrorHandler(HandlerType handler);
+
+    void pushSuccessHandler(HandlerType handler);
+
+    void clearTestCaseStartHandlers();
+
+    void clearTestCaseEndHandlers();
+
+    void clearTestStartHandlers();
 
     void clearErrorHandlers();
 
     void clearSuccessHandlers();
-
-    void clearStatisticHelpers();
-
-    void setShowTests();
 
   };
 

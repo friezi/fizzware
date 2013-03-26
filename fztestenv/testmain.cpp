@@ -6,21 +6,27 @@ using namespace exc;
 
 static unsigned long testcaseNmb;
 
-static FailedTests *failedTests;
+static TestResults *testresults;
 
+static unsigned long global_success = 0;
 static unsigned long global_errors = 0;
 
 static void statisticHelper(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
-  (*failedTests)[testcaseNmb].second = testcase;
+  (*testresults)[testcaseNmb].setTestCase(testcase);
+  cout << " success: " << (*testresults)[testcaseNmb].getSuccess() << " failure: " << (*testresults)[testcaseNmb].getFailure() << endl;
   testcaseNmb++;
 
 }
 
+static void localSuccessHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+  (*testresults)[testcaseNmb].incSuccess();
+}
+
 static void localErrorHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
 
-  (*failedTests)[testcaseNmb].first++;
-  cerr << " ";
+  (*testresults)[testcaseNmb].incFailure();
+  cerr << " " << msg << endl;
 
 }
 
@@ -28,31 +34,29 @@ static void globalErrorHandler(TestCaseBase *testcase, string msg) throw (Except
   global_errors++;
 }
 
-static void testcaseStartupHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
-  cout << "executing " << testcase->getTestCaseName() << endl;
-}
-
-static unsigned long global_success = 0;
-
 static void globalSuccessHandler(TestCaseBase *testcase, string msg){
   global_success++;
 }
 
-FailedTests * constructFailedTests(TestUnit *mainTestUnit){
+static void testcaseStartHandler(TestCaseBase *testcase, string msg) throw (Exception<TestCaseBase>){
+  cout << "testcase: " << testcase->getTestCaseName() << endl;
+}
 
-  FailedTests *failedTests = new FailedTests(mainTestUnit->getNmbTestCases());
-  for ( FailedTests::iterator it = failedTests->begin(); it != failedTests->end(); it++ ){
-    (*it) = pair<unsigned long,TestCaseBase *>(0,0);
+TestResults * constructTestResults(TestUnit *mainTestUnit){
+
+  TestResults *testresults = new TestResults(mainTestUnit->getNmbTestCases());
+  for ( TestResults::iterator it = testresults->begin(); it != testresults->end(); it++ ){
+    (*it) = TestCaseResult();
   }
   
-  return failedTests;
+  return testresults;
 
 }
 
 int main(){
 
   testcaseNmb = 0;
-  failedTests = 0;
+  testresults = 0;
 
   TestUnit *mainTestUnit = 0;
 
@@ -60,13 +64,15 @@ int main(){
 
     mainTestUnit = createMainTestUnit();
 
-    failedTests = constructFailedTests(mainTestUnit);
+    testresults = constructTestResults(mainTestUnit);
     mainTestUnit->pushErrorHandler(localErrorHandler);
     mainTestUnit->pushErrorHandler(globalErrorHandler);
-    mainTestUnit->pushStatisticHelper(statisticHelper);
+    mainTestUnit->pushTestCaseStartHandler(testcaseStartHandler);
+    mainTestUnit->pushTestCaseEndHandler(statisticHelper);
+    mainTestUnit->pushSuccessHandler(localSuccessHandler);
     mainTestUnit->pushSuccessHandler(globalSuccessHandler);
-    mainTestUnit->setTestCaseStartupHandler(testcaseStartupHandler);
-    mainTestUnit->setShowTests();
+    
+    cout << "executing unittests" << endl;
     
     (*mainTestUnit)();
     
@@ -74,24 +80,21 @@ int main(){
     
     cout << endl;
 
-    for ( FailedTests::iterator it = failedTests->begin(); it != failedTests->end(); it++ ){
-      if ( (*it).first > 0 ){
-	cout << (*it).first << "/" << (*it).second->getNmbTests() << " tests failed in "
-	     << (*it).second->getTestCaseName() << "!" << endl;
+    for ( TestResults::iterator it = testresults->begin(); it != testresults->end(); it++ ){
+      if ( (*it).getFailure() > 0 ){
+	cout << (*it).getFailure() << "/" << (*it).getTestCase()->getNmbTests() << " tests failed in "
+	     << (*it).getTestCase()->getTestCaseName() << "!" << endl;
       }
     }
     
-    cout << "Success: " << global_success << "/" << tests << endl;
-    if ( global_errors > 0 ){
-      cout << "Failure: " << global_errors << "/" << tests << endl;
-    }
-
+    cout << "total: " << tests << " success: " << global_success << " failures: " << global_errors << endl;
+    
   }catch (ExceptionBase &e){
     e.show();
   }
 
-  if ( failedTests != 0 ){
-    delete failedTests;
+  if ( testresults != 0 ){
+    delete testresults;
   }
 
   if ( mainTestUnit != 0 ){
