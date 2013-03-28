@@ -61,9 +61,9 @@ OBJECT_MAKEFILE_PATHS = $(OBJECT_MAKEFILES:%=$(OBJECT_MAKEFILES_DIR)/%)
 OBJ_START = true
 OBJ_END = false
 
-.PHONY: all clean ed cleandoc dist dynamic
+.PHONY: all clean ed cleandoc dist dynamic unittests
 
-all:	$(STATIC_LIB_NAME) $(DOC)
+all:	$(STATIC_LIB_NAME) $(DOC) unittests
 
 $(DOC):
 
@@ -139,3 +139,8 @@ $(DYNAMIC_LIB_NAME): $(DYN_OBJECTNAMES) $(IMPORTANT_HEADERS)
 	$(DYN_GCC) $(DYN_OBJECTNAMES) $(LINKER_OPTIONS)
 	@echo '****************' generation of $(DYNAMIC_LIB_NAME) finished '***********************'
 	@echo
+
+unittests:
+	pushd unittests; \
+	$(MAKE) -k; \
+	popd;
