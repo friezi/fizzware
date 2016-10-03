@@ -1,19 +1,21 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = matchit
+TARGET = hpreis
 
 MAIN_MODULE = main
-LOCAL_MODULES = bashautomat
+LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
 TT = ../fztooltempl
+ST = ../fzsystools
 
+#  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
 CLASSLIBRARY_PATH = ../lib
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception
+CLASS_MODULES = $(TT)/exception $(TT)/cmdlparser
 
 IMPORTANT_HEADERS =
 
@@ -25,6 +27,9 @@ ADDITIONAL_DISTFILES =
 
 # in case that ansi is not allowed
 # NOANSI = true
+
+# change if modules are in a deeper directory
+# ROOT_DIR = ../
 
 ### check the field CC ########################################################
 ################################################################################

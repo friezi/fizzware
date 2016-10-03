@@ -1,19 +1,22 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = matchit
+TARGET = lexer
+
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
 
 MAIN_MODULE = main
-LOCAL_MODULES = bashautomat
+LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../fztooltempl
+TT = $(ROOT_DIR)/fztooltempl
 
-CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception
+CLASS_MODULES = $(TT)/exception $(TT)/lex $(TT)/cmdlparser
 
 IMPORTANT_HEADERS =
 

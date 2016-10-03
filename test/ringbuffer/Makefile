@@ -1,21 +1,24 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = matchit
+TARGET = ringbuffer
+
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
 
 MAIN_MODULE = main
-LOCAL_MODULES = bashautomat
+LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../fztooltempl
+TT = $(ROOT_DIR)/fztooltempl
 
-CLASSLIBRARY_PATH = ../lib
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib/
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
 CLASS_MODULES = $(TT)/exception
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(TT)/datastructures
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =

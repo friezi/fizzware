@@ -1,4 +1,5 @@
 DIRS = fizzcal matchit msgqrd msgqrclient prim primfak process hpreis
+LIBS = fzsystools fztestenv fztooltempl
 
 EDITOR ?= vi
 
@@ -10,7 +11,7 @@ all:	test
 		$(MAKE) -k; popd ; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ; \
 	)
 
-.PHONY:	all clean ed dist test
+.PHONY:	all clean cleantotal ed dist test
 
 test:
 	cd test/; \
@@ -22,6 +23,10 @@ clean:
 	$(MAKE) -k clean; \
 	cd ../;
 	$(foreach dir,$(DIRS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; pushd $(dir); $(MAKE) -k clean; popd; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
+
+cleantotal: clean
+	$(foreach dir,$(LIBS),echo ; echo \*\*\*\*\*\*\*\*\*\*\*\*; pushd $(dir); $(MAKE) -k clean; popd; echo \*\*\*\*\*\*\*\*\*\*\*\*; echo ;)
+	
 
 ed:
 	$(EDITOR) Makefile Makefile_body Makefile_head_template &

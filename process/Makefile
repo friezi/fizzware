@@ -108,7 +108,7 @@ clean:
 	rm -f $(TARGET) $(OBJ)/*.o $(EM_OBJECTS)
 
 compile_test: $(MAINTEST)
-$(MAINTEST): $(OBJ)/$(MAINTEST).o
+$(MAINTEST): $(OBJ)/$(MAINTEST).o $(LM_HEADERS)
 	$(MAKE) -k -C $(LIBTEST_DIR) -f Makefile
 	$(CC) -I$(LIBTEST_DIR) $(OBJ)/$(MAINTEST).o -o $(MAINTEST) $(LIBS) $(CL_LIB) -l$(TESTENV_LIB)
 

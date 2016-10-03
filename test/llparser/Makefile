@@ -1,21 +1,26 @@
 ################################################################################
 ########################### FOR EDITING ########################################
 
-TARGET = matchit
+TARGET = llparser
+
+# change if modules are in a deeper directory
+ROOT_DIR = ../../
 
 MAIN_MODULE = main
-LOCAL_MODULES = bashautomat
+LOCAL_MODULES =
 EXTERN_MODULES =
 EM_PATH =
 
-TT = ../fztooltempl
+TT = $(ROOT_DIR)/fztooltempl
+ST = $(ROOT_DIR)/fzsystools
 
-CLASSLIBRARY_PATH = ../lib
+#  alternativ o. zusaetzlich Pfad fuer lokale Klassenbibliotheken (statisch)
+CLASSLIBRARY_PATH = $(ROOT_DIR)/lib
 CLASSLIBRARIES = fztooltempl
 CLASS_MODULES_PATHS = $(TT)
-CLASS_MODULES = $(TT)/exception
+CLASS_MODULES = $(TT)/exception $(TT)/utils $(TT)/datastructures $(TT)/llparser
 
-IMPORTANT_HEADERS =
+IMPORTANT_HEADERS = $(TT)/graph
 
 LIBRARY_INCLUDE_PATHS =
 LIBRARIES =
