@@ -82,7 +82,7 @@ namespace graph{
     */
     virtual bool operator==(const abstract_node_iterator<TNode> *it_rval) throw(exc::ExceptionBase) = 0;
     
-    bool operator!=(const abstract_node_iterator<TNode> *it_rval) throw(exc::ExceptionBase) { return !( *this == it_rval ); }
+    bool operator!=(const abstract_node_iterator<TNode> *it_rval) throw(exc::ExceptionBase) { return !(*this == it_rval); }
     
     virtual ~abstract_node_iterator(){}
 
@@ -124,17 +124,16 @@ namespace graph{
     
     }
     
-    ~node_iterator(){
-        
-      if ( delete_on_destruction == true )
+    ~node_iterator(){        
+      if (delete_on_destruction == true){
 	delete it;
-
+      }
     }
       
     void operator++(int) throw(exc::ExceptionBase) { (*it)++; }
     TNode operator*() throw(exc::ExceptionBase) { return **it; }
-    bool operator!=(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return ( *this->it != it_rval.it ); }
-    bool operator==(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return ( *this->it == it_rval.it ); }
+    bool operator!=(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return (*this->it != it_rval.it); }
+    bool operator==(const node_iterator<TNode> & it_rval) throw(exc::ExceptionBase) { return (*this->it == it_rval.it); }
 
   };
 
@@ -299,7 +298,7 @@ namespace graph{
     unsigned int id = 0;
     unsigned int min;
 
-    while ( !nodestack.empty() ){
+    while (!nodestack.empty()){
       nodestack.pop();
     }
 
@@ -307,7 +306,7 @@ namespace graph{
 
     // set all values to 0 -> no node is visited yet
 
-    for ( node_iterator<TNode> ndit = graph->beginNodes(); ndit != graph->endNodes(); ndit++ ){
+    for (node_iterator<TNode> ndit = graph->beginNodes(); ndit != graph->endNodes(); ndit++){
       values[*ndit] = 0;
     }
     
@@ -315,14 +314,11 @@ namespace graph{
 
     // since not every node must have a neighbour which points to it, we have to start from all unvisited nodes
 
-    for ( node_iterator<TNode> ndit = graph->beginNodes(); ndit != graph->endNodes(); ndit++ ){
-      
-      if ( values[*ndit] == 0 ){
+    for (node_iterator<TNode> ndit = graph->beginNodes(); ndit != graph->endNodes(); ndit++){      
+      if (values[*ndit] == 0){
 	min = scc_visit(*ndit,id);
-      }
-
+      } 
     }
-
   }
 
   template<typename TNode>
@@ -331,25 +327,22 @@ namespace graph{
     unsigned int m = 0, min, value;
 
     values[node] = ++id;
-
     min = id;
-
     nodestack.push(node);
 
-    for ( node_iterator<TNode> nit = graph->beginNeighbours(node); nit != graph->endNeighbours(node); nit++ ){
+    for (node_iterator<TNode> nit = graph->beginNeighbours(node); nit != graph->endNeighbours(node); nit++){
 
       value =  values[*nit];
       m = (!value) ? scc_visit(*nit,id) : value;
 
-      if ( m < min )
+      if (m < min){
 	min = m;
-    
+      }    
     }
 
-    if ( min == values[node] ){
+    if (min == values[node]){
 
       processComponent();
-
       TNode topnode;
 
       do{
@@ -361,7 +354,7 @@ namespace graph{
 
 	processComponentNode(topnode);
 
-      } while ( topnode != node );
+      } while (topnode != node);
 
     }
   
@@ -428,10 +421,9 @@ namespace graph{
 
       nodecomponents.clear();
 
-      for ( node_iterator<TNode> ndit = this->graph->beginNodes(); ndit != this->graph->endNodes(); ndit++ ){
+      for (node_iterator<TNode> ndit = this->graph->beginNodes(); ndit != this->graph->endNodes(); ndit++){
 	nodecomponents[*ndit] = 0;
       }
-
     }
 
     virtual void processComponentNode(TNode node) throw (exc::ExceptionBase){
@@ -440,19 +432,17 @@ namespace graph{
 
       nodecomponents[node] = this->component;
 
-      for ( node_iterator<TNode> nit = this->graph->beginNeighbours(node); nit != this->graph->endNeighbours(node); nit++ ){
+      for (node_iterator<TNode> nit = this->graph->beginNeighbours(node); nit != this->graph->endNeighbours(node); nit++){
 
-	SCCGraphComponent<TNode> * neighbourcomponent;
-
-	if ( ( neighbourcomponent = nodecomponents[*nit] ) != 0 )
-	  if ( neighbourcomponent != this->component)
-	    this->component->insertNeighbour(neighbourcomponent);
-
+	SCCGraphComponent<TNode> * neighbourcomponent = nodecomponents[*nit];
+	if (neighbourcomponent != 0 && neighbourcomponent != this->component){
+	  this->component->insertNeighbour(neighbourcomponent);
+	}
       }
     }
-
+    
   public:
-
+    
   };
   
   /**
@@ -555,10 +545,11 @@ namespace graph{
 
       sbuffer << "{";
 
-      for ( typename Nodeset::iterator it = beginNodes(); it != endNodes(); it++ ){
+      for (typename Nodeset::iterator it = beginNodes(); it != endNodes(); it++){
 
-	if ( it != beginNodes() )
+	if (it != beginNodes()){
 	  sbuffer << ",";
+	}
 	sbuffer << *it;
 
       }
@@ -613,7 +604,7 @@ namespace graph{
       void operator++(int) throw(exc::ExceptionBase){ it++; }
       SCCGraphComponent<TNode> * operator*() throw(exc::ExceptionBase){ return *it; }
       bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> * it_rval) throw(exc::ExceptionBase){
-	return ( this->it == static_cast<const NodeIterator *>(it_rval)->it );
+	return (this->it == static_cast<const NodeIterator *>(it_rval)->it);
       }    
 
     };
@@ -636,7 +627,7 @@ namespace graph{
       void operator++(int) throw(exc::ExceptionBase){ it++; }
       SCCGraphComponent<TNode> * operator*() throw(exc::ExceptionBase){ return *it; }
       bool operator==(const abstract_node_iterator<SCCGraphComponent<TNode> *> *it_rval) throw(exc::ExceptionBase){
-	return ( this->it == static_cast<const NeighbourIterator *>(it_rval)->it );
+	return (this->it == static_cast<const NeighbourIterator *>(it_rval)->it);
       }
     
     };
@@ -649,8 +640,9 @@ namespace graph{
 
     void clear(){
 
-      for ( typename Componentlist::iterator it = components.begin(); it != components.end(); it++ )
+      for (typename Componentlist::iterator it = components.begin(); it != components.end(); it++){
 	delete *it;
+      }
       
       components.clear();
       componentcounter = 0;
@@ -683,15 +675,11 @@ namespace graph{
     // We have to provide the GraphableBase-class Tstgraph with the implementation of the following pure virtual methods.
 
     abstract_node_iterator<SCCGraphComponent<TNode> *> * beginNodesPtr(){
-
       return new NodeIterator(components.begin());
-
     }
 
     abstract_node_iterator<SCCGraphComponent<TNode> *> * endNodesPtr(){
-
       return new NodeIterator(components.end());
-
     }
 
     // note: the "const" must be placed after the pointer-declaration. Otherwise the compiler misinterprets the meaning
@@ -700,7 +688,6 @@ namespace graph{
       NeighbourIterator *it = new NeighbourIterator();
 
       typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
-    
       it->setIt((*cit)->beginNeighbours());
 
       return it;
@@ -712,7 +699,6 @@ namespace graph{
       NeighbourIterator *it = new NeighbourIterator();
       
       typename Componentlist::iterator cit = find(components.begin(),components.end(),node);
-      
       it->setIt((*cit)->endNeighbours());
       
       return it;
